@@ -87,29 +87,6 @@
 		<servlet-name>GPMS-rest</servlet-name>
 		<url-pattern>/REST/*</url-pattern>
 	</servlet-mapping>
-
-	<servlet>
-		<display-name>GPMS-enterprise-rest</display-name>
-		<servlet-name>GPMS-enterprise-rest</servlet-name>
-		<servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
-		<init-param>
-			<param-name>jersey.config.server.provider.packages</param-name>
-			<param-value>gpms.queue</param-value>
-		</init-param>
-		
-		<init-param>
-		    <param-name>jersey.config.server.provider.classnames</param-name>
-		    <param-value>org.glassfish.jersey.media.multipart.MultiPartFeature</param-value>
-		</init-param>
-		
-		<load-on-startup>2</load-on-startup>
-		<async-supported>true</async-supported>
-	</servlet>
-
-	<servlet-mapping>
-		<servlet-name>GPMS-enterprise-rest</servlet-name>
-		<url-pattern>/RESTQ/*</url-pattern>
-	</servlet-mapping>
 	
 	<session-config>
         <session-timeout>
