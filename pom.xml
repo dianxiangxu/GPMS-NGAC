@@ -1,0 +1,375 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>project</groupId>
+	<artifactId>GPMS</artifactId>
+	<packaging>war</packaging>
+	<version>0.0.1-SNAPSHOT</version>
+	<name>GPMS Maven Webapp</name>
+	<url>https://github.com/dianxiangxu/GPMS</url>
+	<scm>
+		<connection>scm:git@github.com:dianxiangxu/GPMS.git</connection>
+		<developerConnection>https://github.com/Milstein</developerConnection>
+		<url>https://github.com/dianxiangxu/GPMS</url>
+		<tag>HEAD</tag>
+	</scm>
+	<prerequisites>
+		<maven>3.2.5</maven>
+	</prerequisites>
+	<!-- List the core committers -->
+	<developers>
+		<developer>
+			<id>Milstein</id>
+			<name>Milson Munakami</name>
+			<organization>BSU</organization>
+			<organizationUrl>http://coen.boisestate.edu/cs/</organizationUrl>
+			<email>milsonmunakami@u.boisestate.edu</email>
+			<roles>
+				<role>developer</role>
+			</roles>
+			<timezone>-6</timezone>
+		</developer>
+		<developer>
+			<id>tshamrin</id>
+			<name>Tamanna Shamrin</name>
+			<email>tamannashamrin@u.boisestate.edu</email>
+		</developer>
+		<developer>
+			<id>thomasvolz</id>
+			<name>Thomas Volz</name>
+			<email>thomasvolz@u.boisestate.edu</email>
+		</developer>
+	</developers>
+
+	<!-- Contributors -->
+	<contributors>
+		<contributor>
+			<name>Milson Munakami</name>
+			<roles>
+				<role>developer</role>
+			</roles>
+			<timezone>-6</timezone>
+		</contributor>
+	</contributors>
+	<issueManagement>
+		<system>GitHub Issues</system>
+		<url>https://github.com/BoiseProjects/GPMS/issues</url>
+	</issueManagement>
+	<mailingLists>
+		<mailingList>
+			<name>GPMS Slack</name>
+			<archive>https://milstein.slack.com</archive>
+		</mailingList>
+		<mailingList>
+			<name>GPMS Support List</name>
+			<archive>https://milstein.slack.com/messages/resources/details/</archive>
+		</mailingList>
+	</mailingLists>
+	<licenses>
+		<license>
+			<name>Apache License 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.html</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
+	<build>
+		<finalName>${project.artifactId}-${project.version}</finalName>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.5.1</version>
+				<inherited>true</inherited>
+				<configuration>
+					<source>1.7</source>
+					<target>1.7</target>
+					<encoding>UTF-8</encoding>
+					<showWarnings>true</showWarnings>
+					<showDeprecation>true</showDeprecation>
+				</configuration>
+			</plugin>
+
+			<!-- For Grizzly server Uncomment following plugin -->
+			<!-- <plugin> <groupId>org.codehaus.mojo</groupId> <artifactId>exec-maven-plugin</artifactId> 
+				<version>1.2.1</version> <executions> <execution> <goals> <goal>java</goal> 
+				</goals> </execution> </executions> <configuration> <mainClass>project.Main</mainClass> 
+				</configuration> </plugin> -->
+		</plugins>
+	</build>
+	<description>Proposal Workflow Management System - A web-based application for replacing the manual approval process of grant submission.</description>
+
+	<repositories>
+		<repository>
+			<id>wso2-nexus</id>
+			<url>http://maven.wso2.org/nexus/content/repositories/releases</url>
+		</repository>
+	</repositories>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.glassfish.jersey</groupId>
+				<artifactId>jersey-bom</artifactId>
+				<version>${jersey.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.glassfish.jersey.containers</groupId>
+			<!-- For Jersey server -->
+			<!-- <artifactId>jersey-container-servlet-core</artifactId> -->
+			<!-- For Grizzly server Uncomment following line -->
+			<!-- <artifactId>jersey-container-grizzly2-http</artifactId> -->
+
+			<!-- use the following artifactId if you don't need servlet 2.x compatibility -->
+			<artifactId>jersey-container-servlet</artifactId>
+
+		</dependency>
+
+		<!-- uncomment this to get JSON support <dependency> -->
+		<dependency>
+			<groupId>org.glassfish.jersey.media</groupId>
+			<artifactId>jersey-media-moxy</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.glassfish.jersey.media</groupId>
+			<artifactId>jersey-media-json-jackson</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.glassfish.jersey.media</groupId>
+			<artifactId>jersey-media-multipart</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.glassfish.jersey.media</groupId>
+			<artifactId>jersey-media-sse</artifactId>
+		</dependency>
+
+		<!-- For logging -->
+		<!-- http://mvnrepository.com/artifact/log4j/log4j -->
+		<dependency>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+			<version>${version.log4j}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>com.sun.jax</groupId>
+					<artifactId>jmxri</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.sun.jdmk</groupId>
+					<artifactId>jmxtools</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>javax.jms</groupId>
+					<artifactId>jms</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
+		<!-- For servlet -->
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>javax.servlet-api</artifactId>
+			<version>3.1.0</version>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>servlet-api</artifactId>
+			<version>2.5</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>javax.servlet.jsp</groupId>
+			<artifactId>jsp-api</artifactId>
+			<version>2.2</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>javax.ws.rs</groupId>
+			<artifactId>jsr311-api</artifactId>
+			<version>1.1.1</version>
+		</dependency>
+
+		<!-- For JSON Parsing -->
+		<dependency>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+			<version>2.3.1</version>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.jaxrs</groupId>
+			<artifactId>jackson-jaxrs-json-provider</artifactId>
+			<version>2.5.3</version>
+		</dependency>
+
+		<!-- For Common Collection Handling -->
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>1.3.2</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+			<version>3.4</version>
+		</dependency>
+
+		<dependency>
+			<groupId>commons-collections</groupId>
+			<artifactId>commons-collections</artifactId>
+			<version>3.2.1</version>
+		</dependency>
+
+		<!-- For Common Multi-Part File Upload Download Handling -->
+		<dependency>
+			<groupId>commons-fileupload</groupId>
+			<artifactId>commons-fileupload</artifactId>
+			<version>1.3.1</version>
+		</dependency>
+
+
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>18.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.fasterxml.jackson.datatype</groupId>
+			<artifactId>jackson-datatype-guava</artifactId>
+			<version>2.4.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.12</version>
+			<scope>test</scope>
+		</dependency>
+
+		<!-- Using com.google.code.morphia <dependency> <groupId>com.google.code.morphia</groupId> 
+			<artifactId>morphia</artifactId> <version>0.98</version> </dependency> -->
+
+		<!-- Include the Morphia library -->
+		<dependency>
+			<groupId>org.mongodb.morphia</groupId>
+			<artifactId>morphia</artifactId>
+			<version>1.1.0</version>
+		</dependency>
+
+		<!-- For lazy=true -->
+		<!-- <dependency> -->
+		<!-- <groupId>com.thoughtworks.proxytoys</groupId> -->
+		<!-- <artifactId>proxytoys</artifactId> -->
+		<!-- <version>1.0</version> -->
+		<!-- </dependency> -->
+
+		<!-- Java Mail sender API -->
+		<dependency>
+			<groupId>javax.mail</groupId>
+			<artifactId>mail</artifactId>
+			<version>1.4.7</version>
+		</dependency>
+		<dependency>
+			<groupId>javax.mail</groupId>
+			<artifactId>javax.mail-api</artifactId>
+			<version>1.5.4</version>
+		</dependency>
+		<dependency>
+			<groupId>javax.mail</groupId>
+			<artifactId>mailapi</artifactId>
+			<version>1.4.3</version>
+		</dependency>
+
+
+		<!-- Excel File Read Write -->
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi</artifactId>
+			<version>3.13</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi-ooxml</artifactId>
+			<version>3.13</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.ckeditor</groupId>
+			<artifactId>ckeditor-java-core</artifactId>
+			<version>3.5.3</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.ebay</groupId>
+			<artifactId>xcelite</artifactId>
+			<version>1.0.4</version>
+		</dependency>
+
+		<!-- http://mvnrepository.com/artifact/org.seleniumhq.selenium/selenium-java -->
+		<dependency>
+			<groupId>org.seleniumhq.selenium</groupId>
+			<artifactId>selenium-java</artifactId>
+			<version>2.53.0</version>
+		</dependency>
+
+		<!-- http://mvnrepository.com/artifact/org.seleniumhq.webdriver/webdriver-common -->
+		<!-- <dependency> -->
+		<!-- <groupId>org.seleniumhq.webdriver</groupId> -->
+		<!-- <artifactId>webdriver-common</artifactId> -->
+		<!-- <version>0.9.7376</version> -->
+		<!-- </dependency> -->
+
+		<!-- https://mvnrepository.com/artifact/org.seleniumhq.selenium/selenium-chrome-driver -->
+		<dependency>
+			<groupId>org.seleniumhq.selenium</groupId>
+			<artifactId>selenium-chrome-driver</artifactId>
+			<version>2.53.0</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.seleniumhq.selenium/selenium-server -->
+		<dependency>
+			<groupId>org.seleniumhq.selenium</groupId>
+			<artifactId>selenium-server</artifactId>
+			<version>2.53.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>io.swagger</groupId>
+			<artifactId>swagger-jersey2-jaxrs</artifactId>
+			<version>1.5.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.wso2.balana</groupId>
+			<artifactId>org.wso2.balana</artifactId>
+			<version>${balana.version}</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.jdom/jdom2 -->
+		<dependency>
+			<groupId>org.jdom</groupId>
+			<artifactId>jdom2</artifactId>
+			<version>2.0.3</version>
+		</dependency>
+
+	</dependencies>
+
+	<properties>
+		<balana.version>1.0.4</balana.version>
+		<jersey.version>2.22.2</jersey.version>
+		<version.log4j>1.2.17</version.log4j>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
+</project>
