@@ -1126,6 +1126,585 @@ public class UserService {
 	}
 
 	@POST
+	@Path("/signup")
+	@ApiOperation(value = "Registering a New user", notes = "This API signups a new user")
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, message = "Success: { True }"),
+			@ApiResponse(code = 400, message = "Failed: { \"error\":\"error description\", \"status\": \"FAIL\" }") })
+	public Response signUpUser(
+			@ApiParam(value = "Message", required = true, defaultValue = "", allowableValues = "", allowMultiple = false) String message) {
+		try {
+			log.info("UserService::signUpUser started");
+			String userID = new String();
+			String userEmail = new String();
+			UserAccount newAccount = new UserAccount();
+			UserProfile newProfile = new UserProfile();
+			ObjectMapper mapper = new ObjectMapper();
+			JsonNode root = mapper.readTree(message);
+			if (root != null && root.has("userInfo")) {
+				JsonNode userInfo = root.get("userInfo");
+				if (userInfo != null && userInfo.has("UserID")) {
+					userID = userInfo.get("UserID").textValue();
+				}
+				if (userID.equals("0")) {
+					newAccount.setAddedOn(new Date());
+					if (userInfo != null && userInfo.has("UserName")) {
+						String loginUserName = userInfo.get("UserName")
+								.textValue();
+						newAccount.setUserName(loginUserName);
+					}
+					if (userInfo != null && userInfo.has("Password")) {
+						newAccount.setPassword(userInfo.get("Password")
+								.textValue());
+					}
+					newProfile.setUserAccount(newAccount);
+					if (userInfo != null && userInfo.has("FirstName")) {
+						newProfile.setFirstName(userInfo.get("FirstName")
+								.textValue());
+					}
+					if (userInfo != null && userInfo.has("MiddleName")) {
+						newProfile.setMiddleName(userInfo.get("MiddleName")
+								.textValue());
+					}
+					if (userInfo != null && userInfo.has("LastName")) {
+						newProfile.setLastName(userInfo.get("LastName")
+								.textValue());
+					}
+					if (userInfo != null && userInfo.has("DOB")) {
+						Date dob = formatter.parse(userInfo.get("DOB")
+								.textValue());
+						newProfile.setDateOfBirth(dob);
+					}
+					if (userInfo != null && userInfo.has("Gender")) {
+						newProfile
+								.setGender(userInfo.get("Gender").textValue());
+					}
+					Address newAddress = new Address();
+					if (userInfo != null && userInfo.has("Street")) {
+						newAddress
+								.setStreet(userInfo.get("Street").textValue());
+					}
+					if (userInfo != null && userInfo.has("Apt")) {
+						newAddress.setApt(userInfo.get("Apt").textValue());
+					}
+					if (userInfo != null && userInfo.has("City")) {
+						newAddress.setCity(userInfo.get("City").textValue());
+					}
+					if (userInfo != null && userInfo.has("State")) {
+						newAddress.setState(userInfo.get("State").textValue());
+					}
+					if (userInfo != null && userInfo.has("Zip")) {
+						newAddress.setZipcode(userInfo.get("Zip").textValue());
+					}
+					if (userInfo != null && userInfo.has("Country")) {
+						newAddress.setCountry(userInfo.get("Country")
+								.textValue());
+					}
+					newProfile.getAddresses().add(newAddress);
+					if (userInfo != null && userInfo.has("MobileNumber")) {
+						newProfile.getMobileNumbers().add(
+								userInfo.get("MobileNumber").textValue());
+					}
+					if (userInfo != null && userInfo.has("WorkEmail")) {
+						userEmail = userInfo.get("WorkEmail").textValue();
+						newProfile.getWorkEmails().add(userEmail);
+					}
+				}
+				userAccountDAO.save(newAccount);
+				userProfileDAO.signUpUser(newProfile);
+				NotificationLog notification = new NotificationLog();
+				notification.setType("User");
+				notification.setAction("Signed up.");
+				notification.setUserProfileId(newAccount.getId().toString());
+				notification.setUsername(newAccount.getUserName());
+				notification.setForAdmin(true);
+				notificationDAO.save(notification);
+			}
+			OutboundEvent.Builder eventBuilder = new OutboundEvent.Builder();
+			OutboundEvent event = eventBuilder.name("notification")
+					.mediaType(MediaType.TEXT_PLAIN_TYPE)
+					.data(String.class, "1").build();
+			NotificationService.BROADCASTER.broadcast(event);
+			return Response
+					.status(Response.Status.OK)
+					.entity(mapper.writerWithDefaultPrettyPrinter()
+							.writeValueAsString(true)).build();
+
+		} catch (Exception e) {
+			log.error("Could not register a new user error e=", e);
+		}
+		return Response
+				.status(Response.Status.BAD_REQUEST)
+				.entity("{\"error\": \"Could Not Register A New User\", \"status\": \"FAIL\"}")
+				.build();
+	}
+
+	@POST
+	@Path("/login")
+	@ApiOperation(value = "login user with valid username and password", notes = "This API allows to login a valid user with authorized username and password"
+			+ "<p><u>Form Parameters</u><ul><li><b>username</b> is required</li><li><b>password</b> is required</li></ul>")
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, message = "Success: { Redirect to Dashboard page }"),
+			@ApiResponse(code = 400, message = "Failed: { \"error\":\"error description\", \"status\": \"FAIL\" }") })
+	public Response login(
+			@ApiParam(value = "username", required = true, defaultValue = "test", allowableValues = "", allowMultiple = false) @FormParam("username") String email,
+			@ApiParam(value = "password", required = true, defaultValue = "password", allowableValues = "", allowMultiple = false) @FormParam("password") String password,
+			@Context HttpServletRequest req) {
+		try {
+			if (req == null) {
+				return Response
+						.status(Response.Status.BAD_REQUEST)
+						.entity("{\"error\": \"Could Not Find The User\", \"status\": \"FAIL\"}")
+						.build();
+			}
+			List<UserProfile> userList = userProfileDAO.findAll();
+			boolean isFound = false;
+			if (userList.size() != 0) {
+				for (UserProfile user : userList) {
+					if (user.getUserAccount().getUserName().equals(email)
+							|| user.getWorkEmails().contains(email)) {
+						if (PasswordHash.validatePassword(password, user
+								.getUserAccount().getPassword())
+								&& !user.isDeleted()
+								&& user.getUserAccount().isActive()
+								&& !user.getUserAccount().isDeleted()) {
+							isFound = true;
+
+							setMySessionID(req, user.getId().toString());
+							java.net.URI location = new java.net.URI(
+									"../Home.jsp");
+							if (user.getUserAccount().isAdmin()) {
+								location = new java.net.URI("../Dashboard.jsp");
+							}
+							return Response.seeOther(location).build();
+						} else {
+							isFound = false;
+						}
+					}
+				}
+			} else {
+				isFound = false;
+			}
+			if (!isFound) {
+				java.net.URI location = new java.net.URI(
+						"../Login.jsp?msg=error");
+				return Response.seeOther(location).build();
+			}
+		} catch (Exception e) {
+			log.error("Could not find the User error e=", e);
+		}
+		return Response
+				.status(Response.Status.BAD_REQUEST)
+				.entity("{\"error\": \"Could Not Find The User\", \"status\": \"FAIL\"}")
+				.build();
+	}
+
+	@POST
+	@Path("/SetUserViewSession")
+	@ApiOperation(value = "Set User Session based on selected position detail", notes = "This API sets the selected position detail as a session")
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, message = "Success: { True }"),
+			@ApiResponse(code = 400, message = "Failed: { \"error\":\"error description\", \"status\": \"FAIL\" }") })
+	public Response setUserViewSession(
+			@Context HttpServletRequest req,
+			@ApiParam(value = "Message", required = true, defaultValue = "", allowableValues = "", allowMultiple = false) String message) {
+		try {
+			log.info("UserService::setUserViewSession started");
+			deleteAllSession(req);
+			ObjectMapper mapper = new ObjectMapper();
+			JsonNode root = mapper.readTree(message);
+			if (root != null && root.has("userId") && root.has("userName")
+					&& root.has("isAdminUser")) {
+				String profileId = root.get("userId").textValue();
+				ObjectId id = new ObjectId(profileId);
+				String userName = new String();
+				Boolean isAdminUser = false;
+				String college = new String();
+				String department = new String();
+				String positionType = new String();
+				String positionTitle = new String();
+				userName = root.get("userName").textValue();
+				isAdminUser = Boolean.parseBoolean(root.get("isAdminUser")
+						.textValue());
+				if (root != null && root.has("college")) {
+					college = root.get("college").textValue();
+				}
+				if (root != null && root.has("department")) {
+					department = root.get("department").textValue();
+				}
+				if (root != null && root.has("positionType")) {
+					positionType = root.get("positionType").textValue();
+				}
+				if (root != null && root.has("positionTitle")) {
+					positionTitle = root.get("positionTitle").textValue();
+				}
+				UserProfile user = userProfileDAO.findMatchedUserDetails(id,
+						userName, isAdminUser, college, department,
+						positionType, positionTitle);
+				if (user != null) {
+					setUserCurrentSession(req, userName, isAdminUser,
+							profileId, college, department, positionType,
+							positionTitle);
+				}
+				return Response
+						.status(Response.Status.OK)
+						.entity(mapper.writerWithDefaultPrettyPrinter()
+								.writeValueAsString(true)).build();
+			}
+		} catch (Exception e) {
+			log.error(
+					"Could not set User Session based on selected position detail error e=",
+					e);
+		}
+		return Response
+				.status(Response.Status.BAD_REQUEST)
+				.entity("{\"error\": \"Could Not Set User Session Based On Selected Position Detail\", \"status\": \"FAIL\"}")
+				.build();
+	}
+
+	private void setUserCurrentSession(HttpServletRequest req, String userName,
+			boolean admin, String userId, String college, String department,
+			String positionType, String positionTitle) {
+		HttpSession session = req.getSession();
+		if (session.getAttribute("userProfileId") == null) {
+			session.setAttribute("userProfileId", userId);
+		}
+		if (session.getAttribute("gpmsUserName") == null) {
+			session.setAttribute("gpmsUserName", userName);
+		}
+		if (session.getAttribute("isAdmin") == null) {
+			session.setAttribute("isAdmin", admin);
+		}
+		if (session.getAttribute("userCollege") == null) {
+			session.setAttribute("userCollege", college);
+		}
+		if (session.getAttribute("userDepartment") == null) {
+			session.setAttribute("userDepartment", department);
+		}
+		if (session.getAttribute("userPositionType") == null) {
+			session.setAttribute("userPositionType", positionType);
+		}
+		if (session.getAttribute("userPositionTitle") == null) {
+			session.setAttribute("userPositionTitle", positionTitle);
+		}
+	}
+
+	@GET
+	@Path("/logout")
+	@ApiOperation(value = "Logout the User", notes = "This API logouts the user")
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, message = "Success: { Redirect to Login page }"),
+			@ApiResponse(code = 400, message = "Failed: { \"error\":\"error description\", \"status\": \"FAIL\" }") })
+	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+	public Response logout(@Context HttpServletRequest req) {
+		try {
+			log.info("UserService::logout started");
+			if (req == null) {
+				log.error("Null request in context");
+				return Response
+						.status(Response.Status.BAD_REQUEST)
+						.entity("{\"error\": \"Could Not Logout the User\", \"status\": \"FAIL\"}")
+						.build();
+			}
+			deleteAllSession(req);
+			return Response.seeOther(new java.net.URI("../Login.jsp")).build();
+		} catch (Exception e) {
+			log.error("Could not logout the user error e=", e);
+		}
+		return Response
+				.status(Response.Status.BAD_REQUEST)
+				.entity("{\"error\": \"Could Not Logout the User\", \"status\": \"FAIL\"}")
+				.build();
+	}
+
+	private void deleteAllSession(@Context HttpServletRequest req) {
+		HttpSession session = req.getSession();
+		session.removeAttribute("userProfileId");
+		session.removeAttribute("gpmsUserName");
+		session.removeAttribute("isAdmin");
+		session.removeAttribute("userCollege");
+		session.removeAttribute("userDepartment");
+		session.removeAttribute("userPositionType");
+		session.removeAttribute("userPositionTitle");
+		session.invalidate();
+	}
+
+	private void setMySessionID(@Context HttpServletRequest req,
+			String sessionValue) {
+		try {
+			if (req == null) {
+				System.out.println("Null request in context");
+			}
+			HttpSession session = req.getSession();
+			if (session.getAttribute("userProfileId") == null) {
+				// id = System.currentTimeMillis();
+				session.setAttribute("userProfileId", sessionValue);
+			}
+			UserProfile existingUserProfile = new UserProfile();
+			if (!sessionValue.equals("null")) {
+				ObjectId id = new ObjectId(sessionValue);
+				existingUserProfile = userProfileDAO
+						.findUserDetailsByProfileID(id);
+			}
+			if (session.getAttribute("gpmsUserName") == null) {
+				session.setAttribute("gpmsUserName", existingUserProfile
+						.getUserAccount().getUserName());
+			}
+			if (session.getAttribute("isAdmin") == null) {
+				session.setAttribute("isAdmin", existingUserProfile
+						.getUserAccount().isAdmin());
+			}
+			for (PositionDetails userDetails : existingUserProfile.getDetails()) {
+				if (userDetails.isAsDefault()) {
+					if (session.getAttribute("userPositionType") == null) {
+						session.setAttribute("userPositionType",
+								userDetails.getPositionType());
+					}
+					if (session.getAttribute("userPositionTitle") == null) {
+						session.setAttribute("userPositionTitle",
+								userDetails.getPositionTitle());
+					}
+					if (session.getAttribute("userDepartment") == null) {
+						session.setAttribute("userDepartment",
+								userDetails.getDepartment());
+					}
+					if (session.getAttribute("userCollege") == null) {
+						session.setAttribute("userCollege",
+								userDetails.getCollege());
+					}
+				}
+			}
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
+	}
+
+	public String getMySessionId(@Context HttpServletRequest req) {
+		HttpSession session = req.getSession();
+		if (session.getAttribute("userProfileId") != null) {
+			return (String) session.getAttribute("userProfileId");
+		}
+		if (session.getAttribute("gpmsUserName") != null) {
+			return (String) session.getAttribute("gpmsUserName");
+		}
+		if (session.getAttribute("userPositionType") != null) {
+			return (String) session.getAttribute("userPositionType");
+		}
+		if (session.getAttribute("userPositionTitle") != null) {
+			return (String) session.getAttribute("userPositionTitle");
+		}
+		if (session.getAttribute("userDepartment") != null) {
+			return (String) session.getAttribute("userDepartment");
+		}
+		if (session.getAttribute("userCollege") != null) {
+			return (String) session.getAttribute("userCollege");
+		}
+		if (session.getAttribute("isAdmin") != null) {
+			return (String) session.getAttribute("isAdmin");
+		}
+		return null;
+	}
+
+	@POST
+	@Path("/GetAllUserDropdown")
+	@ApiOperation(value = "Get All Users", notes = "This API gets all active Users to bind in dropdowns")
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, message = "Success: { User Info }"),
+			@ApiResponse(code = 400, message = "Failed: { \"error\":\"error description\", \"status\": \"FAIL\" }") })
+	public Response getAllUsers() {
+		try {
+			log.info("UserService::getAllUsers started");
+			HashMap<String, String> users = new HashMap<String, String>();
+			List<UserProfile> userprofiles = userProfileDAO
+					.findAllUsersWithPosition();
+			for (UserProfile userProfile : userprofiles) {
+				users.put(userProfile.getId().toString(),
+						userProfile.getFullName());
+			}
+			ObjectMapper mapper = new ObjectMapper();
+			return Response
+					.status(Response.Status.OK)
+					.entity(mapper.writerWithDefaultPrettyPrinter()
+							.writeValueAsString(users)).build();
+		} catch (Exception e) {
+			log.error("Could not get all Users error e=", e);
+		}
+		return Response
+				.status(Response.Status.BAD_REQUEST)
+				.entity("{\"error\": \"Could Not Get All Users\", \"status\": \"FAIL\"}")
+				.build();
+	}
+
+	@POST
+	@Path("/GetCurrentPositionDetailsForPI")
+	@ApiOperation(value = "Get Current Position Details For PI", notes = "This API gets current Position Details for PI")
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, message = "Success: { Investigator Users And Positions }"),
+			@ApiResponse(code = 400, message = "Failed: { \"error\":\"error description\", \"status\": \"FAIL\" }") })
+	public Response getCurrentPositionDetailsForPI(
+			@ApiParam(value = "Message", required = true, defaultValue = "", allowableValues = "", allowMultiple = false) String message) {
+		try {
+			log.info("UserService::getCurrentPositionDetailsForPI started");
+			ObjectMapper mapper = new ObjectMapper();
+			JsonNode root = mapper.readTree(message);
+			String userProfileID = new String();
+			@SuppressWarnings("unused")
+			String userName = new String();
+			@SuppressWarnings("unused")
+			Boolean userIsAdmin = false;
+			String userCollege = new String();
+			String userDepartment = new String();
+			String userPositionType = new String();
+			String userPositionTitle = new String();
+			if (root != null && root.has("gpmsCommonObj")) {
+				JsonNode commonObj = root.get("gpmsCommonObj");
+				if (commonObj != null && commonObj.has("UserProfileID")) {
+					userProfileID = commonObj.get("UserProfileID").textValue();
+				}
+				if (commonObj != null && commonObj.has("UserName")) {
+					userName = commonObj.get("UserName").textValue();
+				}
+				if (commonObj != null && commonObj.has("UserIsAdmin")) {
+					userIsAdmin = Boolean.parseBoolean(commonObj.get(
+							"UserIsAdmin").textValue());
+				}
+				if (commonObj != null && commonObj.has("UserCollege")) {
+					userCollege = commonObj.get("UserCollege").textValue();
+				}
+				if (commonObj != null && commonObj.has("UserDepartment")) {
+					userDepartment = commonObj.get("UserDepartment")
+							.textValue();
+				}
+				if (commonObj != null && commonObj.has("UserPositionType")) {
+					userPositionType = commonObj.get("UserPositionType")
+							.textValue();
+				}
+				if (commonObj != null && commonObj.has("UserPositionTitle")) {
+					userPositionTitle = commonObj.get("UserPositionTitle")
+							.textValue();
+				}
+			}
+			ObjectId id = new ObjectId(userProfileID);
+			final MultimapAdapter multimapAdapter = new MultimapAdapter();
+			final Gson gson = new GsonBuilder().setPrettyPrinting()
+					.registerTypeAdapter(Multimap.class, multimapAdapter)
+					.create();
+			return Response
+					.status(Response.Status.OK)
+					.entity(gson.toJson(userProfileDAO
+							.findCurrentPositionDetailsForPI(id, userCollege,
+									userDepartment, userPositionType,
+									userPositionTitle))).build();
+		} catch (Exception e) {
+			log.error("Could not current Position Details for PI error e=", e);
+		}
+		return Response
+				.status(Response.Status.BAD_REQUEST)
+				.entity("{\"error\": \"Could Not Current Position Details For PI\", \"status\": \"FAIL\"}")
+				.build();
+	}
+
+	@POST
+	@Path("/GetAllPositionDetailsForAUser")
+	@ApiOperation(value = "Get All Position Details For A User", notes = "This API gets all Position Details for a User")
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, message = "Success: { User Info }"),
+			@ApiResponse(code = 400, message = "Failed: { \"error\":\"error description\", \"status\": \"FAIL\" }") })
+	public Response getAllPositionDetailsForAUser(
+			@ApiParam(value = "Message", required = true, defaultValue = "", allowableValues = "", allowMultiple = false) String message) {
+		try {
+			log.info("UserService::getAllPositionDetailsForAUser started");
+			String userId = new String();
+			ObjectMapper mapper = new ObjectMapper();
+			JsonNode root = mapper.readTree(message);
+			if (root != null && root.has("userId")) {
+				userId = root.get("userId").textValue();
+			}
+			ObjectId id = new ObjectId(userId);
+			final MultimapAdapter multimapAdapter = new MultimapAdapter();
+			final Gson gson = new GsonBuilder().setPrettyPrinting()
+					.registerTypeAdapter(Multimap.class, multimapAdapter)
+					.create();
+			return Response
+					.status(Response.Status.OK)
+					.entity(gson.toJson(userProfileDAO
+							.findAllPositionDetailsForAUser(id))).build();
+		} catch (Exception e) {
+			log.error("Could not get all Position Details for a User error e=",
+					e);
+		}
+		return Response
+				.status(Response.Status.BAD_REQUEST)
+				.entity("{\"error\": \"Could Not Get All Position Details For A User\", \"status\": \"FAIL\"}")
+				.build();
+	}
+
+	@POST
+	@Path("/GetAllProposalCountForAUser")
+	@ApiOperation(value = "Get All Proposal Count For A User", notes = "This API gets all proposal count for a User")
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, message = "Success: { User Info }"),
+			@ApiResponse(code = 400, message = "Failed: { \"error\":\"error description\", \"status\": \"FAIL\" }") })
+	public Response getAllProposalCountForAUser(
+			@ApiParam(value = "Message", required = true, defaultValue = "", allowableValues = "", allowMultiple = false) String message) {
+		try {
+			log.info("UserService::getAllProposalCountForAUser started");
+			ObjectMapper mapper = new ObjectMapper();
+			JsonNode root = mapper.readTree(message);
+			String userProfileID = new String();
+			@SuppressWarnings("unused")
+			String userName = new String();
+			@SuppressWarnings("unused")
+			Boolean userIsAdmin = false;
+			String userCollege = new String();
+			String userDepartment = new String();
+			String userPositionType = new String();
+			String userPositionTitle = new String();
+			if (root != null && root.has("gpmsCommonObj")) {
+				JsonNode commonObj = root.get("gpmsCommonObj");
+				if (commonObj != null && commonObj.has("UserProfileID")) {
+					userProfileID = commonObj.get("UserProfileID").textValue();
+				}
+				if (commonObj != null && commonObj.has("UserName")) {
+					userName = commonObj.get("UserName").textValue();
+				}
+				if (commonObj != null && commonObj.has("UserIsAdmin")) {
+					userIsAdmin = Boolean.parseBoolean(commonObj.get(
+							"UserIsAdmin").textValue());
+				}
+				if (commonObj != null && commonObj.has("UserCollege")) {
+					userCollege = commonObj.get("UserCollege").textValue();
+				}
+				if (commonObj != null && commonObj.has("UserDepartment")) {
+					userDepartment = commonObj.get("UserDepartment")
+							.textValue();
+				}
+				if (commonObj != null && commonObj.has("UserPositionType")) {
+					userPositionType = commonObj.get("UserPositionType")
+							.textValue();
+				}
+				if (commonObj != null && commonObj.has("UserPositionTitle")) {
+					userPositionTitle = commonObj.get("UserPositionTitle")
+							.textValue();
+				}
+			}
+			UserProposalCount count = userProfileDAO.getUserProposalCounts(
+					userProfileID, userCollege, userDepartment,
+					userPositionType, userPositionTitle);
+			return Response
+					.status(Response.Status.OK)
+					.entity(mapper.writerWithDefaultPrettyPrinter()
+							.writeValueAsString(count)).build();
+		} catch (Exception e) {
+			log.error("Could not get all proposal count for a User error e=", e);
+		}
+		return Response
+				.status(Response.Status.BAD_REQUEST)
+				.entity("{\"error\": \"Could Not Get All Proposal Count For A User\", \"status\": \"FAIL\"}")
+				.build();
+	}
+
+	@POST
 	@Path("/SaveUpdateUser")
 	@ApiOperation(value = "Save a New User or Update an existing User", notes = "This API saves a New User or updates an existing User")
 	@ApiResponses(value = {
@@ -1189,7 +1768,6 @@ public class UserService {
 								"IsActive").booleanValue()) {
 							existingUserAccount.setActive(userInfo.get(
 									"IsActive").booleanValue());
-
 							isActiveUser = userInfo.get("IsActive")
 									.booleanValue();
 						}
@@ -1601,589 +2179,6 @@ public class UserService {
 		return Response
 				.status(Response.Status.BAD_REQUEST)
 				.entity("{\"error\": \"Could Not Save A New User OR Update AN Existing User\", \"status\": \"FAIL\"}")
-				.build();
-	}
-
-	@POST
-	@Path("/signup")
-	@ApiOperation(value = "Registering a New user", notes = "This API signups a new user")
-	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "Success: { True }"),
-			@ApiResponse(code = 400, message = "Failed: { \"error\":\"error description\", \"status\": \"FAIL\" }") })
-	public Response signUpUser(
-			@ApiParam(value = "Message", required = true, defaultValue = "", allowableValues = "", allowMultiple = false) String message) {
-		try {
-			log.info("UserService::signUpUser started");
-			String userID = new String();
-			String userEmail = new String();
-			UserAccount newAccount = new UserAccount();
-			UserProfile newProfile = new UserProfile();
-			ObjectMapper mapper = new ObjectMapper();
-			JsonNode root = mapper.readTree(message);
-			if (root != null && root.has("userInfo")) {
-				JsonNode userInfo = root.get("userInfo");
-				if (userInfo != null && userInfo.has("UserID")) {
-					userID = userInfo.get("UserID").textValue();
-				}
-				if (userID.equals("0")) {
-					newAccount.setAddedOn(new Date());
-					if (userInfo != null && userInfo.has("UserName")) {
-						String loginUserName = userInfo.get("UserName")
-								.textValue();
-						newAccount.setUserName(loginUserName);
-					}
-					if (userInfo != null && userInfo.has("Password")) {
-						newAccount.setPassword(userInfo.get("Password")
-								.textValue());
-					}
-					newProfile.setUserAccount(newAccount);
-					if (userInfo != null && userInfo.has("FirstName")) {
-						newProfile.setFirstName(userInfo.get("FirstName")
-								.textValue());
-					}
-					if (userInfo != null && userInfo.has("MiddleName")) {
-						newProfile.setMiddleName(userInfo.get("MiddleName")
-								.textValue());
-					}
-					if (userInfo != null && userInfo.has("LastName")) {
-						newProfile.setLastName(userInfo.get("LastName")
-								.textValue());
-					}
-					if (userInfo != null && userInfo.has("DOB")) {
-						Date dob = formatter.parse(userInfo.get("DOB")
-								.textValue());
-						newProfile.setDateOfBirth(dob);
-					}
-					if (userInfo != null && userInfo.has("Gender")) {
-						newProfile
-								.setGender(userInfo.get("Gender").textValue());
-					}
-					Address newAddress = new Address();
-					if (userInfo != null && userInfo.has("Street")) {
-						newAddress
-								.setStreet(userInfo.get("Street").textValue());
-					}
-					if (userInfo != null && userInfo.has("Apt")) {
-						newAddress.setApt(userInfo.get("Apt").textValue());
-					}
-					if (userInfo != null && userInfo.has("City")) {
-						newAddress.setCity(userInfo.get("City").textValue());
-					}
-					if (userInfo != null && userInfo.has("State")) {
-						newAddress.setState(userInfo.get("State").textValue());
-					}
-					if (userInfo != null && userInfo.has("Zip")) {
-						newAddress.setZipcode(userInfo.get("Zip").textValue());
-					}
-					if (userInfo != null && userInfo.has("Country")) {
-						newAddress.setCountry(userInfo.get("Country")
-								.textValue());
-					}
-					newProfile.getAddresses().add(newAddress);
-					if (userInfo != null && userInfo.has("MobileNumber")) {
-						newProfile.getMobileNumbers().add(
-								userInfo.get("MobileNumber").textValue());
-					}
-					if (userInfo != null && userInfo.has("WorkEmail")) {
-						userEmail = userInfo.get("WorkEmail").textValue();
-						newProfile.getWorkEmails().add(userEmail);
-					}
-				}
-				userAccountDAO.save(newAccount);
-				userProfileDAO.signUpUser(newProfile);
-				NotificationLog notification = new NotificationLog();
-				notification.setType("User");
-				notification.setAction("Signed up.");
-				notification.setUserProfileId(newAccount.getId().toString());
-				notification.setUsername(newAccount.getUserName());
-				notification.setForAdmin(true);
-				notificationDAO.save(notification);
-			}
-			OutboundEvent.Builder eventBuilder = new OutboundEvent.Builder();
-			OutboundEvent event = eventBuilder.name("notification")
-					.mediaType(MediaType.TEXT_PLAIN_TYPE)
-					.data(String.class, "1").build();
-			NotificationService.BROADCASTER.broadcast(event);
-			return Response
-					.status(Response.Status.OK)
-					.entity(mapper.writerWithDefaultPrettyPrinter()
-							.writeValueAsString(true)).build();
-
-		} catch (Exception e) {
-			log.error("Could not register a new user error e=", e);
-		}
-		return Response
-				.status(Response.Status.BAD_REQUEST)
-				.entity("{\"error\": \"Could Not Register A New User\", \"status\": \"FAIL\"}")
-				.build();
-	}
-
-	@POST
-	@Path("/login")
-	@ApiOperation(value = "login user with valid username and password", notes = "This API allows to login a valid user with authorized username and password"
-			+ "<p><u>Form Parameters</u><ul><li><b>username</b> is required</li><li><b>password</b> is required</li></ul>")
-	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "Success: { Redirect to Dashboard page }"),
-			@ApiResponse(code = 400, message = "Failed: { \"error\":\"error description\", \"status\": \"FAIL\" }") })
-	public Response login(
-			@ApiParam(value = "username", required = true, defaultValue = "test", allowableValues = "", allowMultiple = false) @FormParam("username") String email,
-			@ApiParam(value = "password", required = true, defaultValue = "password", allowableValues = "", allowMultiple = false) @FormParam("password") String password,
-			@Context HttpServletRequest req) {
-		try {
-			if (req == null) {
-				return Response
-						.status(Response.Status.BAD_REQUEST)
-						.entity("{\"error\": \"Could Not Find The User\", \"status\": \"FAIL\"}")
-						.build();
-			}
-			List<UserProfile> userList = userProfileDAO.findAll();
-			boolean isFound = false;
-			if (userList.size() != 0) {
-				for (UserProfile user : userList) {
-					if (user.getUserAccount().getUserName().equals(email)
-							|| user.getWorkEmails().contains(email)) {
-						if (PasswordHash.validatePassword(password, user
-								.getUserAccount().getPassword())
-								&& !user.isDeleted()
-								&& user.getUserAccount().isActive()
-								&& !user.getUserAccount().isDeleted()) {
-							isFound = true;
-
-							setMySessionID(req, user.getId().toString());
-							java.net.URI location = new java.net.URI(
-									"../Home.jsp");
-							if (user.getUserAccount().isAdmin()) {
-								location = new java.net.URI("../Dashboard.jsp");
-							}
-							return Response.seeOther(location).build();
-						} else {
-							isFound = false;
-						}
-					}
-				}
-			} else {
-				isFound = false;
-			}
-			if (!isFound) {
-				java.net.URI location = new java.net.URI(
-						"../Login.jsp?msg=error");
-				return Response.seeOther(location).build();
-			}
-		} catch (Exception e) {
-			log.error("Could not find the User error e=", e);
-		}
-		return Response
-				.status(Response.Status.BAD_REQUEST)
-				.entity("{\"error\": \"Could Not Find The User\", \"status\": \"FAIL\"}")
-				.build();
-	}
-
-	@POST
-	@Path("/SetUserViewSession")
-	@ApiOperation(value = "Set User Session based on selected position detail", notes = "This API sets the selected position detail as a session")
-	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "Success: { True }"),
-			@ApiResponse(code = 400, message = "Failed: { \"error\":\"error description\", \"status\": \"FAIL\" }") })
-	public Response setUserViewSession(
-			@Context HttpServletRequest req,
-			@ApiParam(value = "Message", required = true, defaultValue = "", allowableValues = "", allowMultiple = false) String message) {
-		try {
-			log.info("UserService::setUserViewSession started");
-			deleteAllSession(req);
-			ObjectMapper mapper = new ObjectMapper();
-			JsonNode root = mapper.readTree(message);
-			if (root != null && root.has("userId") && root.has("userName")
-					&& root.has("isAdminUser")) {
-				String profileId = root.get("userId").textValue();
-				ObjectId id = new ObjectId(profileId);
-				String userName = new String();
-				Boolean isAdminUser = false;
-				String college = new String();
-				String department = new String();
-				String positionType = new String();
-				String positionTitle = new String();
-				userName = root.get("userName").textValue();
-				isAdminUser = Boolean.parseBoolean(root.get("isAdminUser")
-						.textValue());
-				if (root != null && root.has("college")) {
-					college = root.get("college").textValue();
-				}
-				if (root != null && root.has("department")) {
-					department = root.get("department").textValue();
-				}
-				if (root != null && root.has("positionType")) {
-					positionType = root.get("positionType").textValue();
-				}
-				if (root != null && root.has("positionTitle")) {
-					positionTitle = root.get("positionTitle").textValue();
-				}
-				UserProfile user = userProfileDAO.findMatchedUserDetails(id,
-						userName, isAdminUser, college, department,
-						positionType, positionTitle);
-				if (user != null) {
-					setUserCurrentSession(req, userName, isAdminUser,
-							profileId, college, department, positionType,
-							positionTitle);
-				}
-				return Response
-						.status(Response.Status.OK)
-						.entity(mapper.writerWithDefaultPrettyPrinter()
-								.writeValueAsString(true)).build();
-			}
-		} catch (Exception e) {
-			log.error(
-					"Could not set User Session based on selected position detail error e=",
-					e);
-		}
-		return Response
-				.status(Response.Status.BAD_REQUEST)
-				.entity("{\"error\": \"Could Not Set User Session Based On Selected Position Detail\", \"status\": \"FAIL\"}")
-				.build();
-	}
-
-	private void setUserCurrentSession(HttpServletRequest req, String userName,
-			boolean admin, String userId, String college, String department,
-			String positionType, String positionTitle) {
-		HttpSession session = req.getSession();
-		if (session.getAttribute("userProfileId") == null) {
-			session.setAttribute("userProfileId", userId);
-		}
-		if (session.getAttribute("gpmsUserName") == null) {
-			session.setAttribute("gpmsUserName", userName);
-		}
-		if (session.getAttribute("isAdmin") == null) {
-			session.setAttribute("isAdmin", admin);
-		}
-		if (session.getAttribute("userCollege") == null) {
-			session.setAttribute("userCollege", college);
-		}
-		if (session.getAttribute("userDepartment") == null) {
-			session.setAttribute("userDepartment", department);
-		}
-		if (session.getAttribute("userPositionType") == null) {
-			session.setAttribute("userPositionType", positionType);
-		}
-		if (session.getAttribute("userPositionTitle") == null) {
-			session.setAttribute("userPositionTitle", positionTitle);
-		}
-	}
-
-	@GET
-	@Path("/logout")
-	@ApiOperation(value = "Logout the User", notes = "This API logouts the user")
-	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "Success: { Redirect to Login page }"),
-			@ApiResponse(code = 400, message = "Failed: { \"error\":\"error description\", \"status\": \"FAIL\" }") })
-	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-	public Response logout(@Context HttpServletRequest req) {
-		try {
-			log.info("UserService::logout started");
-			if (req == null) {
-				log.error("Null request in context");
-				return Response
-						.status(Response.Status.BAD_REQUEST)
-						.entity("{\"error\": \"Could Not Logout the User\", \"status\": \"FAIL\"}")
-						.build();
-			}
-			deleteAllSession(req);
-			return Response.seeOther(new java.net.URI("../Login.jsp")).build();
-		} catch (Exception e) {
-			log.error("Could not logout the user error e=", e);
-		}
-		return Response
-				.status(Response.Status.BAD_REQUEST)
-				.entity("{\"error\": \"Could Not Logout the User\", \"status\": \"FAIL\"}")
-				.build();
-	}
-
-	private void deleteAllSession(@Context HttpServletRequest req) {
-		HttpSession session = req.getSession();
-		session.removeAttribute("userProfileId");
-		session.removeAttribute("gpmsUserName");
-		session.removeAttribute("isAdmin");
-		session.removeAttribute("userCollege");
-		session.removeAttribute("userDepartment");
-		session.removeAttribute("userPositionType");
-		session.removeAttribute("userPositionTitle");
-		session.invalidate();
-	}
-
-	private void setMySessionID(@Context HttpServletRequest req,
-			String sessionValue) {
-		try {
-			if (req == null) {
-				System.out.println("Null request in context");
-			}
-			HttpSession session = req.getSession();
-			if (session.getAttribute("userProfileId") == null) {
-				// id = System.currentTimeMillis();
-				session.setAttribute("userProfileId", sessionValue);
-			}
-			UserProfile existingUserProfile = new UserProfile();
-			if (!sessionValue.equals("null")) {
-				ObjectId id = new ObjectId(sessionValue);
-				existingUserProfile = userProfileDAO
-						.findUserDetailsByProfileID(id);
-			}
-			if (session.getAttribute("gpmsUserName") == null) {
-				session.setAttribute("gpmsUserName", existingUserProfile
-						.getUserAccount().getUserName());
-			}
-
-			if (session.getAttribute("isAdmin") == null) {
-				session.setAttribute("isAdmin", existingUserProfile
-						.getUserAccount().isAdmin());
-			}
-			for (PositionDetails userDetails : existingUserProfile.getDetails()) {
-				if (userDetails.isAsDefault()) {
-					if (session.getAttribute("userPositionType") == null) {
-						session.setAttribute("userPositionType",
-								userDetails.getPositionType());
-					}
-					if (session.getAttribute("userPositionTitle") == null) {
-						session.setAttribute("userPositionTitle",
-								userDetails.getPositionTitle());
-					}
-					if (session.getAttribute("userDepartment") == null) {
-						session.setAttribute("userDepartment",
-								userDetails.getDepartment());
-					}
-					if (session.getAttribute("userCollege") == null) {
-						session.setAttribute("userCollege",
-								userDetails.getCollege());
-					}
-				}
-			}
-		} catch (Exception e) {
-			System.out.println(e.getMessage());
-		}
-	}
-
-	public String getMySessionId(@Context HttpServletRequest req) {
-		HttpSession session = req.getSession();
-		if (session.getAttribute("userProfileId") != null) {
-			return (String) session.getAttribute("userProfileId");
-		}
-		if (session.getAttribute("gpmsUserName") != null) {
-			return (String) session.getAttribute("gpmsUserName");
-		}
-		if (session.getAttribute("userPositionType") != null) {
-			return (String) session.getAttribute("userPositionType");
-		}
-		if (session.getAttribute("userPositionTitle") != null) {
-			return (String) session.getAttribute("userPositionTitle");
-		}
-		if (session.getAttribute("userDepartment") != null) {
-			return (String) session.getAttribute("userDepartment");
-		}
-		if (session.getAttribute("userCollege") != null) {
-			return (String) session.getAttribute("userCollege");
-		}
-		if (session.getAttribute("isAdmin") != null) {
-			return (String) session.getAttribute("isAdmin");
-		}
-		return null;
-	}
-
-	@POST
-	@Path("/GetAllUserDropdown")
-	@ApiOperation(value = "Get All Users", notes = "This API gets all active Users to bind in dropdowns")
-	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "Success: { User Info }"),
-			@ApiResponse(code = 400, message = "Failed: { \"error\":\"error description\", \"status\": \"FAIL\" }") })
-	public Response getAllUsers() {
-		try {
-			log.info("UserService::getAllUsers started");
-			HashMap<String, String> users = new HashMap<String, String>();
-			List<UserProfile> userprofiles = userProfileDAO
-					.findAllUsersWithPosition();
-			for (UserProfile userProfile : userprofiles) {
-				users.put(userProfile.getId().toString(),
-						userProfile.getFullName());
-			}
-			ObjectMapper mapper = new ObjectMapper();
-			return Response
-					.status(Response.Status.OK)
-					.entity(mapper.writerWithDefaultPrettyPrinter()
-							.writeValueAsString(users)).build();
-
-		} catch (Exception e) {
-			log.error("Could not get all Users error e=", e);
-		}
-
-		return Response
-				.status(Response.Status.BAD_REQUEST)
-				.entity("{\"error\": \"Could Not Get All Users\", \"status\": \"FAIL\"}")
-				.build();
-	}
-
-	@POST
-	@Path("/GetCurrentPositionDetailsForPI")
-	@ApiOperation(value = "Get Current Position Details For PI", notes = "This API gets current Position Details for PI")
-	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "Success: { Investigator Users And Positions }"),
-			@ApiResponse(code = 400, message = "Failed: { \"error\":\"error description\", \"status\": \"FAIL\" }") })
-	public Response getCurrentPositionDetailsForPI(
-			@ApiParam(value = "Message", required = true, defaultValue = "", allowableValues = "", allowMultiple = false) String message) {
-		try {
-			log.info("UserService::getCurrentPositionDetailsForPI started");
-			ObjectMapper mapper = new ObjectMapper();
-			JsonNode root = mapper.readTree(message);
-			String userProfileID = new String();
-			@SuppressWarnings("unused")
-			String userName = new String();
-			@SuppressWarnings("unused")
-			Boolean userIsAdmin = false;
-			String userCollege = new String();
-			String userDepartment = new String();
-			String userPositionType = new String();
-			String userPositionTitle = new String();
-			if (root != null && root.has("gpmsCommonObj")) {
-				JsonNode commonObj = root.get("gpmsCommonObj");
-				if (commonObj != null && commonObj.has("UserProfileID")) {
-					userProfileID = commonObj.get("UserProfileID").textValue();
-				}
-				if (commonObj != null && commonObj.has("UserName")) {
-					userName = commonObj.get("UserName").textValue();
-				}
-				if (commonObj != null && commonObj.has("UserIsAdmin")) {
-					userIsAdmin = Boolean.parseBoolean(commonObj.get(
-							"UserIsAdmin").textValue());
-				}
-				if (commonObj != null && commonObj.has("UserCollege")) {
-					userCollege = commonObj.get("UserCollege").textValue();
-				}
-				if (commonObj != null && commonObj.has("UserDepartment")) {
-					userDepartment = commonObj.get("UserDepartment")
-							.textValue();
-				}
-				if (commonObj != null && commonObj.has("UserPositionType")) {
-					userPositionType = commonObj.get("UserPositionType")
-							.textValue();
-				}
-				if (commonObj != null && commonObj.has("UserPositionTitle")) {
-					userPositionTitle = commonObj.get("UserPositionTitle")
-							.textValue();
-				}
-			}
-			ObjectId id = new ObjectId(userProfileID);
-			final MultimapAdapter multimapAdapter = new MultimapAdapter();
-			final Gson gson = new GsonBuilder().setPrettyPrinting()
-					.registerTypeAdapter(Multimap.class, multimapAdapter)
-					.create();
-			return Response
-					.status(Response.Status.OK)
-					.entity(gson.toJson(userProfileDAO
-							.findCurrentPositionDetailsForPI(id, userCollege,
-									userDepartment, userPositionType,
-									userPositionTitle))).build();
-
-		} catch (Exception e) {
-			log.error("Could not current Position Details for PI error e=", e);
-		}
-		return Response
-				.status(Response.Status.BAD_REQUEST)
-				.entity("{\"error\": \"Could Not Current Position Details For PI\", \"status\": \"FAIL\"}")
-				.build();
-	}
-
-	@POST
-	@Path("/GetAllPositionDetailsForAUser")
-	@ApiOperation(value = "Get All Position Details For A User", notes = "This API gets all Position Details for a User")
-	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "Success: { User Info }"),
-			@ApiResponse(code = 400, message = "Failed: { \"error\":\"error description\", \"status\": \"FAIL\" }") })
-	public Response getAllPositionDetailsForAUser(
-			@ApiParam(value = "Message", required = true, defaultValue = "", allowableValues = "", allowMultiple = false) String message) {
-		try {
-			log.info("UserService::getAllPositionDetailsForAUser started");
-			String userId = new String();
-			ObjectMapper mapper = new ObjectMapper();
-			JsonNode root = mapper.readTree(message);
-			if (root != null && root.has("userId")) {
-				userId = root.get("userId").textValue();
-			}
-			ObjectId id = new ObjectId(userId);
-			final MultimapAdapter multimapAdapter = new MultimapAdapter();
-			final Gson gson = new GsonBuilder().setPrettyPrinting()
-					.registerTypeAdapter(Multimap.class, multimapAdapter)
-					.create();
-			return Response
-					.status(Response.Status.OK)
-					.entity(gson.toJson(userProfileDAO
-							.findAllPositionDetailsForAUser(id))).build();
-		} catch (Exception e) {
-			log.error("Could not get all Position Details for a User error e=",
-					e);
-		}
-		return Response
-				.status(Response.Status.BAD_REQUEST)
-				.entity("{\"error\": \"Could Not Get All Position Details For A User\", \"status\": \"FAIL\"}")
-				.build();
-	}
-
-	@POST
-	@Path("/GetAllProposalCountForAUser")
-	@ApiOperation(value = "Get All Proposal Count For A User", notes = "This API gets all proposal count for a User")
-	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "Success: { User Info }"),
-			@ApiResponse(code = 400, message = "Failed: { \"error\":\"error description\", \"status\": \"FAIL\" }") })
-	public Response getAllProposalCountForAUser(
-			@ApiParam(value = "Message", required = true, defaultValue = "", allowableValues = "", allowMultiple = false) String message) {
-		try {
-			log.info("UserService::getAllProposalCountForAUser started");
-			ObjectMapper mapper = new ObjectMapper();
-			JsonNode root = mapper.readTree(message);
-			String userProfileID = new String();
-			@SuppressWarnings("unused")
-			String userName = new String();
-			@SuppressWarnings("unused")
-			Boolean userIsAdmin = false;
-			String userCollege = new String();
-			String userDepartment = new String();
-			String userPositionType = new String();
-			String userPositionTitle = new String();
-			if (root != null && root.has("gpmsCommonObj")) {
-				JsonNode commonObj = root.get("gpmsCommonObj");
-				if (commonObj != null && commonObj.has("UserProfileID")) {
-					userProfileID = commonObj.get("UserProfileID").textValue();
-				}
-				if (commonObj != null && commonObj.has("UserName")) {
-					userName = commonObj.get("UserName").textValue();
-				}
-				if (commonObj != null && commonObj.has("UserIsAdmin")) {
-					userIsAdmin = Boolean.parseBoolean(commonObj.get(
-							"UserIsAdmin").textValue());
-				}
-				if (commonObj != null && commonObj.has("UserCollege")) {
-					userCollege = commonObj.get("UserCollege").textValue();
-				}
-				if (commonObj != null && commonObj.has("UserDepartment")) {
-					userDepartment = commonObj.get("UserDepartment")
-							.textValue();
-				}
-				if (commonObj != null && commonObj.has("UserPositionType")) {
-					userPositionType = commonObj.get("UserPositionType")
-							.textValue();
-				}
-				if (commonObj != null && commonObj.has("UserPositionTitle")) {
-					userPositionTitle = commonObj.get("UserPositionTitle")
-							.textValue();
-				}
-			}
-			UserProposalCount count = userProfileDAO.getUserProposalCounts(
-					userProfileID, userCollege, userDepartment,
-					userPositionType, userPositionTitle);
-			return Response
-					.status(Response.Status.OK)
-					.entity(mapper.writerWithDefaultPrettyPrinter()
-							.writeValueAsString(count)).build();
-		} catch (Exception e) {
-			log.error("Could not get all proposal count for a User error e=", e);
-		}
-		return Response
-				.status(Response.Status.BAD_REQUEST)
-				.entity("{\"error\": \"Could Not Get All Proposal Count For A User\", \"status\": \"FAIL\"}")
 				.build();
 	}
 }
