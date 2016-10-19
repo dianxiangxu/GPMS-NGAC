@@ -53,7 +53,6 @@ public class AttributeSpreadSheet {
 				return;
 			String fullAttributeName = row.getCell(1) != null ? row.getCell(1)
 					.toString() : "";
-
 			String category = row.getCell(2) != null ? row.getCell(2)
 					.toString() : "";
 			String dataType = row.getCell(3) != null ? row.getCell(3)

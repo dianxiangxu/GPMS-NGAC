@@ -101,7 +101,6 @@ public class EmailUtil {
 				msg.addRecipient(Message.RecipientType.BCC,
 						new InternetAddress(email));
 			}
-
 			Transport.send(msg);
 		} catch (Exception e) {
 			e.printStackTrace();

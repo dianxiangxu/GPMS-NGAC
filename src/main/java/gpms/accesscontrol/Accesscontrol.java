@@ -43,16 +43,13 @@ public class Accesscontrol {
 		try {
 			String file = "/XACMLAttributeDictionary.xls";
 			InputStream inputStream = this.getClass().getResourceAsStream(file);
-
 			String policyFolderName = "/policy";
 			policyLocation = this.getClass().getResource(policyFolderName)
 					.toURI().getPath();
-
 			this.attrSpreadSheet = new AttributeSpreadSheet(inputStream);
 		} catch (Exception e) {
 			System.err.println("Can not locate policy repository");
 		}
-
 	}
 
 	/***
@@ -65,7 +62,6 @@ public class Accesscontrol {
 					System.setProperty(
 							FileBasedPolicyFinderModule.POLICY_DIR_PROPERTY,
 							policyLocation);
-
 					balana = Balana.getInstance();
 				}
 			}
@@ -87,10 +83,8 @@ public class Accesscontrol {
 		System.out.println(request);
 		System.out
 				.println("===========================================================");
-
 		AbstractRequestCtx requestCtx;
 		ResponseCtx responseCtx;
-
 		try {
 			requestCtx = RequestCtxFactory.getFactory().getRequestCtx(
 					request.replaceAll(">\\s+<", "><"));
@@ -104,7 +98,6 @@ public class Accesscontrol {
 			responseCtx = new ResponseCtx(new Result(
 					AbstractResult.DECISION_INDETERMINATE, status));
 		}
-
 		return responseCtx;
 	}
 
@@ -118,23 +111,19 @@ public class Accesscontrol {
 	public String getXACMLdecision(
 			HashMap<String, Multimap<String, String>> attrMap) {
 		String request = createXACMLRequest(attrMap);
-
 		ResponseCtx response = getResponse(request.replaceAll(">\\s+<", "><"));
-
 		if (response != null) {
 			System.out
 					.println("\n======================== XACML Response ====================");
 			System.out.println(response.encode());
 			System.out
 					.println("===========================================================");
-
 			Set<AbstractResult> set = response.getResults();
 			Iterator<AbstractResult> it = set.iterator();
 			int intDecision = AbstractResult.DECISION_NOT_APPLICABLE;
 			while (it.hasNext()) {
 				ar = it.next();
 				intDecision = ar.getDecision();
-
 				System.out
 						.println("\n======================== Printing Obligations ====================");
 				List<ObligationResult> obligations = ar.getObligations();
@@ -196,16 +185,13 @@ public class Accesscontrol {
 			HashMap<String, Multimap<String, String>> attrMap,
 			StringBuffer contentProfile) {
 		String request = createXACMLRequestWithProfile(attrMap, contentProfile);
-
 		ResponseCtx response = getResponse(request);
-
 		if (response != null) {
 			System.out
 					.println("\n======================== XACML Response ====================");
 			System.out.println(response.encode());
 			System.out
 					.println("===========================================================");
-
 			Set<AbstractResult> set = response.getResults();
 			return set;
 		} else {
@@ -240,18 +226,14 @@ public class Accesscontrol {
 	 */
 	private String createXACMLRequest(
 			HashMap<String, Multimap<String, String>> attributesMap) {
-
 		StringBuffer subjectAttr = new StringBuffer();
 		StringBuffer resourceAttr = new StringBuffer();
 		StringBuffer actionAttr = new StringBuffer();
 		StringBuffer environmentAttr = new StringBuffer();
-
 		for (Entry<String, Multimap<String, String>> entry : attributesMap
 				.entrySet()) {
-
 			Set<String> keySet = entry.getValue().keySet();
 			Iterator<String> keyIterator = keySet.iterator();
-
 			switch (entry.getKey()) {
 			case "Subject":
 				generateAttribute(subjectAttr, entry, keyIterator);
@@ -265,19 +247,15 @@ public class Accesscontrol {
 			case "Environment":
 				generateAttribute(environmentAttr, entry, keyIterator);
 				break;
-
 			default:
 				break;
 			}
 		}
-
 		StringBuffer finalRequest = new StringBuffer();
-
 		finalRequest
 				.append("<Request xmlns=\"urn:oasis:names:tc:xacml:3.0:core:schema:wd-17\" CombinedDecision=\"false\" ReturnPolicyIdList=\"false\">")
 				.append(subjectAttr).append(resourceAttr).append(actionAttr)
 				.append(environmentAttr).append("</Request>");
-
 		return finalRequest.toString();
 	}
 
@@ -335,18 +313,14 @@ public class Accesscontrol {
 	private String createXACMLRequestWithProfile(
 			HashMap<String, Multimap<String, String>> attributesMap,
 			StringBuffer contentProfile) {
-
 		StringBuffer subjectAttr = new StringBuffer();
 		StringBuffer resourceAttr = new StringBuffer();
 		StringBuffer actionAttr = new StringBuffer();
 		StringBuffer environmentAttr = new StringBuffer();
-
 		for (Entry<String, Multimap<String, String>> entry : attributesMap
 				.entrySet()) {
-
 			Set<String> keySet = entry.getValue().keySet();
 			Iterator<String> keyIterator = keySet.iterator();
-
 			switch (entry.getKey()) {
 			case "Subject":
 				generateAttribute(subjectAttr, entry, keyIterator);
@@ -361,19 +335,15 @@ public class Accesscontrol {
 			case "Environment":
 				generateAttribute(environmentAttr, entry, keyIterator);
 				break;
-
 			default:
 				break;
 			}
 		}
-
 		StringBuffer finalRequest = new StringBuffer();
-
 		finalRequest
 				.append("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><Request xmlns=\"urn:oasis:names:tc:xacml:3.0:core:schema:wd-17\" CombinedDecision=\"false\" ReturnPolicyIdList=\"false\">")
 				.append(subjectAttr).append(resourceAttr).append(actionAttr)
 				.append(environmentAttr).append("</Request>");
-
 		return finalRequest.toString();
 	}
 
@@ -408,19 +378,16 @@ public class Accesscontrol {
 							attr.append("<Attributes Category=\""
 									+ attrRecord.getCategory().toString()
 									+ "\">");
-
 							if (contentProfile.length() != 0) {
 								attr.append(contentProfile);
 							}
 						}
-
 						attr.append("<Attribute AttributeId=\""
 								+ attrRecord.getFullAttributeName().toString()
 								+ "\" IncludeInResult=\"false\">"
 								+ "<AttributeValue DataType=\""
 								+ attrRecord.getDataType().toString() + "\">"
 								+ value + "</AttributeValue></Attribute>");
-
 						isFirstResource = false;
 					}
 				}
@@ -428,7 +395,6 @@ public class Accesscontrol {
 		}
 		if (keySet.isEmpty()) {
 			attr.append("<Attributes Category=\"urn:oasis:names:tc:xacml:3.0:attribute-category:resource\">");
-
 			if (contentProfile.length() != 0) {
 				attr.append(contentProfile);
 			}
@@ -447,16 +413,13 @@ public class Accesscontrol {
 	public Set<AbstractResult> getXACMLdecisionForMDP(
 			HashMap<String, Multimap<String, String>> attrMap) {
 		String request = createXACMLRequestForMDP(attrMap);
-
 		ResponseCtx response = getResponse(request);
-
 		if (response != null) {
 			System.out
 					.println("\n======================== XACML Response ====================");
 			System.out.println(response.encode());
 			System.out
 					.println("===========================================================");
-
 			Set<AbstractResult> set = response.getResults();
 			return set;
 		} else {
@@ -475,17 +438,13 @@ public class Accesscontrol {
 	 */
 	private String createXACMLRequestForMDP(
 			HashMap<String, Multimap<String, String>> attrMap) {
-
 		StringBuffer subjectAttr = new StringBuffer();
 		StringBuffer resourceAttr = new StringBuffer();
 		StringBuffer actionAttr = new StringBuffer();
 		StringBuffer environmentAttr = new StringBuffer();
-
 		for (Entry<String, Multimap<String, String>> entry : attrMap.entrySet()) {
-
 			Set<String> keySet = entry.getValue().keySet();
 			Iterator<String> keyIterator = keySet.iterator();
-
 			switch (entry.getKey()) {
 			case "Subject":
 				generateAttribute(subjectAttr, entry, keyIterator);
@@ -499,19 +458,15 @@ public class Accesscontrol {
 			case "Environment":
 				generateAttribute(environmentAttr, entry, keyIterator);
 				break;
-
 			default:
 				break;
 			}
 		}
-
 		StringBuffer finalRequest = new StringBuffer();
-
 		finalRequest
 				.append("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><Request xmlns=\"urn:oasis:names:tc:xacml:3.0:core:schema:wd-17\" CombinedDecision=\"false\" ReturnPolicyIdList=\"false\">")
 				.append(subjectAttr).append(resourceAttr).append(actionAttr)
 				.append(environmentAttr).append("</Request>");
-
 		return finalRequest.toString();
 	}
 
@@ -530,16 +485,13 @@ public class Accesscontrol {
 			StringBuffer contentProfile) {
 		String request = createXACMLRequestForMDPWithProfile(attrMap,
 				contentProfile);
-
 		ResponseCtx response = getResponse(request);
-
 		if (response != null) {
 			System.out
 					.println("\n======================== XACML Response ====================");
 			System.out.println(response.encode());
 			System.out
 					.println("===========================================================");
-
 			Set<AbstractResult> set = response.getResults();
 			return set;
 		} else {
@@ -560,17 +512,13 @@ public class Accesscontrol {
 	private String createXACMLRequestForMDPWithProfile(
 			HashMap<String, Multimap<String, String>> attrMap,
 			StringBuffer contentProfile) {
-
 		StringBuffer subjectAttr = new StringBuffer();
 		StringBuffer resourceAttr = new StringBuffer();
 		StringBuffer actionAttr = new StringBuffer();
 		StringBuffer environmentAttr = new StringBuffer();
-
 		for (Entry<String, Multimap<String, String>> entry : attrMap.entrySet()) {
-
 			Set<String> keySet = entry.getValue().keySet();
 			Iterator<String> keyIterator = keySet.iterator();
-
 			switch (entry.getKey()) {
 			case "Subject":
 				generateAttribute(subjectAttr, entry, keyIterator);
@@ -585,19 +533,15 @@ public class Accesscontrol {
 			case "Environment":
 				generateAttribute(environmentAttr, entry, keyIterator);
 				break;
-
 			default:
 				break;
 			}
 		}
-
 		StringBuffer finalRequest = new StringBuffer();
-
 		finalRequest
 				.append("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><Request xmlns=\"urn:oasis:names:tc:xacml:3.0:core:schema:wd-17\" CombinedDecision=\"false\" ReturnPolicyIdList=\"false\">")
 				.append(subjectAttr).append(resourceAttr).append(actionAttr)
 				.append(environmentAttr).append("</Request>");
-
 		return finalRequest.toString();
 	}
 
@@ -625,14 +569,12 @@ public class Accesscontrol {
 						System.out.println(key + " :::::: " + value);
 						actionAttr.append("<Attributes Category=\""
 								+ attrRecord.getCategory().toString() + "\">");
-
 						actionAttr.append("<Attribute AttributeId=\""
 								+ attrRecord.getFullAttributeName().toString()
 								+ "\" IncludeInResult=\"true\">"
 								+ "<AttributeValue DataType=\""
 								+ attrRecord.getDataType().toString() + "\">"
 								+ value + "</AttributeValue></Attribute>");
-
 						actionAttr.append("</Attributes>");
 					}
 				}
