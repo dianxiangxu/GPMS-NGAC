@@ -29,7 +29,7 @@ public class ChairAttatchmentFail {
 		System.setProperty("webdriver.chrome.driver",
 				"F:/chromedriver_win32/chromedriver.exe");
 		driver = new ChromeDriver();
-		baseUrl = "http://seal.boisestate.edu:8080/";
+		baseUrl = "http://localhost:8181/";
 		driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
 	}
 
