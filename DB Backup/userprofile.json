@@ -1375,14 +1375,14 @@
             "position type" : "Non-tenure-track research faculty", 
             "department" : "Computer Science", 
             "college" : "Engineering", 
-            "as default" : false
+            "as default" : true
         }, 
         {
             "position title" : "Professor", 
             "position type" : "Tenured/tenure-track faculty", 
             "department" : "Computer Engineering", 
             "college" : "Engineering", 
-            "as default" : true
+            "as default" : false
         }
     ], 
     "office number" : [
@@ -1415,7 +1415,7 @@
     ], 
     "user id" : DBRef("useraccount", ObjectId("574f638565dbb34d17834b32")), 
     "deleted" : false, 
-    "version" : NumberLong(5), 
+    "version" : NumberLong(2), 
     "audit log" : [
         {
             "author info" : DBRef("userprofile", ObjectId("574f638565dbb34d17834b33")), 
@@ -1426,16 +1426,6 @@
             "author info" : DBRef("userprofile", ObjectId("5745ed6fbcbb29192ce0d3c9")), 
             "action" : "Updated user account and profile of liliana", 
             "activity on" : ISODate("2016-06-01T22:40:12.410+0000")
-        }, 
-        {
-            "author info" : DBRef("userprofile", ObjectId("574f638565dbb34d17834b33")), 
-            "action" : "Updated user account and profile of liliana", 
-            "activity on" : ISODate("2016-06-01T23:28:18.643+0000")
-        }, 
-        {
-            "author info" : DBRef("userprofile", ObjectId("5745ed6fbcbb29192ce0d3c9")), 
-            "action" : "Updated user account and profile of liliana", 
-            "activity on" : ISODate("2016-09-23T23:39:42.511+0000")
         }
     ]
 }

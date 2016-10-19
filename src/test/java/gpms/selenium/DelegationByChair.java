@@ -25,7 +25,7 @@ public class DelegationByChair {
 	@Before
 	public void setUp() throws Exception {
 		System.setProperty("webdriver.chrome.driver",
-				"F:/chromedriver_win32/chromedriver.exe");
+				"D:/GPWFMS/selenium_driver/chromedriver.exe");
 		driver = new ChromeDriver();
 		baseUrl = "http://localhost:8181/";
 		driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
@@ -236,7 +236,7 @@ public class DelegationByChair {
 				.click();
 		Thread.sleep(200);
 		driver.findElement(By.id("ui-id-21")).click();
-		Thread.sleep(1000);
+		Thread.sleep(500);
 		driver.findElement(By.id("pi_signature")).clear();
 		Thread.sleep(200);
 		driver.findElement(By.id("pi_signature")).sendKeys("Milson Munakami");
@@ -251,9 +251,9 @@ public class DelegationByChair {
 				.sendKeys("Test");
 		Thread.sleep(200);
 		driver.findElement(By.id("ui-id-25")).click();
-		Thread.sleep(1000);
+		Thread.sleep(500);
 		driver.findElement(By.id("btnSaveProposal")).click();
-		Thread.sleep(1000);
+		Thread.sleep(500);
 		driver.findElement(By.id("BoxConfirmBtnOk")).click();
 		Thread.sleep(5000);
 		assertTrue(driver.findElement(By.cssSelector("BODY")).getText()
@@ -266,7 +266,7 @@ public class DelegationByChair {
 				.executeScript("var s=document.getElementById('edit0');s.click();");
 		Thread.sleep(5000);
 		driver.findElement(By.id("btnSubmitProposal")).click();
-		Thread.sleep(1000);
+		Thread.sleep(500);
 		driver.findElement(By.id("BoxConfirmBtnOk")).click();
 		Thread.sleep(2000);
 		assertTrue(driver.findElement(By.cssSelector("BODY")).getText()
@@ -294,7 +294,7 @@ public class DelegationByChair {
 
 		((JavascriptExecutor) driver)
 				.executeScript("var s=document.getElementById('edit0');s.click();");
-		Thread.sleep(1000);
+		Thread.sleep(500);
 
 		// assertTrue(isElementPresent(By.id("btnApproveProposal")));
 
@@ -325,7 +325,7 @@ public class DelegationByChair {
 		Thread.sleep(200);
 
 		driver.findElement(By.id("btnAddNew")).click();
-		Thread.sleep(1000);
+		Thread.sleep(500);
 		driver.findElement(By.id("chkAction_0")).click();
 		Thread.sleep(400);
 		driver.findElement(By.id("txtDelegationFrom")).click();
@@ -372,7 +372,7 @@ public class DelegationByChair {
 
 		((JavascriptExecutor) driver)
 				.executeScript("var s=document.getElementById('edit0');s.click();");
-		Thread.sleep(1000);
+		Thread.sleep(500);
 		driver.findElement(By.id("ui-id-21")).click();
 		Thread.sleep(3000);
 		driver.findElement(By.name("57505b9e65dbb34d173fc701Department_Chair"))

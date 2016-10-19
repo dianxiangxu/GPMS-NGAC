@@ -658,6 +658,34 @@ $(function() {
 				}
 
 				if (validateErrorMessage == "") {
+					var _saveOptions = '';
+					$("#dataTable")
+							.find("tr input, select")
+							.each(
+									function(i) {
+										var optionsText = $(this).val();
+										if ($(this).hasClass("sfListmenu")) {
+											if (!optionsText
+													&& $(this).prop("name") != "ddlPositionTitle") {
+												validateErrorMessage = 'Please select all position details for this user.'
+														+ "<br/>";
+												myAccount.SetFirstTabActive();
+												$(this).focus();
+											} else {
+												_saveOptions += optionsText
+														+ "!#!";
+											}
+										} else if ($(this).hasClass(
+												"class-isdefault")) {
+											var _IsChecked = $(this).prop(
+													'checked');
+											_saveOptions += _IsChecked + "#!#";
+										}
+									});
+
+					_saveOptions = _saveOptions.substring(0,
+							_saveOptions.length - 3);
+
 					var userInfo = {
 						UserID : _userId,
 						FirstName : $.trim($('#txtFirstName').val()),
@@ -677,7 +705,8 @@ $(function() {
 						OtherNumber : $('#txtOtherNumber').mask(),
 						WorkEmail : $('#txtWorkEmail').val(),
 						PersonalEmail : $('#txtPersonalEmail').val(),
-						UserName : $.trim($('#txtUserName').val())
+						UserName : $.trim($('#txtUserName').val()),
+						SaveOptions : _saveOptions
 					};
 
 					var password = $.trim($('#txtPassword').val());

@@ -27,7 +27,7 @@ public class SuccessfullProposalSubmition_NoIRB {
 	@Before
 	public void setUp() throws Exception {
 		System.setProperty("webdriver.chrome.driver",
-				"F:/chromedriver_win32/chromedriver.exe");
+				"D:/GPWFMS/selenium_driver/chromedriver.exe");
 		driver = new ChromeDriver();
 		baseUrl = "http://localhost:8181/";
 		driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
@@ -238,7 +238,7 @@ public class SuccessfullProposalSubmition_NoIRB {
 				.click();
 		Thread.sleep(200);
 		driver.findElement(By.id("ui-id-21")).click();
-		Thread.sleep(1000);
+		Thread.sleep(500);
 		driver.findElement(By.id("pi_signature")).clear();
 		Thread.sleep(200);
 		driver.findElement(By.id("pi_signature")).sendKeys("Nicholas chapa");
@@ -253,9 +253,9 @@ public class SuccessfullProposalSubmition_NoIRB {
 				.sendKeys("Test");
 		Thread.sleep(200);
 		driver.findElement(By.id("ui-id-25")).click();
-		Thread.sleep(1000);
+		Thread.sleep(500);
 		driver.findElement(By.id("btnSaveProposal")).click();
-		Thread.sleep(1000);
+		Thread.sleep(500);
 		driver.findElement(By.id("BoxConfirmBtnOk")).click();
 		Thread.sleep(200);
 		assertTrue(driver.findElement(By.cssSelector("BODY")).getText()
@@ -266,9 +266,9 @@ public class SuccessfullProposalSubmition_NoIRB {
 
 		((JavascriptExecutor) driver)
 				.executeScript("var s=document.getElementById('edit0');s.click();");
-		Thread.sleep(1000);
+		Thread.sleep(500);
 		driver.findElement(By.id("btnSubmitProposal")).click();
-		Thread.sleep(1000);
+		Thread.sleep(500);
 		driver.findElement(By.id("BoxConfirmBtnOk")).click();
 		Thread.sleep(200);
 		assertTrue(driver.findElement(By.cssSelector("BODY")).getText()
@@ -297,9 +297,9 @@ public class SuccessfullProposalSubmition_NoIRB {
 
 		((JavascriptExecutor) driver)
 				.executeScript("var s=document.getElementById('edit0');s.click();");
-		Thread.sleep(1000);
+		Thread.sleep(500);
 		driver.findElement(By.id("ui-id-21")).click();
-		Thread.sleep(1000);
+		Thread.sleep(500);
 		driver.findElement(By.name("5745f29ebcbb29192ce0d42fDepartment_Chair"))
 				.clear();
 		Thread.sleep(200);
@@ -318,7 +318,7 @@ public class SuccessfullProposalSubmition_NoIRB {
 				.sendKeys("Test");
 		Thread.sleep(200);
 		driver.findElement(By.id("btnApproveProposal")).click();
-		Thread.sleep(1000);
+		Thread.sleep(500);
 		driver.findElement(By.id("BoxConfirmBtnOk")).click();
 		Thread.sleep(200);
 
@@ -326,7 +326,7 @@ public class SuccessfullProposalSubmition_NoIRB {
 				.matches("^[\\s\\S]*$"));
 		Thread.sleep(200);
 		driver.findElement(By.id("BoxAlertBtnOk")).click();
-		Thread.sleep(1000);
+		Thread.sleep(500);
 		driver.findElement(By.cssSelector("span.myProfile.icon-arrow-s"))
 				.click();
 		Thread.sleep(200);
@@ -348,9 +348,9 @@ public class SuccessfullProposalSubmition_NoIRB {
 
 		((JavascriptExecutor) driver)
 				.executeScript("var s=document.getElementById('edit0');s.click();");
-		Thread.sleep(1000);
+		Thread.sleep(500);
 		driver.findElement(By.id("ui-id-21")).click();
-		Thread.sleep(1000);
+		Thread.sleep(500);
 		driver.findElement(By.name("574620c6bcbb29150487642aBusiness_Manager"))
 				.clear();
 		Thread.sleep(200);
@@ -371,7 +371,7 @@ public class SuccessfullProposalSubmition_NoIRB {
 
 		Thread.sleep(200);
 		driver.findElement(By.id("btnApproveProposal")).click();
-		Thread.sleep(1000);
+		Thread.sleep(500);
 		driver.findElement(By.id("BoxConfirmBtnOk")).click();
 		Thread.sleep(200);
 
@@ -401,9 +401,9 @@ public class SuccessfullProposalSubmition_NoIRB {
 
 		((JavascriptExecutor) driver)
 				.executeScript("var s=document.getElementById('edit0');s.click();");
-		Thread.sleep(1000);
+		Thread.sleep(500);
 		driver.findElement(By.id("ui-id-21")).click();
-		Thread.sleep(1000);
+		Thread.sleep(500);
 		driver.findElement(By.name("57460657bcbb29192ce0d483Dean")).clear();
 		Thread.sleep(200);
 		driver.findElement(By.name("57460657bcbb29192ce0d483Dean")).sendKeys(
@@ -419,7 +419,7 @@ public class SuccessfullProposalSubmition_NoIRB {
 				.sendKeys("Test");
 		Thread.sleep(200);
 		driver.findElement(By.id("btnApproveProposal")).click();
-		Thread.sleep(1000);
+		Thread.sleep(500);
 		driver.findElement(By.id("BoxConfirmBtnOk")).click();
 		Thread.sleep(200);
 
@@ -449,9 +449,9 @@ public class SuccessfullProposalSubmition_NoIRB {
 
 		((JavascriptExecutor) driver)
 				.executeScript("var s=document.getElementById('edit0');s.click();");
-		Thread.sleep(1000);
+		Thread.sleep(500);
 		driver.findElement(By.id("ui-id-21")).click();
-		Thread.sleep(1000);
+		Thread.sleep(500);
 		driver.findElement(
 				By.name("5745fcfdbcbb29192ce0d451University_Research_Administrator"))
 				.clear();
@@ -473,7 +473,7 @@ public class SuccessfullProposalSubmition_NoIRB {
 				.sendKeys("Test");
 		Thread.sleep(200);
 		driver.findElement(By.id("btnApproveProposal")).click();
-		Thread.sleep(1000);
+		Thread.sleep(500);
 		driver.findElement(By.id("txtAgencyList")).clear();
 		Thread.sleep(200);
 
@@ -619,7 +619,7 @@ public class SuccessfullProposalSubmition_NoIRB {
 		Thread.sleep(200);
 
 		driver.findElement(By.id("btnApproveProposal")).click();
-		Thread.sleep(1000);
+		Thread.sleep(500);
 		driver.findElement(By.id("BoxConfirmBtnOk")).click();
 		Thread.sleep(200);
 
@@ -649,9 +649,9 @@ public class SuccessfullProposalSubmition_NoIRB {
 
 		((JavascriptExecutor) driver)
 				.executeScript("var s=document.getElementById('edit0');s.click();");
-		Thread.sleep(1000);
+		Thread.sleep(500);
 		driver.findElement(By.id("ui-id-21")).click();
-		Thread.sleep(1000);
+		Thread.sleep(500);
 		driver.findElement(
 				By.name("5745fd43bcbb29192ce0d459University_Research_Director"))
 				.clear();
@@ -675,7 +675,7 @@ public class SuccessfullProposalSubmition_NoIRB {
 		Thread.sleep(200);
 
 		driver.findElement(By.id("btnApproveProposal")).click();
-		Thread.sleep(1000);
+		Thread.sleep(500);
 		driver.findElement(By.id("BoxConfirmBtnOk")).click();
 		Thread.sleep(200);
 
@@ -705,9 +705,9 @@ public class SuccessfullProposalSubmition_NoIRB {
 
 		((JavascriptExecutor) driver)
 				.executeScript("var s=document.getElementById('edit0');s.click();");
-		Thread.sleep(1000);
+		Thread.sleep(500);
 		driver.findElement(By.id("btnSubmitProposal")).click();
-		Thread.sleep(1000);
+		Thread.sleep(500);
 		driver.findElement(By.id("BoxConfirmBtnOk")).click();
 		Thread.sleep(200);
 		assertTrue(driver.findElement(By.cssSelector("BODY")).getText()
@@ -717,7 +717,7 @@ public class SuccessfullProposalSubmition_NoIRB {
 		Thread.sleep(200);
 		driver.findElement(By.cssSelector("span.myProfile.icon-arrow-s"))
 				.click();
-		Thread.sleep(1000);
+		Thread.sleep(500);
 		driver.findElement(By.linkText("Log Out")).click();
 		Thread.sleep(1500);
 
@@ -736,10 +736,10 @@ public class SuccessfullProposalSubmition_NoIRB {
 
 		((JavascriptExecutor) driver)
 				.executeScript("var s=document.getElementById('edit0');s.click();");
-		Thread.sleep(1000);
+		Thread.sleep(500);
 
 		driver.findElement(By.id("btnArchiveProposal")).click();
-		Thread.sleep(1000);
+		Thread.sleep(500);
 		driver.findElement(By.id("BoxConfirmBtnOk")).click();
 		Thread.sleep(200);
 

@@ -294,7 +294,7 @@ public class Accesscontrol {
 	private void generateAttribute(StringBuffer attr,
 			Entry<String, Multimap<String, String>> entry,
 			Iterator<String> keyIterator) {
-		boolean isFirstSubject = true;
+		boolean isFirstAttr = true;
 		while (keyIterator.hasNext()) {
 			String key = (String) keyIterator.next();
 			Collection<String> values = entry.getValue().get(key);
@@ -304,7 +304,7 @@ public class Accesscontrol {
 				for (String value : values) {
 					if (attrRecord.getValues().contains(value)) {
 						System.out.println(key + " :::::: " + value);
-						if (isFirstSubject) {
+						if (isFirstAttr) {
 							attr.append("<Attributes Category=\""
 									+ attrRecord.getCategory().toString()
 									+ "\">");
@@ -315,7 +315,7 @@ public class Accesscontrol {
 								+ "<AttributeValue DataType=\""
 								+ attrRecord.getDataType().toString() + "\">"
 								+ value + "</AttributeValue></Attribute>");
-						isFirstSubject = false;
+						isFirstAttr = false;
 					}
 				}
 			}
@@ -469,20 +469,19 @@ public class Accesscontrol {
 	 * Generates Request for Multiple Decision Points (MDP) without XACML
 	 * profile
 	 * 
-	 * @param attributesMap
+	 * @param attrMap
 	 *            Attribute Map
 	 * @return XACML Request
 	 */
 	private String createXACMLRequestForMDP(
-			HashMap<String, Multimap<String, String>> attributesMap) {
+			HashMap<String, Multimap<String, String>> attrMap) {
 
 		StringBuffer subjectAttr = new StringBuffer();
 		StringBuffer resourceAttr = new StringBuffer();
 		StringBuffer actionAttr = new StringBuffer();
 		StringBuffer environmentAttr = new StringBuffer();
 
-		for (Entry<String, Multimap<String, String>> entry : attributesMap
-				.entrySet()) {
+		for (Entry<String, Multimap<String, String>> entry : attrMap.entrySet()) {
 
 			Set<String> keySet = entry.getValue().keySet();
 			Iterator<String> keyIterator = keySet.iterator();
@@ -495,7 +494,7 @@ public class Accesscontrol {
 				generateAttribute(resourceAttr, entry, keyIterator);
 				break;
 			case "Action":
-				generateAttribute(actionAttr, entry, keyIterator);
+				generateSingleActionAttribute(actionAttr, entry, keyIterator);
 				break;
 			case "Environment":
 				generateAttribute(environmentAttr, entry, keyIterator);
@@ -581,7 +580,7 @@ public class Accesscontrol {
 						entry, keySet, keyIterator);
 				break;
 			case "Action":
-				generateAttribute(actionAttr, entry, keyIterator);
+				generateSingleActionAttribute(actionAttr, entry, keyIterator);
 				break;
 			case "Environment":
 				generateAttribute(environmentAttr, entry, keyIterator);
@@ -612,7 +611,6 @@ public class Accesscontrol {
 	 * @param keyIterator
 	 *            Iterator that goes through the map
 	 */
-	@SuppressWarnings("unused")
 	private void generateSingleActionAttribute(StringBuffer actionAttr,
 			Entry<String, Multimap<String, String>> entry,
 			Iterator<String> keyIterator) {

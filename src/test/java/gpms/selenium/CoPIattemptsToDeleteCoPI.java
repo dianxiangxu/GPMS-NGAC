@@ -27,7 +27,7 @@ public class CoPIattemptsToDeleteCoPI {
 	@Before
 	public void setUp() throws Exception {
 		System.setProperty("webdriver.chrome.driver",
-				"F:/chromedriver_win32/chromedriver.exe");
+				"D:/GPWFMS/selenium_driver/chromedriver.exe");
 		driver = new ChromeDriver();
 		baseUrl = "http://localhost:8181/";
 		driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
@@ -41,31 +41,31 @@ public class CoPIattemptsToDeleteCoPI {
 		driver.findElement(By.id("user_email")).clear();
 		driver.findElement(By.id("user_email")).sendKeys(
 				"nicholas1234@gmail.com");
-		Thread.sleep(1000);
+		Thread.sleep(500);
 		driver.findElement(By.name("commit")).click();
-		Thread.sleep(1000);
+		Thread.sleep(500);
 		driver.findElement(By.cssSelector("li.sfLevel1 > a > span")).click();
-		Thread.sleep(1000);
+		Thread.sleep(500);
 
 		((JavascriptExecutor) driver)
 				.executeScript("var s=document.getElementById('edit0');s.click();");
 
-		Thread.sleep(1000);
+		Thread.sleep(500);
 		driver.findElement(By.id("ui-id-1")).click();
-		Thread.sleep(1000);
+		Thread.sleep(500);
 		driver.findElement(By.name("AddCoPI")).click();
-		Thread.sleep(1000);
+		Thread.sleep(500);
 		driver.findElement(By.name("AddCoPI")).click();
-		Thread.sleep(1000);
+		Thread.sleep(500);
 		driver.findElement(By.id("btnSaveProposal")).click();
-		Thread.sleep(1000);
+		Thread.sleep(500);
 		driver.findElement(By.id("BoxConfirmBtnOk")).click();
-		Thread.sleep(1000);
+		Thread.sleep(500);
 		driver.findElement(By.id("BoxAlertBtnOk")).click();
-		Thread.sleep(1000);
+		Thread.sleep(500);
 		driver.findElement(By.cssSelector("span.myProfile.icon-arrow-s"))
 				.click();
-		Thread.sleep(1000);
+		Thread.sleep(500);
 		driver.findElement(By.linkText("Log Out")).click();
 		Thread.sleep(2000);
 
@@ -75,33 +75,33 @@ public class CoPIattemptsToDeleteCoPI {
 		driver.findElement(By.id("user_password")).sendKeys("gpmspassword");
 		driver.findElement(By.id("user_email")).clear();
 		driver.findElement(By.id("user_email")).sendKeys("selena");
-		Thread.sleep(1000);
+		Thread.sleep(500);
 		driver.findElement(By.name("commit")).click();
-		Thread.sleep(1000);
+		Thread.sleep(500);
 		driver.findElement(By.linkText("My Proposals")).click();
-		Thread.sleep(1000);
+		Thread.sleep(500);
 		((JavascriptExecutor) driver)
 				.executeScript("var s=document.getElementById('edit0');s.click();");
-		Thread.sleep(1000);
+		Thread.sleep(500);
 		driver.findElement(By.id("ui-id-1")).click();
-		Thread.sleep(1000);
+		Thread.sleep(500);
 		((JavascriptExecutor) driver)
 		.executeScript("var s=document.getElementById('DeleteOption');s.click();");
-		Thread.sleep(1000);
+		Thread.sleep(500);
 		driver.findElement(By.id("BoxConfirmBtnOk")).click();
-		Thread.sleep(1000);
+		Thread.sleep(500);
 		driver.findElement(By.cssSelector("span.myProfile.icon-arrow-s"))
 				.click();
-		Thread.sleep(1000);
+		Thread.sleep(500);
 		driver.findElement(By.id("btnSaveProposal")).click();
-		Thread.sleep(1000);
+		Thread.sleep(500);
 		driver.findElement(By.id("BoxConfirmBtnOk")).click();
-		Thread.sleep(1000);
+		Thread.sleep(500);
 		driver.findElement(By.id("BoxAlertBtnOk")).click();
-		Thread.sleep(1000);
+		Thread.sleep(500);
 		driver.findElement(By.cssSelector("span.myProfile.icon-arrow-s"))
 				.click();
-		Thread.sleep(1000);
+		Thread.sleep(500);
 		driver.findElement(By.linkText("Log Out")).click();
 		Thread.sleep(2000);
 	}
