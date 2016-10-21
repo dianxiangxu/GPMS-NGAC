@@ -25,7 +25,7 @@ public class ProposalAddFailure {
 	@Before
 	public void setUp() throws Exception {
 		System.setProperty("webdriver.chrome.driver",
-				"D:/GPWFMS/selenium_driver/chromedriver.exe");
+				"F:/chromedriver_win32/chromedriver.exe");
 		driver = new ChromeDriver();
 		baseUrl = "http://localhost:8181/";
 		driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
@@ -50,7 +50,7 @@ public class ProposalAddFailure {
 		assertTrue(driver.findElement(By.cssSelector("BODY")).getText()
 				.matches("^[\\s\\S]*$"));
 		Thread.sleep(500);
-		assertTrue(driver.findElement(By.id("alert-BoxContenedor"))
+		assertTrue(driver.findElement(By.cssSelector("div.BoxError"))
 				.isDisplayed());
 		Thread.sleep(500);
 		driver.findElement(By.id("BoxAlertBtnOk")).click();

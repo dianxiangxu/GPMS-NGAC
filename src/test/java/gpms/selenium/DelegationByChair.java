@@ -25,7 +25,7 @@ public class DelegationByChair {
 	@Before
 	public void setUp() throws Exception {
 		System.setProperty("webdriver.chrome.driver",
-				"D:/GPWFMS/selenium_driver/chromedriver.exe");
+				"F:/chromedriver_win32/chromedriver.exe");
 		driver = new ChromeDriver();
 		baseUrl = "http://localhost:8181/";
 		driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
@@ -47,7 +47,7 @@ public class DelegationByChair {
 		driver.findElement(By.id("btnAddNew")).click();
 		Thread.sleep(200);
 		driver.findElement(By.cssSelector("i.sidebarExpand")).click();
-		Thread.sleep(5000);
+		Thread.sleep(200);
 		driver.findElement(By.id("lblSection2")).click();
 		Thread.sleep(200);
 		driver.findElement(By.id("txtProjectTitle")).click();
@@ -255,30 +255,30 @@ public class DelegationByChair {
 		driver.findElement(By.id("btnSaveProposal")).click();
 		Thread.sleep(500);
 		driver.findElement(By.id("BoxConfirmBtnOk")).click();
-		Thread.sleep(5000);
+		Thread.sleep(500);
 		assertTrue(driver.findElement(By.cssSelector("BODY")).getText()
 				.matches("^[\\s\\S]*$"));
 		Thread.sleep(200);
 		driver.findElement(By.id("BoxAlertBtnOk")).click();
-		Thread.sleep(7000);
+		Thread.sleep(500);
 
 		((JavascriptExecutor) driver)
 				.executeScript("var s=document.getElementById('edit0');s.click();");
-		Thread.sleep(5000);
+		Thread.sleep(500);
 		driver.findElement(By.id("btnSubmitProposal")).click();
 		Thread.sleep(500);
 		driver.findElement(By.id("BoxConfirmBtnOk")).click();
-		Thread.sleep(2000);
+		Thread.sleep(200);
 		assertTrue(driver.findElement(By.cssSelector("BODY")).getText()
 				.matches("^[\\s\\S]*$"));
 		Thread.sleep(200);
 		driver.findElement(By.id("BoxAlertBtnOk")).click();
-		Thread.sleep(7000);
+		Thread.sleep(500);
 		driver.findElement(By.cssSelector("span.myProfile.icon-arrow-s"))
 				.click();
 		Thread.sleep(200);
 		driver.findElement(By.linkText("Log Out")).click();
-		Thread.sleep(10000);
+		Thread.sleep(1000);
 
 		// Associate Chair Approve Failure
 		driver.get(baseUrl + "GPMS/");
@@ -290,7 +290,7 @@ public class DelegationByChair {
 		driver.findElement(By.name("commit")).click();
 		Thread.sleep(200);
 		driver.findElement(By.linkText("My Proposals")).click();
-		Thread.sleep(5000);
+		Thread.sleep(200);
 
 		((JavascriptExecutor) driver)
 				.executeScript("var s=document.getElementById('edit0');s.click();");
@@ -303,13 +303,13 @@ public class DelegationByChair {
 		Thread.sleep(2000);
 
 		driver.findElement(By.id("ui-id-21")).click();
-		Thread.sleep(10000);
+		Thread.sleep(500);
 
 		driver.findElement(By.cssSelector("span.myProfile.icon-arrow-s"))
 				.click();
 		Thread.sleep(200);
 		driver.findElement(By.linkText("Log Out")).click();
-		Thread.sleep(6000);
+		Thread.sleep(500);
 
 		// Chair Delegate Associate Chair
 		driver.get(baseUrl + "GPMS/");
@@ -329,34 +329,34 @@ public class DelegationByChair {
 		driver.findElement(By.id("chkAction_0")).click();
 		Thread.sleep(400);
 		driver.findElement(By.id("txtDelegationFrom")).click();
-		Thread.sleep(2000);
+		Thread.sleep(500);
 		driver.findElement(By.linkText("1")).click();
 		Thread.sleep(400);
 		driver.findElement(By.id("txtDelegationTo")).click();
-		Thread.sleep(2000);
+		Thread.sleep(500);
 		driver.findElement(By.linkText("30")).click();
 		Thread.sleep(400);
 		driver.findElement(By.id("txtDelegationReason")).clear();
-		Thread.sleep(2000);
+		Thread.sleep(1000);
 		driver.findElement(By.id("txtDelegationReason"))
 				.sendKeys("Sick Leave!");
-		Thread.sleep(5000);
+		Thread.sleep(2000);
 
 		driver.findElement(By.id("btnSaveDelegation")).click();
-		Thread.sleep(2000);
+		Thread.sleep(1000);
 		driver.findElement(By.id("BoxConfirmBtnOk")).click();
-		Thread.sleep(5000);
+		Thread.sleep(500);
 
 		assertTrue(driver.findElement(By.cssSelector("BODY")).getText()
 				.matches("^[\\s\\S]*$"));
 		Thread.sleep(200);
 		driver.findElement(By.id("BoxAlertBtnOk")).click();
-		Thread.sleep(5000);
+		Thread.sleep(500);
 		driver.findElement(By.cssSelector("span.myProfile.icon-arrow-s"))
 				.click();
 		Thread.sleep(200);
 		driver.findElement(By.linkText("Log Out")).click();
-		Thread.sleep(5000);
+		Thread.sleep(2000);
 
 		// Associate Chair Approve Success
 		driver.get(baseUrl + "GPMS/");
@@ -374,7 +374,7 @@ public class DelegationByChair {
 				.executeScript("var s=document.getElementById('edit0');s.click();");
 		Thread.sleep(500);
 		driver.findElement(By.id("ui-id-21")).click();
-		Thread.sleep(3000);
+		Thread.sleep(500);
 		driver.findElement(By.name("57505b9e65dbb34d173fc701Department_Chair"))
 				.clear();
 		Thread.sleep(400);
@@ -391,22 +391,22 @@ public class DelegationByChair {
 		driver.findElement(
 				By.name("proposalNotes57505b9e65dbb34d173fc701Department_Chair"))
 				.sendKeys("Test");
-		Thread.sleep(7000);
+		Thread.sleep(500);
 		driver.findElement(By.id("btnApproveProposal")).click();
-		Thread.sleep(2000);
+		Thread.sleep(1000);
 		driver.findElement(By.id("BoxConfirmBtnOk")).click();
-		Thread.sleep(10000);
+		Thread.sleep(500);
 
 		assertTrue(driver.findElement(By.cssSelector("BODY")).getText()
 				.matches("^[\\s\\S]*$"));
 		Thread.sleep(200);
 		driver.findElement(By.id("BoxAlertBtnOk")).click();
-		Thread.sleep(7000);
+		Thread.sleep(200);
 		driver.findElement(By.cssSelector("span.myProfile.icon-arrow-s"))
 				.click();
 		Thread.sleep(200);
 		driver.findElement(By.linkText("Log Out")).click();
-		Thread.sleep(10000);
+		Thread.sleep(1000);
 
 		// Revocation by Chair
 		driver.get(baseUrl + "GPMS/");
@@ -423,18 +423,18 @@ public class DelegationByChair {
 
 		((JavascriptExecutor) driver)
 				.executeScript("var s=document.getElementById('edit0');s.click();");
-		Thread.sleep(5000);
+		Thread.sleep(500);
 
 		driver.findElement(By.id("btnRevokeDelegation")).click();
 		Thread.sleep(2000);
 		driver.findElement(By.id("BoxConfirmBtnOk")).click();
-		Thread.sleep(10000);
+		Thread.sleep(1000);
 
 		assertTrue(driver.findElement(By.cssSelector("BODY")).getText()
 				.matches("^[\\s\\S]*$"));
 		Thread.sleep(200);
 		driver.findElement(By.id("BoxAlertBtnOk")).click();
-		Thread.sleep(10000);
+		Thread.sleep(200);
 		driver.findElement(By.cssSelector("span.myProfile.icon-arrow-s"))
 				.click();
 		Thread.sleep(200);

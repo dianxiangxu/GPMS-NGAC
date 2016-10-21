@@ -6,7 +6,7 @@ package gpms.selenium;
  * The Dean will log in and attempt to delete an attachment.
  */
 
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 import java.util.concurrent.TimeUnit;
 
@@ -28,7 +28,7 @@ public class DeanDeletesAttatchmentFail {
 	@Before
 	public void setUp() throws Exception {
 		System.setProperty("webdriver.chrome.driver",
-				"D:/GPWFMS/selenium_driver/chromedriver.exe");
+				"F:/chromedriver_win32/chromedriver.exe");
 		driver = new ChromeDriver();
 		baseUrl = "http://localhost:8181/";
 		driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
@@ -52,16 +52,9 @@ public class DeanDeletesAttatchmentFail {
 		Thread.sleep(500);
 		driver.findElement(By.id("lblSection13")).click();
 		Thread.sleep(500);
-		driver.findElement(By.xpath("//div[@id='ui-id-26']/div[2]/div/div[8]"))
-				.click();
-		Thread.sleep(500);
-		driver.findElement(By.xpath("(//button[@type='button'])[19]")).click();
-		Thread.sleep(500);
-		driver.findElement(By.id("btnSaveProposal")).click();
-		Thread.sleep(500);
-		driver.findElement(By.id("BoxConfirmBtnOk")).click();
-		Thread.sleep(500);
-		driver.findElement(By.id("BoxAlertBtnOk")).click();
+		assertFalse(driver.findElement(
+				By.xpath("//div[@id='ui-id-26']/div[2]/div[1]/div[8]"))
+				.isDisplayed());
 		Thread.sleep(500);
 		driver.findElement(By.cssSelector("span.myProfile.icon-arrow-s"))
 				.click();

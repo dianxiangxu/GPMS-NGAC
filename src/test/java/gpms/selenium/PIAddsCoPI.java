@@ -1,10 +1,10 @@
 package gpms.selenium;
 
 /*Made by: Nick
- * PI logs in and deletes Co-PI
+ * PI logs in and adds a Co-PI to the proposal.
  */
 
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 import java.util.concurrent.TimeUnit;
 
@@ -18,7 +18,7 @@ import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 
-public class PIdeletesCoPI {
+public class PIAddsCoPI {
 	private WebDriver driver;
 	private String baseUrl;
 	private StringBuffer verificationErrors = new StringBuffer();
@@ -26,14 +26,14 @@ public class PIdeletesCoPI {
 	@Before
 	public void setUp() throws Exception {
 		System.setProperty("webdriver.chrome.driver",
-				"D:/GPWFMS/selenium_driver/chromedriver.exe");
+				"F:/chromedriver_win32/chromedriver.exe");
 		driver = new ChromeDriver();
 		baseUrl = "http://localhost:8181/";
 		driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
 	}
 
 	@Test
-	public void testPIdeletesCoPI() throws Exception {
+	public void testPIaddsCoPI() throws Exception {
 		driver.get(baseUrl + "GPMS/");
 		driver.findElement(By.id("user_password")).clear();
 		driver.findElement(By.id("user_password")).sendKeys("gpmspassword");
@@ -48,18 +48,18 @@ public class PIdeletesCoPI {
 		((JavascriptExecutor) driver)
 				.executeScript("var s=document.getElementById('edit0');s.click();");
 		Thread.sleep(500);
-		driver.findElement(By.id("ui-id-1")).click();
+		driver.findElement(By.cssSelector("i.sidebarExpand")).click();
 		Thread.sleep(500);
-		driver.findElement(By.name("DeleteOption")).click();
+		driver.findElement(By.id("lblSection1")).click();
 		Thread.sleep(500);
-		driver.findElement(By.id("BoxConfirmBtnOk")).click();
-		Thread.sleep(500);
-		driver.findElement(By.cssSelector("span.myProfile.icon-arrow-s"))
-				.click();
+		driver.findElement(By.name("AddCoPI")).click();
 		Thread.sleep(500);
 		driver.findElement(By.id("btnSaveProposal")).click();
 		Thread.sleep(500);
 		driver.findElement(By.id("BoxConfirmBtnOk")).click();
+		Thread.sleep(500);
+		assertTrue(driver.findElement(By.cssSelector("BODY")).getText()
+				.matches("^[\\s\\S]*$"));
 		Thread.sleep(500);
 		driver.findElement(By.id("BoxAlertBtnOk")).click();
 		Thread.sleep(500);

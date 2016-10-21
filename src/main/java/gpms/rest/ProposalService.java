@@ -1904,7 +1904,8 @@ public class ProposalService {
 			Accesscontrol ac = new Accesscontrol();
 
 			// TODO :: Get these static actions from the Dictionary we setup in
-			// "XACMLAttributeDictionary.xls" //Add, Add Co-PI, Add Senior Personnel,
+			// "XACMLAttributeDictionary.xls" //Add, Add Co-PI, Add Senior
+			// Personnel,
 			// Save, Submit, Approve, Disapprove, Withdraw, Archive, Delete,
 			// View, Edit, Revoke
 
@@ -3389,6 +3390,8 @@ public class ProposalService {
 										.add(uploadFile);
 							}
 						}
+					} else {
+						existingProposal.getAppendices().clear();
 					}
 				}
 
@@ -4725,6 +4728,8 @@ public class ProposalService {
 										.add(uploadFile);
 							}
 						}
+					} else {
+						existingProposal.getAppendices().clear();
 					}
 				}
 
