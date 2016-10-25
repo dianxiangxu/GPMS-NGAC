@@ -6,7 +6,6 @@ package gpms.selenium;
  * Exception if test is successful.
  */
 
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -19,6 +18,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.support.ui.Select;
 
@@ -293,12 +293,49 @@ public class DeanApprovalFail {
 
 		Thread.sleep(200);
 		driver.findElement(By.id("ui-id-21")).click();
+		Thread.sleep(500);
+
+		WebElement txtSign = driver.findElement(By
+				.name("57460657bcbb29192ce0d483Dean"));
+		((JavascriptExecutor) driver)
+				.executeScript(
+						"arguments[0].readonly = false;arguments[0].removeAttribute('disabled');",
+						txtSign);
+
+		Thread.sleep(500);
+
+		WebElement txtDate = driver.findElement(By
+				.name("signaturedate57460657bcbb29192ce0d483Dean"));
+		((JavascriptExecutor) driver)
+				.executeScript(
+						"arguments[0].readonly = false;arguments[0].removeAttribute('disabled');",
+						txtDate);
+
+		Thread.sleep(500);
+
+		WebElement txtNote = driver.findElement(By
+				.name("proposalNotes57460657bcbb29192ce0d483Dean"));
+		((JavascriptExecutor) driver)
+				.executeScript(
+						"arguments[0].readonly = false;arguments[0].removeAttribute('disabled');",
+						txtNote);
+
+		Thread.sleep(1000);
+
+		driver.findElement(By.name("57460657bcbb29192ce0d483Dean")).sendKeys(
+				"dean");
 		Thread.sleep(200);
-
-		assertTrue(driver.findElement(
-				By.xpath("//table[@id='trSignDean']/tbody/tr/td[3]"))
-				.isDisplayed());
-
+		driver.findElement(By.name("signaturedate57460657bcbb29192ce0d483Dean"))
+				.click();
+		Thread.sleep(200);
+		driver.findElement(By.xpath("//table[@id='trSignDean']/tbody/tr/td[3]"))
+				.click();
+		Thread.sleep(200);
+		driver.findElement(By.name("proposalNotes57460657bcbb29192ce0d483Dean"))
+				.clear();
+		Thread.sleep(200);
+		driver.findElement(By.name("proposalNotes57460657bcbb29192ce0d483Dean"))
+				.sendKeys("Test");
 		Thread.sleep(200);
 
 		((JavascriptExecutor) driver)

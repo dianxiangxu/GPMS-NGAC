@@ -289,7 +289,7 @@ public class SeniorPersonalProposalDeleteFail {
 				.click();
 		Thread.sleep(200);
 		driver.findElement(By.linkText("Log Out")).click();
-		Thread.sleep(5000);
+		Thread.sleep(1000);
 
 		// Senior Personal attempts deletion
 		driver.get(baseUrl + "GPMS/");

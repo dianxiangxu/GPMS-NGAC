@@ -71,37 +71,30 @@ public class DelegationDAO extends BasicDAO<Delegation, String> {
 			throws ParseException {
 		Datastore ds = getDatastore();
 		List<DelegationInfo> delegations = new ArrayList<DelegationInfo>();
-
 		Query<Delegation> delegationQuery = ds.createQuery(Delegation.class);
-
+		// For Filter in Grid
 		if (delegatorID != null) {
 			delegationQuery.criteria("delegator user id").equal(delegatorID);
 		}
-
 		if (delegatedCollege != null) {
 			delegationQuery.criteria("delegated college").equal(
 					delegatedCollege);
 		}
-
 		if (delegatedDepartment != null) {
 			delegationQuery.criteria("delegated department").equal(
 					delegatedDepartment);
 		}
-
 		if (delegatedPositionType != null) {
 			delegationQuery.criteria("delegated position type").equal(
 					delegatedPositionType);
 		}
-
 		if (delegatedPositionTitle != null) {
 			delegationQuery.criteria("delegated position title").equal(
 					delegatedPositionTitle);
 		}
-
 		if (delegatee != null) {
 			delegationQuery.criteria("delegatee").containsIgnoreCase(delegatee);
 		}
-
 		if (createdFrom != null && !createdFrom.isEmpty()) {
 			Date delegatedStartsFrom = formatter.parse(createdFrom);
 			delegationQuery.criteria("created on").greaterThanOrEq(
@@ -112,22 +105,18 @@ public class DelegationDAO extends BasicDAO<Delegation, String> {
 			delegationQuery.criteria("created on").lessThanOrEq(
 					delegatedStartsTo);
 		}
-
 		if (delegatedAction != null) {
 			delegationQuery.criteria("actions").contains(delegatedAction);
 		}
-
 		if (isRevoked != null) {
 			delegationQuery.criteria("revoked").equal(isRevoked);
 		}
-
 		int rowTotal = delegationQuery.asList().size();
 		List<Delegation> allDelegations = delegationQuery.offset(offset - 1)
 				.limit(limit).order("-audit log.activity on").asList();
 
 		for (Delegation userDelegation : allDelegations) {
 			DelegationInfo delegation = new DelegationInfo();
-
 			delegation.setRowTotal(rowTotal);
 			delegation.setId(userDelegation.getId().toString());
 			delegation.setDelegatee(userDelegation.getDelegatee());
@@ -141,11 +130,9 @@ public class DelegationDAO extends BasicDAO<Delegation, String> {
 			delegation.setDateCreated(userDelegation.getCreatedOn());
 			delegation.setDelegatedFrom(userDelegation.getFrom());
 			delegation.setDelegatedTo(userDelegation.getTo());
-
 			Date lastAudited = null;
 			String lastAuditedBy = new String();
 			String lastAuditAction = new String();
-
 			int auditLogCount = userDelegation.getAuditLog().size();
 			if (userDelegation.getAuditLog() != null && auditLogCount != 0) {
 				AuditLog auditLog = userDelegation.getAuditLog().get(
@@ -154,16 +141,12 @@ public class DelegationDAO extends BasicDAO<Delegation, String> {
 				lastAuditedBy = auditLog.getUserProfile().getFullName();
 				lastAuditAction = auditLog.getAction();
 			}
-
 			delegation.setLastAudited(lastAudited);
 			delegation.setLastAuditedBy(lastAuditedBy);
 			delegation.setLastAuditAction(lastAuditAction);
-
 			delegation.setRevoked(userDelegation.isRevoked());
-
 			delegations.add(delegation);
 		}
-		// Collections.sort(delegations);
 		return delegations;
 	}
 
@@ -503,12 +486,10 @@ public class DelegationDAO extends BasicDAO<Delegation, String> {
 			existingDelegation.getAuditLog().add(audit);
 			ds.save(existingDelegation);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 
-	// Not Used
 	public void updateDelegation(ObjectId delegationID,
 			Date delegationFromDate, Date delegationToDate,
 			String delegationReason, String policyFileName,
@@ -530,7 +511,6 @@ public class DelegationDAO extends BasicDAO<Delegation, String> {
 			ds.update(query, ops);
 
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -547,7 +527,6 @@ public class DelegationDAO extends BasicDAO<Delegation, String> {
 			ds.save(existingDelegation);
 			return true;
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return false;

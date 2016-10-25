@@ -727,9 +727,6 @@ public class DelegationService {
 				}
 			}
 
-			// TODO :: Get these static actions from the Dictionary we setup in
-			// "XACMLAttributeDictionary.xls"
-
 			List<String> attributeValue = Arrays.asList("Save", "Submit",
 					"Approve", "Disapprove", "Withdraw", "Archive", "Delete");
 
@@ -1562,7 +1559,6 @@ public class DelegationService {
 					String emailBody = new String();
 					String delegatorName = new String();
 					String delegatorEmail = new String();
-					String delegateeName = new String();
 					List<String> emaillist = new ArrayList<String>();
 
 					if (obligations.size() > 0) {
@@ -1586,9 +1582,6 @@ public class DelegationService {
 									case "delegatorEmail":
 										delegatorEmail = assignment
 												.getContent();
-										break;
-									case "delegateeName":
-										delegateeName = assignment.getContent();
 										break;
 									case "delegateeEmail":
 										if (!assignment.getContent().equals("")) {

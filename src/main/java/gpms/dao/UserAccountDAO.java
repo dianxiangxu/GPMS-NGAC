@@ -20,8 +20,6 @@ public class UserAccountDAO extends BasicDAO<UserAccount, String> {
 	private static Morphia morphia;
 	private static Datastore ds;
 
-	// private AuditLog audit = new AuditLog();
-
 	private static Morphia getMorphia() throws UnknownHostException,
 			MongoException {
 		if (morphia == null) {

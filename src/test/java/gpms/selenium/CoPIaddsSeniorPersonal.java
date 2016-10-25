@@ -4,7 +4,7 @@ package gpms.selenium;
  * Co-PI will add a senior personal to the proposal.
  */
 
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 import java.util.concurrent.TimeUnit;
 
@@ -38,54 +38,57 @@ public class CoPIaddsSeniorPersonal {
 		driver.findElement(By.id("user_password")).clear();
 		driver.findElement(By.id("user_password")).sendKeys("gpmspassword");
 		driver.findElement(By.id("user_email")).clear();
-		driver.findElement(By.id("user_email")).sendKeys("selena");
-		Thread.sleep(500);
+		driver.findElement(By.id("user_email")).sendKeys("liliana");
+		Thread.sleep(200);
 		driver.findElement(By.name("commit")).click();
-		Thread.sleep(500);
+		Thread.sleep(200);
 		driver.findElement(By.linkText("My Proposals")).click();
-		Thread.sleep(500);
+		Thread.sleep(200);
 
 		((JavascriptExecutor) driver)
 				.executeScript("var s=document.getElementById('edit0');s.click();");
 
-		Thread.sleep(500);
+		Thread.sleep(200);
 		driver.findElement(By.id("ui-id-1")).click();
-		Thread.sleep(500);
+		Thread.sleep(200);
 		driver.findElement(By.name("AddSenior")).click();
-		Thread.sleep(500);
+		Thread.sleep(1000);
 		driver.findElement(By.id("btnSaveProposal")).click();
-		Thread.sleep(500);
-		driver.findElement(By.name("57505b2d65dbb34d173fc6f9Co-PI")).clear();
-		Thread.sleep(500);
-		driver.findElement(By.name("57505b2d65dbb34d173fc6f9Co-PI")).sendKeys(
-				"selena");
-		Thread.sleep(500);
+		Thread.sleep(200);
+		driver.findElement(By.name("574f638565dbb34d17834b33Co-PI")).clear();
+		Thread.sleep(200);
+		driver.findElement(By.name("574f638565dbb34d17834b33Co-PI")).sendKeys(
+				"Liliana");
+		Thread.sleep(200);
 		driver.findElement(
-				By.name("proposalNotes57505b2d65dbb34d173fc6f9Co-PI")).clear();
-		Thread.sleep(500);
+				By.name("proposalNotes574f638565dbb34d17834b33Co-PI")).clear();
+		Thread.sleep(200);
 		driver.findElement(
-				By.name("proposalNotes57505b2d65dbb34d173fc6f9Co-PI"))
+				By.name("proposalNotes574f638565dbb34d17834b33Co-PI"))
 				.sendKeys("Test");
-		Thread.sleep(500);
+		Thread.sleep(200);
 		driver.findElement(
-				By.name("signaturedate57505b2d65dbb34d173fc6f9Co-PI")).click();
-		Thread.sleep(500);
+				By.name("signaturedate574f638565dbb34d17834b33Co-PI")).click();
+		Thread.sleep(200);
 		driver.findElement(
 				By.xpath("//table[@id='trSignChair']/tbody/tr/td[3]")).click();
-		Thread.sleep(500);
+		Thread.sleep(200);
 		driver.findElement(By.cssSelector("div.sfMaincontent")).click();
-		Thread.sleep(500);
+		Thread.sleep(200);
 		driver.findElement(By.id("btnSaveProposal")).click();
-		Thread.sleep(500);
+		Thread.sleep(200);
 		driver.findElement(By.id("BoxConfirmBtnOk")).click();
-		Thread.sleep(500);
+		Thread.sleep(200);
+		assertTrue(driver.findElement(By.cssSelector("BODY")).getText()
+				.matches("^[\\s\\S]*$"));
+		Thread.sleep(200);
 		driver.findElement(By.id("BoxAlertBtnOk")).click();
-		Thread.sleep(500);
+		Thread.sleep(200);
 		driver.findElement(By.cssSelector("span.myProfile.icon-arrow-s"))
 				.click();
-		Thread.sleep(500);
+		Thread.sleep(200);
 		driver.findElement(By.linkText("Log Out")).click();
-		Thread.sleep(500);
+		Thread.sleep(1000);
 	}
 
 	@After

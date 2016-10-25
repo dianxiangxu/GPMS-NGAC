@@ -124,34 +124,8 @@ public class Accesscontrol {
 			while (it.hasNext()) {
 				ar = it.next();
 				intDecision = ar.getDecision();
-				System.out
-						.println("\n======================== Printing Obligations ====================");
-				List<ObligationResult> obligations = ar.getObligations();
-				for (ObligationResult obligation : obligations) {
-					if (obligation instanceof org.wso2.balana.xacml3.Obligation) {
-						List<AttributeAssignment> assignments = ((org.wso2.balana.xacml3.Obligation) obligation)
-								.getAssignments();
-						for (AttributeAssignment assignment : assignments) {
-							System.out.println("Obligation :  "
-									+ assignment.getContent() + "\n");
-						}
-					}
-				}
-				System.out
-						.println("===========================================================");
-				System.out
-						.println("\n======================== Printing Advices ====================");
-				List<Advice> advices = ar.getAdvices();
-				for (Advice advice : advices) {
-					if (advice instanceof org.wso2.balana.xacml3.Advice) {
-						List<AttributeAssignment> assignments = ((org.wso2.balana.xacml3.Advice) advice)
-								.getAssignments();
-						for (AttributeAssignment assignment : assignments) {
-							System.out.println("Advice :  "
-									+ assignment.getContent() + "\n");
-						}
-					}
-				}
+				printObligations();
+				printAdvice();
 				System.out
 						.println("===========================================================");
 				if (intDecision == AbstractResult.DECISION_INDETERMINATE_DENY
@@ -170,6 +144,46 @@ public class Accesscontrol {
 			System.out.println("Response received PDP is Null");
 		}
 		return null;
+	}
+
+	/**
+	 * Prints Advice in response
+	 */
+	private void printAdvice() {
+		System.out
+				.println("===========================================================");
+		System.out
+				.println("\n======================== Printing Advices ====================");
+		List<Advice> advices = ar.getAdvices();
+		for (Advice advice : advices) {
+			if (advice instanceof org.wso2.balana.xacml3.Advice) {
+				List<AttributeAssignment> assignments = ((org.wso2.balana.xacml3.Advice) advice)
+						.getAssignments();
+				for (AttributeAssignment assignment : assignments) {
+					System.out.println("Advice :  " + assignment.getContent()
+							+ "\n");
+				}
+			}
+		}
+	}
+
+	/**
+	 * Prints Obligations in response
+	 */
+	private void printObligations() {
+		System.out
+				.println("\n======================== Printing Obligations ====================");
+		List<ObligationResult> obligations = ar.getObligations();
+		for (ObligationResult obligation : obligations) {
+			if (obligation instanceof org.wso2.balana.xacml3.Obligation) {
+				List<AttributeAssignment> assignments = ((org.wso2.balana.xacml3.Obligation) obligation)
+						.getAssignments();
+				for (AttributeAssignment assignment : assignments) {
+					System.out.println("Obligation :  "
+							+ assignment.getContent() + "\n");
+				}
+			}
+		}
 	}
 
 	/***

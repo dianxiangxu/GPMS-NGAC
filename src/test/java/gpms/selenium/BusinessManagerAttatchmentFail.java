@@ -5,7 +5,7 @@ package gpms.selenium;
  * Program will close with element not visible exception if test is successful, Business manager is not permited to add an attatchment.
  */
 
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 import java.util.concurrent.TimeUnit;
 
@@ -17,6 +17,7 @@ import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoAlertPresentException;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 
 public class BusinessManagerAttatchmentFail {
@@ -41,31 +42,27 @@ public class BusinessManagerAttatchmentFail {
 		driver.findElement(By.id("user_email")).clear();
 		driver.findElement(By.id("user_email")).sendKeys(
 				"bmchemistry1@gmail.com");
-		Thread.sleep(500);
+		Thread.sleep(200);
 		driver.findElement(By.name("commit")).click();
-		Thread.sleep(500);
+		Thread.sleep(200);
 		driver.findElement(By.linkText("My Proposals")).click();
-		Thread.sleep(500);
+		Thread.sleep(200);
 
 		((JavascriptExecutor) driver)
 				.executeScript("var s=document.getElementById('edit0');s.click();");
 
-		Thread.sleep(500);
+		Thread.sleep(200);
 		driver.findElement(By.id("lblSection13")).click();
-		Thread.sleep(500);
-		driver.findElement(By.cssSelector("div.ajax-file-upload")).click();
-		Thread.sleep(500);
-		driver.findElement(By.id("btnSaveProposal")).click();
-		Thread.sleep(500);
-		driver.findElement(By.id("BoxConfirmBtnOk")).click();
-		Thread.sleep(500);
-		driver.findElement(By.id("BoxAlertBtnOk")).click();
-		Thread.sleep(500);
+		Thread.sleep(200);
+
+		assertFalse(driver.findElement(By.id("fileuploader")).isDisplayed());
+		Thread.sleep(200);
+
 		driver.findElement(By.cssSelector("span.myProfile.icon-arrow-s"))
 				.click();
-		Thread.sleep(500);
+		Thread.sleep(200);
 		driver.findElement(By.linkText("Log Out")).click();
-		Thread.sleep(2000);
+		Thread.sleep(1000);
 	}
 
 	@After

@@ -2268,7 +2268,7 @@ Resolver.prototype.resolve = function (spec, arg1, arg2, arg3) {
       }
       else {
         var obj = {
-          useJQuery: false,  // TODO
+          useJQuery: false,
           url: item.root,
           method: 'get',
           headers: {

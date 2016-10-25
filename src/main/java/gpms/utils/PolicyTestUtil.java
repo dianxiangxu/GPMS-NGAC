@@ -68,7 +68,7 @@ import org.wso2.balana.xacml3.Attributes;
 /**
  * Simple utility class For Testing Policy
  *
- * @author Seth Proctor
+ * @author Seth Proctor From Balana Core Source
  */
 public class PolicyTestUtil {
 

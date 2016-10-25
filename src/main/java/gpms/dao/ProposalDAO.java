@@ -2037,15 +2037,7 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 								}
 							} else if (isDelegator(user.getId().toString(),
 									posDetails)) {
-								// TODO :: here I used Transfer mode of
-								// Delegation to unable the User
-								// with isDelegator() = true to sign the
-								// proposal
-								// Find all delegation with delegatee =
-								// user.getId().toString()
-								// I only consider for Not Signed Case to show
-								// delegated Users to sign
-								// TODO Find the delegated User details
+								// here we used Transfer mode of Delegation 
 								List<SignatureInfo> delegatedChair = findDelegatedUsersForAUser(
 										user.getId(), id.toString(),
 										posDetails.getCollege(),

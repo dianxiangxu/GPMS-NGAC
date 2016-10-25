@@ -117,7 +117,6 @@ public class ProposalService {
 	ProposalDAO proposalDAO = null;
 	DelegationDAO delegationDAO = null;
 	NotificationDAO notificationDAO = null;
-	// private AbstractResult ar;
 
 	DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 
@@ -1270,28 +1269,6 @@ public class ProposalService {
 						}
 					}
 
-					// // TODO only check this for required not all XACML call
-					// if (root != null && root.has("proposalId")) {
-					// String proposalId = new String();
-					// JsonNode proposal_Id = root.get("proposalId");
-					// proposalId = proposal_Id.textValue();
-					// if (!proposalId.equals("")) {
-					// ObjectId id = new ObjectId(proposalId);
-					// Proposal proposal = proposalDAO
-					// .findProposalByProposalID(id);
-					// resourceMap.put("status", proposal.getProposalStatus()
-					// .toString());
-					// attrMap.put("Resource", resourceMap);
-					// }
-					// }
-
-					// Need to add Environment to detect the Campus or outside
-					// network
-					// network.type
-
-					// Device type
-					// device.type
-
 					Set<AbstractResult> set = ac
 							.getXACMLdecisionWithObligations(attrMap,
 									contentProfile);
@@ -2339,30 +2316,6 @@ public class ProposalService {
 
 			List<SignatureInfo> signatures = proposalDAO
 					.findAllSignatureForAProposal(id, irbApprovalRequired);
-
-			// Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd")
-			// .excludeFieldsWithoutExposeAnnotation().setPrettyPrinting()
-			// .create();
-			// response = gson.toJson(signatures, SignatureInfo.class);
-
-			// for (SignatureInfo signatureInfo : signatures) {
-			// // TODO : get all delegated User Info for this PI user and bind
-			// it
-			// // into signature Object
-			//
-			// // Check if the proposal Id is exact to this proposal id
-			//
-			// // TODO : find all the delegated User for this Proposal Id
-			// ObjectId userId = new ObjectId(signatureInfo.getUserProfileId());
-			// List<SignatureInfo> delegatedUsers = delegationDAO
-			// .findDelegatedUsersForAUser(userId,
-			// signatureInfo.getPositionTitle(), proposalId);
-			//
-			// for (SignatureInfo delegatedUser : delegatedUsers) {
-			// signatures.add(delegatedUser);
-			// }
-			//
-			// }
 
 			return Response
 					.status(Response.Status.OK)

@@ -18,6 +18,7 @@ import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoAlertPresentException;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 
 public class DeanDeletesAttatchmentFail {
@@ -42,25 +43,32 @@ public class DeanDeletesAttatchmentFail {
 		driver.findElement(By.id("user_email")).clear();
 		driver.findElement(By.id("user_email")).sendKeys(
 				"deanchemistry1@gmail.com");
-		Thread.sleep(500);
+		Thread.sleep(200);
 		driver.findElement(By.name("commit")).click();
-		Thread.sleep(500);
+		Thread.sleep(200);
 		driver.findElement(By.linkText("My Proposals")).click();
-		Thread.sleep(500);
+		Thread.sleep(200);
 		((JavascriptExecutor) driver)
 				.executeScript("var s=document.getElementById('edit0');s.click();");
 		Thread.sleep(500);
 		driver.findElement(By.id("lblSection13")).click();
-		Thread.sleep(500);
+		Thread.sleep(200);
+
+		// WebElement btnDeleteAttachment = driver.findElement(By
+		// .cssSelector("ajax-file-upload-red"));
+		// ((JavascriptExecutor) driver).executeScript(
+		// "arguments[0].style.display='block';", btnDeleteAttachment);
+		// Thread.sleep(500);
+
 		assertFalse(driver.findElement(
-				By.xpath("//div[@id='ui-id-26']/div[2]/div[1]/div[8]"))
-				.isDisplayed());
-		Thread.sleep(500);
+				By.cssSelector("div.ajax-file-upload-red")).isDisplayed());
+
+		Thread.sleep(200);
 		driver.findElement(By.cssSelector("span.myProfile.icon-arrow-s"))
 				.click();
-		Thread.sleep(500);
+		Thread.sleep(200);
 		driver.findElement(By.linkText("Log Out")).click();
-		Thread.sleep(2000);
+		Thread.sleep(1000);
 	}
 
 	@After

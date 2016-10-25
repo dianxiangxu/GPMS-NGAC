@@ -233,12 +233,17 @@ public class AdvanceTestV3 extends TestCase {
 		}
 	}
 
-	public void testBasicTest0007() throws Exception {
+	/***
+	 * MDP example from Balana
+	 *
+	 * @throws Exception
+	 */
+	public void testBasicTest0005() throws Exception {
 
 		String reqResNo;
 		Set<String> policies = new HashSet<String>();
-		policies.add("TestPolicy_0007.xml");
-		log.info("Basic Test 0007 is started");
+		policies.add("TestPolicy_0005.xml");
+		log.info("Basic Test 0005 is started");
 
 		for (int i = 1; i < 4; i++) {
 
@@ -249,7 +254,7 @@ public class AdvanceTestV3 extends TestCase {
 			}
 
 			String request = PolicyTestUtil.createRequest(ROOT_DIRECTORY,
-					VERSION_DIRECTORY, "request_0007_" + reqResNo + ".xml");
+					VERSION_DIRECTORY, "request_0005_" + reqResNo + ".xml");
 			if (request != null) {
 				log.info("Request that is sent to the PDP :  " + request);
 				ResponseCtx response = PolicyTestUtil.evaluate(
@@ -259,7 +264,7 @@ public class AdvanceTestV3 extends TestCase {
 							+ response.encode());
 					ResponseCtx expectedResponseCtx = PolicyTestUtil
 							.createResponse(ROOT_DIRECTORY, VERSION_DIRECTORY,
-									"response_0007_" + reqResNo + ".xml");
+									"response_0005_" + reqResNo + ".xml");
 					if (expectedResponseCtx != null) {
 						assertTrue(PolicyTestUtil.isMatching(response,
 								expectedResponseCtx));
@@ -273,18 +278,20 @@ public class AdvanceTestV3 extends TestCase {
 				assertTrue("Request read from file is Null", false);
 			}
 
-			log.info("Basic Test 0007 is finished");
+			log.info("Basic Test 0005 is finished");
 		}
 	}
 
-	// Info:: To be tested alone Not with other test cases only then it will
-	// pass otherwise always fails
-	public void testAdvanceTest0006() throws Exception {
-
+	/***
+	 * Revoke of Delegated Proposal Test
+	 *
+	 * @throws Exception
+	 */
+	public void testAdvanceTest006() throws Exception {
 		String reqResNo;
 		Set<String> policies = new HashSet<String>();
 		policies.add("TestPolicy_0006.xml");
-		log.info("Advance Test 0006 is started. This test is for Jira IDENTITY-416");
+		log.info("Advance Test 006 is started. This test is for Jira COMMONS-97");
 
 		for (int i = 1; i < 2; i++) {
 
@@ -323,14 +330,68 @@ public class AdvanceTestV3 extends TestCase {
 		}
 	}
 
-	public void testAdvanceTest008() throws Exception {
+	/***
+	 * MDP Example from Balana
+	 *
+	 * @throws Exception
+	 */
+	public void testAdvanceTest0007() throws Exception {
+
+		String reqResNo;
+		Set<String> policies = new HashSet<String>();
+		policies.add("TestPolicy_0007.xml");
+		log.info("Advance Test 0007 is started. This test is for Jira COMMONS-97");
+
+		for (int i = 1; i < 2; i++) {
+
+			if (i < 10) {
+				reqResNo = "0" + i;
+			} else {
+				reqResNo = Integer.toString(i);
+			}
+
+			String request = PolicyTestUtil.createRequest(ROOT_DIRECTORY,
+					VERSION_DIRECTORY, "request_0007_" + reqResNo + ".xml");
+			if (request != null) {
+				log.info("Request that is sent to the PDP :  " + request);
+				ResponseCtx response = PolicyTestUtil.evaluate(
+						getPDPNewInstance(policies), request);
+				if (response != null) {
+					log.info("Response that is received from the PDP :  "
+							+ response.encode());
+					ResponseCtx expectedResponseCtx = PolicyTestUtil
+							.createResponse(ROOT_DIRECTORY, VERSION_DIRECTORY,
+									"response_0007_" + reqResNo + ".xml");
+					if (expectedResponseCtx != null) {
+						assertTrue(PolicyTestUtil.isMatching(response,
+								expectedResponseCtx));
+					} else {
+						assertTrue("Response read from file is Null", false);
+					}
+				} else {
+					assertFalse("Response received PDP is Null", false);
+				}
+			} else {
+				assertTrue("Request read from file is Null", false);
+			}
+
+			log.info("Advance Test 0007 is finished");
+		}
+	}
+
+	/***
+	 * Return MDP users who can Approve/ Disapprove a Proposal
+	 * 
+	 * @throws Exception
+	 */
+	public void testAdvanceTest0008() throws Exception {
 
 		String reqResNo;
 		Set<String> policies = new HashSet<String>();
 		policies.add("TestPolicy_0008.xml");
-		log.info("Advance Test 008 is started. This test is for Jira COMMONS-97");
+		log.info("Advance Test 0008 is started. This test is for Jira COMMONS-97");
 
-		for (int i = 1; i < 2; i++) {
+		for (int i = 1; i < 3; i++) {
 
 			if (i < 10) {
 				reqResNo = "0" + i;
@@ -367,152 +428,14 @@ public class AdvanceTestV3 extends TestCase {
 		}
 	}
 
-	public void testAdvanceTest0010() throws Exception {
-
-		String reqResNo;
-		Set<String> policies = new HashSet<String>();
-		policies.add("StaticDelegationRules.xml");
-		// policies.add("Policy.xml");
-		log.info("Advance Test 0010 is started. This test is for Jira COMMONS-97");
-
-		for (int i = 1; i < 2; i++) {
-
-			if (i < 10) {
-				reqResNo = "0" + i;
-			} else {
-				reqResNo = Integer.toString(i);
-			}
-
-			String request = PolicyTestUtil.createRequest(ROOT_DIRECTORY,
-					VERSION_DIRECTORY, "request_0010_" + reqResNo + ".xml");
-			if (request != null) {
-				log.info("Request that is sent to the PDP :  " + request);
-				ResponseCtx response = PolicyTestUtil.evaluate(
-						getPDPNewInstance(policies), request);
-				if (response != null) {
-					log.info("Response that is received from the PDP :  "
-							+ response.encode());
-					ResponseCtx expectedResponseCtx = PolicyTestUtil
-							.createResponse(ROOT_DIRECTORY, VERSION_DIRECTORY,
-									"response_0010_" + reqResNo + ".xml");
-					if (expectedResponseCtx != null) {
-						assertTrue(PolicyTestUtil.isMatching(response,
-								expectedResponseCtx));
-					} else {
-						assertTrue("Response read from file is Null", false);
-					}
-				} else {
-					assertFalse("Response received PDP is Null", false);
-				}
-			} else {
-				assertTrue("Request read from file is Null", false);
-			}
-
-			log.info("Advance Test 0010 is finished");
-		}
-	}
-
-	public void testAdvanceTest00011() throws Exception {
-
-		String reqResNo;
-		Set<String> policies = new HashSet<String>();
-		policies.add("TestPolicy_00011.xml");
-		log.info("Advance Test 00011 is started. This test is for Jira COMMONS-97");
-
-		for (int i = 1; i < 2; i++) {
-
-			if (i < 10) {
-				reqResNo = "0" + i;
-			} else {
-				reqResNo = Integer.toString(i);
-			}
-
-			String request = PolicyTestUtil.createRequest(ROOT_DIRECTORY,
-					VERSION_DIRECTORY, "request_00011_" + reqResNo + ".xml");
-			if (request != null) {
-				log.info("Request that is sent to the PDP :  " + request);
-				ResponseCtx response = PolicyTestUtil.evaluate(
-						getPDPNewInstance(policies), request);
-				if (response != null) {
-					log.info("Response that is received from the PDP :  "
-							+ response.encode());
-					ResponseCtx expectedResponseCtx = PolicyTestUtil
-							.createResponse(ROOT_DIRECTORY, VERSION_DIRECTORY,
-									"response_00011_" + reqResNo + ".xml");
-					if (expectedResponseCtx != null) {
-						assertTrue(PolicyTestUtil.isMatching(response,
-								expectedResponseCtx));
-					} else {
-						assertTrue("Response read from file is Null", false);
-					}
-				} else {
-					assertFalse("Response received PDP is Null", false);
-				}
-			} else {
-				assertTrue("Request read from file is Null", false);
-			}
-
-			log.info("Advance Test 00011 is finished");
-		}
-	}
-
 	/***
-	 * For Delegation Testing
-	 *
-	 * @throws Exception
+	 * To Test for Action button Show Policy-Driven Interface Test
 	 */
-	public void testAdvanceTest0005() throws Exception {
+	public void testAdvanceTest0009() throws Exception {
 
 		String reqResNo;
 		Set<String> policies = new HashSet<String>();
-		policies.add("TestPolicy_0005.xml");
-		log.info("Basic Test 0005 is started");
-
-		for (int i = 1; i < 2; i++) {
-
-			if (i < 10) {
-				reqResNo = "0" + i;
-			} else {
-				reqResNo = Integer.toString(i);
-			}
-
-			String request = PolicyTestUtil.createRequest(ROOT_DIRECTORY,
-					VERSION_DIRECTORY, "request_0005_" + reqResNo + ".xml");
-			if (request != null) {
-				log.info("Request that is sent to the PDP :  " + request);
-				ResponseCtx response = PolicyTestUtil.evaluate(
-						getPDPNewInstance(policies), request);
-				if (response != null) {
-					log.info("Response that is received from the PDP :  "
-							+ response.encode());
-					ResponseCtx expectedResponseCtx = PolicyTestUtil
-							.createResponse(ROOT_DIRECTORY, VERSION_DIRECTORY,
-									"response_0005_" + reqResNo + ".xml");
-					if (expectedResponseCtx != null) {
-						assertTrue(PolicyTestUtil.isMatching(response,
-								expectedResponseCtx));
-					} else {
-						assertTrue("Response read from file is Null", false);
-					}
-				} else {
-					assertFalse("Response received PDP is Null", false);
-				}
-			} else {
-				assertTrue("Request read from file is Null", false);
-			}
-
-			log.info("Basic Test 0005 is finished");
-		}
-	}
-
-	public void testAdvanceTest009() throws Exception {
-
-		String reqResNo;
-		Set<String> policies = new HashSet<String>();
-		// policies.add("TestPolicy_0009.xml");
-
-		policies.add("TestPolicy_0009_01.xml");
-		policies.add("TestPolicy_0009_02.xml");
+		policies.add("TestPolicy_0009.xml");
 
 		log.info("Advance Test 0009 is started. This test is for Jira COMMONS-97");
 
@@ -553,13 +476,13 @@ public class AdvanceTestV3 extends TestCase {
 		}
 	}
 
-	public void testAdvanceTest0013() throws Exception {
+	public void testAdvanceTest00010() throws Exception {
 
 		String reqResNo;
 		Set<String> policies = new HashSet<String>();
-		policies.add("TestPolicy_00013.xml");
+		policies.add("TestPolicy_00010.xml");
 
-		log.info("Advance Test 00013 is started. This test is for Jira COMMONS-97");
+		log.info("Advance Test 00010 is started. This test is for Jira COMMONS-97");
 
 		for (int i = 1; i < 2; i++) {
 
@@ -570,7 +493,7 @@ public class AdvanceTestV3 extends TestCase {
 			}
 
 			String request = PolicyTestUtil.createRequest(ROOT_DIRECTORY,
-					VERSION_DIRECTORY, "request_00013_" + reqResNo + ".xml");
+					VERSION_DIRECTORY, "request_00010_" + reqResNo + ".xml");
 			if (request != null) {
 				log.info("Request that is sent to the PDP :  " + request);
 				ResponseCtx response = PolicyTestUtil.evaluate(
@@ -580,7 +503,7 @@ public class AdvanceTestV3 extends TestCase {
 							+ response.encode());
 					ResponseCtx expectedResponseCtx = PolicyTestUtil
 							.createResponse(ROOT_DIRECTORY, VERSION_DIRECTORY,
-									"response_00013_" + reqResNo + ".xml");
+									"response_00010_" + reqResNo + ".xml");
 					if (expectedResponseCtx != null) {
 						assertTrue(PolicyTestUtil.isMatching(response,
 								expectedResponseCtx));
@@ -594,56 +517,7 @@ public class AdvanceTestV3 extends TestCase {
 				assertTrue("Request read from file is Null", false);
 			}
 
-			log.info("Advance Test 00013 is finished");
-		}
-	}
-
-	public void testAdvanceTest00014() throws Exception {
-
-		String reqResNo;
-		Set<String> policies = new HashSet<String>();
-
-		// policies.add("L5emlk1s_2016_08_12.xml");
-		// policies.add("Hy9sttB7_2016_08_12.xml");
-
-		policies.add("delegatedRules.xml");
-
-		log.info("Advance Test 00014 is started. This test is for Jira COMMONS-97");
-
-		for (int i = 2; i < 3; i++) {
-
-			if (i < 10) {
-				reqResNo = "0" + i;
-			} else {
-				reqResNo = Integer.toString(i);
-			}
-
-			String request = PolicyTestUtil.createRequest(ROOT_DIRECTORY,
-					VERSION_DIRECTORY, "request_00014_" + reqResNo + ".xml");
-			if (request != null) {
-				log.info("Request that is sent to the PDP :  " + request);
-				ResponseCtx response = PolicyTestUtil.evaluate(
-						getPDPNewInstance(policies), request);
-				if (response != null) {
-					log.info("Response that is received from the PDP :  "
-							+ response.encode());
-					ResponseCtx expectedResponseCtx = PolicyTestUtil
-							.createResponse(ROOT_DIRECTORY, VERSION_DIRECTORY,
-									"response_00014_" + reqResNo + ".xml");
-					if (expectedResponseCtx != null) {
-						assertTrue(PolicyTestUtil.isMatching(response,
-								expectedResponseCtx));
-					} else {
-						assertTrue("Response read from file is Null", false);
-					}
-				} else {
-					assertFalse("Response received PDP is Null", false);
-				}
-			} else {
-				assertTrue("Request read from file is Null", false);
-			}
-
-			log.info("Advance Test 00014 is finished");
+			log.info("Advance Test 00010 is finished");
 		}
 	}
 

@@ -18,6 +18,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.support.ui.Select;
 
@@ -287,47 +288,73 @@ public class ChairApprovalFail {
 		((JavascriptExecutor) driver)
 				.executeScript("var s=document.getElementById('edit0');s.click();");
 
-		Thread.sleep(500);
+		Thread.sleep(200);
 		driver.findElement(By.id("ui-id-21")).click();
 		Thread.sleep(500);
-		driver.findElement(By.name("5745f29ebcbb29192ce0d42fDepartment_Chair"))
-				.click();
+
+		WebElement txtSign = driver.findElement(By
+				.name("5745f29ebcbb29192ce0d42fDepartment_Chair"));
+		((JavascriptExecutor) driver)
+				.executeScript(
+						"arguments[0].readonly = false;arguments[0].removeAttribute('disabled');",
+						txtSign);
+
 		Thread.sleep(500);
-		driver.findElement(By.name("5745f29ebcbb29192ce0d42fDepartment_Chair"))
-				.clear();
+
+		WebElement txtDate = driver.findElement(By
+				.name("signaturedate5745f29ebcbb29192ce0d42fDepartment_Chair"));
+		((JavascriptExecutor) driver)
+				.executeScript(
+						"arguments[0].readonly = false;arguments[0].removeAttribute('disabled');",
+						txtDate);
+
 		Thread.sleep(500);
+
+		WebElement txtNote = driver.findElement(By
+				.name("proposalNotes5745f29ebcbb29192ce0d42fDepartment_Chair"));
+		((JavascriptExecutor) driver)
+				.executeScript(
+						"arguments[0].readonly = false;arguments[0].removeAttribute('disabled');",
+						txtNote);
+
+		Thread.sleep(1000);
+
 		driver.findElement(By.name("5745f29ebcbb29192ce0d42fDepartment_Chair"))
 				.sendKeys("chair");
-		Thread.sleep(500);
+		Thread.sleep(200);
 		driver.findElement(
 				By.name("signaturedate5745f29ebcbb29192ce0d42fDepartment_Chair"))
 				.click();
-		Thread.sleep(500);
+		Thread.sleep(200);
 		driver.findElement(
-				By.xpath("//table[@id='trSignChair']/tbody/tr/td[3]")).click();
-		Thread.sleep(500);
+				By.xpath("//table[@id='trSignBusinessManager']/tbody/tr/td[3]"))
+				.click();
+		Thread.sleep(200);
 		driver.findElement(
 				By.name("proposalNotes5745f29ebcbb29192ce0d42fDepartment_Chair"))
 				.clear();
-		Thread.sleep(500);
+		Thread.sleep(200);
 		driver.findElement(
 				By.name("proposalNotes5745f29ebcbb29192ce0d42fDepartment_Chair"))
 				.sendKeys("Test");
-		Thread.sleep(500);
+		Thread.sleep(200);
+
 		((JavascriptExecutor) driver)
 				.executeScript("var s=document.getElementById('btnApproveProposal');s.click();");
 		Thread.sleep(500);
 		driver.findElement(By.id("BoxConfirmBtnOk")).click();
-		Thread.sleep(500);
-		
-
+		Thread.sleep(200);
 		assertTrue(driver.findElement(By.cssSelector("BODY")).getText()
 				.matches("^[\\s\\S]*$"));
-		Thread.sleep(500);
+		Thread.sleep(200);
+
+		assertTrue(driver.findElement(By.cssSelector("div.BoxError"))
+				.isDisplayed());
+		Thread.sleep(200);
+
 		driver.findElement(By.id("BoxAlertBtnOk")).click();
-		Thread.sleep(500);
-		// ERROR: Caught exception [ERROR: Unsupported command [selectWindow |
-		// null | ]]
+		Thread.sleep(200);
+
 		driver.findElement(By.cssSelector("span.myProfile.icon-arrow-s"))
 				.click();
 		Thread.sleep(500);

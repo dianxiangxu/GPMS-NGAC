@@ -431,9 +431,6 @@ public class UserProfileDAO extends BasicDAO<UserProfile, String> {
 		Query<UserProfile> profileQuery = ds.createQuery(UserProfile.class)
 				.retrievedFields(true, "_id", "first name", "middle name",
 						"last name", "work email", "details", "user id");
-
-		// TODO refine this query to get only new not existing users with
-		//
 		profileQuery.and(
 				profileQuery.criteria("_id").notEqual(id),
 				profileQuery.criteria("deleted").equal(false),
