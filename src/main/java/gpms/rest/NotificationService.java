@@ -6,6 +6,7 @@ import gpms.dao.NotificationDAO;
 import gpms.dao.ProposalDAO;
 import gpms.dao.UserAccountDAO;
 import gpms.dao.UserProfileDAO;
+import gpms.model.GPMSCommonInfo;
 import gpms.model.NotificationLog;
 import gpms.model.UserAccount;
 import gpms.model.UserProfile;
@@ -89,46 +90,21 @@ public class NotificationService {
 			log.info("NotificationService::notificationGetAllCountForAUser started");
 			ObjectMapper mapper = new ObjectMapper();
 			JsonNode root = mapper.readTree(message);
-			String userProfileID = new String();
-			@SuppressWarnings("unused")
-			String userName = new String();
-			Boolean userIsAdmin = false;
-			String userCollege = new String();
-			String userDepartment = new String();
-			String userPositionType = new String();
-			String userPositionTitle = new String();
-			JsonNode commonObj = root.get("gpmsCommonObj");
-			if (commonObj != null && commonObj.has("UserProfileID")) {
-				userProfileID = commonObj.get("UserProfileID").textValue();
-			}
-			if (commonObj != null && commonObj.has("UserName")) {
-				userName = commonObj.get("UserName").textValue();
-			}
-			if (commonObj != null && commonObj.has("UserIsAdmin")) {
-				userIsAdmin = Boolean.parseBoolean(commonObj.get("UserIsAdmin")
-						.textValue());
-			}
-			if (commonObj != null && commonObj.has("UserCollege")) {
-				userCollege = commonObj.get("UserCollege").textValue();
-			}
-			if (commonObj != null && commonObj.has("UserDepartment")) {
-				userDepartment = commonObj.get("UserDepartment").textValue();
-			}
-			if (commonObj != null && commonObj.has("UserPositionType")) {
-				userPositionType = commonObj.get("UserPositionType")
-						.textValue();
-			}
-			if (commonObj != null && commonObj.has("UserPositionTitle")) {
-				userPositionTitle = commonObj.get("UserPositionTitle")
-						.textValue();
+			GPMSCommonInfo userInfo = new GPMSCommonInfo();
+			if (root != null && root.has("gpmsCommonObj")) {
+				JsonNode commonObj = root.get("gpmsCommonObj");
+				userInfo = new GPMSCommonInfo(commonObj);
 			}
 			return Response
 					.status(Response.Status.OK)
 					.entity(Long.toString(notificationDAO
-							.findAllNotificationCountAUser(userProfileID,
-									userCollege, userDepartment,
-									userPositionType, userPositionTitle,
-									userIsAdmin))).build();
+							.findAllNotificationCountAUser(
+									userInfo.getUserProfileID(),
+									userInfo.getUserCollege(),
+									userInfo.getUserDepartment(),
+									userInfo.getUserPositionType(),
+									userInfo.getUserPositionTitle(),
+									userInfo.isUserIsAdmin()))).build();
 		} catch (Exception e) {
 			log.error("Could not find Notifications count error e=", e);
 		}
@@ -153,6 +129,12 @@ public class NotificationService {
 			throw new ServletException("Request can't be null or empty");
 		}
 		EventOutput eventOutput = new EventOutput();
+		String userProfileID = new String();
+		String userCollege = new String();
+		String userDepartment = new String();
+		String userPositionType = new String();
+		String userPositionTitle = new String();
+		Boolean userIsAdmin = false;
 		HttpSession session = request.getSession();
 		if (session.getAttribute("userProfileId") == null
 				|| session.getAttribute("userCollege") == null
@@ -161,12 +143,6 @@ public class NotificationService {
 				|| session.getAttribute("userPositionTitle") == null) {
 			throw new ServletException("User Session can't be null or empty");
 		}
-		String userProfileID = new String();
-		String userCollege = new String();
-		String userDepartment = new String();
-		String userPositionType = new String();
-		String userPositionTitle = new String();
-		Boolean userIsAdmin = false;
 		if (session.getAttribute("userProfileId") != null) {
 			userProfileID = (String) session.getAttribute("userProfileId");
 		}
@@ -211,46 +187,19 @@ public class NotificationService {
 			log.info("NotificationService::notificationGetAllForAUser started");
 			ObjectMapper mapper = new ObjectMapper();
 			JsonNode root = mapper.readTree(message);
-			String userProfileID = new String();
-			@SuppressWarnings("unused")
-			String userName = new String();
-			Boolean userIsAdmin = false;
-			String userCollege = new String();
-			String userDepartment = new String();
-			String userPositionType = new String();
-			String userPositionTitle = new String();
+			GPMSCommonInfo userInfo = new GPMSCommonInfo();
 			if (root != null && root.has("gpmsCommonObj")) {
 				JsonNode commonObj = root.get("gpmsCommonObj");
-				if (commonObj != null && commonObj.has("UserProfileID")) {
-					userProfileID = commonObj.get("UserProfileID").textValue();
-				}
-				if (commonObj != null && commonObj.has("UserName")) {
-					userName = commonObj.get("UserName").textValue();
-				}
-				if (commonObj != null && commonObj.has("UserIsAdmin")) {
-					userIsAdmin = Boolean.parseBoolean(commonObj.get(
-							"UserIsAdmin").textValue());
-				}
-				if (commonObj != null && commonObj.has("UserCollege")) {
-					userCollege = commonObj.get("UserCollege").textValue();
-				}
-				if (commonObj != null && commonObj.has("UserDepartment")) {
-					userDepartment = commonObj.get("UserDepartment")
-							.textValue();
-				}
-				if (commonObj != null && commonObj.has("UserPositionType")) {
-					userPositionType = commonObj.get("UserPositionType")
-							.textValue();
-				}
-				if (commonObj != null && commonObj.has("UserPositionTitle")) {
-					userPositionTitle = commonObj.get("UserPositionTitle")
-							.textValue();
-				}
+				userInfo = new GPMSCommonInfo(commonObj);
 			}
 			List<NotificationLog> notifications = notificationDAO
-					.findAllNotificationForAUser(1, 10, userProfileID,
-							userCollege, userDepartment, userPositionType,
-							userPositionTitle, userIsAdmin);
+					.findAllNotificationForAUser(1, 10,
+							userInfo.getUserProfileID(),
+							userInfo.getUserCollege(),
+							userInfo.getUserDepartment(),
+							userInfo.getUserPositionType(),
+							userInfo.getUserPositionTitle(),
+							userInfo.isUserIsAdmin());
 			return Response
 					.status(Response.Status.OK)
 					.entity(mapper.writerWithDefaultPrettyPrinter()

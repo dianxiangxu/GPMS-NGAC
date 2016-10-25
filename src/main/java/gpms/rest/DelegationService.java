@@ -86,10 +86,8 @@ public class DelegationService {
 	UserProfileDAO userProfileDAO = null;
 	DelegationDAO delegationDAO = null;
 	NotificationDAO notificationDAO = null;
-
 	DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 	private static String policyLocation = new String();
-
 	private static final Logger log = Logger.getLogger(DelegationService.class
 			.getName());
 
@@ -593,7 +591,6 @@ public class DelegationService {
 		contentProfile.append("<Content>");
 		contentProfile.append("<ak:record xmlns:ak=\"http://akpower.org\">");
 		ObjectId id = new ObjectId(userProfileID);
-		// TO GET all admin users here for Content as Delegatee
 		List<UserDetail> delegableUsers = userProfileDAO
 				.findAllUsersForDelegation(id, userCollege, userDepartment);
 		for (UserDetail userDetail : delegableUsers) {

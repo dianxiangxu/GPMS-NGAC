@@ -578,48 +578,12 @@ public class UserService {
 			if (root != null && root.has("userId")) {
 				profileId = root.get("userId").textValue();
 			}
-			String userProfileID = new String();
-			@SuppressWarnings("unused")
-			String userName = new String();
-			@SuppressWarnings("unused")
-			Boolean userIsAdmin = false;
-			@SuppressWarnings("unused")
-			String userCollege = new String();
-			@SuppressWarnings("unused")
-			String userDepartment = new String();
-			@SuppressWarnings("unused")
-			String userPositionType = new String();
-			@SuppressWarnings("unused")
-			String userPositionTitle = new String();
+			GPMSCommonInfo userInfo = new GPMSCommonInfo();
 			if (root != null && root.has("gpmsCommonObj")) {
 				JsonNode commonObj = root.get("gpmsCommonObj");
-				if (commonObj != null && commonObj.has("UserProfileID")) {
-					userProfileID = commonObj.get("UserProfileID").textValue();
-				}
-				if (commonObj != null && commonObj.has("UserName")) {
-					userName = commonObj.get("UserName").textValue();
-				}
-				if (commonObj != null && commonObj.has("UserIsAdmin")) {
-					userIsAdmin = Boolean.parseBoolean(commonObj.get(
-							"UserIsAdmin").textValue());
-				}
-				if (commonObj != null && commonObj.has("UserCollege")) {
-					userCollege = commonObj.get("UserCollege").textValue();
-				}
-				if (commonObj != null && commonObj.has("UserDepartment")) {
-					userDepartment = commonObj.get("UserDepartment")
-							.textValue();
-				}
-				if (commonObj != null && commonObj.has("UserPositionType")) {
-					userPositionType = commonObj.get("UserPositionType")
-							.textValue();
-				}
-				if (commonObj != null && commonObj.has("UserPositionTitle")) {
-					userPositionTitle = commonObj.get("UserPositionTitle")
-							.textValue();
-				}
+				userInfo = new GPMSCommonInfo(commonObj);
 			}
-			ObjectId authorId = new ObjectId(userProfileID);
+			ObjectId authorId = new ObjectId(userInfo.getUserProfileID());
 			UserProfile authorProfile = userProfileDAO
 					.findUserDetailsByProfileID(authorId);
 			ObjectId id = new ObjectId(profileId);
@@ -632,25 +596,7 @@ public class UserService {
 			userAccount.setDeleted(true);
 			userAccount.setActive(false);
 			userAccountDAO.save(userAccount);
-			String messageBody = new String();
-			EmailUtil emailUtil = new EmailUtil();
-			if (userProfile.isDeleted()) {
-				messageBody = "Hello "
-						+ userProfile.getFullName()
-						+ ",<br/> Your account has been deleted to reactivate you can contact administrator: <a href='http://seal.boisestate.edu:8080/GPMS/ContactUs.jsp' title='GPMS Contact Us' target='_blank'>Contact Us</a><br/><br/>Thank you, <br/> GPMS Team";
-				emailUtil.sendMailWithoutAuth(userProfile.getWorkEmails()
-						.get(0),
-						"You have been deleted " + userProfile.getFullName(),
-						messageBody);
-			}
-			NotificationLog notification = new NotificationLog();
-			notification.setType("User");
-			notification.setAction("Account is deleted.");
-			notification.setUserProfileId(userProfile.getId().toString());
-			notification.setUsername(userAccount.getUserName());
-			notification.setForAdmin(true);
-			notification.setCritical(true);
-			notificationDAO.save(notification);
+			sendNotification(userProfile, userAccount);
 			OutboundEvent.Builder eventBuilder = new OutboundEvent.Builder();
 			OutboundEvent event = eventBuilder.name("notification")
 					.mediaType(MediaType.TEXT_PLAIN_TYPE)
@@ -687,48 +633,12 @@ public class UserService {
 				profileIds = root.get("userIds").textValue();
 				profiles = profileIds.split(",");
 			}
-			String userProfileID = new String();
-			@SuppressWarnings("unused")
-			String userName = new String();
-			@SuppressWarnings("unused")
-			Boolean userIsAdmin = false;
-			@SuppressWarnings("unused")
-			String userCollege = new String();
-			@SuppressWarnings("unused")
-			String userDepartment = new String();
-			@SuppressWarnings("unused")
-			String userPositionType = new String();
-			@SuppressWarnings("unused")
-			String userPositionTitle = new String();
+			GPMSCommonInfo userInfo = new GPMSCommonInfo();
 			if (root != null && root.has("gpmsCommonObj")) {
 				JsonNode commonObj = root.get("gpmsCommonObj");
-				if (commonObj != null && commonObj.has("UserProfileID")) {
-					userProfileID = commonObj.get("UserProfileID").textValue();
-				}
-				if (commonObj != null && commonObj.has("UserName")) {
-					userName = commonObj.get("UserName").textValue();
-				}
-				if (commonObj != null && commonObj.has("UserIsAdmin")) {
-					userIsAdmin = Boolean.parseBoolean(commonObj.get(
-							"UserIsAdmin").textValue());
-				}
-				if (commonObj != null && commonObj.has("UserCollege")) {
-					userCollege = commonObj.get("UserCollege").textValue();
-				}
-				if (commonObj != null && commonObj.has("UserDepartment")) {
-					userDepartment = commonObj.get("UserDepartment")
-							.textValue();
-				}
-				if (commonObj != null && commonObj.has("UserPositionType")) {
-					userPositionType = commonObj.get("UserPositionType")
-							.textValue();
-				}
-				if (commonObj != null && commonObj.has("UserPositionTitle")) {
-					userPositionTitle = commonObj.get("UserPositionTitle")
-							.textValue();
-				}
+				userInfo = new GPMSCommonInfo(commonObj);
 			}
-			ObjectId authorId = new ObjectId(userProfileID);
+			ObjectId authorId = new ObjectId(userInfo.getUserProfileID());
 			UserProfile authorProfile = userProfileDAO
 					.findUserDetailsByProfileID(authorId);
 			for (String profile : profiles) {
@@ -742,14 +652,7 @@ public class UserService {
 				userAccount.setDeleted(true);
 				userAccount.setActive(false);
 				userAccountDAO.save(userAccount);
-				NotificationLog notification = new NotificationLog();
-				notification.setType("User");
-				notification.setAction("Account is deleted.");
-				notification.setUserProfileId(userProfile.getId().toString());
-				notification.setUsername(userAccount.getUserName());
-				notification.setForAdmin(true);
-				notification.setCritical(true);
-				notificationDAO.save(notification);
+				sendNotification(userProfile, userAccount);
 			}
 			OutboundEvent.Builder eventBuilder = new OutboundEvent.Builder();
 			OutboundEvent event = eventBuilder.name("notification")
@@ -767,6 +670,34 @@ public class UserService {
 				.status(Response.Status.BAD_REQUEST)
 				.entity("{\"error\": \"Could Not Delete All Selected Users\", \"status\": \"FAIL\"}")
 				.build();
+	}
+
+	/**
+	 * Sends Notification for User Account is Deleted
+	 * 
+	 * @param userProfile
+	 * @param userAccount
+	 */
+	private void sendNotification(UserProfile userProfile,
+			UserAccount userAccount) {
+		String messageBody = new String();
+		EmailUtil emailUtil = new EmailUtil();
+		if (userProfile.isDeleted()) {
+			messageBody = "Hello "
+					+ userProfile.getFullName()
+					+ ",<br/> Your account has been deleted to reactivate you can contact administrator: <a href='http://seal.boisestate.edu:8080/GPMS/ContactUs.jsp' title='GPMS Contact Us' target='_blank'>Contact Us</a><br/><br/>Thank you, <br/> GPMS Team";
+			emailUtil.sendMailWithoutAuth(userProfile.getWorkEmails().get(0),
+					"You have been deleted " + userProfile.getFullName(),
+					messageBody);
+		}
+		NotificationLog notification = new NotificationLog();
+		notification.setType("User");
+		notification.setAction("Account is deleted.");
+		notification.setUserProfileId(userProfile.getId().toString());
+		notification.setUsername(userAccount.getUserName());
+		notification.setForAdmin(true);
+		notification.setCritical(true);
+		notificationDAO.save(notification);
 	}
 
 	@POST
@@ -789,48 +720,12 @@ public class UserService {
 			if (root != null && root.has("isActive")) {
 				isActive = root.get("isActive").booleanValue();
 			}
-			String userProfileID = new String();
-			@SuppressWarnings("unused")
-			String userName = new String();
-			@SuppressWarnings("unused")
-			Boolean userIsAdmin = false;
-			@SuppressWarnings("unused")
-			String userCollege = new String();
-			@SuppressWarnings("unused")
-			String userDepartment = new String();
-			@SuppressWarnings("unused")
-			String userPositionType = new String();
-			@SuppressWarnings("unused")
-			String userPositionTitle = new String();
+			GPMSCommonInfo userInfo = new GPMSCommonInfo();
 			if (root != null && root.has("gpmsCommonObj")) {
 				JsonNode commonObj = root.get("gpmsCommonObj");
-				if (commonObj != null && commonObj.has("UserProfileID")) {
-					userProfileID = commonObj.get("UserProfileID").textValue();
-				}
-				if (commonObj != null && commonObj.has("UserName")) {
-					userName = commonObj.get("UserName").textValue();
-				}
-				if (commonObj != null && commonObj.has("UserIsAdmin")) {
-					userIsAdmin = Boolean.parseBoolean(commonObj.get(
-							"UserIsAdmin").textValue());
-				}
-				if (commonObj != null && commonObj.has("UserCollege")) {
-					userCollege = commonObj.get("UserCollege").textValue();
-				}
-				if (commonObj != null && commonObj.has("UserDepartment")) {
-					userDepartment = commonObj.get("UserDepartment")
-							.textValue();
-				}
-				if (commonObj != null && commonObj.has("UserPositionType")) {
-					userPositionType = commonObj.get("UserPositionType")
-							.textValue();
-				}
-				if (commonObj != null && commonObj.has("UserPositionTitle")) {
-					userPositionTitle = commonObj.get("UserPositionTitle")
-							.textValue();
-				}
+				userInfo = new GPMSCommonInfo(commonObj);
 			}
-			ObjectId authorId = new ObjectId(userProfileID);
+			ObjectId authorId = new ObjectId(userInfo.getUserProfileID());
 			UserProfile authorProfile = userProfileDAO
 					.findUserDetailsByProfileID(authorId);
 			ObjectId id = new ObjectId(profileId);
@@ -842,56 +737,7 @@ public class UserService {
 			userAccount.setDeleted(!isActive);
 			userAccount.setActive(isActive);
 			userAccountDAO.save(userAccount);
-			String messageBody = new String();
-			EmailUtil emailUtil = new EmailUtil();
-			NotificationLog notification = new NotificationLog();
-			String notificationMessage = new String();
-			boolean isCritical = false;
-			if (isActive) {
-				notificationMessage = "Account is activated.";
-				messageBody = "Hello "
-						+ userProfile.getFullName()
-						+ ",<br/><br/> Your account has been activated and you can login now using your credential: <a href='http://seal.boisestate.edu:8080/GPMS/Login.jsp' title='GPMS Login' target='_blank'>Login Here</a><br/><br/>Thank you, <br/> GPMS Team";
-				emailUtil.sendMailWithoutAuth(userProfile.getWorkEmails()
-						.get(0), "Successfully Activated your account "
-						+ userProfile.getFullName(), messageBody);
-			} else {
-				notificationMessage = "Account is deactivated.";
-				isCritical = true;
-
-				messageBody = "Hello "
-						+ userProfile.getFullName()
-						+ ",<br/> Your account has been deactivated to reactivate you can contact administrator: <a href='http://seal.boisestate.edu:8080/GPMS/ContactUs.jsp' title='GPMS Contact Us' target='_blank'>Contact Us</a><br/><br/>Thank you, <br/> GPMS Team";
-				emailUtil.sendMailWithoutAuth(
-						userProfile.getWorkEmails().get(0),
-						"You have been Deactivated "
-								+ userProfile.getFullName(), messageBody);
-			}
-			notification.setType("User");
-			notification.setAction(notificationMessage);
-			notification.setUserProfileId(userProfile.getId().toString());
-			notification.setUsername(userAccount.getUserName());
-			notification.setForAdmin(true);
-			notification.setCritical(isCritical);
-			notificationDAO.save(notification);
-			for (PositionDetails positions : userProfile.getDetails()) {
-				notification = new NotificationLog();
-				notification.setType("User");
-				notification.setAction(notificationMessage);
-				notification.setUserProfileId(userProfile.getId().toString());
-				notification.setUsername(userAccount.getUserName());
-				notification.setCollege(positions.getCollege());
-				notification.setDepartment(positions.getDepartment());
-				notification.setPositionType(positions.getPositionType());
-				notification.setPositionTitle(positions.getPositionTitle());
-				notification.setCritical(isCritical);
-				notificationDAO.save(notification);
-			}
-			OutboundEvent.Builder eventBuilder = new OutboundEvent.Builder();
-			OutboundEvent event = eventBuilder.name("notification")
-					.mediaType(MediaType.TEXT_PLAIN_TYPE)
-					.data(String.class, "1").build();
-			NotificationService.BROADCASTER.broadcast(event);
+			sendNotification(isActive, userProfile, userAccount);
 			return Response
 					.status(Response.Status.OK)
 					.entity(mapper.writerWithDefaultPrettyPrinter()
@@ -903,6 +749,67 @@ public class UserService {
 				.status(Response.Status.BAD_REQUEST)
 				.entity("{\"error\": \"Could Not Update User's IsActive Field\", \"status\": \"FAIL\"}")
 				.build();
+	}
+
+	/**
+	 * Sends Notification for User Account is Activated/ Deactivated
+	 * 
+	 * @param isActive
+	 * @param userProfile
+	 * @param userAccount
+	 */
+	private void sendNotification(Boolean isActive, UserProfile userProfile,
+			UserAccount userAccount) {
+		String messageBody = new String();
+		EmailUtil emailUtil = new EmailUtil();
+		NotificationLog notification = new NotificationLog();
+		String notificationMessage = new String();
+		boolean isCritical = false;
+		if (isActive) {
+			notificationMessage = "Account is activated.";
+			messageBody = "Hello "
+					+ userProfile.getFullName()
+					+ ",<br/><br/> Your account has been activated and you can login now using your credential: <a href='http://seal.boisestate.edu:8080/GPMS/Login.jsp' title='GPMS Login' target='_blank'>Login Here</a><br/><br/>Thank you, <br/> GPMS Team";
+			emailUtil.sendMailWithoutAuth(
+					userProfile.getWorkEmails().get(0),
+					"Successfully Activated your account "
+							+ userProfile.getFullName(), messageBody);
+		} else {
+			notificationMessage = "Account is deactivated.";
+			isCritical = true;
+
+			messageBody = "Hello "
+					+ userProfile.getFullName()
+					+ ",<br/> Your account has been deactivated to reactivate you can contact administrator: <a href='http://seal.boisestate.edu:8080/GPMS/ContactUs.jsp' title='GPMS Contact Us' target='_blank'>Contact Us</a><br/><br/>Thank you, <br/> GPMS Team";
+			emailUtil.sendMailWithoutAuth(userProfile.getWorkEmails().get(0),
+					"You have been Deactivated " + userProfile.getFullName(),
+					messageBody);
+		}
+		notification.setType("User");
+		notification.setAction(notificationMessage);
+		notification.setUserProfileId(userProfile.getId().toString());
+		notification.setUsername(userAccount.getUserName());
+		notification.setForAdmin(true);
+		notification.setCritical(isCritical);
+		notificationDAO.save(notification);
+		for (PositionDetails positions : userProfile.getDetails()) {
+			notification = new NotificationLog();
+			notification.setType("User");
+			notification.setAction(notificationMessage);
+			notification.setUserProfileId(userProfile.getId().toString());
+			notification.setUsername(userAccount.getUserName());
+			notification.setCollege(positions.getCollege());
+			notification.setDepartment(positions.getDepartment());
+			notification.setPositionType(positions.getPositionType());
+			notification.setPositionTitle(positions.getPositionTitle());
+			notification.setCritical(isCritical);
+			notificationDAO.save(notification);
+		}
+		OutboundEvent.Builder eventBuilder = new OutboundEvent.Builder();
+		OutboundEvent event = eventBuilder.name("notification")
+				.mediaType(MediaType.TEXT_PLAIN_TYPE).data(String.class, "1")
+				.build();
+		NotificationService.BROADCASTER.broadcast(event);
 	}
 
 	@POST
@@ -928,48 +835,6 @@ public class UserService {
 
 				if (userUniqueObj != null && userUniqueObj.has("NewUserName")) {
 					newUserName = userUniqueObj.get("NewUserName").textValue();
-				}
-			}
-			@SuppressWarnings("unused")
-			String userProfileID = new String();
-			@SuppressWarnings("unused")
-			String userName = new String();
-			@SuppressWarnings("unused")
-			Boolean userIsAdmin = false;
-			@SuppressWarnings("unused")
-			String userCollege = new String();
-			@SuppressWarnings("unused")
-			String userDepartment = new String();
-			@SuppressWarnings("unused")
-			String userPositionType = new String();
-			@SuppressWarnings("unused")
-			String userPositionTitle = new String();
-			if (root != null && root.has("gpmsCommonObj")) {
-				JsonNode commonObj = root.get("gpmsCommonObj");
-				if (commonObj != null && commonObj.has("UserProfileID")) {
-					userProfileID = commonObj.get("UserProfileID").textValue();
-				}
-				if (commonObj != null && commonObj.has("UserName")) {
-					userName = commonObj.get("UserName").textValue();
-				}
-				if (commonObj != null && commonObj.has("UserIsAdmin")) {
-					userIsAdmin = Boolean.parseBoolean(commonObj.get(
-							"UserIsAdmin").textValue());
-				}
-				if (commonObj != null && commonObj.has("UserCollege")) {
-					userCollege = commonObj.get("UserCollege").textValue();
-				}
-				if (commonObj != null && commonObj.has("UserDepartment")) {
-					userDepartment = commonObj.get("UserDepartment")
-							.textValue();
-				}
-				if (commonObj != null && commonObj.has("UserPositionType")) {
-					userPositionType = commonObj.get("UserPositionType")
-							.textValue();
-				}
-				if (commonObj != null && commonObj.has("UserPositionTitle")) {
-					userPositionTitle = commonObj.get("UserPositionTitle")
-							.textValue();
 				}
 			}
 			ObjectId id = new ObjectId();
@@ -1021,48 +886,6 @@ public class UserService {
 				}
 				if (userUniqueObj != null && userUniqueObj.has("NewEmail")) {
 					newEmail = userUniqueObj.get("NewEmail").textValue();
-				}
-			}
-			@SuppressWarnings("unused")
-			String userProfileID = new String();
-			@SuppressWarnings("unused")
-			String userName = new String();
-			@SuppressWarnings("unused")
-			Boolean userIsAdmin = false;
-			@SuppressWarnings("unused")
-			String userCollege = new String();
-			@SuppressWarnings("unused")
-			String userDepartment = new String();
-			@SuppressWarnings("unused")
-			String userPositionType = new String();
-			@SuppressWarnings("unused")
-			String userPositionTitle = new String();
-			if (root != null && root.has("gpmsCommonObj")) {
-				JsonNode commonObj = root.get("gpmsCommonObj");
-				if (commonObj != null && commonObj.has("UserProfileID")) {
-					userProfileID = commonObj.get("UserProfileID").textValue();
-				}
-				if (commonObj != null && commonObj.has("UserName")) {
-					userName = commonObj.get("UserName").textValue();
-				}
-				if (commonObj != null && commonObj.has("UserIsAdmin")) {
-					userIsAdmin = Boolean.parseBoolean(commonObj.get(
-							"UserIsAdmin").textValue());
-				}
-				if (commonObj != null && commonObj.has("UserCollege")) {
-					userCollege = commonObj.get("UserCollege").textValue();
-				}
-				if (commonObj != null && commonObj.has("UserDepartment")) {
-					userDepartment = commonObj.get("UserDepartment")
-							.textValue();
-				}
-				if (commonObj != null && commonObj.has("UserPositionType")) {
-					userPositionType = commonObj.get("UserPositionType")
-							.textValue();
-				}
-				if (commonObj != null && commonObj.has("UserPositionTitle")) {
-					userPositionTitle = commonObj.get("UserPositionTitle")
-							.textValue();
 				}
 			}
 			ObjectId id = new ObjectId();
@@ -1513,44 +1336,12 @@ public class UserService {
 			log.info("UserService::getCurrentPositionDetailsForPI started");
 			ObjectMapper mapper = new ObjectMapper();
 			JsonNode root = mapper.readTree(message);
-			String userProfileID = new String();
-			@SuppressWarnings("unused")
-			String userName = new String();
-			@SuppressWarnings("unused")
-			Boolean userIsAdmin = false;
-			String userCollege = new String();
-			String userDepartment = new String();
-			String userPositionType = new String();
-			String userPositionTitle = new String();
+			GPMSCommonInfo userInfo = new GPMSCommonInfo();
 			if (root != null && root.has("gpmsCommonObj")) {
 				JsonNode commonObj = root.get("gpmsCommonObj");
-				if (commonObj != null && commonObj.has("UserProfileID")) {
-					userProfileID = commonObj.get("UserProfileID").textValue();
-				}
-				if (commonObj != null && commonObj.has("UserName")) {
-					userName = commonObj.get("UserName").textValue();
-				}
-				if (commonObj != null && commonObj.has("UserIsAdmin")) {
-					userIsAdmin = Boolean.parseBoolean(commonObj.get(
-							"UserIsAdmin").textValue());
-				}
-				if (commonObj != null && commonObj.has("UserCollege")) {
-					userCollege = commonObj.get("UserCollege").textValue();
-				}
-				if (commonObj != null && commonObj.has("UserDepartment")) {
-					userDepartment = commonObj.get("UserDepartment")
-							.textValue();
-				}
-				if (commonObj != null && commonObj.has("UserPositionType")) {
-					userPositionType = commonObj.get("UserPositionType")
-							.textValue();
-				}
-				if (commonObj != null && commonObj.has("UserPositionTitle")) {
-					userPositionTitle = commonObj.get("UserPositionTitle")
-							.textValue();
-				}
+				userInfo = new GPMSCommonInfo(commonObj);
 			}
-			ObjectId id = new ObjectId(userProfileID);
+			ObjectId id = new ObjectId(userInfo.getUserProfileID());
 			final MultimapAdapter multimapAdapter = new MultimapAdapter();
 			final Gson gson = new GsonBuilder().setPrettyPrinting()
 					.registerTypeAdapter(Multimap.class, multimapAdapter)
@@ -1558,9 +1349,11 @@ public class UserService {
 			return Response
 					.status(Response.Status.OK)
 					.entity(gson.toJson(userProfileDAO
-							.findCurrentPositionDetailsForPI(id, userCollege,
-									userDepartment, userPositionType,
-									userPositionTitle))).build();
+							.findCurrentPositionDetailsForPI(id,
+									userInfo.getUserCollege(),
+									userInfo.getUserDepartment(),
+									userInfo.getUserPositionType(),
+									userInfo.getUserPositionTitle()))).build();
 		} catch (Exception e) {
 			log.error("Could not current Position Details for PI error e=", e);
 		}
@@ -1617,46 +1410,16 @@ public class UserService {
 			log.info("UserService::getAllProposalCountForAUser started");
 			ObjectMapper mapper = new ObjectMapper();
 			JsonNode root = mapper.readTree(message);
-			String userProfileID = new String();
-			@SuppressWarnings("unused")
-			String userName = new String();
-			@SuppressWarnings("unused")
-			Boolean userIsAdmin = false;
-			String userCollege = new String();
-			String userDepartment = new String();
-			String userPositionType = new String();
-			String userPositionTitle = new String();
+			GPMSCommonInfo userInfo = new GPMSCommonInfo();
 			if (root != null && root.has("gpmsCommonObj")) {
 				JsonNode commonObj = root.get("gpmsCommonObj");
-				if (commonObj != null && commonObj.has("UserProfileID")) {
-					userProfileID = commonObj.get("UserProfileID").textValue();
-				}
-				if (commonObj != null && commonObj.has("UserName")) {
-					userName = commonObj.get("UserName").textValue();
-				}
-				if (commonObj != null && commonObj.has("UserIsAdmin")) {
-					userIsAdmin = Boolean.parseBoolean(commonObj.get(
-							"UserIsAdmin").textValue());
-				}
-				if (commonObj != null && commonObj.has("UserCollege")) {
-					userCollege = commonObj.get("UserCollege").textValue();
-				}
-				if (commonObj != null && commonObj.has("UserDepartment")) {
-					userDepartment = commonObj.get("UserDepartment")
-							.textValue();
-				}
-				if (commonObj != null && commonObj.has("UserPositionType")) {
-					userPositionType = commonObj.get("UserPositionType")
-							.textValue();
-				}
-				if (commonObj != null && commonObj.has("UserPositionTitle")) {
-					userPositionTitle = commonObj.get("UserPositionTitle")
-							.textValue();
-				}
+				userInfo = new GPMSCommonInfo(commonObj);
 			}
 			UserProposalCount count = userProfileDAO.getUserProposalCounts(
-					userProfileID, userCollege, userDepartment,
-					userPositionType, userPositionTitle);
+					userInfo.getUserProfileID(), userInfo.getUserCollege(),
+					userInfo.getUserDepartment(),
+					userInfo.getUserPositionType(),
+					userInfo.getUserPositionTitle());
 			return Response
 					.status(Response.Status.OK)
 					.entity(mapper.writerWithDefaultPrettyPrinter()
@@ -2017,122 +1780,17 @@ public class UserService {
 					}
 				}
 			}
-			String userProfileID = new String();
-			@SuppressWarnings("unused")
-			String userName = new String();
-			@SuppressWarnings("unused")
-			Boolean userIsAdmin = false;
-			@SuppressWarnings("unused")
-			String userCollege = new String();
-			@SuppressWarnings("unused")
-			String userDepartment = new String();
-			@SuppressWarnings("unused")
-			String userPositionType = new String();
-			@SuppressWarnings("unused")
-			String userPositionTitle = new String();
+			GPMSCommonInfo userInfo = new GPMSCommonInfo();
 			if (root != null && root.has("gpmsCommonObj")) {
 				JsonNode commonObj = root.get("gpmsCommonObj");
-				if (commonObj != null && commonObj.has("UserProfileID")) {
-					userProfileID = commonObj.get("UserProfileID").textValue();
-				}
-				if (commonObj != null && commonObj.has("UserName")) {
-					userName = commonObj.get("UserName").textValue();
-				}
-				if (commonObj != null && commonObj.has("UserIsAdmin")) {
-					userIsAdmin = Boolean.parseBoolean(commonObj.get(
-							"UserIsAdmin").textValue());
-				}
-				if (commonObj != null && commonObj.has("UserCollege")) {
-					userCollege = commonObj.get("UserCollege").textValue();
-				}
-				if (commonObj != null && commonObj.has("UserDepartment")) {
-					userDepartment = commonObj.get("UserDepartment")
-							.textValue();
-				}
-				if (commonObj != null && commonObj.has("UserPositionType")) {
-					userPositionType = commonObj.get("UserPositionType")
-							.textValue();
-				}
-				if (commonObj != null && commonObj.has("UserPositionTitle")) {
-					userPositionTitle = commonObj.get("UserPositionTitle")
-							.textValue();
-				}
+				userInfo = new GPMSCommonInfo(commonObj);
 			}
-			ObjectId authorId = new ObjectId(userProfileID);
+			ObjectId authorId = new ObjectId(userInfo.getUserProfileID());
 			UserProfile authorProfile = userProfileDAO
 					.findUserDetailsByProfileID(authorId);
-			NotificationLog notification = new NotificationLog();
-			if (!userID.equals("0")) {
-				if (!oldUserProfile.equals(existingUserProfile)) {
-					if (!oldUserProfile.getUserAccount().equals(
-							existingUserAccount)) {
-						userAccountDAO.save(existingUserAccount);
-					}
-					userProfileDAO.updateUser(existingUserProfile,
-							authorProfile);
-					notification = new NotificationLog();
-					notification.setType("User");
-					if (isActiveUser) {
-						notification.setAction("Account is activated.");
-					} else {
-						notification.setAction("Account is updated.");
-					}
-					notification.setUserProfileId(existingUserProfile.getId()
-							.toString());
-					notification.setUsername(existingUserProfile
-							.getUserAccount().getUserName());
-					notification.setForAdmin(true);
-					notificationDAO.save(notification);
-					for (PositionDetails positions : existingUserProfile
-							.getDetails()) {
-						notification = new NotificationLog();
-						notification.setType("User");
-						notification.setAction("Account is updated.");
-
-						notification.setUserProfileId(existingUserProfile
-								.getId().toString());
-						notification.setUsername(existingUserProfile
-								.getUserAccount().getUserName());
-						notification.setCollege(positions.getCollege());
-						notification.setDepartment(positions.getDepartment());
-						notification.setPositionType(positions
-								.getPositionType());
-						notification.setPositionTitle(positions
-								.getPositionTitle());
-						notificationDAO.save(notification);
-					}
-				}
-			} else {
-				userAccountDAO.save(newAccount);
-				userProfileDAO.saveUser(newProfile, authorProfile);
-				notification = new NotificationLog();
-				notification.setType("User");
-				notification.setAction("Account is created.");
-				notification.setUserProfileId(newProfile.getId().toString());
-				notification.setUsername(newProfile.getUserAccount()
-						.getUserName());
-				notification.setForAdmin(true);
-				notificationDAO.save(notification);
-				for (PositionDetails positions : newProfile.getDetails()) {
-					notification = new NotificationLog();
-					notification.setType("User");
-					notification.setAction("Account is created.");
-					notification
-							.setUserProfileId(newProfile.getId().toString());
-					notification.setUsername(newProfile.getUserAccount()
-							.getUserName());
-					notification.setCollege(positions.getCollege());
-					notification.setDepartment(positions.getDepartment());
-					notification.setPositionType(positions.getPositionType());
-					notification.setPositionTitle(positions.getPositionTitle());
-					notificationDAO.save(notification);
-				}
-			}
-			OutboundEvent.Builder eventBuilder = new OutboundEvent.Builder();
-			OutboundEvent event = eventBuilder.name("notification")
-					.mediaType(MediaType.TEXT_PLAIN_TYPE)
-					.data(String.class, "1").build();
-			NotificationService.BROADCASTER.broadcast(event);
+			sendNotification(userID, newAccount, newProfile,
+					existingUserAccount, existingUserProfile, oldUserProfile,
+					isActiveUser, authorProfile);
 			return Response
 					.status(Response.Status.OK)
 					.entity(mapper.writerWithDefaultPrettyPrinter()
@@ -2146,5 +1804,89 @@ public class UserService {
 				.status(Response.Status.BAD_REQUEST)
 				.entity("{\"error\": \"Could Not Save A New User OR Update AN Existing User\", \"status\": \"FAIL\"}")
 				.build();
+	}
+
+	/**
+	 * Sends Notification For User Save and Update
+	 * 
+	 * @param userID
+	 * @param newAccount
+	 * @param newProfile
+	 * @param existingUserAccount
+	 * @param existingUserProfile
+	 * @param oldUserProfile
+	 * @param isActiveUser
+	 * @param authorProfile
+	 */
+	private void sendNotification(String userID, UserAccount newAccount,
+			UserProfile newProfile, UserAccount existingUserAccount,
+			UserProfile existingUserProfile, UserProfile oldUserProfile,
+			boolean isActiveUser, UserProfile authorProfile) {
+		NotificationLog notification = new NotificationLog();
+		if (!userID.equals("0")) {
+			if (!oldUserProfile.equals(existingUserProfile)) {
+				if (!oldUserProfile.getUserAccount()
+						.equals(existingUserAccount)) {
+					userAccountDAO.save(existingUserAccount);
+				}
+				userProfileDAO.updateUser(existingUserProfile, authorProfile);
+				notification = new NotificationLog();
+				notification.setType("User");
+				if (isActiveUser) {
+					notification.setAction("Account is activated.");
+				} else {
+					notification.setAction("Account is updated.");
+				}
+				notification.setUserProfileId(existingUserProfile.getId()
+						.toString());
+				notification.setUsername(existingUserProfile.getUserAccount()
+						.getUserName());
+				notification.setForAdmin(true);
+				notificationDAO.save(notification);
+				for (PositionDetails positions : existingUserProfile
+						.getDetails()) {
+					notification = new NotificationLog();
+					notification.setType("User");
+					notification.setAction("Account is updated.");
+					notification.setUserProfileId(existingUserProfile.getId()
+							.toString());
+					notification.setUsername(existingUserProfile
+							.getUserAccount().getUserName());
+					notification.setCollege(positions.getCollege());
+					notification.setDepartment(positions.getDepartment());
+					notification.setPositionType(positions.getPositionType());
+					notification.setPositionTitle(positions.getPositionTitle());
+					notificationDAO.save(notification);
+				}
+			}
+		} else {
+			userAccountDAO.save(newAccount);
+			userProfileDAO.saveUser(newProfile, authorProfile);
+			notification = new NotificationLog();
+			notification.setType("User");
+			notification.setAction("Account is created.");
+			notification.setUserProfileId(newProfile.getId().toString());
+			notification.setUsername(newProfile.getUserAccount().getUserName());
+			notification.setForAdmin(true);
+			notificationDAO.save(notification);
+			for (PositionDetails positions : newProfile.getDetails()) {
+				notification = new NotificationLog();
+				notification.setType("User");
+				notification.setAction("Account is created.");
+				notification.setUserProfileId(newProfile.getId().toString());
+				notification.setUsername(newProfile.getUserAccount()
+						.getUserName());
+				notification.setCollege(positions.getCollege());
+				notification.setDepartment(positions.getDepartment());
+				notification.setPositionType(positions.getPositionType());
+				notification.setPositionTitle(positions.getPositionTitle());
+				notificationDAO.save(notification);
+			}
+		}
+		OutboundEvent.Builder eventBuilder = new OutboundEvent.Builder();
+		OutboundEvent event = eventBuilder.name("notification")
+				.mediaType(MediaType.TEXT_PLAIN_TYPE).data(String.class, "1")
+				.build();
+		NotificationService.BROADCASTER.broadcast(event);
 	}
 }

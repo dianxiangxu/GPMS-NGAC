@@ -47,7 +47,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML,
 		MediaType.TEXT_PLAIN })
 public class FileService {
-
 	private static final Logger log = Logger
 			.getLogger(NotificationService.class.getName());
 

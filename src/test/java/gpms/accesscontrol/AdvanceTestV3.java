@@ -527,48 +527,48 @@ public class AdvanceTestV3 extends TestCase {
 	 *
 	 * @throws Exception
 	 */
-	public void testAdvanceTest00011() throws Exception {
-		String reqResNo;
-		Set<String> policies = new HashSet<String>();
-		policies.add("TestPolicy_00011.xml");
-		log.info("Basic Test 00011 is started");
-
-		for (int i = 1; i < 2; i++) {
-
-			if (i < 10) {
-				reqResNo = "0" + i;
-			} else {
-				reqResNo = Integer.toString(i);
-			}
-
-			String request = PolicyTestUtil.createRequest(ROOT_DIRECTORY,
-					VERSION_DIRECTORY, "request_00011_" + reqResNo + ".xml");
-			if (request != null) {
-				log.info("Request that is sent to the PDP :  " + request);
-				ResponseCtx response = PolicyTestUtil.evaluate(
-						getPDPNewInstance(policies), request);
-				if (response != null) {
-					log.info("Response that is received from the PDP :  "
-							+ response.encode());
-					ResponseCtx expectedResponseCtx = PolicyTestUtil
-							.createResponse(ROOT_DIRECTORY, VERSION_DIRECTORY,
-									"response_00011_" + reqResNo + ".xml");
-					if (expectedResponseCtx != null) {
-						assertTrue(PolicyTestUtil.isMatching(response,
-								expectedResponseCtx));
-					} else {
-						assertTrue("Response read from file is Null", false);
-					}
-				} else {
-					assertFalse("Response received PDP is Null", false);
-				}
-			} else {
-				assertTrue("Request read from file is Null", false);
-			}
-
-			log.info("Basic Test 00011 is finished");
-		}
-	}
+	// public void testAdvanceTest00011() throws Exception {
+	// String reqResNo;
+	// Set<String> policies = new HashSet<String>();
+	// policies.add("TestPolicy_00011.xml");
+	// log.info("Basic Test 00011 is started");
+	//
+	// for (int i = 1; i < 2; i++) {
+	//
+	// if (i < 10) {
+	// reqResNo = "0" + i;
+	// } else {
+	// reqResNo = Integer.toString(i);
+	// }
+	//
+	// String request = PolicyTestUtil.createRequest(ROOT_DIRECTORY,
+	// VERSION_DIRECTORY, "request_00011_" + reqResNo + ".xml");
+	// if (request != null) {
+	// log.info("Request that is sent to the PDP :  " + request);
+	// ResponseCtx response = PolicyTestUtil.evaluate(
+	// getPDPNewInstance(policies), request);
+	// if (response != null) {
+	// log.info("Response that is received from the PDP :  "
+	// + response.encode());
+	// ResponseCtx expectedResponseCtx = PolicyTestUtil
+	// .createResponse(ROOT_DIRECTORY, VERSION_DIRECTORY,
+	// "response_00011_" + reqResNo + ".xml");
+	// if (expectedResponseCtx != null) {
+	// assertTrue(PolicyTestUtil.isMatching(response,
+	// expectedResponseCtx));
+	// } else {
+	// assertTrue("Response read from file is Null", false);
+	// }
+	// } else {
+	// assertFalse("Response received PDP is Null", false);
+	// }
+	// } else {
+	// assertTrue("Request read from file is Null", false);
+	// }
+	//
+	// log.info("Basic Test 00011 is finished");
+	// }
+	// }
 
 	/**
 	 * Returns a new PDP instance with new XACML policies
