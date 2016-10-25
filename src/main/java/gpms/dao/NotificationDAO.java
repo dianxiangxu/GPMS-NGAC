@@ -1,6 +1,7 @@
 package gpms.dao;
 
 import gpms.DAL.MongoDBConnector;
+import gpms.model.GPMSCommonInfo;
 import gpms.model.NotificationLog;
 import gpms.model.UserAccount;
 import gpms.model.UserProfile;
@@ -55,11 +56,15 @@ public class NotificationDAO extends BasicDAO<NotificationLog, String> {
 		super(mongo, morphia, dbName);
 	}
 
-	public long findAllNotificationCountAUser(String userProfileId,
-			String userCollege, String userDepartment, String userPositionType,
-			String userPositionTitle, boolean isUserAdmin)
+	public long findAllNotificationCountAUser(GPMSCommonInfo userInfo)
 			throws ParseException {
 		Datastore ds = getDatastore();
+		String userProfileId = userInfo.getUserProfileID();
+		String userCollege = userInfo.getUserCollege();
+		String userDepartment = userInfo.getUserDepartment();
+		String userPositionType = userInfo.getUserPositionType();
+		String userPositionTitle = userInfo.getUserPositionTitle();
+		boolean isUserAdmin = userInfo.isUserIsAdmin();
 		Query<NotificationLog> notificationQuery = ds
 				.createQuery(NotificationLog.class);
 		if (isUserAdmin) {
@@ -97,12 +102,11 @@ public class NotificationDAO extends BasicDAO<NotificationLog, String> {
 		}
 	}
 
-	public List<NotificationLog> findAllNotificationForAUser(int offset,
-			int limit, String userProfileId, String userCollege,
-			String userDepartment, String userPositionType,
-			String userPositionTitle, boolean isUserAdmin)
-			throws ParseException {
+	public List<NotificationLog> findAllNotificationForAUser(
+			GPMSCommonInfo userInfo) throws ParseException {
 		Datastore ds = getDatastore();
+		int offset = 1;
+		int limit = 10;
 		List<NotificationLog> notifications = new ArrayList<NotificationLog>();
 		Query<NotificationLog> notificationQuery = ds
 				.createQuery(NotificationLog.class)
@@ -118,14 +122,12 @@ public class NotificationDAO extends BasicDAO<NotificationLog, String> {
 				"user name", "college", "department", "position type",
 				"position title", "viewed by user", "viewed by admin",
 				"activity on", "for admin", "critical");
-		if (isUserAdmin) {
+		if (userInfo.isUserIsAdmin()) {
 			notifications = getNotificationsForAdmin(offset, limit, ds,
 					notificationQuery, removeNotifyQuery);
 		} else {
-			notifications = getNotificationsForUser(offset, limit,
-					userProfileId, userCollege, userDepartment,
-					userPositionType, userPositionTitle, ds, notificationQuery,
-					removeNotifyQuery);
+			notifications = getNotificationsForUser(offset, limit, userInfo,
+					ds, notificationQuery, removeNotifyQuery);
 		}
 		return notifications;
 	}
@@ -156,12 +158,15 @@ public class NotificationDAO extends BasicDAO<NotificationLog, String> {
 	 * @return
 	 */
 	private List<NotificationLog> getNotificationsForUser(int offset,
-			int limit, String userProfileId, String userCollege,
-			String userDepartment, String userPositionType,
-			String userPositionTitle, Datastore ds,
+			int limit, GPMSCommonInfo userInfo, Datastore ds,
 			Query<NotificationLog> notificationQuery,
 			Query<NotificationLog> removeNotifyQuery) {
-		List<NotificationLog> notifications;
+		List<NotificationLog> notifications = new ArrayList<NotificationLog>();
+		String userProfileId = userInfo.getUserProfileID();
+		String userCollege = userInfo.getUserCollege();
+		String userDepartment = userInfo.getUserDepartment();
+		String userPositionType = userInfo.getUserPositionType();
+		String userPositionTitle = userInfo.getUserPositionTitle();
 		switch (userPositionTitle) {
 		case "Associate Chair":
 			userPositionTitle = "Department Chair";

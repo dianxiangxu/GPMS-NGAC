@@ -98,13 +98,7 @@ public class NotificationService {
 			return Response
 					.status(Response.Status.OK)
 					.entity(Long.toString(notificationDAO
-							.findAllNotificationCountAUser(
-									userInfo.getUserProfileID(),
-									userInfo.getUserCollege(),
-									userInfo.getUserDepartment(),
-									userInfo.getUserPositionType(),
-									userInfo.getUserPositionTitle(),
-									userInfo.isUserIsAdmin()))).build();
+							.findAllNotificationCountAUser(userInfo))).build();
 		} catch (Exception e) {
 			log.error("Could not find Notifications count error e=", e);
 		}
@@ -129,13 +123,28 @@ public class NotificationService {
 			throw new ServletException("Request can't be null or empty");
 		}
 		EventOutput eventOutput = new EventOutput();
-		String userProfileID = new String();
-		String userCollege = new String();
-		String userDepartment = new String();
-		String userPositionType = new String();
-		String userPositionTitle = new String();
-		Boolean userIsAdmin = false;
 		HttpSession session = request.getSession();
+		GPMSCommonInfo userInfo = bindUserInfoFromSession(session);
+		long notificationCount = notificationDAO
+				.findAllNotificationCountAUser(userInfo);
+		OutboundEvent.Builder eventBuilder = new OutboundEvent.Builder();
+		eventBuilder.name("notification");
+		eventBuilder.data(String.class, Long.toString(notificationCount));
+		OutboundEvent event = eventBuilder.build();
+		eventOutput.write(event);
+		BROADCASTER.add(eventOutput);
+		return eventOutput;
+	}
+
+	/**
+	 * Binds User Info From login user Session
+	 * 
+	 * @param session
+	 * @throws ServletException
+	 */
+	private GPMSCommonInfo bindUserInfoFromSession(HttpSession session)
+			throws ServletException {
+		GPMSCommonInfo userInfo = new GPMSCommonInfo();
 		if (session.getAttribute("userProfileId") == null
 				|| session.getAttribute("userCollege") == null
 				|| session.getAttribute("userDepartment") == null
@@ -144,35 +153,30 @@ public class NotificationService {
 			throw new ServletException("User Session can't be null or empty");
 		}
 		if (session.getAttribute("userProfileId") != null) {
-			userProfileID = (String) session.getAttribute("userProfileId");
+			userInfo.setUserProfileID((String) session
+					.getAttribute("userProfileId"));
 		}
 		if (session.getAttribute("userCollege") != null) {
-			userCollege = (String) session.getAttribute("userCollege");
+			userInfo.setUserCollege((String) session
+					.getAttribute("userCollege"));
 		}
 		if (session.getAttribute("userDepartment") != null) {
-			userDepartment = (String) session.getAttribute("userDepartment");
+			userInfo.setUserDepartment((String) session
+					.getAttribute("userDepartment"));
 		}
 		if (session.getAttribute("userPositionType") != null) {
-			userPositionType = (String) session
-					.getAttribute("userPositionType");
+			userInfo.setUserPositionType((String) session
+					.getAttribute("userPositionType"));
 		}
 		if (session.getAttribute("userPositionTitle") != null) {
-			userPositionTitle = (String) session
-					.getAttribute("userPositionTitle");
+			userInfo.setUserPositionTitle((String) session
+					.getAttribute("userPositionTitle"));
 		}
 		if (session.getAttribute("isAdmin") != null) {
-			userIsAdmin = (Boolean) session.getAttribute("isAdmin");
+			userInfo.setUserIsAdmin((Boolean) session.getAttribute("isAdmin"));
 		}
-		long notificationCount = notificationDAO.findAllNotificationCountAUser(
-				userProfileID, userCollege, userDepartment, userPositionType,
-				userPositionTitle, userIsAdmin);
-		OutboundEvent.Builder eventBuilder = new OutboundEvent.Builder();
-		eventBuilder.name("notification");
-		eventBuilder.data(String.class, Long.toString(notificationCount));
-		OutboundEvent event = eventBuilder.build();
-		eventOutput.write(event);
-		BROADCASTER.add(eventOutput);
-		return eventOutput;
+
+		return userInfo;
 	}
 
 	@POST
@@ -193,13 +197,7 @@ public class NotificationService {
 				userInfo = new GPMSCommonInfo(commonObj);
 			}
 			List<NotificationLog> notifications = notificationDAO
-					.findAllNotificationForAUser(1, 10,
-							userInfo.getUserProfileID(),
-							userInfo.getUserCollege(),
-							userInfo.getUserDepartment(),
-							userInfo.getUserPositionType(),
-							userInfo.getUserPositionTitle(),
-							userInfo.isUserIsAdmin());
+					.findAllNotificationForAUser(userInfo);
 			return Response
 					.status(Response.Status.OK)
 					.entity(mapper.writerWithDefaultPrettyPrinter()

@@ -2,6 +2,7 @@ package gpms.dao;
 
 import gpms.DAL.MongoDBConnector;
 import gpms.model.AuditLog;
+import gpms.model.AuditLogCommonInfo;
 import gpms.model.AuditLogInfo;
 import gpms.model.Delegation;
 import gpms.model.DelegationCommonInfo;
@@ -236,8 +237,8 @@ public class DelegationDAO extends BasicDAO<Delegation, String> {
 	}
 
 	public List<AuditLogInfo> findAllForDelegationAuditLogGrid(int offset,
-			int limit, ObjectId id, String action, String auditedBy,
-			String activityOnFrom, String activityOnTo) throws ParseException {
+			int limit, ObjectId id, AuditLogCommonInfo auditLogInfo)
+			throws ParseException {
 		Datastore ds = getDatastore();
 		Query<Delegation> delegationQuery = ds.createQuery(Delegation.class);
 		Delegation q = delegationQuery.field("_id").equal(id).get();
@@ -245,8 +246,8 @@ public class DelegationDAO extends BasicDAO<Delegation, String> {
 		int rowTotal = 0;
 		if (q.getAuditLog() != null && q.getAuditLog().size() != 0) {
 			for (AuditLog delegationAudit : q.getAuditLog()) {
-				getDelegationAuditLogInfo(action, auditedBy, activityOnFrom,
-						activityOnTo, allAuditLogs, delegationAudit);
+				getDelegationAuditLogInfo(auditLogInfo, allAuditLogs,
+						delegationAudit);
 			}
 		}
 		Collections.sort(allAuditLogs);
@@ -274,11 +275,14 @@ public class DelegationDAO extends BasicDAO<Delegation, String> {
 	 * @param delegationAudit
 	 * @throws ParseException
 	 */
-	private void getDelegationAuditLogInfo(String action, String auditedBy,
-			String activityOnFrom, String activityOnTo,
+	private void getDelegationAuditLogInfo(AuditLogCommonInfo auditLogInfo,
 			List<AuditLogInfo> allAuditLogs, AuditLog delegationAudit)
 			throws ParseException {
 		AuditLogInfo delegationAuditLog = new AuditLogInfo();
+		String action = auditLogInfo.getAction();
+		String auditedBy = auditLogInfo.getAuditedBy();
+		String activityOnFrom = auditLogInfo.getActivityOnFrom();
+		String activityOnTo = auditLogInfo.getActivityOnTo();
 		boolean isActionMatch = false;
 		boolean isAuditedByMatch = false;
 		boolean isActivityDateFromMatch = false;
@@ -350,20 +354,15 @@ public class DelegationDAO extends BasicDAO<Delegation, String> {
 	}
 
 	public List<AuditLogInfo> findAllUserDelegationAuditLogs(ObjectId id,
-			String action, String auditedBy, String activityOnFrom,
-			String activityOnTo) throws ParseException {
+			AuditLogCommonInfo auditLogInfo) throws ParseException {
 		Datastore ds = getDatastore();
-
 		Query<Delegation> delegationQuery = ds.createQuery(Delegation.class);
-
 		Delegation q = delegationQuery.field("_id").equal(id).get();
-
 		List<AuditLogInfo> allAuditLogs = new ArrayList<AuditLogInfo>();
-
 		if (q.getAuditLog() != null && q.getAuditLog().size() != 0) {
 			for (AuditLog delegationAudit : q.getAuditLog()) {
-				getDelegationAuditLogInfo(action, auditedBy, activityOnFrom,
-						activityOnTo, allAuditLogs, delegationAudit);
+				getDelegationAuditLogInfo(auditLogInfo, allAuditLogs,
+						delegationAudit);
 			}
 		}
 		Collections.sort(allAuditLogs);

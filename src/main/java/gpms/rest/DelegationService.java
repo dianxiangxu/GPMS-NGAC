@@ -6,6 +6,7 @@ import gpms.dao.DelegationDAO;
 import gpms.dao.NotificationDAO;
 import gpms.dao.UserAccountDAO;
 import gpms.dao.UserProfileDAO;
+import gpms.model.AuditLogCommonInfo;
 import gpms.model.AuditLogInfo;
 import gpms.model.Delegation;
 import gpms.model.DelegationCommonInfo;
@@ -26,6 +27,7 @@ import io.swagger.annotations.ApiResponses;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -202,21 +204,7 @@ public class DelegationService {
 					userInfo.getUserPositionTitle());
 			String filename = new String();
 			if (delegations.size() > 0) {
-				Xcelite xcelite = new Xcelite();
-				XceliteSheet sheet = xcelite.createSheet("Delegations");
-				SheetWriter<DelegationInfo> writer = sheet
-						.getBeanWriter(DelegationInfo.class);
-				writer.write(delegations);
-				SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy_MM_dd");
-				Date date = new Date();
-				String fileName = String.format("%s.%s",
-						RandomStringUtils.randomAlphanumeric(8) + "_"
-								+ dateFormat.format(date), "xlsx");
-				String downloadLocation = this.getClass()
-						.getResource("/uploads").toURI().getPath();
-				xcelite.write(new File(downloadLocation + fileName));
-				filename = mapper.writerWithDefaultPrettyPrinter()
-						.writeValueAsString(fileName);
+				filename = exportToExcelFile(delegations, null, mapper);
 			} else {
 				filename = mapper.writerWithDefaultPrettyPrinter()
 						.writeValueAsString("No Record");
@@ -244,10 +232,6 @@ public class DelegationService {
 			List<AuditLogInfo> delegationAuditLogs = new ArrayList<AuditLogInfo>();
 			int offset = 0, limit = 0;
 			String delegationId = new String();
-			String action = new String();
-			String auditedBy = new String();
-			String activityOnFrom = new String();
-			String activityOnTo = new String();
 			ObjectMapper mapper = new ObjectMapper();
 			JsonNode root = mapper.readTree(message);
 			if (root != null && root.has("offset")) {
@@ -259,29 +243,15 @@ public class DelegationService {
 			if (root != null && root.has("delegationId")) {
 				delegationId = root.get("delegationId").textValue();
 			}
+			AuditLogCommonInfo auditLogInfo = new AuditLogCommonInfo();
 			if (root != null && root.has("auditLogBindObj")) {
 				JsonNode auditLogBindObj = root.get("auditLogBindObj");
-				if (auditLogBindObj != null && auditLogBindObj.has("Action")) {
-					action = auditLogBindObj.get("Action").textValue();
-				}
-				if (auditLogBindObj != null && auditLogBindObj.has("AuditedBy")) {
-					auditedBy = auditLogBindObj.get("AuditedBy").textValue();
-				}
-				if (auditLogBindObj != null
-						&& auditLogBindObj.has("ActivityOnFrom")) {
-					activityOnFrom = auditLogBindObj.get("ActivityOnFrom")
-							.textValue();
-				}
-				if (auditLogBindObj != null
-						&& auditLogBindObj.has("ActivityOnTo")) {
-					activityOnTo = auditLogBindObj.get("ActivityOnTo")
-							.textValue();
-				}
+				auditLogInfo = new AuditLogCommonInfo(auditLogBindObj);
 			}
 			ObjectId id = new ObjectId(delegationId);
 			delegationAuditLogs = delegationDAO
 					.findAllForDelegationAuditLogGrid(offset, limit, id,
-							action, auditedBy, activityOnFrom, activityOnTo);
+							auditLogInfo);
 			return Response
 					.status(Response.Status.OK)
 					.entity(mapper.writerWithDefaultPrettyPrinter()
@@ -306,55 +276,23 @@ public class DelegationService {
 		try {
 			log.info("DelegationService::exportDelegationAuditLogJSON started");
 			List<AuditLogInfo> delegationAuditLogs = new ArrayList<AuditLogInfo>();
-			String delegationId = new String();
-			String action = new String();
-			String auditedBy = new String();
-			String activityOnFrom = new String();
-			String activityOnTo = new String();
+			String delegationId = new String();			
 			ObjectMapper mapper = new ObjectMapper();
 			JsonNode root = mapper.readTree(message);
 			if (root != null && root.has("delegationId")) {
 				delegationId = root.get("delegationId").textValue();
 			}
+			AuditLogCommonInfo auditLogInfo = new AuditLogCommonInfo();
 			if (root != null && root.has("auditLogBindObj")) {
 				JsonNode auditLogBindObj = root.get("auditLogBindObj");
-				if (auditLogBindObj != null && auditLogBindObj.has("Action")) {
-					action = auditLogBindObj.get("Action").textValue();
-				}
-				if (auditLogBindObj != null && auditLogBindObj.has("AuditedBy")) {
-					auditedBy = auditLogBindObj.get("AuditedBy").textValue();
-				}
-				if (auditLogBindObj != null
-						&& auditLogBindObj.has("ActivityOnFrom")) {
-					activityOnFrom = auditLogBindObj.get("ActivityOnFrom")
-							.textValue();
-				}
-				if (auditLogBindObj != null
-						&& auditLogBindObj.has("ActivityOnTo")) {
-					activityOnTo = auditLogBindObj.get("ActivityOnTo")
-							.textValue();
-				}
+				auditLogInfo = new AuditLogCommonInfo(auditLogBindObj);
 			}
 			ObjectId id = new ObjectId(delegationId);
 			delegationAuditLogs = delegationDAO.findAllUserDelegationAuditLogs(
-					id, action, auditedBy, activityOnFrom, activityOnTo);
+					id, auditLogInfo);
 			String filename = new String();
 			if (delegationAuditLogs.size() > 0) {
-				Xcelite xcelite = new Xcelite();
-				XceliteSheet sheet = xcelite.createSheet("AuditLogs");
-				SheetWriter<AuditLogInfo> writer = sheet
-						.getBeanWriter(AuditLogInfo.class);
-				writer.write(delegationAuditLogs);
-				SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy_MM_dd");
-				Date date = new Date();
-				String fileName = String.format("%s.%s",
-						RandomStringUtils.randomAlphanumeric(8) + "_"
-								+ dateFormat.format(date), "xlsx");
-				String downloadLocation = this.getClass()
-						.getResource("/uploads").toURI().getPath();
-				xcelite.write(new File(downloadLocation + fileName));
-				filename = mapper.writerWithDefaultPrettyPrinter()
-						.writeValueAsString(fileName);
+				filename = exportToExcelFile(null, delegationAuditLogs, mapper);
 			} else {
 				filename = mapper.writerWithDefaultPrettyPrinter()
 						.writeValueAsString("No Record");
@@ -367,6 +305,47 @@ public class DelegationService {
 				.status(Response.Status.BAD_REQUEST)
 				.entity("{\"error\": \"Could Not Delegation Logs List\", \"status\": \"FAIL\"}")
 				.build();
+	}
+
+	/***
+	 * Exports to Excel File for Delegation and its Audit Logs
+	 * 
+	 * @param delegations
+	 * @param delegationAuditLogs
+	 * @param mapper
+	 * @return
+	 * @throws URISyntaxException
+	 * @throws JsonProcessingException
+	 */
+	private String exportToExcelFile(List<DelegationInfo> delegations,
+			List<AuditLogInfo> delegationAuditLogs, ObjectMapper mapper)
+			throws URISyntaxException, JsonProcessingException {
+		String filename = new String();
+		Xcelite xcelite = new Xcelite();
+		if (delegations != null) {
+			XceliteSheet sheet = xcelite.createSheet("Delegations");
+			SheetWriter<DelegationInfo> writer = sheet
+					.getBeanWriter(DelegationInfo.class);
+			writer.write(delegations);
+		} else {
+			XceliteSheet sheet = xcelite.createSheet("AuditLogs");
+			SheetWriter<AuditLogInfo> writer = sheet
+					.getBeanWriter(AuditLogInfo.class);
+			writer.write(delegationAuditLogs);
+		}
+
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy_MM_dd");
+		Date date = new Date();
+		String fileName = String.format(
+				"%s.%s",
+				RandomStringUtils.randomAlphanumeric(8) + "_"
+						+ dateFormat.format(date), "xlsx");
+		String downloadLocation = this.getClass().getResource("/uploads")
+				.toURI().getPath();
+		xcelite.write(new File(downloadLocation + fileName));
+		filename = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(
+				fileName);
+		return filename;
 	}
 
 	@POST

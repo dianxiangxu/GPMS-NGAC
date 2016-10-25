@@ -2,6 +2,7 @@ package gpms.dao;
 
 import gpms.DAL.MongoDBConnector;
 import gpms.model.AuditLog;
+import gpms.model.AuditLogCommonInfo;
 import gpms.model.AuditLogInfo;
 import gpms.model.Delegation;
 import gpms.model.GPMSCommonInfo;
@@ -255,10 +256,15 @@ public class UserProfileDAO extends BasicDAO<UserProfile, String> {
 		return users;
 	}
 
-	public List<UserInfo> findAllUsers(String userName, String college,
-			String department, String positionType, String positionTitle,
-			Boolean isActive) throws UnknownHostException {
+	public List<UserInfo> findAllUsers(GPMSCommonInfo userInfo)
+			throws UnknownHostException {
 		Datastore ds = getDatastore();
+		String userName = userInfo.getUserName();
+		String college = userInfo.getUserCollege();
+		String department = userInfo.getUserDepartment();
+		String positionType = userInfo.getUserPositionType();
+		String positionTitle = userInfo.getUserPositionTitle();
+		Boolean isActive = userInfo.getUserIsActive();
 		List<UserInfo> users = new ArrayList<UserInfo>();
 		Query<UserProfile> profileQuery = ds.createQuery(UserProfile.class);
 		Query<UserAccount> accountQuery = ds.createQuery(UserAccount.class);
@@ -361,10 +367,12 @@ public class UserProfileDAO extends BasicDAO<UserProfile, String> {
 		return false;
 	}
 
-	public List<UserInfo> findAllAdminUsers(String userName, String college,
-			String department, String positionType, String positionTitle,
-			Boolean isActive) throws UnknownHostException {
+	public List<UserInfo> findAllAdminUsers(GPMSCommonInfo userInfo)
+			throws UnknownHostException {
 		Datastore ds = getDatastore();
+		String userName = userInfo.getUserName();
+		String positionTitle = userInfo.getUserPositionTitle();
+		Boolean isActive = userInfo.getUserIsActive();
 		List<UserInfo> users = new ArrayList<UserInfo>();
 		Query<UserProfile> profileQuery = ds.createQuery(UserProfile.class);
 		Query<UserAccount> accountQuery = ds.createQuery(UserAccount.class);
@@ -435,9 +443,8 @@ public class UserProfileDAO extends BasicDAO<UserProfile, String> {
 	}
 
 	public List<AuditLogInfo> findAllForUserAuditLogGrid(int offset, int limit,
-			ObjectId userId, String action, String auditedBy,
-			String activityOnFrom, String activityOnTo) throws ParseException,
-			UnknownHostException {
+			ObjectId userId, AuditLogCommonInfo auditLogInfo)
+			throws ParseException, UnknownHostException {
 		Datastore ds = getDatastore();
 		Query<UserProfile> profileQuery = ds.createQuery(UserProfile.class);
 		UserProfile q = profileQuery.field("_id").equal(userId).get();
@@ -445,8 +452,7 @@ public class UserProfileDAO extends BasicDAO<UserProfile, String> {
 		int rowTotal = 0;
 		if (q.getAuditLog() != null && q.getAuditLog().size() != 0) {
 			for (AuditLog userProfileAudit : q.getAuditLog()) {
-				getUserAuditLogs(action, auditedBy, activityOnFrom,
-						activityOnTo, allAuditLogs, userProfileAudit);
+				getUserAuditLogs(auditLogInfo, allAuditLogs, userProfileAudit);
 			}
 		}
 		Collections.sort(allAuditLogs);
@@ -474,11 +480,14 @@ public class UserProfileDAO extends BasicDAO<UserProfile, String> {
 	 * @param userProfileAudit
 	 * @throws ParseException
 	 */
-	private void getUserAuditLogs(String action, String auditedBy,
-			String activityOnFrom, String activityOnTo,
+	private void getUserAuditLogs(AuditLogCommonInfo auditLogInfo,
 			List<AuditLogInfo> allAuditLogs, AuditLog userProfileAudit)
 			throws ParseException {
 		AuditLogInfo userAuditLog = new AuditLogInfo();
+		String action = auditLogInfo.getAction();
+		String auditedBy = auditLogInfo.getAuditedBy();
+		String activityOnFrom = auditLogInfo.getActivityOnFrom();
+		String activityOnTo = auditLogInfo.getActivityOnTo();
 		boolean isActionMatch = false;
 		boolean isAuditedByMatch = false;
 		boolean isActivityDateFromMatch = false;

@@ -7,6 +7,7 @@ import gpms.dao.ProposalDAO;
 import gpms.dao.UserAccountDAO;
 import gpms.dao.UserProfileDAO;
 import gpms.model.Address;
+import gpms.model.AuditLogCommonInfo;
 import gpms.model.AuditLogInfo;
 import gpms.model.GPMSCommonInfo;
 import gpms.model.NotificationLog;
@@ -26,7 +27,9 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 
 import java.io.File;
+import java.net.URISyntaxException;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -54,6 +57,7 @@ import org.mongodb.morphia.Morphia;
 import com.ebay.xcelite.Xcelite;
 import com.ebay.xcelite.sheet.XceliteSheet;
 import com.ebay.xcelite.writer.SheetWriter;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Multimap;
@@ -201,9 +205,6 @@ public class UserService {
 			log.info("UserService::produceAdminUsersJSON started");
 			List<UserInfo> users = new ArrayList<UserInfo>();
 			int offset = 0, limit = 0;
-			String userName = new String();
-			String positionTitle = new String();
-			Boolean isActive = null;
 			ObjectMapper mapper = new ObjectMapper();
 			JsonNode root = mapper.readTree(message);
 			if (root != null && root.has("offset")) {
@@ -212,24 +213,14 @@ public class UserService {
 			if (root != null && root.has("limit")) {
 				limit = root.get("limit").intValue();
 			}
+			GPMSCommonInfo userInfo = new GPMSCommonInfo();
 			if (root != null && root.has("userBindObj")) {
 				JsonNode userObj = root.get("userBindObj");
-				if (userObj != null && userObj.has("UserName")) {
-					userName = userObj.get("UserName").textValue();
-				}
-				if (userObj != null && userObj.has("PositionTitle")) {
-					positionTitle = userObj.get("PositionTitle").textValue();
-				}
-				if (userObj != null && userObj.has("IsActive")) {
-					if (!userObj.get("IsActive").isNull()) {
-						isActive = userObj.get("IsActive").booleanValue();
-					} else {
-						isActive = null;
-					}
-				}
+				userInfo = GPMSCommonInfo.getUserBindInfo(userObj);
 			}
 			users = userProfileDAO.findAllForAdminUserGrid(offset, limit,
-					userName, positionTitle, isActive);
+					userInfo.getUserName(), userInfo.getUserPositionTitle(),
+					userInfo.getUserIsActive());
 			return Response
 					.status(Response.Status.OK)
 					.entity(mapper.writerWithDefaultPrettyPrinter()
@@ -255,58 +246,17 @@ public class UserService {
 		try {
 			log.info("UserService::exportUsersJSON started");
 			List<UserInfo> users = new ArrayList<UserInfo>();
-			String userName = new String();
-			String college = new String();
-			String department = new String();
-			String positionType = new String();
-			String positionTitle = new String();
-			Boolean isActive = null;
 			ObjectMapper mapper = new ObjectMapper();
 			JsonNode root = mapper.readTree(message);
+			GPMSCommonInfo userInfo = new GPMSCommonInfo();
 			if (root != null && root.has("userBindObj")) {
 				JsonNode userObj = root.get("userBindObj");
-				if (userObj != null && userObj.has("UserName")) {
-					userName = userObj.get("UserName").textValue();
-				}
-				if (userObj != null && userObj.has("College")) {
-					college = userObj.get("College").textValue();
-				}
-				if (userObj != null && userObj.has("Department")) {
-					department = userObj.get("Department").textValue();
-				}
-				if (userObj != null && userObj.has("PositionType")) {
-					positionType = userObj.get("PositionType").textValue();
-				}
-				if (userObj != null && userObj.has("PositionTitle")) {
-					positionTitle = userObj.get("PositionTitle").textValue();
-				}
-				if (userObj != null && userObj.has("IsActive")) {
-					if (!userObj.get("IsActive").isNull()) {
-						isActive = userObj.get("IsActive").booleanValue();
-					} else {
-						isActive = null;
-					}
-				}
+				userInfo = GPMSCommonInfo.getUserBindInfo(userObj);
 			}
-			users = userProfileDAO.findAllUsers(userName, college, department,
-					positionType, positionTitle, isActive);
+			users = userProfileDAO.findAllUsers(userInfo);
 			String filename = new String();
 			if (users.size() > 0) {
-				Xcelite xcelite = new Xcelite();
-				XceliteSheet sheet = xcelite.createSheet("Users");
-				SheetWriter<UserInfo> writer = sheet
-						.getBeanWriter(UserInfo.class);
-				writer.write(users);
-				SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy_MM_dd");
-				Date date = new Date();
-				String fileName = String.format("%s.%s",
-						RandomStringUtils.randomAlphanumeric(8) + "_"
-								+ dateFormat.format(date), "xlsx");
-				String downloadLocation = this.getClass()
-						.getResource("/uploads").toURI().getPath();
-				xcelite.write(new File(downloadLocation + fileName));
-				filename = mapper.writerWithDefaultPrettyPrinter()
-						.writeValueAsString(fileName);
+				filename = exportToExcelFile(users, mapper);
 			} else {
 				filename = mapper.writerWithDefaultPrettyPrinter()
 						.writeValueAsString("No Record");
@@ -333,58 +283,17 @@ public class UserService {
 		try {
 			log.info("UserService::exportAdminUsersJSON started");
 			List<UserInfo> users = new ArrayList<UserInfo>();
-			String userName = new String();
-			String college = new String();
-			String department = new String();
-			String positionType = new String();
-			String positionTitle = new String();
-			Boolean isActive = null;
 			ObjectMapper mapper = new ObjectMapper();
 			JsonNode root = mapper.readTree(message);
+			GPMSCommonInfo userInfo = new GPMSCommonInfo();
 			if (root != null && root.has("userBindObj")) {
 				JsonNode userObj = root.get("userBindObj");
-				if (userObj != null && userObj.has("UserName")) {
-					userName = userObj.get("UserName").textValue();
-				}
-				if (userObj != null && userObj.has("College")) {
-					college = userObj.get("College").textValue();
-				}
-				if (userObj != null && userObj.has("Department")) {
-					department = userObj.get("Department").textValue();
-				}
-				if (userObj != null && userObj.has("PositionType")) {
-					positionType = userObj.get("PositionType").textValue();
-				}
-				if (userObj != null && userObj.has("PositionTitle")) {
-					positionTitle = userObj.get("PositionTitle").textValue();
-				}
-				if (userObj != null && userObj.has("IsActive")) {
-					if (!userObj.get("IsActive").isNull()) {
-						isActive = userObj.get("IsActive").booleanValue();
-					} else {
-						isActive = null;
-					}
-				}
+				userInfo = GPMSCommonInfo.getUserBindInfo(userObj);
 			}
-			users = userProfileDAO.findAllAdminUsers(userName, college,
-					department, positionType, positionTitle, isActive);
+			users = userProfileDAO.findAllAdminUsers(userInfo);
 			String filename = new String();
 			if (users.size() > 0) {
-				Xcelite xcelite = new Xcelite();
-				XceliteSheet sheet = xcelite.createSheet("Users");
-				SheetWriter<UserInfo> writer = sheet
-						.getBeanWriter(UserInfo.class);
-				writer.write(users);
-				SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy_MM_dd");
-				Date date = new Date();
-				String fileName = String.format("%s.%s",
-						RandomStringUtils.randomAlphanumeric(8) + "_"
-								+ dateFormat.format(date), "xlsx");
-				String downloadLocation = this.getClass()
-						.getResource("/uploads").toURI().getPath();
-				xcelite.write(new File(downloadLocation + fileName));
-				filename = mapper.writerWithDefaultPrettyPrinter()
-						.writeValueAsString(fileName);
+				exportToExcelFile(users, mapper);
 			} else {
 				filename = mapper.writerWithDefaultPrettyPrinter()
 						.writeValueAsString("No Record");
@@ -397,6 +306,36 @@ public class UserService {
 				.status(Response.Status.BAD_REQUEST)
 				.entity("{\"error\": \"Could Not Export Admin User List\", \"status\": \"FAIL\"}")
 				.build();
+	}
+
+	/**
+	 * Exports to Excel File for Users and Admin Users
+	 * 
+	 * @param users
+	 * @param mapper
+	 * @return
+	 * @throws URISyntaxException
+	 * @throws JsonProcessingException
+	 */
+	private String exportToExcelFile(List<UserInfo> users, ObjectMapper mapper)
+			throws URISyntaxException, JsonProcessingException {
+		String filename;
+		Xcelite xcelite = new Xcelite();
+		XceliteSheet sheet = xcelite.createSheet("Users");
+		SheetWriter<UserInfo> writer = sheet.getBeanWriter(UserInfo.class);
+		writer.write(users);
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy_MM_dd");
+		Date date = new Date();
+		String fileName = String.format(
+				"%s.%s",
+				RandomStringUtils.randomAlphanumeric(8) + "_"
+						+ dateFormat.format(date), "xlsx");
+		String downloadLocation = this.getClass().getResource("/uploads")
+				.toURI().getPath();
+		xcelite.write(new File(downloadLocation + fileName));
+		filename = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(
+				fileName);
+		return filename;
 	}
 
 	@POST
@@ -461,11 +400,9 @@ public class UserService {
 							.writeValueAsString(
 									user.getUserAccount().getPassword()))
 					.build();
-
 		} catch (Exception e) {
 			log.error("Could not get User Information By ProfileId error e=", e);
 		}
-
 		return Response
 				.status(Response.Status.BAD_REQUEST)
 				.entity("{\"error\": \"Could Not Get User Information By ProfileId\", \"status\": \"FAIL\"}")
@@ -485,10 +422,6 @@ public class UserService {
 			List<AuditLogInfo> userAuditLogs = new ArrayList<AuditLogInfo>();
 			int offset = 0, limit = 0;
 			String profileId = new String();
-			String action = new String();
-			String auditedBy = new String();
-			String activityOnFrom = new String();
-			String activityOnTo = new String();
 			ObjectMapper mapper = new ObjectMapper();
 			JsonNode root = mapper.readTree(message);
 			if (root != null && root.has("offset")) {
@@ -500,29 +433,14 @@ public class UserService {
 			if (root != null && root.has("userId")) {
 				profileId = root.get("userId").textValue();
 			}
+			AuditLogCommonInfo auditLogInfo = new AuditLogCommonInfo();
 			if (root != null && root.has("auditLogBindObj")) {
 				JsonNode auditLogBindObj = root.get("auditLogBindObj");
-				if (auditLogBindObj != null && auditLogBindObj.has("Action")) {
-					action = auditLogBindObj.get("Action").textValue();
-				}
-				if (auditLogBindObj != null && auditLogBindObj.has("AuditedBy")) {
-					auditedBy = auditLogBindObj.get("AuditedBy").textValue();
-				}
-				if (auditLogBindObj != null
-						&& auditLogBindObj.has("ActivityOnFrom")) {
-					activityOnFrom = auditLogBindObj.get("ActivityOnFrom")
-							.textValue();
-				}
-				if (auditLogBindObj != null
-						&& auditLogBindObj.has("ActivityOnTo")) {
-					activityOnTo = auditLogBindObj.get("ActivityOnTo")
-							.textValue();
-				}
+				auditLogInfo = new AuditLogCommonInfo(auditLogBindObj);
 			}
 			ObjectId userId = new ObjectId(profileId);
 			userAuditLogs = userProfileDAO.findAllForUserAuditLogGrid(offset,
-					limit, userId, action, auditedBy, activityOnFrom,
-					activityOnTo);
+					limit, userId, auditLogInfo);
 			return Response
 					.status(Response.Status.OK)
 					.entity(mapper.writerWithDefaultPrettyPrinter()
@@ -832,7 +750,6 @@ public class UserService {
 				if (userUniqueObj != null && userUniqueObj.has("UserID")) {
 					userID = userUniqueObj.get("UserID").textValue();
 				}
-
 				if (userUniqueObj != null && userUniqueObj.has("NewUserName")) {
 					newUserName = userUniqueObj.get("NewUserName").textValue();
 				}
@@ -925,7 +842,6 @@ public class UserService {
 		try {
 			log.info("UserService::signUpUser started");
 			String userID = new String();
-			String userEmail = new String();
 			UserAccount newAccount = new UserAccount();
 			UserProfile newProfile = new UserProfile();
 			ObjectMapper mapper = new ObjectMapper();
@@ -936,68 +852,7 @@ public class UserService {
 					userID = userInfo.get("UserID").textValue();
 				}
 				if (userID.equals("0")) {
-					newAccount.setAddedOn(new Date());
-					if (userInfo != null && userInfo.has("UserName")) {
-						String loginUserName = userInfo.get("UserName")
-								.textValue();
-						newAccount.setUserName(loginUserName);
-					}
-					if (userInfo != null && userInfo.has("Password")) {
-						newAccount.setPassword(userInfo.get("Password")
-								.textValue());
-					}
-					newProfile.setUserAccount(newAccount);
-					if (userInfo != null && userInfo.has("FirstName")) {
-						newProfile.setFirstName(userInfo.get("FirstName")
-								.textValue());
-					}
-					if (userInfo != null && userInfo.has("MiddleName")) {
-						newProfile.setMiddleName(userInfo.get("MiddleName")
-								.textValue());
-					}
-					if (userInfo != null && userInfo.has("LastName")) {
-						newProfile.setLastName(userInfo.get("LastName")
-								.textValue());
-					}
-					if (userInfo != null && userInfo.has("DOB")) {
-						Date dob = formatter.parse(userInfo.get("DOB")
-								.textValue());
-						newProfile.setDateOfBirth(dob);
-					}
-					if (userInfo != null && userInfo.has("Gender")) {
-						newProfile
-								.setGender(userInfo.get("Gender").textValue());
-					}
-					Address newAddress = new Address();
-					if (userInfo != null && userInfo.has("Street")) {
-						newAddress
-								.setStreet(userInfo.get("Street").textValue());
-					}
-					if (userInfo != null && userInfo.has("Apt")) {
-						newAddress.setApt(userInfo.get("Apt").textValue());
-					}
-					if (userInfo != null && userInfo.has("City")) {
-						newAddress.setCity(userInfo.get("City").textValue());
-					}
-					if (userInfo != null && userInfo.has("State")) {
-						newAddress.setState(userInfo.get("State").textValue());
-					}
-					if (userInfo != null && userInfo.has("Zip")) {
-						newAddress.setZipcode(userInfo.get("Zip").textValue());
-					}
-					if (userInfo != null && userInfo.has("Country")) {
-						newAddress.setCountry(userInfo.get("Country")
-								.textValue());
-					}
-					newProfile.getAddresses().add(newAddress);
-					if (userInfo != null && userInfo.has("MobileNumber")) {
-						newProfile.getMobileNumbers().add(
-								userInfo.get("MobileNumber").textValue());
-					}
-					if (userInfo != null && userInfo.has("WorkEmail")) {
-						userEmail = userInfo.get("WorkEmail").textValue();
-						newProfile.getWorkEmails().add(userEmail);
-					}
+					bindUserInfo(newAccount, newProfile, userInfo);
 				}
 				userAccountDAO.save(newAccount);
 				userProfileDAO.signUpUser(newProfile);
@@ -1026,6 +881,72 @@ public class UserService {
 				.status(Response.Status.BAD_REQUEST)
 				.entity("{\"error\": \"Could Not Register A New User\", \"status\": \"FAIL\"}")
 				.build();
+	}
+
+	/**
+	 * Binds User Info From user Sign up from
+	 * 
+	 * @param newAccount
+	 * @param newProfile
+	 * @param userInfo
+	 * @throws ParseException
+	 */
+	private void bindUserInfo(UserAccount newAccount, UserProfile newProfile,
+			JsonNode userInfo) throws ParseException {
+		String userEmail = new String();
+		newAccount.setAddedOn(new Date());
+		if (userInfo != null && userInfo.has("UserName")) {
+			String loginUserName = userInfo.get("UserName").textValue();
+			newAccount.setUserName(loginUserName);
+		}
+		if (userInfo != null && userInfo.has("Password")) {
+			newAccount.setPassword(userInfo.get("Password").textValue());
+		}
+		newProfile.setUserAccount(newAccount);
+		if (userInfo != null && userInfo.has("FirstName")) {
+			newProfile.setFirstName(userInfo.get("FirstName").textValue());
+		}
+		if (userInfo != null && userInfo.has("MiddleName")) {
+			newProfile.setMiddleName(userInfo.get("MiddleName").textValue());
+		}
+		if (userInfo != null && userInfo.has("LastName")) {
+			newProfile.setLastName(userInfo.get("LastName").textValue());
+		}
+		if (userInfo != null && userInfo.has("DOB")) {
+			Date dob = formatter.parse(userInfo.get("DOB").textValue());
+			newProfile.setDateOfBirth(dob);
+		}
+		if (userInfo != null && userInfo.has("Gender")) {
+			newProfile.setGender(userInfo.get("Gender").textValue());
+		}
+		Address newAddress = new Address();
+		if (userInfo != null && userInfo.has("Street")) {
+			newAddress.setStreet(userInfo.get("Street").textValue());
+		}
+		if (userInfo != null && userInfo.has("Apt")) {
+			newAddress.setApt(userInfo.get("Apt").textValue());
+		}
+		if (userInfo != null && userInfo.has("City")) {
+			newAddress.setCity(userInfo.get("City").textValue());
+		}
+		if (userInfo != null && userInfo.has("State")) {
+			newAddress.setState(userInfo.get("State").textValue());
+		}
+		if (userInfo != null && userInfo.has("Zip")) {
+			newAddress.setZipcode(userInfo.get("Zip").textValue());
+		}
+		if (userInfo != null && userInfo.has("Country")) {
+			newAddress.setCountry(userInfo.get("Country").textValue());
+		}
+		newProfile.getAddresses().add(newAddress);
+		if (userInfo != null && userInfo.has("MobileNumber")) {
+			newProfile.getMobileNumbers().add(
+					userInfo.get("MobileNumber").textValue());
+		}
+		if (userInfo != null && userInfo.has("WorkEmail")) {
+			userEmail = userInfo.get("WorkEmail").textValue();
+			newProfile.getWorkEmails().add(userEmail);
+		}
 	}
 
 	@POST
