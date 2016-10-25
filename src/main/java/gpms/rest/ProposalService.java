@@ -117,9 +117,7 @@ public class ProposalService {
 	ProposalDAO proposalDAO = null;
 	DelegationDAO delegationDAO = null;
 	NotificationDAO notificationDAO = null;
-
 	DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-
 	private static final Logger log = Logger.getLogger(ProposalService.class
 			.getName());
 
@@ -143,13 +141,11 @@ public class ProposalService {
 	public Response testService() {
 		try {
 			log.info("ProposalService::testService started");
-
 			return Response.status(Response.Status.OK).entity("Hello World!")
 					.build();
 		} catch (Exception e) {
 			log.error("Could not connect the Proposal Service error e=", e);
 		}
-
 		return Response
 				.status(Response.Status.BAD_REQUEST)
 				.entity("{\"error\": \"Could Not Find Proposal Service\", \"status\": \"FAIL\"}")
@@ -165,7 +161,6 @@ public class ProposalService {
 	public Response getProposalStatusList() {
 		try {
 			log.info("ProposalService::getProposalStatusList started");
-
 			ObjectMapper mapper = new ObjectMapper();
 			List<ProposalStatusInfo> proposalStatusList = new ArrayList<ProposalStatusInfo>();
 			for (Status status : Status.values()) {
@@ -174,21 +169,17 @@ public class ProposalService {
 				proposalStatus.setStatusValue(status.toString());
 				proposalStatusList.add(proposalStatus);
 			}
-
 			return Response
 					.status(Response.Status.OK)
 					.entity(mapper.writerWithDefaultPrettyPrinter()
 							.writeValueAsString(proposalStatusList)).build();
-
 		} catch (Exception e) {
 			log.error("Could not find all Proposal Status error e=", e);
 		}
-
 		return Response
 				.status(Response.Status.BAD_REQUEST)
 				.entity("{\"error\": \"Could Not Find All Proposal Status\", \"status\": \"FAIL\"}")
 				.build();
-
 	}
 
 	@POST
@@ -201,9 +192,7 @@ public class ProposalService {
 			@ApiParam(value = "Message", required = true, defaultValue = "", allowableValues = "", allowMultiple = false) String message) {
 		try {
 			log.info("ProposalService::produceProposalsJSON started");
-
 			List<ProposalInfo> proposals = new ArrayList<ProposalInfo>();
-
 			int offset = 0, limit = 0;
 			String projectTitle = new String();
 			String usernameBy = new String();
@@ -212,76 +201,61 @@ public class ProposalService {
 			String submittedOnFrom = new String();
 			String submittedOnTo = new String();
 			String proposalStatus = new String();
-
 			ObjectMapper mapper = new ObjectMapper();
 			JsonNode root = mapper.readTree(message);
-
 			if (root != null && root.has("offset")) {
 				offset = root.get("offset").intValue();
 			}
-
 			if (root != null && root.has("limit")) {
 				limit = root.get("limit").intValue();
 			}
-
 			if (root != null && root.has("proposalBindObj")) {
 				JsonNode proposalObj = root.get("proposalBindObj");
 				if (proposalObj != null && proposalObj.has("ProjectTitle")) {
 					projectTitle = proposalObj.get("ProjectTitle").textValue();
 				}
-
 				if (proposalObj != null && proposalObj.has("UsernameBy")) {
 					usernameBy = proposalObj.get("UsernameBy").textValue();
 				}
-
 				if (proposalObj != null && proposalObj.has("SubmittedOnFrom")) {
 					submittedOnFrom = proposalObj.get("SubmittedOnFrom")
 							.textValue();
 				}
-
 				if (proposalObj != null && proposalObj.has("SubmittedOnTo")) {
 					submittedOnTo = proposalObj.get("SubmittedOnTo")
 							.textValue();
 				}
-
 				if (proposalObj != null && proposalObj.has("TotalCostsFrom")) {
 					if (proposalObj.get("TotalCostsFrom").textValue() != null) {
 						totalCostsFrom = Double.valueOf(proposalObj.get(
 								"TotalCostsFrom").textValue());
 					}
 				}
-
 				if (proposalObj != null && proposalObj.has("TotalCostsTo")) {
 					if (proposalObj.get("TotalCostsTo").textValue() != null) {
 						totalCostsTo = Double.valueOf(proposalObj.get(
 								"TotalCostsTo").textValue());
 					}
 				}
-
 				if (proposalObj != null && proposalObj.has("ProposalStatus")) {
 					proposalStatus = proposalObj.get("ProposalStatus")
 							.textValue();
 				}
 			}
-
 			proposals = proposalDAO.findAllForProposalGrid(offset, limit,
 					projectTitle, usernameBy, submittedOnFrom, submittedOnTo,
 					totalCostsFrom, totalCostsTo, proposalStatus);
-
 			return Response
 					.status(Response.Status.OK)
 					.entity(mapper.writerWithDefaultPrettyPrinter()
 							.writeValueAsString(proposals)).build();
-
 		} catch (Exception e) {
 			log.error("Could not find all Proposals error e=", e);
 		}
-
 		return Response
 				.status(Response.Status.BAD_REQUEST)
 				.entity("{\"error\": \"Could Not Find All Proposals\", \"status\": \"FAIL\"}")
 				.build();
-
 	}
 
 	@POST
@@ -1273,23 +1247,22 @@ public class ProposalService {
 							.getXACMLdecisionWithObligations(attrMap,
 									contentProfile);
 					Iterator<AbstractResult> it = set.iterator();
-					int intDecision = 3;
+					int intDecision = AbstractResult.DECISION_NOT_APPLICABLE;
 					while (it.hasNext()) {
 						AbstractResult ar = it.next();
 						intDecision = ar.getDecision();
-
-						if (intDecision >= 4 && intDecision <= 6) {
-							intDecision = 2;
+						if (intDecision == AbstractResult.DECISION_INDETERMINATE_DENY
+								|| intDecision == AbstractResult.DECISION_INDETERMINATE_PERMIT
+								|| intDecision == AbstractResult.DECISION_INDETERMINATE_DENY_OR_PERMIT) {
+							intDecision = AbstractResult.DECISION_INDETERMINATE;
 						}
 						System.out.println("Decision:" + intDecision
 								+ " that is: "
 								+ AbstractResult.DECISIONS[intDecision]);
-
 						if (AbstractResult.DECISIONS[intDecision]
 								.equals("Permit")) {
 							List<ObligationResult> obligations = ar
 									.getObligations();
-
 							EmailUtil emailUtil = new EmailUtil();
 							String emailSubject = new String();
 							String emailBody = new String();
@@ -2756,40 +2729,18 @@ public class ProposalService {
 							break;
 						}
 					}
-
-					// // TODO only check this for required not all XACML call
-					// if (root != null && root.has("proposalId")) {
-					// String proposalId = new String();
-					// JsonNode proposal_Id = root.get("proposalId");
-					// proposalId = proposal_Id.textValue();
-					// if (!proposalId.equals("")) {
-					// ObjectId id = new ObjectId(proposalId);
-					// Proposal proposal = proposalDAO
-					// .findProposalByProposalID(id);
-					// resourceMap.put("status", proposal.getProposalStatus()
-					// .toString());
-					// attrMap.put("Resource", resourceMap);
-					// }
-					// }
-
-					// Need to add Environment to detect the Campus or outside
-					// network
-					// network.type
-
-					// Device type
-					// device.type
-
 					Set<AbstractResult> set = ac
 							.getXACMLdecisionWithObligations(attrMap,
 									contentProfile);
 					Iterator<AbstractResult> it = set.iterator();
-					int intDecision = 3;
+					int intDecision = AbstractResult.DECISION_NOT_APPLICABLE;
 					while (it.hasNext()) {
 						AbstractResult ar = it.next();
 						intDecision = ar.getDecision();
-
-						if (intDecision >= 4 && intDecision <= 6) {
-							intDecision = 2;
+						if (intDecision == AbstractResult.DECISION_INDETERMINATE_DENY
+								|| intDecision == AbstractResult.DECISION_INDETERMINATE_PERMIT
+								|| intDecision == AbstractResult.DECISION_INDETERMINATE_DENY_OR_PERMIT) {
+							intDecision = AbstractResult.DECISION_INDETERMINATE;
 						}
 						System.out.println("Decision:" + intDecision
 								+ " that is: "
@@ -5830,18 +5781,18 @@ public class ProposalService {
 								.getXACMLdecisionWithObligations(attrMap,
 										contentProfile);
 						Iterator<AbstractResult> it = set.iterator();
-						int intDecision = 3;
+						int intDecision = AbstractResult.DECISION_NOT_APPLICABLE;
 						while (it.hasNext()) {
 							AbstractResult ar = it.next();
 							intDecision = ar.getDecision();
-
-							if (intDecision >= 4 && intDecision <= 6) {
-								intDecision = 2;
+							if (intDecision == AbstractResult.DECISION_INDETERMINATE_DENY
+									|| intDecision == AbstractResult.DECISION_INDETERMINATE_PERMIT
+									|| intDecision == AbstractResult.DECISION_INDETERMINATE_DENY_OR_PERMIT) {
+								intDecision = AbstractResult.DECISION_INDETERMINATE;
 							}
 							System.out.println("Decision:" + intDecision
 									+ " that is: "
 									+ AbstractResult.DECISIONS[intDecision]);
-
 							if (AbstractResult.DECISIONS[intDecision]
 									.equals("Permit")) {
 								List<ObligationResult> obligations = ar

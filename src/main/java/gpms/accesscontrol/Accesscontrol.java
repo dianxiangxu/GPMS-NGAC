@@ -33,7 +33,6 @@ import com.google.common.collect.Multimap;
  *
  */
 public class Accesscontrol {
-
 	private static Balana balana = null;
 	private AbstractResult ar;
 	AttributeSpreadSheet attrSpreadSheet = null;

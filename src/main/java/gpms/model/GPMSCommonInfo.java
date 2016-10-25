@@ -2,22 +2,50 @@ package gpms.model;
 
 import java.io.Serializable;
 
+import com.fasterxml.jackson.databind.JsonNode;
+
 public class GPMSCommonInfo implements Serializable {
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
 
-	private String userProfileID;
-	private String userName;
+	private String userProfileID = new String();
+	private String userName = new String();
 	private boolean userIsAdmin;
-	private String userCollege;
-	private String userDepartment;
-	private String userPositionType;
-	private String userPositionTitle;
+	private String userCollege = new String();
+	private String userDepartment = new String();
+	private String userPositionType = new String();
+	private String userPositionTitle = new String();
+	private Boolean userIsActive = null;
 
 	public GPMSCommonInfo() {
 
+	}
+
+	public GPMSCommonInfo(JsonNode commonObj) {
+		if (commonObj != null && commonObj.has("UserProfileID")) {
+			userProfileID = commonObj.get("UserProfileID").textValue();
+		}
+		if (commonObj != null && commonObj.has("UserName")) {
+			userName = commonObj.get("UserName").textValue();
+		}
+		if (commonObj != null && commonObj.has("UserIsAdmin")) {
+			userIsAdmin = Boolean.parseBoolean(commonObj.get("UserIsAdmin")
+					.textValue());
+		}
+		if (commonObj != null && commonObj.has("UserCollege")) {
+			userCollege = commonObj.get("UserCollege").textValue();
+		}
+		if (commonObj != null && commonObj.has("UserDepartment")) {
+			userDepartment = commonObj.get("UserDepartment").textValue();
+		}
+		if (commonObj != null && commonObj.has("UserPositionType")) {
+			userPositionType = commonObj.get("UserPositionType").textValue();
+		}
+		if (commonObj != null && commonObj.has("UserPositionTitle")) {
+			userPositionTitle = commonObj.get("UserPositionTitle").textValue();
+		}
 	}
 
 	public String getUserProfileID() {
@@ -76,12 +104,40 @@ public class GPMSCommonInfo implements Serializable {
 		this.userPositionTitle = userPositionTitle;
 	}
 
-	@Override
-	public String toString() {
-		return "GPMSCommonInfo [userProfileID=" + userProfileID + ", userName="
-				+ userName + ", userIsAdmin=" + userIsAdmin + ", userCollege="
-				+ userCollege + ", userDepartment=" + userDepartment
-				+ ", userPositionType=" + userPositionType
-				+ ", userPositionTitle=" + userPositionTitle + "]";
+	public Boolean getUserIsActive() {
+		return userIsActive;
+	}
+
+	public void setUserIsActive(Boolean userIsActive) {
+		this.userIsActive = userIsActive;
+	}
+
+	public static GPMSCommonInfo getUserBindInfo(JsonNode userObj) {
+		GPMSCommonInfo userInfo = new GPMSCommonInfo();
+		if (userObj != null && userObj.has("UserName")) {
+			userInfo.setUserName(userObj.get("UserName").textValue());
+		}
+		if (userObj != null && userObj.has("College")) {
+			userInfo.setUserCollege(userObj.get("College").textValue());
+		}
+		if (userObj != null && userObj.has("Department")) {
+			userInfo.setUserDepartment(userObj.get("Department").textValue());
+		}
+		if (userObj != null && userObj.has("PositionType")) {
+			userInfo.setUserPositionType(userObj.get("PositionType")
+					.textValue());
+		}
+		if (userObj != null && userObj.has("PositionTitle")) {
+			userInfo.setUserPositionTitle(userObj.get("PositionTitle")
+					.textValue());
+		}
+		if (userObj != null && userObj.has("IsActive")) {
+			if (!userObj.get("IsActive").isNull()) {
+				userInfo.setUserIsActive(userObj.get("IsActive").booleanValue());
+			} else {
+				userInfo.setUserIsActive(null);
+			}
+		}
+		return userInfo;
 	}
 }

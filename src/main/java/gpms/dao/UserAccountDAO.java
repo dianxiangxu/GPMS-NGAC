@@ -16,7 +16,6 @@ import com.mongodb.MongoException;
 public class UserAccountDAO extends BasicDAO<UserAccount, String> {
 	private static final String DBNAME = "db_gpms";
 	public static final String COLLECTION_NAME = "useraccount";
-
 	private static Morphia morphia;
 	private static Datastore ds;
 
@@ -52,17 +51,15 @@ public class UserAccountDAO extends BasicDAO<UserAccount, String> {
 	}
 
 	/**
-	 * This method will return a user account object that matches the username
-	 * searched for
+	 * Finds User Account By Username
 	 * 
 	 * @param userName
 	 *            the user account name to search for
-	 * @return the username if it exists or null if it does not
+	 * @return the UserAccount Details if it exists or null if it does not
 	 */
 	public UserAccount findByUserName(String userName) {
 		Datastore ds = getDatastore();
 		return ds.createQuery(UserAccount.class).field("username")
 				.equal(userName).get();
 	}
-
 }

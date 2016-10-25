@@ -8,6 +8,7 @@ import gpms.dao.UserAccountDAO;
 import gpms.dao.UserProfileDAO;
 import gpms.model.Address;
 import gpms.model.AuditLogInfo;
+import gpms.model.GPMSCommonInfo;
 import gpms.model.NotificationLog;
 import gpms.model.PositionDetails;
 import gpms.model.UserAccount;
@@ -75,9 +76,7 @@ public class UserService {
 	UserProfileDAO userProfileDAO = null;
 	ProposalDAO proposalDAO = null;
 	NotificationDAO notificationDAO = null;
-
 	DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-
 	private static final Logger log = Logger.getLogger(UserService.class
 			.getName());
 
@@ -166,12 +165,6 @@ public class UserService {
 			log.info("UserService::produceUsersJSON started");
 			List<UserInfo> users = new ArrayList<UserInfo>();
 			int offset = 0, limit = 0;
-			String userName = new String();
-			String college = new String();
-			String department = new String();
-			String positionType = new String();
-			String positionTitle = new String();
-			Boolean isActive = null;
 			ObjectMapper mapper = new ObjectMapper();
 			JsonNode root = mapper.readTree(message);
 			if (root != null && root.has("offset")) {
@@ -180,38 +173,12 @@ public class UserService {
 			if (root != null && root.has("limit")) {
 				limit = root.get("limit").intValue();
 			}
+			GPMSCommonInfo userInfo = new GPMSCommonInfo();
 			if (root != null && root.has("userBindObj")) {
 				JsonNode userObj = root.get("userBindObj");
-				if (userObj != null && userObj.has("UserName")) {
-					userName = userObj.get("UserName").textValue();
-				}
-
-				if (userObj != null && userObj.has("College")) {
-					college = userObj.get("College").textValue();
-				}
-
-				if (userObj != null && userObj.has("Department")) {
-					department = userObj.get("Department").textValue();
-				}
-
-				if (userObj != null && userObj.has("PositionType")) {
-					positionType = userObj.get("PositionType").textValue();
-				}
-
-				if (userObj != null && userObj.has("PositionTitle")) {
-					positionTitle = userObj.get("PositionTitle").textValue();
-				}
-
-				if (userObj != null && userObj.has("IsActive")) {
-					if (!userObj.get("IsActive").isNull()) {
-						isActive = userObj.get("IsActive").booleanValue();
-					} else {
-						isActive = null;
-					}
-				}
+				userInfo = GPMSCommonInfo.getUserBindInfo(userObj);
 			}
-			users = userProfileDAO.findAllForUserGrid(offset, limit, userName,
-					college, department, positionType, positionTitle, isActive);
+			users = userProfileDAO.findAllForUserGrid(offset, limit, userInfo);
 			return Response
 					.status(Response.Status.OK)
 					.entity(mapper.writerWithDefaultPrettyPrinter()
@@ -261,7 +228,6 @@ public class UserService {
 					}
 				}
 			}
-
 			users = userProfileDAO.findAllForAdminUserGrid(offset, limit,
 					userName, positionTitle, isActive);
 			return Response
