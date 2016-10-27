@@ -193,15 +193,8 @@ public class DelegationService {
 				JsonNode commonObj = root.get("gpmsCommonObj");
 				userInfo = new GPMSCommonInfo(commonObj);
 			}
-			delegations = delegationDAO.findAllUserDelegations(
-					delegationInfo.getDelegatee(),
-					delegationInfo.getCreatedFrom(),
-					delegationInfo.getCreatedTo(),
-					delegationInfo.getDelegatedAction(),
-					delegationInfo.isRevoked(), userInfo.getUserProfileID(),
-					userInfo.getUserCollege(), userInfo.getUserDepartment(),
-					userInfo.getUserPositionType(),
-					userInfo.getUserPositionTitle());
+			delegations = delegationDAO.findAllUserDelegations(delegationInfo,
+					userInfo);
 			String filename = new String();
 			if (delegations.size() > 0) {
 				filename = exportToExcelFile(delegations, null, mapper);
@@ -276,7 +269,7 @@ public class DelegationService {
 		try {
 			log.info("DelegationService::exportDelegationAuditLogJSON started");
 			List<AuditLogInfo> delegationAuditLogs = new ArrayList<AuditLogInfo>();
-			String delegationId = new String();			
+			String delegationId = new String();
 			ObjectMapper mapper = new ObjectMapper();
 			JsonNode root = mapper.readTree(message);
 			if (root != null && root.has("delegationId")) {
@@ -630,7 +623,6 @@ public class DelegationService {
 			ObjectId authorId = new ObjectId(userInfo.getUserProfileID());
 			UserProfile authorProfile = userProfileDAO
 					.findUserDetailsByProfileID(authorId);
-
 			String delegatorName = authorProfile.getFullName();
 			String delegationID = new String();
 			Delegation newDelegation = new Delegation();
@@ -642,7 +634,6 @@ public class DelegationService {
 			} catch (Exception ex) {
 				throw new Exception("The Policy folder can not be Found!");
 			}
-			String policyId = new String();
 			if (root != null && root.has("delegationInfo")) {
 				JsonNode delegationInfo = root.get("delegationInfo");
 				if (delegationInfo != null
@@ -663,28 +654,11 @@ public class DelegationService {
 				}
 				generateDelegationDetails(userInfo, delegationID,
 						newDelegation, existingDelegation, delegationInfo);
-
-				String notificationMessage = new String();
 				if (!delegationID.equals("0")) {
 					if (!existingDelegation.equals(oldDelegation)) {
 						try {
-							// Create New policy Id
-							policyId = createDynamicPolicy(
-									userInfo.getUserProfileID(), delegatorName,
-									policyLocation, existingDelegation);
-							existingDelegation.setDelegationPolicyId(policyId);
-							delegationDAO.updateDelegation(existingDelegation,
-									authorProfile);
-							notificationMessage = "Delegation Updated by "
-									+ userInfo.getUserName() + ".";
-							sendNotification(existingDelegation,
-									userInfo.getUserProfileID(),
-									userInfo.getUserName(),
-									userInfo.getUserCollege(),
-									userInfo.getUserDepartment(),
-									userInfo.getUserPositionType(),
-									userInfo.getUserPositionTitle(),
-									notificationMessage, "Delegation", false);
+							updateDelegation(userInfo, authorProfile,
+									delegatorName, existingDelegation);
 						} catch (Exception e) {
 							return Response
 									.status(403)
@@ -696,27 +670,8 @@ public class DelegationService {
 				} else {
 					delegationDAO.save(newDelegation);
 					try {
-						policyId = createDynamicPolicy(
-								userInfo.getUserProfileID(), delegatorName,
-								policyLocation, newDelegation);
-						newDelegation.setDelegationPolicyId(policyId);
-						delegationDAO.saveDelegation(newDelegation,
-								authorProfile);
-						notificationMessage = "Delegation Added by "
-								+ userInfo.getUserName() + ".";
-						sendNotification(newDelegation,
-								userInfo.getUserProfileID(),
-								userInfo.getUserName(),
-								userInfo.getUserCollege(),
-								userInfo.getUserDepartment(),
-								userInfo.getUserPositionType(),
-								userInfo.getUserPositionTitle(),
-								notificationMessage, "Delegation", false);
-						return Response
-								.status(200)
-								.type(MediaType.APPLICATION_JSON)
-								.entity(mapper.writerWithDefaultPrettyPrinter()
-										.writeValueAsString(true)).build();
+						return saveDelegation(mapper, userInfo, authorProfile,
+								delegatorName, newDelegation);
 					} catch (Exception e) {
 						delegationDAO.delete(newDelegation);
 						return Response
@@ -747,6 +702,65 @@ public class DelegationService {
 	}
 
 	/**
+	 * Saves Delegation
+	 * 
+	 * @param mapper
+	 * @param userInfo
+	 * @param authorProfile
+	 * @param delegatorName
+	 * @param newDelegation
+	 * @return
+	 * @throws SAXException
+	 * @throws IOException
+	 * @throws JsonProcessingException
+	 */
+	private Response saveDelegation(ObjectMapper mapper,
+			GPMSCommonInfo userInfo, UserProfile authorProfile,
+			String delegatorName, Delegation newDelegation)
+			throws SAXException, IOException, JsonProcessingException {
+		String policyId = new String();
+		String notificationMessage = new String();
+		policyId = createDynamicPolicy(userInfo.getUserProfileID(),
+				delegatorName, policyLocation, newDelegation);
+		newDelegation.setDelegationPolicyId(policyId);
+		delegationDAO.saveDelegation(newDelegation, authorProfile);
+		notificationMessage = "Delegation Added by " + userInfo.getUserName()
+				+ ".";
+		sendNotification(newDelegation, userInfo, notificationMessage,
+				"Delegation", false);
+		return Response
+				.status(200)
+				.type(MediaType.APPLICATION_JSON)
+				.entity(mapper.writerWithDefaultPrettyPrinter()
+						.writeValueAsString(true)).build();
+	}
+
+	/**
+	 * Updates Delegation
+	 * 
+	 * @param userInfo
+	 * @param authorProfile
+	 * @param delegatorName
+	 * @param existingDelegation
+	 * @throws SAXException
+	 * @throws IOException
+	 */
+	private void updateDelegation(GPMSCommonInfo userInfo,
+			UserProfile authorProfile, String delegatorName,
+			Delegation existingDelegation) throws SAXException, IOException {
+		String policyId = new String();
+		String notificationMessage = new String();
+		policyId = createDynamicPolicy(userInfo.getUserProfileID(),
+				delegatorName, policyLocation, existingDelegation);
+		existingDelegation.setDelegationPolicyId(policyId);
+		delegationDAO.updateDelegation(existingDelegation, authorProfile);
+		notificationMessage = "Delegation Updated by " + userInfo.getUserName()
+				+ ".";
+		sendNotification(existingDelegation, userInfo, notificationMessage,
+				"Delegation", false);
+	}
+
+	/**
 	 * Generates Delegation Details
 	 * 
 	 * @param userInfo
@@ -761,29 +775,55 @@ public class DelegationService {
 			String delegationID, Delegation newDelegation,
 			Delegation existingDelegation, JsonNode delegationInfo)
 			throws Exception, ParseException {
-		UserProfile delegateeProfile = new UserProfile();
-		if (delegationInfo != null && delegationInfo.has("DelegatedAction")) {
-			final JsonNode delegatedActions = delegationInfo
-					.get("DelegatedAction");
-			if (delegatedActions.isArray()) {
-				if (delegatedActions.size() > 0) {
-					if (delegationID.equals("0")) {
-						for (final JsonNode action : delegatedActions) {
-							newDelegation.getActions().add(action.textValue());
-						}
-					} else {
-						existingDelegation.getActions().clear();
-						for (final JsonNode action : delegatedActions) {
-							existingDelegation.getActions().add(
-									action.textValue());
-						}
+		addDelegatedActions(delegationID, newDelegation, existingDelegation,
+				delegationInfo);
+		addDelegateeInfo(userInfo, delegationID, newDelegation, delegationInfo);
+		addDelegationDuration(delegationID, newDelegation, existingDelegation,
+				delegationInfo);
+		addDeleagationReason(delegationID, newDelegation, existingDelegation,
+				delegationInfo);
+	}
+
+	/**
+	 * @param delegationID
+	 * @param newDelegation
+	 * @param existingDelegation
+	 * @param delegationInfo
+	 * @throws Exception
+	 */
+	private void addDeleagationReason(String delegationID,
+			Delegation newDelegation, Delegation existingDelegation,
+			JsonNode delegationInfo) throws Exception {
+		if (delegationInfo != null && delegationInfo.has("DelegationReason")) {
+			final String reason = delegationInfo.get("DelegationReason")
+					.textValue().trim().replaceAll("\\<[^>]*>", "");
+			if (validateNotEmptyValue(reason)) {
+				if (!delegationID.equals("0")) {
+					if (!existingDelegation.getReason().equals(
+							delegationInfo.get("DelegationReason").textValue())) {
+						existingDelegation.setReason(reason);
 					}
 				} else {
-					throw new Exception(
-							"The Delegation Action can not be Empty");
+					newDelegation.setReason(reason);
 				}
+			} else {
+				throw new Exception("The Delegation Reason can not be Empty");
 			}
 		}
+	}
+
+	/**
+	 * Adds Delegatee Info
+	 * 
+	 * @param userInfo
+	 * @param delegationID
+	 * @param newDelegation
+	 * @param delegationInfo
+	 * @throws Exception
+	 */
+	private void addDelegateeInfo(GPMSCommonInfo userInfo, String delegationID,
+			Delegation newDelegation, JsonNode delegationInfo) throws Exception {
+		UserProfile delegateeProfile = new UserProfile();
 		if (delegationInfo != null && delegationInfo.has("DelegateeId")) {
 			String delegateeId = delegationInfo.get("DelegateeId").textValue();
 			if (delegationID.equals("0")) {
@@ -847,6 +887,57 @@ public class DelegationService {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Adds Delegated Actions
+	 * 
+	 * @param delegationID
+	 * @param newDelegation
+	 * @param existingDelegation
+	 * @param delegationInfo
+	 * @throws Exception
+	 */
+	private void addDelegatedActions(String delegationID,
+			Delegation newDelegation, Delegation existingDelegation,
+			JsonNode delegationInfo) throws Exception {
+		if (delegationInfo != null && delegationInfo.has("DelegatedAction")) {
+			final JsonNode delegatedActions = delegationInfo
+					.get("DelegatedAction");
+			if (delegatedActions.isArray()) {
+				if (delegatedActions.size() > 0) {
+					if (delegationID.equals("0")) {
+						for (final JsonNode action : delegatedActions) {
+							newDelegation.getActions().add(action.textValue());
+						}
+					} else {
+						existingDelegation.getActions().clear();
+						for (final JsonNode action : delegatedActions) {
+							existingDelegation.getActions().add(
+									action.textValue());
+						}
+					}
+				} else {
+					throw new Exception(
+							"The Delegation Action can not be Empty");
+				}
+			}
+		}
+	}
+
+	/**
+	 * Adds Delegation Duration
+	 * 
+	 * @param delegationID
+	 * @param newDelegation
+	 * @param existingDelegation
+	 * @param delegationInfo
+	 * @throws ParseException
+	 * @throws Exception
+	 */
+	private void addDelegationDuration(String delegationID,
+			Delegation newDelegation, Delegation existingDelegation,
+			JsonNode delegationInfo) throws ParseException, Exception {
 		if (delegationInfo != null && delegationInfo.has("DelegationFrom")) {
 			Date fromDate = formatter.parse(delegationInfo
 					.get("DelegationFrom").textValue().trim()
@@ -881,22 +972,6 @@ public class DelegationService {
 				throw new Exception("The Delegation End Date can not be Empty");
 			}
 		}
-		if (delegationInfo != null && delegationInfo.has("DelegationReason")) {
-			final String reason = delegationInfo.get("DelegationReason")
-					.textValue().trim().replaceAll("\\<[^>]*>", "");
-			if (validateNotEmptyValue(reason)) {
-				if (!delegationID.equals("0")) {
-					if (!existingDelegation.getReason().equals(
-							delegationInfo.get("DelegationReason").textValue())) {
-						existingDelegation.setReason(reason);
-					}
-				} else {
-					newDelegation.setReason(reason);
-				}
-			} else {
-				throw new Exception("The Delegation Reason can not be Empty");
-			}
-		}
 	}
 
 	private String createDynamicPolicy(String delegatorId,
@@ -907,10 +982,14 @@ public class DelegationService {
 	}
 
 	private void sendNotification(Delegation existingDelegation,
-			String userProfileID, String userName, String userCollege,
-			String userDepartment, String userPositionType,
-			String userPositionTitle, String notificationMessage,
+			GPMSCommonInfo userInfo, String notificationMessage,
 			String notificationType, boolean isCritical) {
+		String userProfileID = userInfo.getUserProfileID();
+		String userName = userInfo.getUserName();
+		String userCollege = userInfo.getUserCollege();
+		String userDepartment = userInfo.getUserDepartment();
+		String userPositionType = userInfo.getUserPositionType();
+		String userPositionTitle = userInfo.getUserPositionTitle();
 		NotificationLog notification = new NotificationLog();
 		// For Admin
 		notification.setType(notificationType);
@@ -991,12 +1070,10 @@ public class DelegationService {
 			ObjectId authorId = new ObjectId(userInfo.getUserProfileID());
 			UserProfile authorProfile = userProfileDAO
 					.findUserDetailsByProfileID(authorId);
-			String authorFullName = authorProfile.getFullName();
 			String authorUserName = authorProfile.getUserAccount()
 					.getUserName();
 			StringBuffer contentProfile = generateContentDelegationProfile(
-					delegationId, existingDelegation, authorProfile,
-					authorFullName);
+					delegationId, existingDelegation, authorProfile);
 			Accesscontrol ac = new Accesscontrol();
 			HashMap<String, Multimap<String, String>> attrMap = new HashMap<String, Multimap<String, String>>();
 			Multimap<String, String> resourceMap = ArrayListMultimap.create();
@@ -1021,59 +1098,9 @@ public class DelegationService {
 				System.out.println("Decision:" + intDecision + " that is: "
 						+ AbstractResult.DECISIONS[intDecision]);
 				if (AbstractResult.DECISIONS[intDecision].equals("Permit")) {
-					List<ObligationResult> obligations = ar.getObligations();
-					EmailUtil emailUtil = new EmailUtil();
-					String emailSubject = new String();
-					String emailBody = new String();
-					String delegatorName = new String();
-					String delegatorEmail = new String();
-					List<String> emaillist = new ArrayList<String>();
-					if (obligations.size() > 0) {
-						for (ObligationResult obligation : obligations) {
-							if (obligation instanceof org.wso2.balana.xacml3.Obligation) {
-								List<AttributeAssignment> assignments = ((org.wso2.balana.xacml3.Obligation) obligation)
-										.getAssignments();
-								for (AttributeAssignment assignment : assignments) {
-									switch (assignment.getAttributeId()
-											.toString()) {
-									case "emailSubject":
-										emailSubject = assignment.getContent();
-										break;
-									case "emailBody":
-										emailBody = assignment.getContent();
-										break;
-									case "delegatorName":
-										delegatorName = assignment.getContent();
-										break;
-									case "delegatorEmail":
-										delegatorEmail = assignment
-												.getContent();
-										break;
-									case "delegateeEmail":
-										if (!assignment.getContent().equals("")) {
-											emaillist.add(assignment
-													.getContent());
-										}
-										break;
-									}
-								}
-							}
-						}
-					}
-					boolean isRevoked = delegationDAO.revokeDelegation(
-							existingDelegation, authorProfile);
-					if (isRevoked) {
-						return sendNotificationAfterRevoke(mapper, userInfo,
-								existingDelegation, authorUserName, emailUtil,
-								emailSubject, emailBody, delegatorName,
-								delegatorEmail, emaillist);
-					} else {
-						return Response
-								.status(200)
-								.type(MediaType.APPLICATION_JSON)
-								.entity(mapper.writerWithDefaultPrettyPrinter()
-										.writeValueAsString(true)).build();
-					}
+					return revokeDelegation(mapper, userInfo,
+							existingDelegation, authorProfile, authorUserName,
+							ar);
 				} else {
 					return Response
 							.status(403)
@@ -1090,6 +1117,76 @@ public class DelegationService {
 				.status(403)
 				.entity("{\"error\": \"Could not revoke the selected Delegation\", \"status\": \"FAIL\"}")
 				.build();
+	}
+
+	/**
+	 * Revokes Delegation
+	 * 
+	 * @param mapper
+	 * @param userInfo
+	 * @param existingDelegation
+	 * @param authorProfile
+	 * @param authorUserName
+	 * @param ar
+	 * @return
+	 * @throws JsonProcessingException
+	 */
+	private Response revokeDelegation(ObjectMapper mapper,
+			GPMSCommonInfo userInfo, Delegation existingDelegation,
+			UserProfile authorProfile, String authorUserName, AbstractResult ar)
+			throws JsonProcessingException {
+		List<ObligationResult> obligations = ar.getObligations();
+		EmailUtil emailUtil = new EmailUtil();
+		String emailSubject = new String();
+		String emailBody = new String();
+		String delegatorName = new String();
+		String delegatorEmail = new String();
+		List<String> emaillist = new ArrayList<String>();
+		if (obligations.size() > 0) {
+			for (ObligationResult obligation : obligations) {
+				if (obligation instanceof org.wso2.balana.xacml3.Obligation) {
+					List<AttributeAssignment> assignments = ((org.wso2.balana.xacml3.Obligation) obligation)
+							.getAssignments();
+					for (AttributeAssignment assignment : assignments) {
+						switch (assignment.getAttributeId().toString()) {
+						case "emailSubject":
+							emailSubject = assignment.getContent();
+							break;
+						case "emailBody":
+							emailBody = assignment.getContent();
+							break;
+						case "delegatorName":
+							delegatorName = assignment.getContent();
+							break;
+						case "delegatorEmail":
+							delegatorEmail = assignment.getContent();
+							break;
+						case "delegateeEmail":
+							if (!assignment.getContent().equals("")) {
+								emaillist.add(assignment.getContent());
+							}
+							break;
+						default:
+							break;
+						}
+					}
+				}
+			}
+		}
+		boolean isRevoked = delegationDAO.revokeDelegation(existingDelegation,
+				authorProfile);
+		if (isRevoked) {
+			return sendNotificationAfterRevoke(mapper, userInfo,
+					existingDelegation, authorUserName, emailUtil,
+					emailSubject, emailBody, delegatorName, delegatorEmail,
+					emaillist);
+		} else {
+			return Response
+					.status(200)
+					.type(MediaType.APPLICATION_JSON)
+					.entity(mapper.writerWithDefaultPrettyPrinter()
+							.writeValueAsString(true)).build();
+		}
 	}
 
 	/**
@@ -1119,12 +1216,8 @@ public class DelegationService {
 		}
 		String notificationMessage = "Delegation Revoked by " + authorUserName
 				+ ".";
-		sendNotification(existingDelegation, userInfo.getUserProfileID(),
-				userInfo.getUserName(), userInfo.getUserCollege(),
-				userInfo.getUserDepartment(), userInfo.getUserPositionType(),
-				userInfo.getUserPositionTitle(), notificationMessage,
+		sendNotification(existingDelegation, userInfo, notificationMessage,
 				"Delegation", true);
-		// Delete the Delegation Dynamic Policy File here
 		try {
 			policyLocation = this.getClass().getResource("/policy").toURI()
 					.getPath();
@@ -1151,9 +1244,9 @@ public class DelegationService {
 	 * @return
 	 */
 	private StringBuffer generateContentDelegationProfile(String delegationId,
-			Delegation existingDelegation, UserProfile authorProfile,
-			String authorFullName) {
+			Delegation existingDelegation, UserProfile authorProfile) {
 		StringBuffer contentProfile = new StringBuffer();
+		String authorFullName = authorProfile.getFullName();
 		contentProfile.append("<Content>");
 		contentProfile.append("<ak:record xmlns:ak=\"http://akpower.org\">");
 		contentProfile.append("<ak:delegation>");

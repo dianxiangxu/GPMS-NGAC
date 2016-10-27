@@ -221,8 +221,11 @@ public class UserProfileDAO extends BasicDAO<UserProfile, String> {
 	}
 
 	public List<UserInfo> findAllForAdminUserGrid(int offset, int limit,
-			String userName, String positionTitle, Boolean isActive) {
+			GPMSCommonInfo userInfo) {
 		Datastore ds = getDatastore();
+		String userName = userInfo.getUserName();
+		String positionTitle = userInfo.getUserPositionTitle();
+		Boolean isActive = userInfo.getUserIsActive();
 		List<UserInfo> users = new ArrayList<UserInfo>();
 		Query<UserProfile> profileQuery = ds.createQuery(UserProfile.class);
 		Query<UserAccount> accountQuery = ds.createQuery(UserAccount.class);
@@ -755,9 +758,12 @@ public class UserProfileDAO extends BasicDAO<UserProfile, String> {
 	}
 
 	public List<InvestigatorUsersAndPositions> findCurrentPositionDetailsForPI(
-			ObjectId id, String userCollege, String userDepartment,
-			String userPositionType, String userPositionTitle) {
+			ObjectId id, GPMSCommonInfo userInfo) {
 		Datastore ds = getDatastore();
+		String userCollege = userInfo.getUserCollege();
+		String userDepartment = userInfo.getUserDepartment();
+		String userPositionType = userInfo.getUserPositionType();
+		String userPositionTitle = userInfo.getUserPositionTitle();
 		List<InvestigatorUsersAndPositions> userPositions = new ArrayList<InvestigatorUsersAndPositions>();
 		Query<UserProfile> q = ds.createQuery(UserProfile.class)
 				.retrievedFields(true, "_id", "first name", "middle name",
@@ -916,10 +922,13 @@ public class UserProfileDAO extends BasicDAO<UserProfile, String> {
 		return profileQuery.get();
 	}
 
-	public UserProposalCount getUserProposalCounts(String userProfileId,
-			String college, String department, String positionType,
-			String positionTitle) {
+	public UserProposalCount getUserProposalCounts(GPMSCommonInfo userInfo) {
 		Datastore ds = getDatastore();
+		String userProfileId = userInfo.getUserProfileID();
+		String college = userInfo.getUserCollege();
+		String department = userInfo.getUserDepartment();
+		String positionType = userInfo.getUserPositionType();
+		String positionTitle = userInfo.getUserPositionTitle();
 		UserProposalCount userProposalCount = new UserProposalCount();
 		Query<Proposal> proposalQuery = ds.createQuery(Proposal.class);
 		proposalQuery.or(proposalQuery.and(

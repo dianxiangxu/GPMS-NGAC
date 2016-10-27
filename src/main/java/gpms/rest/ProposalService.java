@@ -11,6 +11,7 @@ import gpms.model.AdditionalInfo;
 import gpms.model.Appendix;
 import gpms.model.ApprovalType;
 import gpms.model.ArchiveType;
+import gpms.model.AuditLogCommonInfo;
 import gpms.model.AuditLogInfo;
 import gpms.model.BaseInfo;
 import gpms.model.BaseOptions;
@@ -22,6 +23,7 @@ import gpms.model.ConflictOfInterest;
 import gpms.model.CostShareInfo;
 import gpms.model.DeleteType;
 import gpms.model.FundingSource;
+import gpms.model.GPMSCommonInfo;
 import gpms.model.InvestigatorInfo;
 import gpms.model.InvestigatorRefAndPosition;
 import gpms.model.NotificationLog;
@@ -31,6 +33,7 @@ import gpms.model.ProjectLocation;
 import gpms.model.ProjectPeriod;
 import gpms.model.ProjectType;
 import gpms.model.Proposal;
+import gpms.model.ProposalCommonInfo;
 import gpms.model.ProposalInfo;
 import gpms.model.ProposalStatusInfo;
 import gpms.model.Recovery;
@@ -194,13 +197,6 @@ public class ProposalService {
 			log.info("ProposalService::produceProposalsJSON started");
 			List<ProposalInfo> proposals = new ArrayList<ProposalInfo>();
 			int offset = 0, limit = 0;
-			String projectTitle = new String();
-			String usernameBy = new String();
-			Double totalCostsFrom = 0.0;
-			Double totalCostsTo = 0.0;
-			String submittedOnFrom = new String();
-			String submittedOnTo = new String();
-			String proposalStatus = new String();
 			ObjectMapper mapper = new ObjectMapper();
 			JsonNode root = mapper.readTree(message);
 			if (root != null && root.has("offset")) {
@@ -209,42 +205,13 @@ public class ProposalService {
 			if (root != null && root.has("limit")) {
 				limit = root.get("limit").intValue();
 			}
+			ProposalCommonInfo proposalInfo = new ProposalCommonInfo();
 			if (root != null && root.has("proposalBindObj")) {
 				JsonNode proposalObj = root.get("proposalBindObj");
-				if (proposalObj != null && proposalObj.has("ProjectTitle")) {
-					projectTitle = proposalObj.get("ProjectTitle").textValue();
-				}
-				if (proposalObj != null && proposalObj.has("UsernameBy")) {
-					usernameBy = proposalObj.get("UsernameBy").textValue();
-				}
-				if (proposalObj != null && proposalObj.has("SubmittedOnFrom")) {
-					submittedOnFrom = proposalObj.get("SubmittedOnFrom")
-							.textValue();
-				}
-				if (proposalObj != null && proposalObj.has("SubmittedOnTo")) {
-					submittedOnTo = proposalObj.get("SubmittedOnTo")
-							.textValue();
-				}
-				if (proposalObj != null && proposalObj.has("TotalCostsFrom")) {
-					if (proposalObj.get("TotalCostsFrom").textValue() != null) {
-						totalCostsFrom = Double.valueOf(proposalObj.get(
-								"TotalCostsFrom").textValue());
-					}
-				}
-				if (proposalObj != null && proposalObj.has("TotalCostsTo")) {
-					if (proposalObj.get("TotalCostsTo").textValue() != null) {
-						totalCostsTo = Double.valueOf(proposalObj.get(
-								"TotalCostsTo").textValue());
-					}
-				}
-				if (proposalObj != null && proposalObj.has("ProposalStatus")) {
-					proposalStatus = proposalObj.get("ProposalStatus")
-							.textValue();
-				}
+				proposalInfo = new ProposalCommonInfo(proposalObj);
 			}
 			proposals = proposalDAO.findAllForProposalGrid(offset, limit,
-					projectTitle, usernameBy, submittedOnFrom, submittedOnTo,
-					totalCostsFrom, totalCostsTo, proposalStatus);
+					proposalInfo);
 			return Response
 					.status(Response.Status.OK)
 					.entity(mapper.writerWithDefaultPrettyPrinter()
@@ -268,128 +235,35 @@ public class ProposalService {
 			@ApiParam(value = "Message", required = true, defaultValue = "", allowableValues = "", allowMultiple = false) String message) {
 		try {
 			log.info("ProposalService::produceUserProposalsJSON started");
-
 			List<ProposalInfo> proposals = new ArrayList<ProposalInfo>();
-
 			int offset = 0, limit = 0;
-			String projectTitle = new String();
-			String usernameBy = new String();
-			Double totalCostsFrom = 0.0;
-			Double totalCostsTo = 0.0;
-			String submittedOnFrom = new String();
-			String submittedOnTo = new String();
-			String proposalStatus = new String();
-			String userRole = new String();
-
 			ObjectMapper mapper = new ObjectMapper();
 			JsonNode root = mapper.readTree(message);
-
 			if (root != null && root.has("offset")) {
 				offset = root.get("offset").intValue();
 			}
-
 			if (root != null && root.has("limit")) {
 				limit = root.get("limit").intValue();
 			}
-
+			ProposalCommonInfo proposalInfo = new ProposalCommonInfo();
 			if (root != null && root.has("proposalBindObj")) {
 				JsonNode proposalObj = root.get("proposalBindObj");
-				if (proposalObj != null && proposalObj.has("ProjectTitle")) {
-					projectTitle = proposalObj.get("ProjectTitle").textValue();
-				}
-
-				if (proposalObj != null && proposalObj.has("UsernameBy")) {
-					usernameBy = proposalObj.get("UsernameBy").textValue();
-				}
-
-				if (proposalObj != null && proposalObj.has("SubmittedOnFrom")) {
-					submittedOnFrom = proposalObj.get("SubmittedOnFrom")
-							.textValue();
-				}
-
-				if (proposalObj != null && proposalObj.has("SubmittedOnTo")) {
-					submittedOnTo = proposalObj.get("SubmittedOnTo")
-							.textValue();
-				}
-
-				if (proposalObj != null && proposalObj.has("TotalCostsFrom")) {
-					if (proposalObj.get("TotalCostsFrom").textValue() != null) {
-						totalCostsFrom = Double.valueOf(proposalObj.get(
-								"TotalCostsFrom").textValue());
-					}
-				}
-
-				if (proposalObj != null && proposalObj.has("TotalCostsTo")) {
-					if (proposalObj.get("TotalCostsTo").textValue() != null) {
-						totalCostsTo = Double.valueOf(proposalObj.get(
-								"TotalCostsTo").textValue());
-					}
-				}
-
-				if (proposalObj != null && proposalObj.has("ProposalStatus")) {
-					proposalStatus = proposalObj.get("ProposalStatus")
-							.textValue();
-				}
-
-				if (proposalObj != null && proposalObj.has("UserRole")) {
-					userRole = proposalObj.get("UserRole").textValue();
-				}
+				proposalInfo = new ProposalCommonInfo(proposalObj);
 			}
-
-			String userProfileID = new String();
-			@SuppressWarnings("unused")
-			String userName = new String();
-			@SuppressWarnings("unused")
-			Boolean userIsAdmin = false;
-			String userCollege = new String();
-			String userDepartment = new String();
-			String userPositionType = new String();
-			String userPositionTitle = new String();
-
+			GPMSCommonInfo userInfo = new GPMSCommonInfo();
 			if (root != null && root.has("gpmsCommonObj")) {
 				JsonNode commonObj = root.get("gpmsCommonObj");
-				if (commonObj != null && commonObj.has("UserProfileID")) {
-					userProfileID = commonObj.get("UserProfileID").textValue();
-				}
-				if (commonObj != null && commonObj.has("UserName")) {
-					userName = commonObj.get("UserName").textValue();
-				}
-				if (commonObj != null && commonObj.has("UserIsAdmin")) {
-					userIsAdmin = Boolean.parseBoolean(commonObj.get(
-							"UserIsAdmin").textValue());
-				}
-				if (commonObj != null && commonObj.has("UserCollege")) {
-					userCollege = commonObj.get("UserCollege").textValue();
-				}
-				if (commonObj != null && commonObj.has("UserDepartment")) {
-					userDepartment = commonObj.get("UserDepartment")
-							.textValue();
-				}
-				if (commonObj != null && commonObj.has("UserPositionType")) {
-					userPositionType = commonObj.get("UserPositionType")
-							.textValue();
-				}
-				if (commonObj != null && commonObj.has("UserPositionTitle")) {
-					userPositionTitle = commonObj.get("UserPositionTitle")
-							.textValue();
-				}
+				userInfo = new GPMSCommonInfo(commonObj);
 			}
-
 			proposals = proposalDAO.findUserProposalGrid(offset, limit,
-					projectTitle, usernameBy, submittedOnFrom, submittedOnTo,
-					totalCostsFrom, totalCostsTo, proposalStatus, userRole,
-					userProfileID, userCollege, userDepartment,
-					userPositionType, userPositionTitle);
-
+					proposalInfo, userInfo);
 			return Response
 					.status(Response.Status.OK)
 					.entity(mapper.writerWithDefaultPrettyPrinter()
 							.writeValueAsString(proposals)).build();
-
 		} catch (Exception e) {
 			log.error("Could not find all Proposals of a User error e=", e);
 		}
-
 		return Response
 				.status(Response.Status.BAD_REQUEST)
 				.entity("{\"error\": \"Could Not Find All Proposals Of A User\", \"status\": \"FAIL\"}")
@@ -407,109 +281,26 @@ public class ProposalService {
 			@ApiParam(value = "Message", required = true, defaultValue = "", allowableValues = "", allowMultiple = false) String message) {
 		try {
 			log.info("ProposalService::exportAllProposalsJSON started");
-
 			List<ProposalInfo> proposals = new ArrayList<ProposalInfo>();
-
-			String projectTitle = new String();
-			String usernameBy = new String();
-			Double totalCostsFrom = 0.0;
-			Double totalCostsTo = 0.0;
-			String submittedOnFrom = new String();
-			String submittedOnTo = new String();
-			String proposalStatus = new String();
-
 			ObjectMapper mapper = new ObjectMapper();
 			JsonNode root = mapper.readTree(message);
-
+			ProposalCommonInfo proposalInfo = new ProposalCommonInfo();
 			if (root != null && root.has("proposalBindObj")) {
 				JsonNode proposalObj = root.get("proposalBindObj");
-				if (proposalObj != null && proposalObj.has("ProjectTitle")) {
-					projectTitle = proposalObj.get("ProjectTitle").textValue();
-				}
-
-				if (proposalObj != null && proposalObj.has("UsernameBy")) {
-					usernameBy = proposalObj.get("UsernameBy").textValue();
-				}
-
-				if (proposalObj != null && proposalObj.has("SubmittedOnFrom")) {
-					submittedOnFrom = proposalObj.get("SubmittedOnFrom")
-							.textValue();
-				}
-
-				if (proposalObj != null && proposalObj.has("SubmittedOnTo")) {
-					submittedOnTo = proposalObj.get("SubmittedOnTo")
-							.textValue();
-				}
-
-				if (proposalObj != null && proposalObj.has("TotalCostsFrom")) {
-					if (proposalObj.get("TotalCostsFrom").textValue() != null) {
-						totalCostsFrom = Double.valueOf(proposalObj.get(
-								"TotalCostsFrom").textValue());
-					}
-				}
-
-				if (proposalObj != null && proposalObj.has("TotalCostsTo")) {
-					if (proposalObj.get("TotalCostsTo").textValue() != null) {
-						totalCostsTo = Double.valueOf(proposalObj.get(
-								"TotalCostsTo").textValue());
-					}
-				}
-
-				if (proposalObj != null && proposalObj.has("ProposalStatus")) {
-					proposalStatus = proposalObj.get("ProposalStatus")
-							.textValue();
-				}
+				proposalInfo = new ProposalCommonInfo(proposalObj);
 			}
-
-			proposals = proposalDAO.findAllProposals(projectTitle, usernameBy,
-					submittedOnFrom, submittedOnTo, totalCostsFrom,
-					totalCostsTo, proposalStatus);
-
+			proposals = proposalDAO.findAllProposals(proposalInfo);
 			String filename = new String();
 			if (proposals.size() > 0) {
-				Xcelite xcelite = new Xcelite();
-				XceliteSheet sheet = xcelite.createSheet("Proposals");
-				SheetWriter<ProposalInfo> writer = sheet
-						.getBeanWriter(ProposalInfo.class);
-
-				writer.write(proposals);
-
-				SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy_MM_dd");
-				Date date = new Date();
-
-				String fileName = String.format("%s.%s",
-						RandomStringUtils.randomAlphanumeric(8) + "_"
-								+ dateFormat.format(date), "xlsx");
-
-				// File file = new
-				// File(request.getServletContext().getAttribute(
-				// "FILES_DIR")
-				// + File.separator + filename);
-				// System.out.println("Absolute Path at server=" +
-				// file.getAbsolutePath());
-				String downloadLocation = this.getClass()
-						.getResource("/uploads").toURI().getPath();
-
-				xcelite.write(new File(downloadLocation + fileName));
-
-				// xcelite.write(new
-				// File(request.getServletContext().getAttribute(
-				// "FILES_DIR")
-				// + File.separator + fileName));
-
-				filename = mapper.writerWithDefaultPrettyPrinter()
-						.writeValueAsString(fileName);
+				filename = exportToExcelFile(proposals, null, mapper);
 			} else {
 				filename = mapper.writerWithDefaultPrettyPrinter()
 						.writeValueAsString("No Record");
 			}
-
 			return Response.status(Response.Status.OK).entity(filename).build();
-
 		} catch (Exception e) {
 			log.error("Could not export Proposal list error e=", e);
 		}
-
 		return Response
 				.status(Response.Status.BAD_REQUEST)
 				.entity("{\"error\": \"Could Not Export Proposal List\", \"status\": \"FAIL\"}")
@@ -527,161 +318,38 @@ public class ProposalService {
 			@ApiParam(value = "Message", required = true, defaultValue = "", allowableValues = "", allowMultiple = false) String message) {
 		try {
 			log.info("ProposalService::exportProposalsJSON started");
-
 			List<ProposalInfo> proposals = new ArrayList<ProposalInfo>();
-
-			String projectTitle = new String();
-			String usernameBy = new String();
-			Double totalCostsFrom = 0.0;
-			Double totalCostsTo = 0.0;
-			String submittedOnFrom = new String();
-			String submittedOnTo = new String();
-			String proposalStatus = new String();
-			String userRole = new String();
-
 			ObjectMapper mapper = new ObjectMapper();
 			JsonNode root = mapper.readTree(message);
-
+			ProposalCommonInfo proposalInfo = new ProposalCommonInfo();
 			if (root != null && root.has("proposalBindObj")) {
 				JsonNode proposalObj = root.get("proposalBindObj");
-				if (proposalObj != null && proposalObj.has("ProjectTitle")) {
-					projectTitle = proposalObj.get("ProjectTitle").textValue();
-				}
-
-				if (proposalObj != null && proposalObj.has("UsernameBy")) {
-					usernameBy = proposalObj.get("UsernameBy").textValue();
-				}
-
-				if (proposalObj != null && proposalObj.has("SubmittedOnFrom")) {
-					submittedOnFrom = proposalObj.get("SubmittedOnFrom")
-							.textValue();
-				}
-
-				if (proposalObj != null && proposalObj.has("SubmittedOnTo")) {
-					submittedOnTo = proposalObj.get("SubmittedOnTo")
-							.textValue();
-				}
-
-				if (proposalObj != null && proposalObj.has("TotalCostsFrom")) {
-					if (proposalObj.get("TotalCostsFrom").textValue() != null) {
-						totalCostsFrom = Double.valueOf(proposalObj.get(
-								"TotalCostsFrom").textValue());
-					}
-				}
-
-				if (proposalObj != null && proposalObj.has("TotalCostsTo")) {
-					if (proposalObj.get("TotalCostsTo").textValue() != null) {
-						totalCostsTo = Double.valueOf(proposalObj.get(
-								"TotalCostsTo").textValue());
-					}
-				}
-
-				if (proposalObj != null && proposalObj.has("ProposalStatus")) {
-					proposalStatus = proposalObj.get("ProposalStatus")
-							.textValue();
-				}
-
-				if (proposalObj != null && proposalObj.has("UserRole")) {
-					userRole = proposalObj.get("UserRole").textValue();
-				}
+				proposalInfo = new ProposalCommonInfo(proposalObj);
 			}
-
-			String userProfileID = new String();
-			@SuppressWarnings("unused")
-			String userName = new String();
-			@SuppressWarnings("unused")
-			Boolean userIsAdmin = false;
-			String userCollege = new String();
-			String userDepartment = new String();
-			String userPositionType = new String();
-			String userPositionTitle = new String();
-
+			GPMSCommonInfo userInfo = new GPMSCommonInfo();
 			if (root != null && root.has("gpmsCommonObj")) {
 				JsonNode commonObj = root.get("gpmsCommonObj");
-				if (commonObj != null && commonObj.has("UserProfileID")) {
-					userProfileID = commonObj.get("UserProfileID").textValue();
-				}
-				if (commonObj != null && commonObj.has("UserName")) {
-					userName = commonObj.get("UserName").textValue();
-				}
-				if (commonObj != null && commonObj.has("UserIsAdmin")) {
-					userIsAdmin = Boolean.parseBoolean(commonObj.get(
-							"UserIsAdmin").textValue());
-				}
-				if (commonObj != null && commonObj.has("UserCollege")) {
-					userCollege = commonObj.get("UserCollege").textValue();
-				}
-				if (commonObj != null && commonObj.has("UserDepartment")) {
-					userDepartment = commonObj.get("UserDepartment")
-							.textValue();
-				}
-				if (commonObj != null && commonObj.has("UserPositionType")) {
-					userPositionType = commonObj.get("UserPositionType")
-							.textValue();
-				}
-				if (commonObj != null && commonObj.has("UserPositionTitle")) {
-					userPositionTitle = commonObj.get("UserPositionTitle")
-							.textValue();
-				}
+				userInfo = new GPMSCommonInfo(commonObj);
 			}
-
-			proposals = proposalDAO.findAllUserProposals(projectTitle,
-					usernameBy, submittedOnFrom, submittedOnTo, totalCostsFrom,
-					totalCostsTo, proposalStatus, userRole, userProfileID,
-					userCollege, userDepartment, userPositionType,
-					userPositionTitle);
-
+			proposals = proposalDAO
+					.findAllUserProposals(proposalInfo, userInfo);
 			String filename = new String();
 			if (proposals.size() > 0) {
-				Xcelite xcelite = new Xcelite();
-				XceliteSheet sheet = xcelite.createSheet("Proposals");
-				SheetWriter<ProposalInfo> writer = sheet
-						.getBeanWriter(ProposalInfo.class);
-
-				writer.write(proposals);
-
-				SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy_MM_dd");
-				Date date = new Date();
-
-				String fileName = String.format("%s.%s",
-						RandomStringUtils.randomAlphanumeric(8) + "_"
-								+ dateFormat.format(date), "xlsx");
-
-				// File file = new
-				// File(request.getServletContext().getAttribute(
-				// "FILES_DIR")
-				// + File.separator + filename);
-				// System.out.println("Absolute Path at server=" +
-				// file.getAbsolutePath());
-				String downloadLocation = this.getClass()
-						.getResource("/uploads").toURI().getPath();
-
-				xcelite.write(new File(downloadLocation + fileName));
-
-				// xcelite.write(new
-				// File(request.getServletContext().getAttribute(
-				// "FILES_DIR")
-				// + File.separator + fileName));
-
-				filename = mapper.writerWithDefaultPrettyPrinter()
-						.writeValueAsString(fileName);
+				filename = exportToExcelFile(proposals, null, mapper);
 			} else {
 				filename = mapper.writerWithDefaultPrettyPrinter()
 						.writeValueAsString("No Record");
 			}
 			return Response.status(Response.Status.OK).entity(filename).build();
-
 		} catch (Exception e) {
 			log.error("Could not export all Proposals error e=", e);
 		}
-
 		return Response
 				.status(Response.Status.BAD_REQUEST)
 				.entity("{\"error\": \"Could Not Export All Proposals\", \"status\": \"FAIL\"}")
 				.build();
 	}
 
-	// Delete
 	@POST
 	@Path("/DeleteProposalByAdmin")
 	@ApiOperation(value = "Delete Proposal by Admin", notes = "This API deletes Proposal by Admin")
@@ -692,114 +360,29 @@ public class ProposalService {
 			@ApiParam(value = "Message", required = true, defaultValue = "", allowableValues = "", allowMultiple = false) String message) {
 		try {
 			log.info("ProposalService::deleteProposalByAdmin started");
-
 			ObjectMapper mapper = new ObjectMapper();
 			JsonNode root = mapper.readTree(message);
-
 			String proposalId = new String();
-
 			if (root != null && root.has("proposalId")) {
 				proposalId = root.get("proposalId").textValue();
 			}
-
-			String userProfileID = new String();
-			@SuppressWarnings("unused")
-			String userName = new String();
-			@SuppressWarnings("unused")
-			Boolean userIsAdmin = false;
-			@SuppressWarnings("unused")
-			String userCollege = new String();
-			@SuppressWarnings("unused")
-			String userDepartment = new String();
-			@SuppressWarnings("unused")
-			String userPositionType = new String();
-			@SuppressWarnings("unused")
-			String userPositionTitle = new String();
-
+			GPMSCommonInfo userInfo = new GPMSCommonInfo();
 			if (root != null && root.has("gpmsCommonObj")) {
 				JsonNode commonObj = root.get("gpmsCommonObj");
-				if (commonObj != null && commonObj.has("UserProfileID")) {
-					userProfileID = commonObj.get("UserProfileID").textValue();
-				}
-				if (commonObj != null && commonObj.has("UserName")) {
-					userName = commonObj.get("UserName").textValue();
-				}
-				if (commonObj != null && commonObj.has("UserIsAdmin")) {
-					userIsAdmin = Boolean.parseBoolean(commonObj.get(
-							"UserIsAdmin").textValue());
-				}
-				if (commonObj != null && commonObj.has("UserCollege")) {
-					userCollege = commonObj.get("UserCollege").textValue();
-				}
-				if (commonObj != null && commonObj.has("UserDepartment")) {
-					userDepartment = commonObj.get("UserDepartment")
-							.textValue();
-				}
-				if (commonObj != null && commonObj.has("UserPositionType")) {
-					userPositionType = commonObj.get("UserPositionType")
-							.textValue();
-				}
-				if (commonObj != null && commonObj.has("UserPositionTitle")) {
-					userPositionTitle = commonObj.get("UserPositionTitle")
-							.textValue();
-				}
+				userInfo = new GPMSCommonInfo(commonObj);
 			}
-
 			ObjectId id = new ObjectId(proposalId);
 			Proposal existingProposal = proposalDAO
 					.findProposalByProposalID(id);
-
-			ObjectId authorId = new ObjectId(userProfileID);
+			ObjectId authorId = new ObjectId(userInfo.getUserProfileID());
 			UserProfile authorProfile = userProfileDAO
 					.findUserDetailsByProfileID(authorId);
-			// String authorFullName = authorProfile.getFullName();
 			String authorUserName = authorProfile.getUserAccount()
 					.getUserName();
-
 			boolean isDeleted = proposalDAO.deleteProposalByAdmin(
 					existingProposal, authorProfile);
 			if (isDeleted) {
-				EmailUtil emailUtil = new EmailUtil();
-				String emailSubject = new String();
-				String emailBody = new String();
-				String piEmail = new String();
-				List<String> emaillist = new ArrayList<String>();
-
-				emailSubject = "The proposal has been deleted by: "
-						+ authorUserName;
-				emailBody = "Hello User,<br/><br/>The proposal has been deleted by Admin.<br/><br/>Thank you, <br/> GPMS Team";
-				piEmail = existingProposal.getInvestigatorInfo().getPi()
-						.getUserRef().getWorkEmails().get(0);
-
-				for (InvestigatorRefAndPosition copis : existingProposal
-						.getInvestigatorInfo().getCo_pi()) {
-					emaillist.add(copis.getUserRef().getWorkEmails().get(0));
-				}
-
-				for (InvestigatorRefAndPosition seniors : existingProposal
-						.getInvestigatorInfo().getSeniorPersonnel()) {
-					emaillist.add(seniors.getUserRef().getWorkEmails().get(0));
-				}
-
-				List<SignatureUserInfo> signatures = proposalDAO
-						.findSignaturesExceptInvestigator(id,
-								existingProposal.isIrbApprovalRequired());
-
-				for (SignatureUserInfo signatureInfo : signatures) {
-					emaillist.add(signatureInfo.getEmail());
-				}
-
-				emailUtil.sendMailMultipleUsersWithoutAuth(piEmail, emaillist,
-						emailSubject, emailBody);
-
-				String notificationMessage = "Deleted by " + authorUserName
-						+ ".";
-
-				broadCastNotification(existingProposal.getId().toString(),
-						existingProposal.getProjectInfo().getProjectTitle(),
-						notificationMessage, "Proposal", true, true, true,
-						true, true, true, true, true, true, true);
-
+				sendNotification(id, existingProposal, authorUserName);
 				return Response
 						.status(Response.Status.OK)
 						.entity(mapper.writerWithDefaultPrettyPrinter()
@@ -808,7 +391,6 @@ public class ProposalService {
 		} catch (Exception e) {
 			log.error("Could not delete Proposal error e=", e);
 		}
-
 		return Response
 				.status(Response.Status.BAD_REQUEST)
 				.entity("{\"error\": \"Could Not Delete Proposal\", \"status\": \"FAIL\"}")
@@ -825,424 +407,47 @@ public class ProposalService {
 			@ApiParam(value = "Message", required = true, defaultValue = "", allowableValues = "", allowMultiple = false) String message) {
 		try {
 			log.info("ProposalService::deleteProposalByProposalID started");
-
 			ObjectMapper mapper = new ObjectMapper();
 			JsonNode root = mapper.readTree(message);
-
-			StringBuffer contentProfile = new StringBuffer();
-
 			if (root != null && root.has("policyInfo")) {
 				JsonNode policyInfo = root.get("policyInfo");
 				if (policyInfo != null && policyInfo.isArray()
 						&& policyInfo.size() > 0) {
-
 					String proposalId = new String();
 					String proposalRoles = new String();
 					String proposalUserTitle = new String();
-
 					if (root != null && root.has("proposalId")) {
 						proposalId = root.get("proposalId").textValue();
 					}
-
 					if (root != null && root.has("proposalRoles")) {
 						proposalRoles = root.get("proposalRoles").textValue();
 					}
-
 					if (root != null && root.has("proposalUserTitle")) {
 						proposalUserTitle = root.get("proposalUserTitle")
 								.textValue();
 					}
-
-					String userProfileID = new String();
-					@SuppressWarnings("unused")
-					String userName = new String();
-					@SuppressWarnings("unused")
-					Boolean userIsAdmin = false;
-					@SuppressWarnings("unused")
-					String userCollege = new String();
-					@SuppressWarnings("unused")
-					String userDepartment = new String();
-					@SuppressWarnings("unused")
-					String userPositionType = new String();
-					@SuppressWarnings("unused")
-					String userPositionTitle = new String();
-
+					GPMSCommonInfo userInfo = new GPMSCommonInfo();
 					if (root != null && root.has("gpmsCommonObj")) {
 						JsonNode commonObj = root.get("gpmsCommonObj");
-						if (commonObj != null && commonObj.has("UserProfileID")) {
-							userProfileID = commonObj.get("UserProfileID")
-									.textValue();
-						}
-						if (commonObj != null && commonObj.has("UserName")) {
-							userName = commonObj.get("UserName").textValue();
-						}
-						if (commonObj != null && commonObj.has("UserIsAdmin")) {
-							userIsAdmin = Boolean.parseBoolean(commonObj.get(
-									"UserIsAdmin").textValue());
-						}
-						if (commonObj != null && commonObj.has("UserCollege")) {
-							userCollege = commonObj.get("UserCollege")
-									.textValue();
-						}
-						if (commonObj != null
-								&& commonObj.has("UserDepartment")) {
-							userDepartment = commonObj.get("UserDepartment")
-									.textValue();
-						}
-						if (commonObj != null
-								&& commonObj.has("UserPositionType")) {
-							userPositionType = commonObj
-									.get("UserPositionType").textValue();
-						}
-						if (commonObj != null
-								&& commonObj.has("UserPositionTitle")) {
-							userPositionTitle = commonObj.get(
-									"UserPositionTitle").textValue();
-						}
+						userInfo = new GPMSCommonInfo(commonObj);
 					}
-
 					ObjectId id = new ObjectId(proposalId);
 					Proposal existingProposal = proposalDAO
 							.findProposalByProposalID(id);
-
 					List<SignatureUserInfo> signatures = proposalDAO
 							.findSignaturesExceptInvestigator(id,
 									existingProposal.isIrbApprovalRequired());
-
-					ObjectId authorId = new ObjectId(userProfileID);
+					ObjectId authorId = new ObjectId(
+							userInfo.getUserProfileID());
 					UserProfile authorProfile = userProfileDAO
 							.findUserDetailsByProfileID(authorId);
-					String authorFullName = authorProfile.getFullName();
 					String authorUserName = authorProfile.getUserAccount()
 							.getUserName();
-
-					contentProfile.append("<Content>");
-					contentProfile
-							.append("<ak:record xmlns:ak=\"http://akpower.org\">");
-					contentProfile.append("<ak:proposal>");
-
-					contentProfile.append("<ak:proposalid>");
-					contentProfile.append(proposalId);
-					contentProfile.append("</ak:proposalid>");
-
-					contentProfile.append("<ak:proposaltitle>");
-					contentProfile.append(existingProposal.getProjectInfo()
-							.getProjectTitle());
-					contentProfile.append("</ak:proposaltitle>");
-
-					contentProfile.append("<ak:irbApprovalRequired>");
-					contentProfile.append(existingProposal
-							.isIrbApprovalRequired());
-					contentProfile.append("</ak:irbApprovalRequired>");
-
-					contentProfile.append("<ak:submittedbypi>");
-					contentProfile.append(existingProposal.getSubmittedByPI()
-							.name());
-					contentProfile.append("</ak:submittedbypi>");
-
-					contentProfile.append("<ak:readyforsubmissionbypi>");
-					contentProfile.append(existingProposal
-							.isReadyForSubmissionByPI());
-					contentProfile.append("</ak:readyforsubmissionbypi>");
-
-					contentProfile.append("<ak:deletedbypi>");
-					contentProfile.append(existingProposal.getDeletedByPI()
-							.name());
-					contentProfile.append("</ak:deletedbypi>");
-
-					contentProfile.append("<ak:approvedbydepartmentchair>");
-					contentProfile.append(existingProposal.getChairApproval()
-							.name());
-					contentProfile.append("</ak:approvedbydepartmentchair>");
-
-					contentProfile.append("<ak:approvedbybusinessmanager>");
-					contentProfile.append(existingProposal
-							.getBusinessManagerApproval().name());
-					contentProfile.append("</ak:approvedbybusinessmanager>");
-
-					contentProfile.append("<ak:approvedbyirb>");
-					contentProfile.append(existingProposal.getIrbApproval()
-							.name());
-					contentProfile.append("</ak:approvedbyirb>");
-
-					contentProfile.append("<ak:approvedbydean>");
-					contentProfile.append(existingProposal.getDeanApproval()
-							.name());
-					contentProfile.append("</ak:approvedbydean>");
-
-					contentProfile
-							.append("<ak:approvedbyuniversityresearchadministrator>");
-					contentProfile.append(existingProposal
-							.getResearchAdministratorApproval().name());
-					contentProfile
-							.append("</ak:approvedbyuniversityresearchadministrator>");
-
-					contentProfile
-							.append("<ak:withdrawnbyuniversityresearchadministrator>");
-					contentProfile.append(existingProposal
-							.getResearchAdministratorWithdraw().name());
-					contentProfile
-							.append("</ak:withdrawnbyuniversityresearchadministrator>");
-
-					contentProfile
-							.append("<ak:submittedbyuniversityresearchadministrator>");
-					contentProfile.append(existingProposal
-							.getResearchAdministratorSubmission().name());
-					contentProfile
-							.append("</ak:submittedbyuniversityresearchadministrator>");
-
-					contentProfile
-							.append("<ak:approvedbyuniversityresearchdirector>");
-					contentProfile.append(existingProposal
-							.getResearchDirectorDeletion().name());
-					contentProfile
-							.append("</ak:approvedbyuniversityresearchdirector>");
-
-					contentProfile
-							.append("<ak:deletedbyuniversityresearchdirector>");
-					contentProfile.append(existingProposal
-							.getResearchDirectorDeletion().name());
-					contentProfile
-							.append("</ak:deletedbyuniversityresearchdirector>");
-
-					contentProfile
-							.append("<ak:archivedbyuniversityresearchdirector>");
-					contentProfile.append(existingProposal
-							.getResearchDirectorArchived().name());
-					contentProfile
-							.append("</ak:archivedbyuniversityresearchdirector>");
-
-					contentProfile.append("<ak:authorprofile>");
-					// contentProfile.append("<ak:firstname>");
-					// contentProfile.append(authorProfile.getFirstName());
-					// contentProfile.append("</ak:firstname>");
-					// contentProfile.append("<ak:middlename>");
-					// contentProfile
-					// .append(authorProfile.getMiddleName());
-					// contentProfile.append("</ak:middlename>");
-					//
-					// contentProfile.append("<ak:lastname>");
-					// contentProfile.append(authorProfile.getLastName());
-					// contentProfile.append("</ak:lastname>");
-
-					contentProfile.append("<ak:fullname>");
-					contentProfile.append(authorFullName);
-					contentProfile.append("</ak:fullname>");
-
-					contentProfile.append("<ak:userid>");
-					contentProfile.append(authorProfile.getId().toString());
-					contentProfile.append("</ak:userid>");
-
-					contentProfile.append("</ak:authorprofile>");
-
-					contentProfile.append("<ak:pi>");
-					contentProfile.append("<ak:fullname>");
-					contentProfile.append(existingProposal
-							.getInvestigatorInfo().getPi().getUserRef()
-							.getFullName());
-					contentProfile.append("</ak:fullname>");
-
-					contentProfile.append("<ak:workemail>");
-					contentProfile.append(existingProposal
-							.getInvestigatorInfo().getPi().getUserRef()
-							.getWorkEmails().get(0));
-					contentProfile.append("</ak:workemail>");
-
-					contentProfile.append("<ak:userid>");
-					contentProfile.append(existingProposal
-							.getInvestigatorInfo().getPi().getUserProfileId());
-					contentProfile.append("</ak:userid>");
-					contentProfile.append("</ak:pi>");
-
-					for (InvestigatorRefAndPosition copis : existingProposal
-							.getInvestigatorInfo().getCo_pi()) {
-						contentProfile.append("<ak:copi>");
-						contentProfile.append("<ak:fullname>");
-						contentProfile.append(copis.getUserRef().getFullName());
-						contentProfile.append("</ak:fullname>");
-
-						contentProfile.append("<ak:workemail>");
-						contentProfile.append(copis.getUserRef()
-								.getWorkEmails().get(0));
-						contentProfile.append("</ak:workemail>");
-
-						contentProfile.append("<ak:userid>");
-						contentProfile.append(copis.getUserProfileId());
-						contentProfile.append("</ak:userid>");
-						contentProfile.append("</ak:copi>");
-					}
-
-					for (InvestigatorRefAndPosition seniors : existingProposal
-							.getInvestigatorInfo().getSeniorPersonnel()) {
-						contentProfile.append("<ak:senior>");
-						contentProfile.append("<ak:fullname>");
-						contentProfile.append(seniors.getUserRef()
-								.getFullName());
-						contentProfile.append("</ak:fullname>");
-
-						contentProfile.append("<ak:workemail>");
-						contentProfile.append(seniors.getUserRef()
-								.getWorkEmails().get(0));
-						contentProfile.append("</ak:workemail>");
-
-						contentProfile.append("<ak:userid>");
-						contentProfile.append(seniors.getUserProfileId());
-						contentProfile.append("</ak:userid>");
-						contentProfile.append("</ak:senior>");
-					}
-
-					for (SignatureUserInfo signatureInfo : signatures) {
-						switch (signatureInfo.getPositionTitle()) {
-						case "Department Chair":
-							contentProfile.append("<ak:chair>");
-							contentProfile.append("<ak:fullname>");
-							contentProfile.append(signatureInfo.getFullName());
-							contentProfile.append("</ak:fullname>");
-
-							contentProfile.append("<ak:workemail>");
-							contentProfile.append(signatureInfo.getEmail());
-							contentProfile.append("</ak:workemail>");
-
-							contentProfile.append("<ak:userid>");
-							contentProfile.append(signatureInfo
-									.getUserProfileId());
-							contentProfile.append("</ak:userid>");
-							contentProfile.append("</ak:chair>");
-
-							break;
-						case "Business Manager":
-							contentProfile.append("<ak:manager>");
-							contentProfile.append("<ak:fullname>");
-							contentProfile.append(signatureInfo.getFullName());
-							contentProfile.append("</ak:fullname>");
-
-							contentProfile.append("<ak:workemail>");
-							contentProfile.append(signatureInfo.getEmail());
-							contentProfile.append("</ak:workemail>");
-
-							contentProfile.append("<ak:userid>");
-							contentProfile.append(signatureInfo
-									.getUserProfileId());
-							contentProfile.append("</ak:userid>");
-							contentProfile.append("</ak:manager>");
-							break;
-						case "Dean":
-							contentProfile.append("<ak:dean>");
-							contentProfile.append("<ak:fullname>");
-							contentProfile.append(signatureInfo.getFullName());
-							contentProfile.append("</ak:fullname>");
-
-							contentProfile.append("<ak:workemail>");
-							contentProfile.append(signatureInfo.getEmail());
-							contentProfile.append("</ak:workemail>");
-
-							contentProfile.append("<ak:userid>");
-							contentProfile.append(signatureInfo
-									.getUserProfileId());
-							contentProfile.append("</ak:userid>");
-							contentProfile.append("</ak:dean>");
-							break;
-						case "IRB":
-							contentProfile.append("<ak:irb>");
-							contentProfile.append("<ak:fullname>");
-							contentProfile.append(signatureInfo.getFullName());
-							contentProfile.append("</ak:fullname>");
-
-							contentProfile.append("<ak:workemail>");
-							contentProfile.append(signatureInfo.getEmail());
-							contentProfile.append("</ak:workemail>");
-
-							contentProfile.append("<ak:userid>");
-							contentProfile.append(signatureInfo
-									.getUserProfileId());
-							contentProfile.append("</ak:userid>");
-							contentProfile.append("</ak:irb>");
-							break;
-						case "University Research Administrator":
-							contentProfile.append("<ak:administrator>");
-							contentProfile.append("<ak:fullname>");
-							contentProfile.append(signatureInfo.getFullName());
-							contentProfile.append("</ak:fullname>");
-
-							contentProfile.append("<ak:workemail>");
-							contentProfile.append(signatureInfo.getEmail());
-							contentProfile.append("</ak:workemail>");
-
-							contentProfile.append("<ak:userid>");
-							contentProfile.append(signatureInfo
-									.getUserProfileId());
-							contentProfile.append("</ak:userid>");
-							contentProfile.append("</ak:administrator>");
-							break;
-						case "University Research Director":
-							contentProfile.append("<ak:director>");
-							contentProfile.append("<ak:fullname>");
-							contentProfile.append(signatureInfo.getFullName());
-							contentProfile.append("</ak:fullname>");
-
-							contentProfile.append("<ak:workemail>");
-							contentProfile.append(signatureInfo.getEmail());
-							contentProfile.append("</ak:workemail>");
-
-							contentProfile.append("<ak:userid>");
-							contentProfile.append(signatureInfo
-									.getUserProfileId());
-							contentProfile.append("</ak:userid>");
-							contentProfile.append("</ak:director>");
-							break;
-						}
-					}
-
-					contentProfile.append("</ak:proposal>");
-					contentProfile.append("</ak:record>");
-					contentProfile.append("</Content>");
-
-					contentProfile
-							.append("<Attribute AttributeId=\"urn:oasis:names:tc:xacml:3.0:content-selector\" IncludeInResult=\"false\">");
-					contentProfile
-							.append("<AttributeValue XPathCategory=\"urn:oasis:names:tc:xacml:3.0:attribute-category:resource\" DataType=\"urn:oasis:names:tc:xacml:3.0:data-type:xpathExpression\">//ak:record/ak:proposal</AttributeValue>");
-					contentProfile.append("</Attribute>");
-
+					StringBuffer contentProfile = generateContentProfile(
+							proposalId, existingProposal, signatures,
+							authorProfile);
 					Accesscontrol ac = new Accesscontrol();
-					HashMap<String, Multimap<String, String>> attrMap = new HashMap<String, Multimap<String, String>>();
-
-					Multimap<String, String> subjectMap = ArrayListMultimap
-							.create();
-					Multimap<String, String> resourceMap = ArrayListMultimap
-							.create();
-					Multimap<String, String> actionMap = ArrayListMultimap
-							.create();
-					Multimap<String, String> environmentMap = ArrayListMultimap
-							.create();
-					for (JsonNode node : policyInfo) {
-						String attributeName = node.path("attributeName")
-								.asText();
-						String attributeValue = node.path("attributeValue")
-								.asText();
-						String attributeType = node.path("attributeType")
-								.asText();
-						switch (attributeType) {
-						case "Subject":
-							subjectMap.put(attributeName, attributeValue);
-							attrMap.put("Subject", subjectMap);
-							break;
-						case "Resource":
-							resourceMap.put(attributeName, attributeValue);
-							attrMap.put("Resource", resourceMap);
-							break;
-						case "Action":
-							actionMap.put(attributeName, attributeValue);
-							attrMap.put("Action", actionMap);
-							break;
-						case "Environment":
-							environmentMap.put(attributeName, attributeValue);
-							attrMap.put("Environment", environmentMap);
-							break;
-						default:
-							break;
-						}
-					}
-
+					HashMap<String, Multimap<String, String>> attrMap = generateAttributes(policyInfo);
 					Set<AbstractResult> set = ac
 							.getXACMLdecisionWithObligations(attrMap,
 									contentProfile);
@@ -1261,228 +466,10 @@ public class ProposalService {
 								+ AbstractResult.DECISIONS[intDecision]);
 						if (AbstractResult.DECISIONS[intDecision]
 								.equals("Permit")) {
-							List<ObligationResult> obligations = ar
-									.getObligations();
-							EmailUtil emailUtil = new EmailUtil();
-							String emailSubject = new String();
-							String emailBody = new String();
-							String authorName = new String();
-							String piEmail = new String();
-							List<String> emaillist = new ArrayList<String>();
-
-							if (obligations.size() > 0) {
-								List<ObligationResult> preObligations = new ArrayList<ObligationResult>();
-								List<ObligationResult> postObligations = new ArrayList<ObligationResult>();
-								List<ObligationResult> ongoingObligations = new ArrayList<ObligationResult>();
-
-								for (ObligationResult obligation : obligations) {
-									if (obligation instanceof org.wso2.balana.xacml3.Obligation) {
-										List<AttributeAssignment> assignments = ((org.wso2.balana.xacml3.Obligation) obligation)
-												.getAssignments();
-
-										String obligationType = "postobligation";
-
-										for (AttributeAssignment assignment : assignments) {
-											if (assignment
-													.getAttributeId()
-													.toString()
-													.equalsIgnoreCase(
-															"obligationType")) {
-												obligationType = assignment
-														.getContent();
-												break;
-											}
-										}
-
-										if (obligationType
-												.equals("preobligation")) {
-											preObligations.add(obligation);
-											System.out.println(obligationType
-													+ " is FOUND");
-										} else if (obligationType
-												.equals("postobligation")) {
-											postObligations.add(obligation);
-											System.out.println(obligationType
-													+ " is FOUND");
-										} else {
-											ongoingObligations.add(obligation);
-											System.out.println(obligationType
-													+ " is FOUND");
-										}
-
-									}
-								}
-
-								Boolean preCondition = true;
-								String alertMessage = new String();
-								if (preObligations.size() != 0) {
-									preCondition = false;
-
-									System.out
-											.println("\n======================== Printing Obligations ====================");
-
-									for (ObligationResult obligation : preObligations) {
-										if (obligation instanceof org.wso2.balana.xacml3.Obligation) {
-											List<AttributeAssignment> assignments = ((org.wso2.balana.xacml3.Obligation) obligation)
-													.getAssignments();
-
-											String obligationType = "preobligation";
-
-											for (AttributeAssignment assignment : assignments) {
-
-												// System.out.println("Obligation :  "
-												// + assignment.getContent() +
-												// "\n");
-
-												switch (assignment
-														.getAttributeId()
-														.toString()) {
-												// case "obligationType":
-												// obligationType =
-												// assignment.getContent();
-												// break;
-
-												case "signedByCurrentUser":
-													preCondition = Boolean
-															.parseBoolean(assignment
-																	.getContent());
-													break;
-												case "alertMessage":
-													alertMessage = assignment
-															.getContent();
-													break;
-
-												}
-											}
-											System.out.println(obligationType
-													+ " is RUNNING");
-											if (!preCondition) {
-												break;
-											}
-										}
-									}
-								}
-
-								if (preCondition) {
-									for (ObligationResult obligation : postObligations) {
-										if (obligation instanceof org.wso2.balana.xacml3.Obligation) {
-											List<AttributeAssignment> assignments = ((org.wso2.balana.xacml3.Obligation) obligation)
-													.getAssignments();
-
-											String obligationType = "postobligation";
-
-											for (AttributeAssignment assignment : assignments) {
-
-												// System.out.println("Obligation :  "
-												// + assignment.getContent() +
-												// "\n");
-
-												switch (assignment
-														.getAttributeId()
-														.toString()) {
-												// case "obligationType":
-												// obligationType =
-												// assignment.getContent();
-												// break;
-												case "authorName":
-													authorName = assignment
-															.getContent();
-													break;
-												case "emailSubject":
-													emailSubject = assignment
-															.getContent();
-													break;
-												case "emailBody":
-													emailBody = assignment
-															.getContent();
-													break;
-												case "piEmail":
-													piEmail = assignment
-															.getContent();
-													break;
-												case "copisEmail":
-												case "seniorsEmail":
-												case "chairsEmail":
-												case "managersEmail":
-												case "deansEmail":
-												case "irbsEmail":
-												case "administratorsEmail":
-												case "directorsEmail":
-													if (!assignment
-															.getContent()
-															.equals("")) {
-														emaillist
-																.add(assignment
-																		.getContent());
-													}
-													break;
-												}
-											}
-
-											System.out.println(obligationType
-													+ " is RUNNING");
-										}
-									}
-								} else {
-									return Response.status(403)
-											.type(MediaType.APPLICATION_JSON)
-											.entity(alertMessage).build();
-								}
-							}
-
-							boolean isDeleted = proposalDAO.deleteProposal(
-									existingProposal, proposalRoles,
-									proposalUserTitle, authorProfile);
-							if (isDeleted) {
-								if (!emailSubject.equals("")) {
-									emailUtil.sendMailMultipleUsersWithoutAuth(
-											piEmail, emaillist, emailSubject
-													+ authorName, emailBody);
-								}
-
-								String notificationMessage = "Deleted by "
-										+ authorUserName + ".";
-
-								if (proposalRoles.equals("PI")
-										&& !proposalUserTitle
-												.equals("University Research Director")) {
-									broadCastNotification(existingProposal
-											.getId().toString(),
-											existingProposal.getProjectInfo()
-													.getProjectTitle(),
-											notificationMessage, "Proposal",
-											true, true, true, true, false,
-											false, false, false, false, false);
-								} else if (!proposalRoles.equals("PI")
-										&& proposalUserTitle
-												.equals("University Research Director")) {
-									broadCastNotification(existingProposal
-											.getId().toString(),
-											existingProposal.getProjectInfo()
-													.getProjectTitle(),
-											notificationMessage, "Proposal",
-											true, true, true, true, true, true,
-											true, true, true, true);
-								}
-
-								return Response
-										.status(200)
-										.type(MediaType.APPLICATION_JSON)
-										.entity(mapper
-												.writerWithDefaultPrettyPrinter()
-												.writeValueAsString(true))
-										.build();
-								// return
-								// Response.status(200).entity(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(true)).build();
-							} else {
-								return Response
-										.status(200)
-										.type(MediaType.APPLICATION_JSON)
-										.entity(mapper
-												.writerWithDefaultPrettyPrinter()
-												.writeValueAsString(true))
-										.build();
-							}
+							return deleteProposalWithObligations(mapper,
+									proposalRoles, proposalUserTitle,
+									existingProposal, authorProfile,
+									authorUserName, ar);
 						} else {
 							return Response
 									.status(403)
@@ -1502,11 +489,506 @@ public class ProposalService {
 		} catch (Exception e) {
 			log.error("Could not delete the selected Proposal error e=", e);
 		}
-
 		return Response
 				.status(403)
 				.entity("{\"error\": \"No User Permission Attributes are send!\", \"status\": \"FAIL\"}")
 				.build();
+	}
+
+	/**
+	 * Deletes Proposal With Obligations
+	 * 
+	 * @param mapper
+	 * @param proposalRoles
+	 * @param proposalUserTitle
+	 * @param existingProposal
+	 * @param authorProfile
+	 * @param authorUserName
+	 * @param ar
+	 * @return
+	 * @throws JsonProcessingException
+	 */
+	private Response deleteProposalWithObligations(ObjectMapper mapper,
+			String proposalRoles, String proposalUserTitle,
+			Proposal existingProposal, UserProfile authorProfile,
+			String authorUserName, AbstractResult ar)
+			throws JsonProcessingException {
+		List<ObligationResult> obligations = ar.getObligations();
+		EmailUtil emailUtil = new EmailUtil();
+		String emailSubject = new String();
+		String emailBody = new String();
+		String authorName = new String();
+		String piEmail = new String();
+		List<String> emaillist = new ArrayList<String>();
+		if (obligations.size() > 0) {
+			List<ObligationResult> preObligations = new ArrayList<ObligationResult>();
+			List<ObligationResult> postObligations = new ArrayList<ObligationResult>();
+			List<ObligationResult> ongoingObligations = new ArrayList<ObligationResult>();
+			for (ObligationResult obligation : obligations) {
+				categorizeObligationTypes(preObligations, postObligations,
+						ongoingObligations, obligation);
+			}
+			// Performs Preobligations
+			Boolean preCondition = true;
+			String alertMessage = new String();
+			if (preObligations.size() != 0) {
+				preCondition = false;
+				System.out
+						.println("\n======================== Printing Obligations ====================");
+				for (ObligationResult obligation : preObligations) {
+					if (obligation instanceof org.wso2.balana.xacml3.Obligation) {
+						List<AttributeAssignment> assignments = ((org.wso2.balana.xacml3.Obligation) obligation)
+								.getAssignments();
+						String obligationType = "preobligation";
+						for (AttributeAssignment assignment : assignments) {
+							switch (assignment.getAttributeId().toString()) {
+							case "signedByCurrentUser":
+								preCondition = Boolean.parseBoolean(assignment
+										.getContent());
+								break;
+							case "alertMessage":
+								alertMessage = assignment.getContent();
+								break;
+							default:
+								break;
+							}
+						}
+						System.out.println(obligationType + " is RUNNING");
+						if (!preCondition) {
+							break;
+						}
+					}
+				}
+			}
+
+			if (preCondition) {
+				// Performs Postobligations
+				for (ObligationResult obligation : postObligations) {
+					if (obligation instanceof org.wso2.balana.xacml3.Obligation) {
+						List<AttributeAssignment> assignments = ((org.wso2.balana.xacml3.Obligation) obligation)
+								.getAssignments();
+						String obligationType = "postobligation";
+						for (AttributeAssignment assignment : assignments) {
+							switch (assignment.getAttributeId().toString()) {
+							case "authorName":
+								authorName = assignment.getContent();
+								break;
+							case "emailSubject":
+								emailSubject = assignment.getContent();
+								break;
+							case "emailBody":
+								emailBody = assignment.getContent();
+								break;
+							case "piEmail":
+								piEmail = assignment.getContent();
+								break;
+							case "copisEmail":
+							case "seniorsEmail":
+							case "chairsEmail":
+							case "managersEmail":
+							case "deansEmail":
+							case "irbsEmail":
+							case "administratorsEmail":
+							case "directorsEmail":
+								if (!assignment.getContent().equals("")) {
+									emaillist.add(assignment.getContent());
+								}
+								break;
+							default:
+								break;
+							}
+						}
+						System.out.println(obligationType + " is RUNNING");
+					}
+				}
+			} else {
+				return Response.status(403).type(MediaType.APPLICATION_JSON)
+						.entity(alertMessage).build();
+			}
+		}
+		// Performs Action
+		boolean isDeleted = proposalDAO.deleteProposal(existingProposal,
+				proposalRoles, proposalUserTitle, authorProfile);
+		if (isDeleted) {
+			sendDeleteNotification(proposalRoles, proposalUserTitle,
+					existingProposal, authorUserName, authorName, emailUtil,
+					emailSubject, emailBody, piEmail, emaillist);
+			return Response
+					.status(200)
+					.type(MediaType.APPLICATION_JSON)
+					.entity(mapper.writerWithDefaultPrettyPrinter()
+							.writeValueAsString(true)).build();
+		} else {
+			return Response
+					.status(200)
+					.type(MediaType.APPLICATION_JSON)
+					.entity(mapper.writerWithDefaultPrettyPrinter()
+							.writeValueAsString(true)).build();
+		}
+	}
+
+	/**
+	 * Sends Delete Notification
+	 * 
+	 * @param mapper
+	 * @param proposalRoles
+	 * @param proposalUserTitle
+	 * @param existingProposal
+	 * @param authorUserName
+	 * @param emailUtil
+	 * @param emailSubject
+	 * @param emailBody
+	 * @param authorName
+	 * @param piEmail
+	 * @param emaillist
+	 * @return
+	 * @throws JsonProcessingException
+	 */
+	private void sendDeleteNotification(String proposalRoles,
+			String proposalUserTitle, Proposal existingProposal,
+			String authorUserName, String authorName, EmailUtil emailUtil,
+			String emailSubject, String emailBody, String piEmail,
+			List<String> emaillist) throws JsonProcessingException {
+		if (!emailSubject.equals("")) {
+			emailUtil.sendMailMultipleUsersWithoutAuth(piEmail, emaillist,
+					emailSubject + authorName, emailBody);
+		}
+		String notificationMessage = "Deleted by " + authorUserName + ".";
+		if (proposalRoles.equals("PI")
+				&& !proposalUserTitle.equals("University Research Director")) {
+			broadCastNotification(existingProposal.getId().toString(),
+					existingProposal.getProjectInfo().getProjectTitle(),
+					notificationMessage, "Proposal", true, true, true, true,
+					false, false, false, false, false, false);
+		} else if (!proposalRoles.equals("PI")
+				&& proposalUserTitle.equals("University Research Director")) {
+			broadCastNotification(existingProposal.getId().toString(),
+					existingProposal.getProjectInfo().getProjectTitle(),
+					notificationMessage, "Proposal", true, true, true, true,
+					true, true, true, true, true, true);
+		}
+	}
+
+	/**
+	 * @param preObligations
+	 * @param postObligations
+	 * @param ongoingObligations
+	 * @param obligation
+	 */
+	private void categorizeObligationTypes(
+			List<ObligationResult> preObligations,
+			List<ObligationResult> postObligations,
+			List<ObligationResult> ongoingObligations,
+			ObligationResult obligation) {
+		if (obligation instanceof org.wso2.balana.xacml3.Obligation) {
+			List<AttributeAssignment> assignments = ((org.wso2.balana.xacml3.Obligation) obligation)
+					.getAssignments();
+			String obligationType = "postobligation";
+			for (AttributeAssignment assignment : assignments) {
+				if (assignment.getAttributeId().toString()
+						.equalsIgnoreCase("obligationType")) {
+					obligationType = assignment.getContent();
+					break;
+				}
+			}
+			if (obligationType.equals("preobligation")) {
+				preObligations.add(obligation);
+				System.out.println(obligationType + " is FOUND");
+			} else if (obligationType.equals("postobligation")) {
+				postObligations.add(obligation);
+				System.out.println(obligationType + " is FOUND");
+			} else {
+				ongoingObligations.add(obligation);
+				System.out.println(obligationType + " is FOUND");
+			}
+		}
+	}
+
+	/**
+	 * Generates Attributes based on policy info
+	 * 
+	 * @param policyInfo
+	 * @return
+	 */
+	private HashMap<String, Multimap<String, String>> generateAttributes(
+			JsonNode policyInfo) {
+		HashMap<String, Multimap<String, String>> attrMap = new HashMap<String, Multimap<String, String>>();
+		Multimap<String, String> subjectMap = ArrayListMultimap.create();
+		Multimap<String, String> resourceMap = ArrayListMultimap.create();
+		Multimap<String, String> actionMap = ArrayListMultimap.create();
+		Multimap<String, String> environmentMap = ArrayListMultimap.create();
+		for (JsonNode node : policyInfo) {
+			String attributeName = node.path("attributeName").asText();
+			String attributeValue = node.path("attributeValue").asText();
+			String attributeType = node.path("attributeType").asText();
+			switch (attributeType) {
+			case "Subject":
+				subjectMap.put(attributeName, attributeValue);
+				attrMap.put("Subject", subjectMap);
+				break;
+			case "Resource":
+				resourceMap.put(attributeName, attributeValue);
+				attrMap.put("Resource", resourceMap);
+				break;
+			case "Action":
+				actionMap.put(attributeName, attributeValue);
+				attrMap.put("Action", actionMap);
+				break;
+			case "Environment":
+				environmentMap.put(attributeName, attributeValue);
+				attrMap.put("Environment", environmentMap);
+				break;
+			default:
+				break;
+			}
+		}
+		return attrMap;
+	}
+
+	/***
+	 * Generates Content Profile for Proposal
+	 * 
+	 * @param proposalId
+	 * @param existingProposal
+	 * @param signatures
+	 * @param authorProfile
+	 * @return
+	 */
+	private StringBuffer generateContentProfile(String proposalId,
+			Proposal existingProposal, List<SignatureUserInfo> signatures,
+			UserProfile authorProfile) {
+		StringBuffer contentProfile = new StringBuffer();
+		String authorFullName = authorProfile.getFullName();
+		contentProfile.append("<Content>");
+		contentProfile.append("<ak:record xmlns:ak=\"http://akpower.org\">");
+		genearteProposalInfoContentProfile(proposalId, existingProposal,
+				contentProfile);
+		generateAuthorContentProfile(contentProfile, authorProfile,
+				authorFullName);
+		generateInvestigatorContentProfile(existingProposal, contentProfile);
+		for (SignatureUserInfo signatureInfo : signatures) {
+			generateSignatureContentProfile(contentProfile, signatureInfo);
+		}
+		contentProfile.append("</ak:proposal>");
+		contentProfile.append("</ak:record>");
+		contentProfile.append("</Content>");
+		contentProfile
+				.append("<Attribute AttributeId=\"urn:oasis:names:tc:xacml:3.0:content-selector\" IncludeInResult=\"false\">");
+		contentProfile
+				.append("<AttributeValue XPathCategory=\"urn:oasis:names:tc:xacml:3.0:attribute-category:resource\" DataType=\"urn:oasis:names:tc:xacml:3.0:data-type:xpathExpression\">//ak:record/ak:proposal</AttributeValue>");
+		contentProfile.append("</Attribute>");
+		return contentProfile;
+	}
+
+	/**
+	 * @param proposalId
+	 * @param existingProposal
+	 * @param contentProfile
+	 */
+	private void genearteProposalInfoContentProfile(String proposalId,
+			Proposal existingProposal, StringBuffer contentProfile) {
+		contentProfile.append("<ak:proposal>");
+		contentProfile.append("<ak:proposalid>");
+		contentProfile.append(proposalId);
+		contentProfile.append("</ak:proposalid>");
+		contentProfile.append("<ak:proposaltitle>");
+		contentProfile.append(existingProposal.getProjectInfo()
+				.getProjectTitle());
+		contentProfile.append("</ak:proposaltitle>");
+		contentProfile.append("<ak:irbApprovalRequired>");
+		contentProfile.append(existingProposal.isIrbApprovalRequired());
+		contentProfile.append("</ak:irbApprovalRequired>");
+		contentProfile.append("<ak:submittedbypi>");
+		contentProfile.append(existingProposal.getSubmittedByPI().name());
+		contentProfile.append("</ak:submittedbypi>");
+		contentProfile.append("<ak:readyforsubmissionbypi>");
+		contentProfile.append(existingProposal.isReadyForSubmissionByPI());
+		contentProfile.append("</ak:readyforsubmissionbypi>");
+		contentProfile.append("<ak:deletedbypi>");
+		contentProfile.append(existingProposal.getDeletedByPI().name());
+		contentProfile.append("</ak:deletedbypi>");
+		contentProfile.append("<ak:approvedbydepartmentchair>");
+		contentProfile.append(existingProposal.getChairApproval().name());
+		contentProfile.append("</ak:approvedbydepartmentchair>");
+		contentProfile.append("<ak:approvedbybusinessmanager>");
+		contentProfile.append(existingProposal.getBusinessManagerApproval()
+				.name());
+		contentProfile.append("</ak:approvedbybusinessmanager>");
+		contentProfile.append("<ak:approvedbyirb>");
+		contentProfile.append(existingProposal.getIrbApproval().name());
+		contentProfile.append("</ak:approvedbyirb>");
+		contentProfile.append("<ak:approvedbydean>");
+		contentProfile.append(existingProposal.getDeanApproval().name());
+		contentProfile.append("</ak:approvedbydean>");
+		contentProfile.append("<ak:approvedbyuniversityresearchadministrator>");
+		contentProfile.append(existingProposal
+				.getResearchAdministratorApproval().name());
+		contentProfile
+				.append("</ak:approvedbyuniversityresearchadministrator>");
+		contentProfile
+				.append("<ak:withdrawnbyuniversityresearchadministrator>");
+		contentProfile.append(existingProposal
+				.getResearchAdministratorWithdraw().name());
+		contentProfile
+				.append("</ak:withdrawnbyuniversityresearchadministrator>");
+		contentProfile
+				.append("<ak:submittedbyuniversityresearchadministrator>");
+		contentProfile.append(existingProposal
+				.getResearchAdministratorSubmission().name());
+		contentProfile
+				.append("</ak:submittedbyuniversityresearchadministrator>");
+		contentProfile.append("<ak:approvedbyuniversityresearchdirector>");
+		contentProfile.append(existingProposal.getResearchDirectorApproval()
+				.name());
+		contentProfile.append("</ak:approvedbyuniversityresearchdirector>");
+		contentProfile.append("<ak:deletedbyuniversityresearchdirector>");
+		contentProfile.append(existingProposal.getResearchDirectorDeletion()
+				.name());
+		contentProfile.append("</ak:deletedbyuniversityresearchdirector>");
+		contentProfile.append("<ak:archivedbyuniversityresearchdirector>");
+		contentProfile.append(existingProposal.getResearchDirectorArchived()
+				.name());
+		contentProfile.append("</ak:archivedbyuniversityresearchdirector>");
+	}
+
+	/**
+	 * @param existingProposal
+	 * @param contentProfile
+	 */
+	private void generateInvestigatorContentProfile(Proposal existingProposal,
+			StringBuffer contentProfile) {
+		contentProfile.append("<ak:pi>");
+		contentProfile.append("<ak:fullname>");
+		contentProfile.append(existingProposal.getInvestigatorInfo().getPi()
+				.getUserRef().getFullName());
+		contentProfile.append("</ak:fullname>");
+		contentProfile.append("<ak:workemail>");
+		contentProfile.append(existingProposal.getInvestigatorInfo().getPi()
+				.getUserRef().getWorkEmails().get(0));
+		contentProfile.append("</ak:workemail>");
+		contentProfile.append("<ak:userid>");
+		contentProfile.append(existingProposal.getInvestigatorInfo().getPi()
+				.getUserProfileId());
+		contentProfile.append("</ak:userid>");
+		contentProfile.append("</ak:pi>");
+		for (InvestigatorRefAndPosition copis : existingProposal
+				.getInvestigatorInfo().getCo_pi()) {
+			contentProfile.append("<ak:copi>");
+			contentProfile.append("<ak:fullname>");
+			contentProfile.append(copis.getUserRef().getFullName());
+			contentProfile.append("</ak:fullname>");
+			contentProfile.append("<ak:workemail>");
+			contentProfile.append(copis.getUserRef().getWorkEmails().get(0));
+			contentProfile.append("</ak:workemail>");
+			contentProfile.append("<ak:userid>");
+			contentProfile.append(copis.getUserProfileId());
+			contentProfile.append("</ak:userid>");
+			contentProfile.append("</ak:copi>");
+		}
+		for (InvestigatorRefAndPosition seniors : existingProposal
+				.getInvestigatorInfo().getSeniorPersonnel()) {
+			contentProfile.append("<ak:senior>");
+			contentProfile.append("<ak:fullname>");
+			contentProfile.append(seniors.getUserRef().getFullName());
+			contentProfile.append("</ak:fullname>");
+			contentProfile.append("<ak:workemail>");
+			contentProfile.append(seniors.getUserRef().getWorkEmails().get(0));
+			contentProfile.append("</ak:workemail>");
+			contentProfile.append("<ak:userid>");
+			contentProfile.append(seniors.getUserProfileId());
+			contentProfile.append("</ak:userid>");
+			contentProfile.append("</ak:senior>");
+		}
+	}
+
+	/**
+	 * @param contentProfile
+	 * @param signatureInfo
+	 */
+	private void generateSignatureContentProfile(StringBuffer contentProfile,
+			SignatureUserInfo signatureInfo) {
+		switch (signatureInfo.getPositionTitle()) {
+		case "Department Chair":
+			contentProfile.append("<ak:chair>");
+			contentProfile.append("<ak:fullname>");
+			contentProfile.append(signatureInfo.getFullName());
+			contentProfile.append("</ak:fullname>");
+			contentProfile.append("<ak:workemail>");
+			contentProfile.append(signatureInfo.getEmail());
+			contentProfile.append("</ak:workemail>");
+			contentProfile.append("<ak:userid>");
+			contentProfile.append(signatureInfo.getUserProfileId());
+			contentProfile.append("</ak:userid>");
+			contentProfile.append("</ak:chair>");
+			break;
+		case "Business Manager":
+			contentProfile.append("<ak:manager>");
+			contentProfile.append("<ak:fullname>");
+			contentProfile.append(signatureInfo.getFullName());
+			contentProfile.append("</ak:fullname>");
+			contentProfile.append("<ak:workemail>");
+			contentProfile.append(signatureInfo.getEmail());
+			contentProfile.append("</ak:workemail>");
+			contentProfile.append("<ak:userid>");
+			contentProfile.append(signatureInfo.getUserProfileId());
+			contentProfile.append("</ak:userid>");
+			contentProfile.append("</ak:manager>");
+			break;
+		case "Dean":
+			contentProfile.append("<ak:dean>");
+			contentProfile.append("<ak:fullname>");
+			contentProfile.append(signatureInfo.getFullName());
+			contentProfile.append("</ak:fullname>");
+			contentProfile.append("<ak:workemail>");
+			contentProfile.append(signatureInfo.getEmail());
+			contentProfile.append("</ak:workemail>");
+			contentProfile.append("<ak:userid>");
+			contentProfile.append(signatureInfo.getUserProfileId());
+			contentProfile.append("</ak:userid>");
+			contentProfile.append("</ak:dean>");
+			break;
+		case "IRB":
+			contentProfile.append("<ak:irb>");
+			contentProfile.append("<ak:fullname>");
+			contentProfile.append(signatureInfo.getFullName());
+			contentProfile.append("</ak:fullname>");
+			contentProfile.append("<ak:workemail>");
+			contentProfile.append(signatureInfo.getEmail());
+			contentProfile.append("</ak:workemail>");
+			contentProfile.append("<ak:userid>");
+			contentProfile.append(signatureInfo.getUserProfileId());
+			contentProfile.append("</ak:userid>");
+			contentProfile.append("</ak:irb>");
+			break;
+		case "University Research Administrator":
+			contentProfile.append("<ak:administrator>");
+			contentProfile.append("<ak:fullname>");
+			contentProfile.append(signatureInfo.getFullName());
+			contentProfile.append("</ak:fullname>");
+			contentProfile.append("<ak:workemail>");
+			contentProfile.append(signatureInfo.getEmail());
+			contentProfile.append("</ak:workemail>");
+			contentProfile.append("<ak:userid>");
+			contentProfile.append(signatureInfo.getUserProfileId());
+			contentProfile.append("</ak:userid>");
+			contentProfile.append("</ak:administrator>");
+			break;
+		case "University Research Director":
+			contentProfile.append("<ak:director>");
+			contentProfile.append("<ak:fullname>");
+			contentProfile.append(signatureInfo.getFullName());
+			contentProfile.append("</ak:fullname>");
+			contentProfile.append("<ak:workemail>");
+			contentProfile.append(signatureInfo.getEmail());
+			contentProfile.append("</ak:workemail>");
+			contentProfile.append("<ak:userid>");
+			contentProfile.append(signatureInfo.getUserProfileId());
+			contentProfile.append("</ak:userid>");
+			contentProfile.append("</ak:director>");
+			break;
+		default:
+			break;
+		}
 	}
 
 	@POST
@@ -1519,137 +1001,87 @@ public class ProposalService {
 			@ApiParam(value = "Message", required = true, defaultValue = "", allowableValues = "", allowMultiple = false) String message) {
 		try {
 			log.info("ProposalService::deleteMultipleProposalsByAdmin started");
-
 			String proposalIds = new String();
 			String proposals[] = new String[0];
-
 			ObjectMapper mapper = new ObjectMapper();
 			JsonNode root = mapper.readTree(message);
-
 			if (root != null && root.has("proposalIds")) {
 				proposalIds = root.get("proposalIds").textValue();
 				proposals = proposalIds.split(",");
 			}
-
-			String userProfileID = new String();
-			@SuppressWarnings("unused")
-			String userName = new String();
-			@SuppressWarnings("unused")
-			Boolean userIsAdmin = false;
-			@SuppressWarnings("unused")
-			String userCollege = new String();
-			@SuppressWarnings("unused")
-			String userDepartment = new String();
-			@SuppressWarnings("unused")
-			String userPositionType = new String();
-			@SuppressWarnings("unused")
-			String userPositionTitle = new String();
-
+			GPMSCommonInfo userInfo = new GPMSCommonInfo();
 			if (root != null && root.has("gpmsCommonObj")) {
 				JsonNode commonObj = root.get("gpmsCommonObj");
-				if (commonObj != null && commonObj.has("UserProfileID")) {
-					userProfileID = commonObj.get("UserProfileID").textValue();
-				}
-				if (commonObj != null && commonObj.has("UserName")) {
-					userName = commonObj.get("UserName").textValue();
-				}
-				if (commonObj != null && commonObj.has("UserIsAdmin")) {
-					userIsAdmin = Boolean.parseBoolean(commonObj.get(
-							"UserIsAdmin").textValue());
-				}
-				if (commonObj != null && commonObj.has("UserCollege")) {
-					userCollege = commonObj.get("UserCollege").textValue();
-				}
-				if (commonObj != null && commonObj.has("UserDepartment")) {
-					userDepartment = commonObj.get("UserDepartment")
-							.textValue();
-				}
-				if (commonObj != null && commonObj.has("UserPositionType")) {
-					userPositionType = commonObj.get("UserPositionType")
-							.textValue();
-				}
-				if (commonObj != null && commonObj.has("UserPositionTitle")) {
-					userPositionTitle = commonObj.get("UserPositionTitle")
-							.textValue();
-				}
+				userInfo = new GPMSCommonInfo(commonObj);
 			}
-
-			ObjectId authorId = new ObjectId(userProfileID);
+			ObjectId authorId = new ObjectId(userInfo.getUserProfileID());
 			UserProfile authorProfile = userProfileDAO
 					.findUserDetailsByProfileID(authorId);
-			// String authorFullName = authorProfile.getFullName();
 			String authorUserName = authorProfile.getUserAccount()
 					.getUserName();
-
 			for (String proposalId : proposals) {
 				ObjectId id = new ObjectId(proposalId);
 				Proposal existingProposal = proposalDAO
 						.findProposalByProposalID(id);
-
 				boolean isDeleted = proposalDAO.deleteProposalByAdmin(
 						existingProposal, authorProfile);
-
 				if (isDeleted) {
-					EmailUtil emailUtil = new EmailUtil();
-					String emailSubject = new String();
-					String emailBody = new String();
-					String piEmail = new String();
-					List<String> emaillist = new ArrayList<String>();
-
-					emailSubject = "The proposal has been deleted by: "
-							+ authorUserName;
-					emailBody = "Hello User,<br/><br/>The proposal has been deleted by Admin.<br/><br/>Thank you, <br/> GPMS Team";
-					piEmail = existingProposal.getInvestigatorInfo().getPi()
-							.getUserRef().getWorkEmails().get(0);
-
-					for (InvestigatorRefAndPosition copis : existingProposal
-							.getInvestigatorInfo().getCo_pi()) {
-						emaillist
-								.add(copis.getUserRef().getWorkEmails().get(0));
-					}
-
-					for (InvestigatorRefAndPosition seniors : existingProposal
-							.getInvestigatorInfo().getSeniorPersonnel()) {
-						emaillist.add(seniors.getUserRef().getWorkEmails()
-								.get(0));
-					}
-
-					List<SignatureUserInfo> signatures = proposalDAO
-							.findSignaturesExceptInvestigator(id,
-									existingProposal.isIrbApprovalRequired());
-
-					for (SignatureUserInfo signatureInfo : signatures) {
-						emaillist.add(signatureInfo.getEmail());
-					}
-
-					emailUtil.sendMailMultipleUsersWithoutAuth(piEmail,
-							emaillist, emailSubject, emailBody);
-
-					String projectTitle = existingProposal.getProjectInfo()
-							.getProjectTitle();
-					String notificationMessage = "Deleted by " + authorUserName
-							+ ".";
-
-					broadCastNotification(proposalId, projectTitle,
-							notificationMessage, "Proposal", true, true, true,
-							true, true, true, true, true, true, true);
+					sendNotification(id, existingProposal, authorUserName);
 				}
 			}
-
 			return Response
 					.status(Response.Status.OK)
 					.entity(mapper.writerWithDefaultPrettyPrinter()
 							.writeValueAsString(true)).build();
-
 		} catch (Exception e) {
 			log.error("Could not delete Multiple Proposals error e=", e);
 		}
-
 		return Response
 				.status(Response.Status.BAD_REQUEST)
 				.entity("{\"error\": \"Could Not Delete Multiple Proposals\", \"status\": \"FAIL\"}")
 				.build();
+	}
 
+	/***
+	 * Sends Notification
+	 * 
+	 * @param id
+	 * @param existingProposal
+	 * @param authorUserName
+	 */
+	private void sendNotification(ObjectId id, Proposal existingProposal,
+			String authorUserName) {
+		EmailUtil emailUtil = new EmailUtil();
+		String emailSubject = new String();
+		String emailBody = new String();
+		String piEmail = new String();
+		List<String> emaillist = new ArrayList<String>();
+		emailSubject = "The proposal has been deleted by: " + authorUserName;
+		emailBody = "Hello User,<br/><br/>The proposal has been deleted by Admin.<br/><br/>Thank you, <br/> GPMS Team";
+		piEmail = existingProposal.getInvestigatorInfo().getPi().getUserRef()
+				.getWorkEmails().get(0);
+		for (InvestigatorRefAndPosition copis : existingProposal
+				.getInvestigatorInfo().getCo_pi()) {
+			emaillist.add(copis.getUserRef().getWorkEmails().get(0));
+		}
+		for (InvestigatorRefAndPosition seniors : existingProposal
+				.getInvestigatorInfo().getSeniorPersonnel()) {
+			emaillist.add(seniors.getUserRef().getWorkEmails().get(0));
+		}
+		List<SignatureUserInfo> signatures = proposalDAO
+				.findSignaturesExceptInvestigator(id,
+						existingProposal.isIrbApprovalRequired());
+		for (SignatureUserInfo signatureInfo : signatures) {
+			emaillist.add(signatureInfo.getEmail());
+		}
+		emailUtil.sendMailMultipleUsersWithoutAuth(piEmail, emaillist,
+				emailSubject, emailBody);
+		String projectTitle = existingProposal.getProjectInfo()
+				.getProjectTitle();
+		String notificationMessage = "Deleted by " + authorUserName + ".";
+		broadCastNotification(existingProposal.getId().toString(),
+				projectTitle, notificationMessage, "Proposal", true, true,
+				true, true, true, true, true, true, true, true);
 	}
 
 	@POST
@@ -1662,244 +1094,122 @@ public class ProposalService {
 			@ApiParam(value = "Message", required = true, defaultValue = "", allowableValues = "", allowMultiple = false) String message) {
 		try {
 			log.info("ProposalService::produceAvailableActionsByProposalId started");
-
 			String proposalId = new String();
 			String proposalRoles = new String();
-
 			HashMap<String, Multimap<String, String>> attrMap = new HashMap<String, Multimap<String, String>>();
-
 			Multimap<String, String> subjectMap = ArrayListMultimap.create();
 			Multimap<String, String> resourceMap = ArrayListMultimap.create();
 			Multimap<String, String> actionMap = ArrayListMultimap.create();
-
 			ObjectMapper mapper = new ObjectMapper();
 			JsonNode root = mapper.readTree(message);
-
 			if (root != null && root.has("proposalId")) {
 				proposalId = root.get("proposalId").textValue();
 			}
-
 			if (root != null && root.has("proposalRoles")) {
 				proposalRoles = root.get("proposalRoles").textValue();
 			}
-
-			String userProfileID = new String();
-			@SuppressWarnings("unused")
-			String userName = new String();
-			@SuppressWarnings("unused")
-			Boolean userIsAdmin = false;
-			@SuppressWarnings("unused")
-			String userCollege = new String();
-			@SuppressWarnings("unused")
-			String userDepartment = new String();
-			@SuppressWarnings("unused")
-			String userPositionType = new String();
-			String userPositionTitle = new String();
-
+			GPMSCommonInfo userInfo = new GPMSCommonInfo();
 			if (root != null && root.has("gpmsCommonObj")) {
 				JsonNode commonObj = root.get("gpmsCommonObj");
-				if (commonObj != null && commonObj.has("UserProfileID")) {
-					userProfileID = commonObj.get("UserProfileID").textValue();
-				}
-				if (commonObj != null && commonObj.has("UserName")) {
-					userName = commonObj.get("UserName").textValue();
-				}
-				if (commonObj != null && commonObj.has("UserIsAdmin")) {
-					userIsAdmin = Boolean.parseBoolean(commonObj.get(
-							"UserIsAdmin").textValue());
-				}
-				if (commonObj != null && commonObj.has("UserCollege")) {
-					userCollege = commonObj.get("UserCollege").textValue();
-				}
-				if (commonObj != null && commonObj.has("UserDepartment")) {
-					userDepartment = commonObj.get("UserDepartment")
-							.textValue();
-				}
-				if (commonObj != null && commonObj.has("UserPositionType")) {
-					userPositionType = commonObj.get("UserPositionType")
-							.textValue();
-				}
-				if (commonObj != null && commonObj.has("UserPositionTitle")) {
-					userPositionTitle = commonObj.get("UserPositionTitle")
-							.textValue();
-
-					if (proposalRoles.equals("") && proposalRoles.isEmpty()) {
-						subjectMap.put("position.title", userPositionTitle);
-						attrMap.put("Subject", subjectMap);
-					} else {
-						// String[] currentProposalRoles =
-						// proposalRoles.split(", ");
-						subjectMap.put("proposal.role", proposalRoles);
-						attrMap.put("Subject", subjectMap);
-					}
-				}
+				userInfo = new GPMSCommonInfo(commonObj);
 			}
-
+			if (proposalRoles.equals("") && proposalRoles.isEmpty()) {
+				subjectMap.put("position.title",
+						userInfo.getUserPositionTitle());
+				attrMap.put("Subject", subjectMap);
+			} else {
+				subjectMap.put("proposal.role", proposalRoles);
+				attrMap.put("Subject", subjectMap);
+			}
 			ObjectId id = new ObjectId(proposalId);
 			Proposal existingProposal = proposalDAO
 					.findProposalByProposalID(id);
-
-			StringBuffer contentProfile = new StringBuffer();
-
-			contentProfile.append("<Content>");
-			contentProfile
-					.append("<ak:record xmlns:ak=\"http://akpower.org\">");
-			contentProfile.append("<ak:proposal>");
-
-			contentProfile.append("<ak:proposalid>");
-			contentProfile.append(proposalId);
-			contentProfile.append("</ak:proposalid>");
-
-			contentProfile.append("<ak:proposaltitle>");
-			contentProfile.append(existingProposal.getProjectInfo()
-					.getProjectTitle());
-			contentProfile.append("</ak:proposaltitle>");
-
-			contentProfile.append("<ak:irbApprovalRequired>");
-			contentProfile.append(existingProposal.isIrbApprovalRequired());
-			contentProfile.append("</ak:irbApprovalRequired>");
-
-			contentProfile.append("<ak:submittedbypi>");
-			contentProfile.append(existingProposal.getSubmittedByPI().name());
-			contentProfile.append("</ak:submittedbypi>");
-
-			contentProfile.append("<ak:readyforsubmissionbypi>");
-			contentProfile.append(existingProposal.isReadyForSubmissionByPI());
-			contentProfile.append("</ak:readyforsubmissionbypi>");
-
-			contentProfile.append("<ak:deletedbypi>");
-			contentProfile.append(existingProposal.getDeletedByPI().name());
-			contentProfile.append("</ak:deletedbypi>");
-
-			contentProfile.append("<ak:approvedbydepartmentchair>");
-			contentProfile.append(existingProposal.getChairApproval().name());
-			contentProfile.append("</ak:approvedbydepartmentchair>");
-
-			contentProfile.append("<ak:approvedbybusinessmanager>");
-			contentProfile.append(existingProposal.getBusinessManagerApproval()
-					.name());
-			contentProfile.append("</ak:approvedbybusinessmanager>");
-
-			contentProfile.append("<ak:approvedbyirb>");
-			contentProfile.append(existingProposal.getIrbApproval().name());
-			contentProfile.append("</ak:approvedbyirb>");
-
-			contentProfile.append("<ak:approvedbydean>");
-			contentProfile.append(existingProposal.getDeanApproval().name());
-			contentProfile.append("</ak:approvedbydean>");
-
-			contentProfile
-					.append("<ak:approvedbyuniversityresearchadministrator>");
-			contentProfile.append(existingProposal
-					.getResearchAdministratorApproval().name());
-			contentProfile
-					.append("</ak:approvedbyuniversityresearchadministrator>");
-
-			contentProfile
-					.append("<ak:withdrawnbyuniversityresearchadministrator>");
-			contentProfile.append(existingProposal
-					.getResearchAdministratorWithdraw().name());
-			contentProfile
-					.append("</ak:withdrawnbyuniversityresearchadministrator>");
-
-			contentProfile
-					.append("<ak:submittedbyuniversityresearchadministrator>");
-			contentProfile.append(existingProposal
-					.getResearchAdministratorSubmission().name());
-			contentProfile
-					.append("</ak:submittedbyuniversityresearchadministrator>");
-
-			contentProfile.append("<ak:approvedbyuniversityresearchdirector>");
-			contentProfile.append(existingProposal
-					.getResearchDirectorApproval().name());
-			contentProfile.append("</ak:approvedbyuniversityresearchdirector>");
-
-			contentProfile.append("<ak:deletedbyuniversityresearchdirector>");
-			contentProfile.append(existingProposal
-					.getResearchDirectorDeletion().name());
-			contentProfile.append("</ak:deletedbyuniversityresearchdirector>");
-
-			contentProfile.append("<ak:archivedbyuniversityresearchdirector>");
-			contentProfile.append(existingProposal
-					.getResearchDirectorArchived().name());
-			contentProfile.append("</ak:archivedbyuniversityresearchdirector>");
-
-			contentProfile.append("<ak:authorprofile>");
-			contentProfile.append("<ak:userid>");
-			contentProfile.append(userProfileID);
-			contentProfile.append("</ak:userid>");
-			contentProfile.append("</ak:authorprofile>");
-
-			DateFormat dateFormat = new SimpleDateFormat(
-					"yyyy-MM-dd'T'HH:mm:ssXXX");
-
-			contentProfile.append("<ak:currentdatetime>");
-			contentProfile.append(dateFormat.format(new Date()));
-			contentProfile.append("</ak:currentdatetime>");
-
-			contentProfile.append("</ak:proposal>");
-			contentProfile.append("</ak:record>");
-			contentProfile.append("</Content>");
-
-			contentProfile
-					.append("<Attribute AttributeId=\"urn:oasis:names:tc:xacml:3.0:content-selector\" IncludeInResult=\"false\">");
-			contentProfile
-					.append("<AttributeValue XPathCategory=\"urn:oasis:names:tc:xacml:3.0:attribute-category:resource\" DataType=\"urn:oasis:names:tc:xacml:3.0:data-type:xpathExpression\">//ak:record/ak:proposal</AttributeValue>");
-			contentProfile.append("</Attribute>");
-
+			StringBuffer contentProfile = generateProposalContentProfile(
+					proposalId, userInfo, existingProposal);
 			if (attrMap.get("Resource") == null) {
 				attrMap.put("Resource", resourceMap);
 			}
-
-			Accesscontrol ac = new Accesscontrol();
-
-			// TODO :: Get these static actions from the Dictionary we setup in
-			// "XACMLAttributeDictionary.xls" //Add, Add Co-PI, Add Senior
-			// Personnel,
-			// Save, Submit, Approve, Disapprove, Withdraw, Archive, Delete,
-			// View, Edit, Revoke
-
-			List<String> attributeValue = Arrays.asList("Save", "Submit",
-					"Approve", "Disapprove", "Withdraw", "Archive", "Delete");
-
-			for (String action : attributeValue) {
-				actionMap.put("proposal.action", action);
-				attrMap.put("Action", actionMap);
-			}
-
-			Set<AbstractResult> results = ac.getXACMLdecisionForMDPWithProfile(
-					attrMap, contentProfile);
-
-			List<String> actions = new ArrayList<String>();
-			for (AbstractResult result : results) {
-				if (AbstractResult.DECISION_PERMIT == result.getDecision()) {
-					Set<Attributes> attributesSet = ((Result) result)
-							.getAttributes();
-					for (Attributes attributes : attributesSet) {
-						for (Attribute attribute : attributes.getAttributes()) {
-							actions.add(attribute.getValue().encode());
-						}
-					}
-				}
-			}
-
-			// Collections.sort(actions);
-
+			List<String> actions = generateMDPDecision(attrMap, actionMap,
+					contentProfile);
 			return Response
 					.status(Response.Status.OK)
 					.entity(mapper.setDateFormat(formatter)
 							.writerWithDefaultPrettyPrinter()
 							.writeValueAsString(actions)).build();
-
 		} catch (Exception e) {
 			log.error("Could not find Proposal Details by ProposalId error e=",
 					e);
 		}
-
 		return Response
 				.status(Response.Status.BAD_REQUEST)
 				.entity("{\"error\": \"Could Not Find Proposal Details By ProposalId\", \"status\": \"FAIL\"}")
 				.build();
+	}
+
+	/**
+	 * @param attrMap
+	 * @param actionMap
+	 * @param contentProfile
+	 * @return
+	 */
+	private List<String> generateMDPDecision(
+			HashMap<String, Multimap<String, String>> attrMap,
+			Multimap<String, String> actionMap, StringBuffer contentProfile) {
+		Accesscontrol ac = new Accesscontrol();
+		List<String> attributeValue = Arrays.asList("Save", "Submit",
+				"Approve", "Disapprove", "Withdraw", "Archive", "Delete");
+		for (String action : attributeValue) {
+			actionMap.put("proposal.action", action);
+			attrMap.put("Action", actionMap);
+		}
+		Set<AbstractResult> results = ac.getXACMLdecisionForMDPWithProfile(
+				attrMap, contentProfile);
+		List<String> actions = new ArrayList<String>();
+		for (AbstractResult result : results) {
+			if (AbstractResult.DECISION_PERMIT == result.getDecision()) {
+				Set<Attributes> attributesSet = ((Result) result)
+						.getAttributes();
+				for (Attributes attributes : attributesSet) {
+					for (Attribute attribute : attributes.getAttributes()) {
+						actions.add(attribute.getValue().encode());
+					}
+				}
+			}
+		}
+		return actions;
+	}
+
+	/**
+	 * @param proposalId
+	 * @param userInfo
+	 * @param existingProposal
+	 * @return
+	 */
+	private StringBuffer generateProposalContentProfile(String proposalId,
+			GPMSCommonInfo userInfo, Proposal existingProposal) {
+		StringBuffer contentProfile = new StringBuffer();
+		contentProfile.append("<Content>");
+		contentProfile.append("<ak:record xmlns:ak=\"http://akpower.org\">");
+		genearteProposalInfoContentProfile(proposalId, existingProposal,
+				contentProfile);
+		contentProfile.append("<ak:authorprofile>");
+		contentProfile.append("<ak:userid>");
+		contentProfile.append(userInfo.getUserProfileID());
+		contentProfile.append("</ak:userid>");
+		contentProfile.append("</ak:authorprofile>");
+		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX");
+		contentProfile.append("<ak:currentdatetime>");
+		contentProfile.append(dateFormat.format(new Date()));
+		contentProfile.append("</ak:currentdatetime>");
+		contentProfile.append("</ak:proposal>");
+		contentProfile.append("</ak:record>");
+		contentProfile.append("</Content>");
+		contentProfile
+				.append("<Attribute AttributeId=\"urn:oasis:names:tc:xacml:3.0:content-selector\" IncludeInResult=\"false\">");
+		contentProfile
+				.append("<AttributeValue XPathCategory=\"urn:oasis:names:tc:xacml:3.0:attribute-category:resource\" DataType=\"urn:oasis:names:tc:xacml:3.0:data-type:xpathExpression\">//ak:record/ak:proposal</AttributeValue>");
+		contentProfile.append("</Attribute>");
+		return contentProfile;
 	}
 
 	@POST
@@ -1912,39 +1222,24 @@ public class ProposalService {
 			@ApiParam(value = "Message", required = true, defaultValue = "", allowableValues = "", allowMultiple = false) String message) {
 		try {
 			log.info("ProposalService::produceProposalDetailsByProposalId started");
-
 			Proposal proposal = new Proposal();
 			String proposalId = new String();
-
 			ObjectMapper mapper = new ObjectMapper();
 			JsonNode root = mapper.readTree(message);
-
 			if (root != null && root.has("proposalId")) {
 				proposalId = root.get("proposalId").textValue();
 			}
-
 			ObjectId id = new ObjectId(proposalId);
 			proposal = proposalDAO.findProposalByProposalID(id);
-
-			// Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd")
-			// .excludeFieldsWithoutExposeAnnotation().setPrettyPrinting()
-			// .create();
-			// return gson.toJson(proposal, Proposal.class);
-
-			// mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS,
-			// false);
-
 			return Response
 					.status(Response.Status.OK)
 					.entity(mapper.setDateFormat(formatter)
 							.writerWithDefaultPrettyPrinter()
 							.writeValueAsString(proposal)).build();
-
 		} catch (Exception e) {
 			log.error("Could not find Proposal Details by ProposalId error e=",
 					e);
 		}
-
 		return Response
 				.status(Response.Status.BAD_REQUEST)
 				.entity("{\"error\": \"Could Not Find Proposal Details By ProposalId\", \"status\": \"FAIL\"}")
@@ -1961,74 +1256,35 @@ public class ProposalService {
 			@ApiParam(value = "Message", required = true, defaultValue = "", allowableValues = "", allowMultiple = false) String message) {
 		try {
 			log.info("ProposalService::produceProposalAuditLogJSON started");
-
 			List<AuditLogInfo> proposalAuditLogs = new ArrayList<AuditLogInfo>();
-
 			int offset = 0, limit = 0;
 			String proposalId = new String();
-			String action = new String();
-			String auditedBy = new String();
-			String activityOnFrom = new String();
-			String activityOnTo = new String();
-
 			ObjectMapper mapper = new ObjectMapper();
 			JsonNode root = mapper.readTree(message);
-
 			if (root != null && root.has("offset")) {
 				offset = root.get("offset").intValue();
 			}
-
 			if (root != null && root.has("limit")) {
 				limit = root.get("limit").intValue();
 			}
-
 			if (root != null && root.has("proposalId")) {
 				proposalId = root.get("proposalId").textValue();
 			}
-
+			AuditLogCommonInfo auditLogInfo = new AuditLogCommonInfo();
 			if (root != null && root.has("auditLogBindObj")) {
 				JsonNode auditLogBindObj = root.get("auditLogBindObj");
-				if (auditLogBindObj != null && auditLogBindObj.has("Action")) {
-					action = auditLogBindObj.get("Action").textValue();
-				}
-
-				if (auditLogBindObj != null && auditLogBindObj.has("AuditedBy")) {
-					auditedBy = auditLogBindObj.get("AuditedBy").textValue();
-				}
-
-				if (auditLogBindObj != null
-						&& auditLogBindObj.has("ActivityOnFrom")) {
-					activityOnFrom = auditLogBindObj.get("ActivityOnFrom")
-							.textValue();
-				}
-
-				if (auditLogBindObj != null
-						&& auditLogBindObj.has("ActivityOnTo")) {
-					activityOnTo = auditLogBindObj.get("ActivityOnTo")
-							.textValue();
-				}
+				auditLogInfo = new AuditLogCommonInfo(auditLogBindObj);
 			}
-
 			ObjectId id = new ObjectId(proposalId);
-
 			proposalAuditLogs = proposalDAO.findAllForProposalAuditLogGrid(
-					offset, limit, id, action, auditedBy, activityOnFrom,
-					activityOnTo);
-
-			// users = (ArrayList<UserInfo>)
-			// userProfileDAO.findAllForUserGrid();
-			// response = JSONTansformer.ConvertToJSON(users);
-
-			;
+					offset, limit, id, auditLogInfo);
 			return Response
 					.status(Response.Status.OK)
 					.entity(mapper.writerWithDefaultPrettyPrinter()
 							.writeValueAsString(proposalAuditLogs)).build();
-
 		} catch (Exception e) {
 			log.error("Could not find Proposal Audit Log List error e=", e);
 		}
-
 		return Response
 				.status(Response.Status.BAD_REQUEST)
 				.entity("{\"error\": \"Could Not Find Proposal Audit Log List\", \"status\": \"FAIL\"}")
@@ -2045,101 +1301,76 @@ public class ProposalService {
 			@ApiParam(value = "Message", required = true, defaultValue = "", allowableValues = "", allowMultiple = false) String message) {
 		try {
 			log.info("ProposalService::exportProposalAuditLogJSON started");
-
 			List<AuditLogInfo> proposalAuditLogs = new ArrayList<AuditLogInfo>();
-
 			String proposalId = new String();
-			String action = new String();
-			String auditedBy = new String();
-			String activityOnFrom = new String();
-			String activityOnTo = new String();
-
 			ObjectMapper mapper = new ObjectMapper();
 			JsonNode root = mapper.readTree(message);
-
 			if (root != null && root.has("proposalId")) {
 				proposalId = root.get("proposalId").textValue();
 			}
-
+			AuditLogCommonInfo auditLogInfo = new AuditLogCommonInfo();
 			if (root != null && root.has("auditLogBindObj")) {
 				JsonNode auditLogBindObj = root.get("auditLogBindObj");
-				if (auditLogBindObj != null && auditLogBindObj.has("Action")) {
-					action = auditLogBindObj.get("Action").textValue();
-				}
-
-				if (auditLogBindObj != null && auditLogBindObj.has("AuditedBy")) {
-					auditedBy = auditLogBindObj.get("AuditedBy").textValue();
-				}
-
-				if (auditLogBindObj != null
-						&& auditLogBindObj.has("ActivityOnFrom")) {
-					activityOnFrom = auditLogBindObj.get("ActivityOnFrom")
-							.textValue();
-				}
-
-				if (auditLogBindObj != null
-						&& auditLogBindObj.has("ActivityOnTo")) {
-					activityOnTo = auditLogBindObj.get("ActivityOnTo")
-							.textValue();
-				}
+				auditLogInfo = new AuditLogCommonInfo(auditLogBindObj);
 			}
-
 			ObjectId id = new ObjectId(proposalId);
-
 			proposalAuditLogs = proposalDAO.findAllUserProposalAuditLogs(id,
-					action, auditedBy, activityOnFrom, activityOnTo);
-
-			// users = (ArrayList<UserInfo>)
-			// userProfileDAO.findAllForUserGrid();
-			// response = JSONTansformer.ConvertToJSON(users);
+					auditLogInfo);
 			String filename = new String();
 			if (proposalAuditLogs.size() > 0) {
-				Xcelite xcelite = new Xcelite();
-				XceliteSheet sheet = xcelite.createSheet("AuditLogs");
-				SheetWriter<AuditLogInfo> writer = sheet
-						.getBeanWriter(AuditLogInfo.class);
-
-				writer.write(proposalAuditLogs);
-
-				SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy_MM_dd");
-				Date date = new Date();
-
-				String fileName = String.format("%s.%s",
-						RandomStringUtils.randomAlphanumeric(8) + "_"
-								+ dateFormat.format(date), "xlsx");
-
-				// File file = new
-				// File(request.getServletContext().getAttribute(
-				// "FILES_DIR")
-				// + File.separator + filename);
-				// System.out.println("Absolute Path at server=" +
-				// file.getAbsolutePath());
-				String downloadLocation = this.getClass()
-						.getResource("/uploads").toURI().getPath();
-
-				xcelite.write(new File(downloadLocation + fileName));
-
-				// xcelite.write(new
-				// File(request.getServletContext().getAttribute(
-				// "FILES_DIR")
-				// + File.separator + fileName));
-
-				filename = mapper.writerWithDefaultPrettyPrinter()
-						.writeValueAsString(fileName);
+				filename = exportToExcelFile(null, proposalAuditLogs, mapper);
 			} else {
 				filename = mapper.writerWithDefaultPrettyPrinter()
 						.writeValueAsString("No Record");
 			}
-
 			return Response.status(Response.Status.OK).entity(filename).build();
 		} catch (Exception e) {
 			log.error("Could not export Proposal Logs error e=", e);
 		}
-
 		return Response
 				.status(Response.Status.BAD_REQUEST)
 				.entity("{\"error\": \"Could Not Proposal Logs List\", \"status\": \"FAIL\"}")
 				.build();
+	}
+
+	/***
+	 * Exports to Excel File for Proposals and its Audit Logs
+	 * 
+	 * @param proposals
+	 * @param proposalAuditLogs
+	 * @param mapper
+	 * @return
+	 * @throws URISyntaxException
+	 * @throws JsonProcessingException
+	 */
+	private String exportToExcelFile(List<ProposalInfo> proposals,
+			List<AuditLogInfo> proposalAuditLogs, ObjectMapper mapper)
+			throws URISyntaxException, JsonProcessingException {
+		String filename = new String();
+		Xcelite xcelite = new Xcelite();
+		if (proposals != null) {
+			XceliteSheet sheet = xcelite.createSheet("Proposals");
+			SheetWriter<ProposalInfo> writer = sheet
+					.getBeanWriter(ProposalInfo.class);
+			writer.write(proposals);
+		} else {
+			XceliteSheet sheet = xcelite.createSheet("AuditLogs");
+			SheetWriter<AuditLogInfo> writer = sheet
+					.getBeanWriter(AuditLogInfo.class);
+			writer.write(proposalAuditLogs);
+		}
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy_MM_dd");
+		Date date = new Date();
+		String fileName = String.format(
+				"%s.%s",
+				RandomStringUtils.randomAlphanumeric(8) + "_"
+						+ dateFormat.format(date), "xlsx");
+		String downloadLocation = this.getClass().getResource("/uploads")
+				.toURI().getPath();
+		xcelite.write(new File(downloadLocation + fileName));
+		filename = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(
+				fileName);
+		return filename;
 	}
 
 	@POST
@@ -2152,14 +1383,11 @@ public class ProposalService {
 			@ApiParam(value = "Message", required = true, defaultValue = "", allowableValues = "", allowMultiple = false) String message) {
 		try {
 			log.info("ProposalService::checkUniqueProjectTitle started");
-
 			String proposalID = new String();
 			String newProjectTitle = new String();
 			String response = new String();
-
 			ObjectMapper mapper = new ObjectMapper();
 			JsonNode root = mapper.readTree(message);
-
 			if (root != null && root.has("proposalUniqueObj")) {
 				JsonNode proposalUniqueObj = root.get("proposalUniqueObj");
 				if (proposalUniqueObj != null
@@ -2167,7 +1395,6 @@ public class ProposalService {
 					proposalID = proposalUniqueObj.get("ProposalID")
 							.textValue();
 				}
-
 				if (proposalUniqueObj != null
 						&& proposalUniqueObj.has("NewProjectTitle")) {
 					String projectTitle = proposalUniqueObj
@@ -2182,51 +1409,6 @@ public class ProposalService {
 					}
 				}
 			}
-
-			@SuppressWarnings("unused")
-			String userProfileID = new String();
-			@SuppressWarnings("unused")
-			String userName = new String();
-			@SuppressWarnings("unused")
-			Boolean userIsAdmin = false;
-			@SuppressWarnings("unused")
-			String userCollege = new String();
-			@SuppressWarnings("unused")
-			String userDepartment = new String();
-			@SuppressWarnings("unused")
-			String userPositionType = new String();
-			@SuppressWarnings("unused")
-			String userPositionTitle = new String();
-
-			if (root != null && root.has("gpmsCommonObj")) {
-				JsonNode commonObj = root.get("gpmsCommonObj");
-				if (commonObj != null && commonObj.has("UserProfileID")) {
-					userProfileID = commonObj.get("UserProfileID").textValue();
-				}
-				if (commonObj != null && commonObj.has("UserName")) {
-					userName = commonObj.get("UserName").textValue();
-				}
-				if (commonObj != null && commonObj.has("UserIsAdmin")) {
-					userIsAdmin = Boolean.parseBoolean(commonObj.get(
-							"UserIsAdmin").textValue());
-				}
-				if (commonObj != null && commonObj.has("UserCollege")) {
-					userCollege = commonObj.get("UserCollege").textValue();
-				}
-				if (commonObj != null && commonObj.has("UserDepartment")) {
-					userDepartment = commonObj.get("UserDepartment")
-							.textValue();
-				}
-				if (commonObj != null && commonObj.has("UserPositionType")) {
-					userPositionType = commonObj.get("UserPositionType")
-							.textValue();
-				}
-				if (commonObj != null && commonObj.has("UserPositionTitle")) {
-					userPositionTitle = commonObj.get("UserPositionTitle")
-							.textValue();
-				}
-			}
-
 			Proposal proposal = new Proposal();
 			if (!proposalID.equals("0")) {
 				ObjectId id = new ObjectId(proposalID);
@@ -2236,7 +1418,6 @@ public class ProposalService {
 				proposal = proposalDAO
 						.findAnyProposalWithSameProjectTitle(newProjectTitle);
 			}
-
 			if (proposal != null) {
 				response = mapper.writerWithDefaultPrettyPrinter()
 						.writeValueAsString("false");
@@ -2244,13 +1425,11 @@ public class ProposalService {
 				response = mapper.writerWithDefaultPrettyPrinter()
 						.writeValueAsString("true");
 			}
-
 			return Response.status(Response.Status.OK).entity(response).build();
 
 		} catch (Exception e) {
 			log.error("Could not check for unique Project Title error e=", e);
 		}
-
 		return Response
 				.status(Response.Status.BAD_REQUEST)
 				.entity("{\"error\": \"Check For Unique Project Title\", \"status\": \"FAIL\"}")
@@ -2267,15 +1446,9 @@ public class ProposalService {
 			@ApiParam(value = "Message", required = true, defaultValue = "", allowableValues = "", allowMultiple = false) String message) {
 		try {
 			log.info("ProposalService::getAllSignatureForAProposal started");
-
 			String proposalId = new String();
-
 			Boolean irbApprovalRequired = false;
-
-			// String response = new String();
-
 			ObjectMapper mapper = new ObjectMapper();
-
 			JsonNode root = mapper.readTree(message);
 			if (root != null && root.has("proposalId")) {
 				proposalId = root.get("proposalId").textValue();
@@ -2284,29 +1457,23 @@ public class ProposalService {
 				irbApprovalRequired = Boolean.parseBoolean(root.get(
 						"irbApprovalRequired").textValue());
 			}
-
 			ObjectId id = new ObjectId(proposalId);
-
 			List<SignatureInfo> signatures = proposalDAO
 					.findAllSignatureForAProposal(id, irbApprovalRequired);
-
 			return Response
 					.status(Response.Status.OK)
 					.entity(mapper.writerWithDefaultPrettyPrinter()
 							.writeValueAsString(signatures)).build();
-
 		} catch (Exception e) {
 			log.error("Could not find all Signatures for a Proposal error e=",
 					e);
 		}
-
 		return Response
 				.status(Response.Status.BAD_REQUEST)
 				.entity("{\"error\": \"Could Not Find All Signatures For A Proposal\", \"status\": \"FAIL\"}")
 				.build();
 	}
 
-	// Withdraw and Archive
 	@POST
 	@Path("/UpdateProposalStatus")
 	@ApiOperation(value = "Update Proposal Status", notes = "This API updates Proposal Status")
@@ -2317,418 +1484,43 @@ public class ProposalService {
 			@ApiParam(value = "Message", required = true, defaultValue = "", allowableValues = "", allowMultiple = false) String message) {
 		try {
 			log.info("ProposalService::updateProposalStatus started");
-
 			ObjectMapper mapper = new ObjectMapper();
 			JsonNode root = mapper.readTree(message);
-
-			StringBuffer contentProfile = new StringBuffer();
-
 			if (root != null && root.has("policyInfo")) {
 				JsonNode policyInfo = root.get("policyInfo");
 				if (policyInfo != null && policyInfo.isArray()
 						&& policyInfo.size() > 0) {
-
 					String proposalId = new String();
 					String proposalUserTitle = new String();
-
 					if (root != null && root.has("proposalId")) {
 						proposalId = root.get("proposalId").textValue();
 					}
-
 					if (root != null && root.has("proposalUserTitle")) {
 						proposalUserTitle = root.get("proposalUserTitle")
 								.textValue();
 					}
-
-					String userProfileID = new String();
-					@SuppressWarnings("unused")
-					String userName = new String();
-					@SuppressWarnings("unused")
-					Boolean userIsAdmin = false;
-					@SuppressWarnings("unused")
-					String userCollege = new String();
-					@SuppressWarnings("unused")
-					String userDepartment = new String();
-					@SuppressWarnings("unused")
-					String userPositionType = new String();
-					@SuppressWarnings("unused")
-					String userPositionTitle = new String();
-
+					GPMSCommonInfo userInfo = new GPMSCommonInfo();
 					if (root != null && root.has("gpmsCommonObj")) {
 						JsonNode commonObj = root.get("gpmsCommonObj");
-						if (commonObj != null && commonObj.has("UserProfileID")) {
-							userProfileID = commonObj.get("UserProfileID")
-									.textValue();
-						}
-						if (commonObj != null && commonObj.has("UserName")) {
-							userName = commonObj.get("UserName").textValue();
-						}
-						if (commonObj != null && commonObj.has("UserIsAdmin")) {
-							userIsAdmin = Boolean.parseBoolean(commonObj.get(
-									"UserIsAdmin").textValue());
-						}
-						if (commonObj != null && commonObj.has("UserCollege")) {
-							userCollege = commonObj.get("UserCollege")
-									.textValue();
-						}
-						if (commonObj != null
-								&& commonObj.has("UserDepartment")) {
-							userDepartment = commonObj.get("UserDepartment")
-									.textValue();
-						}
-						if (commonObj != null
-								&& commonObj.has("UserPositionType")) {
-							userPositionType = commonObj
-									.get("UserPositionType").textValue();
-						}
-						if (commonObj != null
-								&& commonObj.has("UserPositionTitle")) {
-							userPositionTitle = commonObj.get(
-									"UserPositionTitle").textValue();
-						}
+						userInfo = new GPMSCommonInfo(commonObj);
 					}
-
 					ObjectId id = new ObjectId(proposalId);
 					Proposal existingProposal = proposalDAO
 							.findProposalByProposalID(id);
-
 					List<SignatureUserInfo> signatures = proposalDAO
 							.findSignaturesExceptInvestigator(id,
 									existingProposal.isIrbApprovalRequired());
-
-					ObjectId authorId = new ObjectId(userProfileID);
+					ObjectId authorId = new ObjectId(
+							userInfo.getUserProfileID());
 					UserProfile authorProfile = userProfileDAO
 							.findUserDetailsByProfileID(authorId);
-					String authorFullName = authorProfile.getFullName();
 					String authorUserName = authorProfile.getUserAccount()
 							.getUserName();
-
-					contentProfile.append("<Content>");
-					contentProfile
-							.append("<ak:record xmlns:ak=\"http://akpower.org\">");
-					contentProfile.append("<ak:proposal>");
-
-					contentProfile.append("<ak:proposalid>");
-					contentProfile.append(proposalId);
-					contentProfile.append("</ak:proposalid>");
-
-					contentProfile.append("<ak:proposaltitle>");
-					contentProfile.append(existingProposal.getProjectInfo()
-							.getProjectTitle());
-					contentProfile.append("</ak:proposaltitle>");
-
-					contentProfile.append("<ak:irbApprovalRequired>");
-					contentProfile.append(existingProposal
-							.isIrbApprovalRequired());
-					contentProfile.append("</ak:irbApprovalRequired>");
-
-					contentProfile.append("<ak:submittedbypi>");
-					contentProfile.append(existingProposal.getSubmittedByPI()
-							.name());
-					contentProfile.append("</ak:submittedbypi>");
-
-					contentProfile.append("<ak:readyforsubmissionbypi>");
-					contentProfile.append(existingProposal
-							.isReadyForSubmissionByPI());
-					contentProfile.append("</ak:readyforsubmissionbypi>");
-
-					contentProfile.append("<ak:deletedbypi>");
-					contentProfile.append(existingProposal.getDeletedByPI()
-							.name());
-					contentProfile.append("</ak:deletedbypi>");
-
-					contentProfile.append("<ak:approvedbydepartmentchair>");
-					contentProfile.append(existingProposal.getChairApproval()
-							.name());
-					contentProfile.append("</ak:approvedbydepartmentchair>");
-
-					contentProfile.append("<ak:approvedbybusinessmanager>");
-					contentProfile.append(existingProposal
-							.getBusinessManagerApproval().name());
-					contentProfile.append("</ak:approvedbybusinessmanager>");
-
-					contentProfile.append("<ak:approvedbyirb>");
-					contentProfile.append(existingProposal.getIrbApproval()
-							.name());
-					contentProfile.append("</ak:approvedbyirb>");
-
-					contentProfile.append("<ak:approvedbydean>");
-					contentProfile.append(existingProposal.getDeanApproval()
-							.name());
-					contentProfile.append("</ak:approvedbydean>");
-
-					contentProfile
-							.append("<ak:approvedbyuniversityresearchadministrator>");
-					contentProfile.append(existingProposal
-							.getResearchAdministratorApproval().name());
-					contentProfile
-							.append("</ak:approvedbyuniversityresearchadministrator>");
-
-					contentProfile
-							.append("<ak:withdrawnbyuniversityresearchadministrator>");
-					contentProfile.append(existingProposal
-							.getResearchAdministratorWithdraw().name());
-					contentProfile
-							.append("</ak:withdrawnbyuniversityresearchadministrator>");
-
-					contentProfile
-							.append("<ak:submittedbyuniversityresearchadministrator>");
-					contentProfile.append(existingProposal
-							.getResearchAdministratorSubmission().name());
-					contentProfile
-							.append("</ak:submittedbyuniversityresearchadministrator>");
-
-					contentProfile
-							.append("<ak:approvedbyuniversityresearchdirector>");
-					contentProfile.append(existingProposal
-							.getResearchDirectorDeletion().name());
-					contentProfile
-							.append("</ak:approvedbyuniversityresearchdirector>");
-
-					contentProfile
-							.append("<ak:deletedbyuniversityresearchdirector>");
-					contentProfile.append(existingProposal
-							.getResearchDirectorDeletion().name());
-					contentProfile
-							.append("</ak:deletedbyuniversityresearchdirector>");
-
-					contentProfile
-							.append("<ak:archivedbyuniversityresearchdirector>");
-					contentProfile.append(existingProposal
-							.getResearchDirectorArchived().name());
-					contentProfile
-							.append("</ak:archivedbyuniversityresearchdirector>");
-
-					contentProfile.append("<ak:authorprofile>");
-					// contentProfile.append("<ak:firstname>");
-					// contentProfile.append(authorProfile.getFirstName());
-					// contentProfile.append("</ak:firstname>");
-					// contentProfile.append("<ak:middlename>");
-					// contentProfile
-					// .append(authorProfile.getMiddleName());
-					// contentProfile.append("</ak:middlename>");
-					//
-					// contentProfile.append("<ak:lastname>");
-					// contentProfile.append(authorProfile.getLastName());
-					// contentProfile.append("</ak:lastname>");
-
-					contentProfile.append("<ak:fullname>");
-					contentProfile.append(authorFullName);
-					contentProfile.append("</ak:fullname>");
-
-					contentProfile.append("<ak:userid>");
-					contentProfile.append(authorProfile.getId().toString());
-					contentProfile.append("</ak:userid>");
-
-					contentProfile.append("</ak:authorprofile>");
-
-					contentProfile.append("<ak:pi>");
-					contentProfile.append("<ak:fullname>");
-					contentProfile.append(existingProposal
-							.getInvestigatorInfo().getPi().getUserRef()
-							.getFullName());
-					contentProfile.append("</ak:fullname>");
-
-					contentProfile.append("<ak:workemail>");
-					contentProfile.append(existingProposal
-							.getInvestigatorInfo().getPi().getUserRef()
-							.getWorkEmails().get(0));
-					contentProfile.append("</ak:workemail>");
-
-					contentProfile.append("<ak:userid>");
-					contentProfile.append(existingProposal
-							.getInvestigatorInfo().getPi().getUserProfileId());
-					contentProfile.append("</ak:userid>");
-					contentProfile.append("</ak:pi>");
-
-					for (InvestigatorRefAndPosition copis : existingProposal
-							.getInvestigatorInfo().getCo_pi()) {
-						contentProfile.append("<ak:copi>");
-						contentProfile.append("<ak:fullname>");
-						contentProfile.append(copis.getUserRef().getFullName());
-						contentProfile.append("</ak:fullname>");
-
-						contentProfile.append("<ak:workemail>");
-						contentProfile.append(copis.getUserRef()
-								.getWorkEmails().get(0));
-						contentProfile.append("</ak:workemail>");
-
-						contentProfile.append("<ak:userid>");
-						contentProfile.append(copis.getUserProfileId());
-						contentProfile.append("</ak:userid>");
-						contentProfile.append("</ak:copi>");
-					}
-
-					for (InvestigatorRefAndPosition seniors : existingProposal
-							.getInvestigatorInfo().getSeniorPersonnel()) {
-						contentProfile.append("<ak:senior>");
-						contentProfile.append("<ak:fullname>");
-						contentProfile.append(seniors.getUserRef()
-								.getFullName());
-						contentProfile.append("</ak:fullname>");
-
-						contentProfile.append("<ak:workemail>");
-						contentProfile.append(seniors.getUserRef()
-								.getWorkEmails().get(0));
-						contentProfile.append("</ak:workemail>");
-
-						contentProfile.append("<ak:userid>");
-						contentProfile.append(seniors.getUserProfileId());
-						contentProfile.append("</ak:userid>");
-						contentProfile.append("</ak:senior>");
-					}
-
-					for (SignatureUserInfo signatureInfo : signatures) {
-						switch (signatureInfo.getPositionTitle()) {
-						case "Department Chair":
-							contentProfile.append("<ak:chair>");
-							contentProfile.append("<ak:fullname>");
-							contentProfile.append(signatureInfo.getFullName());
-							contentProfile.append("</ak:fullname>");
-
-							contentProfile.append("<ak:workemail>");
-							contentProfile.append(signatureInfo.getEmail());
-							contentProfile.append("</ak:workemail>");
-
-							contentProfile.append("<ak:userid>");
-							contentProfile.append(signatureInfo
-									.getUserProfileId());
-							contentProfile.append("</ak:userid>");
-							contentProfile.append("</ak:chair>");
-
-							break;
-						case "Business Manager":
-							contentProfile.append("<ak:manager>");
-							contentProfile.append("<ak:fullname>");
-							contentProfile.append(signatureInfo.getFullName());
-							contentProfile.append("</ak:fullname>");
-
-							contentProfile.append("<ak:workemail>");
-							contentProfile.append(signatureInfo.getEmail());
-							contentProfile.append("</ak:workemail>");
-
-							contentProfile.append("<ak:userid>");
-							contentProfile.append(signatureInfo
-									.getUserProfileId());
-							contentProfile.append("</ak:userid>");
-							contentProfile.append("</ak:manager>");
-							break;
-						case "Dean":
-							contentProfile.append("<ak:dean>");
-							contentProfile.append("<ak:fullname>");
-							contentProfile.append(signatureInfo.getFullName());
-							contentProfile.append("</ak:fullname>");
-
-							contentProfile.append("<ak:workemail>");
-							contentProfile.append(signatureInfo.getEmail());
-							contentProfile.append("</ak:workemail>");
-
-							contentProfile.append("<ak:userid>");
-							contentProfile.append(signatureInfo
-									.getUserProfileId());
-							contentProfile.append("</ak:userid>");
-							contentProfile.append("</ak:dean>");
-							break;
-						case "IRB":
-							contentProfile.append("<ak:irb>");
-							contentProfile.append("<ak:fullname>");
-							contentProfile.append(signatureInfo.getFullName());
-							contentProfile.append("</ak:fullname>");
-
-							contentProfile.append("<ak:workemail>");
-							contentProfile.append(signatureInfo.getEmail());
-							contentProfile.append("</ak:workemail>");
-
-							contentProfile.append("<ak:userid>");
-							contentProfile.append(signatureInfo
-									.getUserProfileId());
-							contentProfile.append("</ak:userid>");
-							contentProfile.append("</ak:irb>");
-							break;
-						case "University Research Administrator":
-							contentProfile.append("<ak:administrator>");
-							contentProfile.append("<ak:fullname>");
-							contentProfile.append(signatureInfo.getFullName());
-							contentProfile.append("</ak:fullname>");
-
-							contentProfile.append("<ak:workemail>");
-							contentProfile.append(signatureInfo.getEmail());
-							contentProfile.append("</ak:workemail>");
-
-							contentProfile.append("<ak:userid>");
-							contentProfile.append(signatureInfo
-									.getUserProfileId());
-							contentProfile.append("</ak:userid>");
-							contentProfile.append("</ak:administrator>");
-							break;
-						case "University Research Director":
-							contentProfile.append("<ak:director>");
-							contentProfile.append("<ak:fullname>");
-							contentProfile.append(signatureInfo.getFullName());
-							contentProfile.append("</ak:fullname>");
-
-							contentProfile.append("<ak:workemail>");
-							contentProfile.append(signatureInfo.getEmail());
-							contentProfile.append("</ak:workemail>");
-
-							contentProfile.append("<ak:userid>");
-							contentProfile.append(signatureInfo
-									.getUserProfileId());
-							contentProfile.append("</ak:userid>");
-							contentProfile.append("</ak:director>");
-							break;
-						}
-					}
-
-					contentProfile.append("</ak:proposal>");
-					contentProfile.append("</ak:record>");
-					contentProfile.append("</Content>");
-
-					contentProfile
-							.append("<Attribute AttributeId=\"urn:oasis:names:tc:xacml:3.0:content-selector\" IncludeInResult=\"false\">");
-					contentProfile
-							.append("<AttributeValue XPathCategory=\"urn:oasis:names:tc:xacml:3.0:attribute-category:resource\" DataType=\"urn:oasis:names:tc:xacml:3.0:data-type:xpathExpression\">//ak:record/ak:proposal</AttributeValue>");
-					contentProfile.append("</Attribute>");
-
+					StringBuffer contentProfile = generateContentProfile(
+							proposalId, existingProposal, signatures,
+							authorProfile);
 					Accesscontrol ac = new Accesscontrol();
-					HashMap<String, Multimap<String, String>> attrMap = new HashMap<String, Multimap<String, String>>();
-
-					Multimap<String, String> subjectMap = ArrayListMultimap
-							.create();
-					Multimap<String, String> resourceMap = ArrayListMultimap
-							.create();
-					Multimap<String, String> actionMap = ArrayListMultimap
-							.create();
-					Multimap<String, String> environmentMap = ArrayListMultimap
-							.create();
-					for (JsonNode node : policyInfo) {
-						String attributeName = node.path("attributeName")
-								.asText();
-						String attributeValue = node.path("attributeValue")
-								.asText();
-						String attributeType = node.path("attributeType")
-								.asText();
-						switch (attributeType) {
-						case "Subject":
-							subjectMap.put(attributeName, attributeValue);
-							attrMap.put("Subject", subjectMap);
-							break;
-						case "Resource":
-							resourceMap.put(attributeName, attributeValue);
-							attrMap.put("Resource", resourceMap);
-							break;
-						case "Action":
-							actionMap.put(attributeName, attributeValue);
-							attrMap.put("Action", actionMap);
-							break;
-						case "Environment":
-							environmentMap.put(attributeName, attributeValue);
-							attrMap.put("Environment", environmentMap);
-							break;
-						default:
-							break;
-						}
-					}
+					HashMap<String, Multimap<String, String>> attrMap = generateAttributes(policyInfo);
 					Set<AbstractResult> set = ac
 							.getXACMLdecisionWithObligations(attrMap,
 									contentProfile);
@@ -2745,91 +1537,41 @@ public class ProposalService {
 						System.out.println("Decision:" + intDecision
 								+ " that is: "
 								+ AbstractResult.DECISIONS[intDecision]);
-
 						if (AbstractResult.DECISIONS[intDecision]
 								.equals("Permit")) {
 							List<ObligationResult> obligations = ar
 									.getObligations();
-
 							EmailUtil emailUtil = new EmailUtil();
 							String emailSubject = new String();
 							String emailBody = new String();
 							String authorName = new String();
 							String piEmail = new String();
 							List<String> emaillist = new ArrayList<String>();
-
 							if (obligations.size() > 0) {
 								List<ObligationResult> preObligations = new ArrayList<ObligationResult>();
 								List<ObligationResult> postObligations = new ArrayList<ObligationResult>();
 								List<ObligationResult> ongoingObligations = new ArrayList<ObligationResult>();
 
 								for (ObligationResult obligation : obligations) {
-									if (obligation instanceof org.wso2.balana.xacml3.Obligation) {
-										List<AttributeAssignment> assignments = ((org.wso2.balana.xacml3.Obligation) obligation)
-												.getAssignments();
-
-										String obligationType = "postobligation";
-
-										for (AttributeAssignment assignment : assignments) {
-											if (assignment
-													.getAttributeId()
-													.toString()
-													.equalsIgnoreCase(
-															"obligationType")) {
-												obligationType = assignment
-														.getContent();
-												break;
-											}
-										}
-
-										if (obligationType
-												.equals("preobligation")) {
-											preObligations.add(obligation);
-											System.out.println(obligationType
-													+ " is FOUND");
-										} else if (obligationType
-												.equals("postobligation")) {
-											postObligations.add(obligation);
-											System.out.println(obligationType
-													+ " is FOUND");
-										} else {
-											ongoingObligations.add(obligation);
-											System.out.println(obligationType
-													+ " is FOUND");
-										}
-
-									}
+									categorizeObligationTypes(preObligations,
+											postObligations,
+											ongoingObligations, obligation);
 								}
-
 								Boolean preCondition = true;
 								String alertMessage = new String();
 								if (preObligations.size() != 0) {
 									preCondition = false;
-
 									System.out
 											.println("\n======================== Printing Obligations ====================");
-
 									for (ObligationResult obligation : preObligations) {
 										if (obligation instanceof org.wso2.balana.xacml3.Obligation) {
 											List<AttributeAssignment> assignments = ((org.wso2.balana.xacml3.Obligation) obligation)
 													.getAssignments();
-
 											String obligationType = "preobligation";
-
 											for (AttributeAssignment assignment : assignments) {
-
-												// System.out.println("Obligation :  "
-												// + assignment.getContent() +
-												// "\n");
-
 												switch (assignment
 														.getAttributeId()
 														.toString()) {
-												// case "obligationType":
-												// obligationType =
-												// assignment.getContent();
-												// break;
-
 												case "signedByCurrentUser":
 													preCondition = Boolean
 															.parseBoolean(assignment
@@ -2839,7 +1581,8 @@ public class ProposalService {
 													alertMessage = assignment
 															.getContent();
 													break;
-
+												default:
+													break;
 												}
 											}
 											System.out.println(obligationType
@@ -2856,22 +1599,11 @@ public class ProposalService {
 										if (obligation instanceof org.wso2.balana.xacml3.Obligation) {
 											List<AttributeAssignment> assignments = ((org.wso2.balana.xacml3.Obligation) obligation)
 													.getAssignments();
-
 											String obligationType = "postobligation";
-
 											for (AttributeAssignment assignment : assignments) {
-
-												// System.out.println("Obligation :  "
-												// + assignment.getContent() +
-												// "\n");
-
 												switch (assignment
 														.getAttributeId()
 														.toString()) {
-												// case "obligationType":
-												// obligationType =
-												// assignment.getContent();
-												// break;
 												case "authorName":
 													authorName = assignment
 															.getContent();
@@ -2904,9 +1636,10 @@ public class ProposalService {
 																		.getContent());
 													}
 													break;
+												default:
+													break;
 												}
 											}
-
 											System.out.println(obligationType
 													+ " is RUNNING");
 										}
@@ -2935,15 +1668,12 @@ public class ProposalService {
 														.setResearchAdministratorWithdraw(WithdrawType.WITHDRAWN);
 												existingProposal
 														.setResearchAdministratorApproval(ApprovalType.NOTREADYFORAPPROVAL);
-
-												// Proposal Status
 												existingProposal
 														.getProposalStatus()
 														.clear();
 												existingProposal
 														.getProposalStatus()
 														.add(Status.WITHDRAWBYRESEARCHADMIN);
-
 												return updateProposalStatus(
 														existingProposal,
 														authorProfile,
@@ -2956,7 +1686,6 @@ public class ProposalService {
 											}
 										}
 										break;
-
 									case "Archive":
 										if (!proposalId.equals("0")) {
 											if (existingProposal
@@ -2969,15 +1698,12 @@ public class ProposalService {
 														.setResearchDirectorArchived(ArchiveType.ARCHIVED);
 												existingProposal
 														.setResearchDirectorApproval(ApprovalType.NOTREADYFORAPPROVAL);
-
-												// Proposal Status
 												existingProposal
 														.getProposalStatus()
 														.clear();
 												existingProposal
 														.getProposalStatus()
 														.add(Status.ARCHIVEDBYRESEARCHDIRECTOR);
-
 												return updateProposalStatus(
 														existingProposal,
 														authorProfile,
@@ -2990,9 +1716,7 @@ public class ProposalService {
 											}
 										}
 										break;
-
 									default:
-
 										break;
 									}
 								}
@@ -3016,11 +1740,32 @@ public class ProposalService {
 		} catch (Exception e) {
 			log.error("Could not update Proposal Status error e=", e);
 		}
-
 		return Response
 				.status(403)
 				.entity("{\"error\": \"No User Permission Attributes are send!\", \"status\": \"FAIL\"}")
 				.build();
+	}
+
+	/**
+	 * @param contentProfile
+	 * @param signatureInfo
+	 */
+
+	/**
+	 * @param contentProfile
+	 * @param authorProfile
+	 * @param authorFullName
+	 */
+	private void generateAuthorContentProfile(StringBuffer contentProfile,
+			UserProfile authorProfile, String authorFullName) {
+		contentProfile.append("<ak:authorprofile>");
+		contentProfile.append("<ak:fullname>");
+		contentProfile.append(authorFullName);
+		contentProfile.append("</ak:fullname>");
+		contentProfile.append("<ak:userid>");
+		contentProfile.append(authorProfile.getId().toString());
+		contentProfile.append("</ak:userid>");
+		contentProfile.append("</ak:authorprofile>");
 	}
 
 	private Response updateProposalStatus(Proposal existingProposal,
@@ -3031,16 +1776,13 @@ public class ProposalService {
 		ObjectMapper mapper = new ObjectMapper();
 		boolean isStatusUpdated = proposalDAO.updateProposalStatus(
 				existingProposal, authorProfile);
-
 		if (isStatusUpdated) {
 			if (!emailSubject.equals("")) {
 				emailUtil.sendMailMultipleUsersWithoutAuth(piEmail, emaillist,
 						emailSubject + authorName, emailBody);
 			}
-
 			String notificationMessage = changeDone + " by " + authorUserName
 					+ ".";
-
 			if (changeDone.equals("Withdrawn")) {
 				broadCastNotification(existingProposal.getId().toString(),
 						existingProposal.getProjectInfo().getProjectTitle(),
@@ -3052,14 +1794,11 @@ public class ProposalService {
 						notificationMessage, "Proposal", true, true, true,
 						true, false, false, false, false, false, false);
 			}
-
 			return Response
 					.status(200)
 					.type(MediaType.APPLICATION_JSON)
 					.entity(mapper.writerWithDefaultPrettyPrinter()
 							.writeValueAsString(true)).build();
-			// return
-			// Response.status(200).entity(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(true)).build();
 		} else {
 			return Response
 					.status(200)
@@ -3069,7 +1808,6 @@ public class ProposalService {
 		}
 	}
 
-	// Save By Admin
 	@POST
 	@Path("/SaveUpdateProposalByAdmin")
 	@ApiOperation(value = "Save a New User or Update an existing Proposal by Admin", notes = "This API saves a New User or updates an existing Proposal by Admin")
@@ -3083,61 +1821,19 @@ public class ProposalService {
 
 			ObjectMapper mapper = new ObjectMapper();
 			JsonNode root = mapper.readTree(message);
-
-			String userProfileID = new String();
-			@SuppressWarnings("unused")
-			String userName = new String();
-			@SuppressWarnings("unused")
-			Boolean userIsAdmin = false;
-			@SuppressWarnings("unused")
-			String userCollege = new String();
-			@SuppressWarnings("unused")
-			String userDepartment = new String();
-			@SuppressWarnings("unused")
-			String userPositionType = new String();
-			@SuppressWarnings("unused")
-			String userPositionTitle = new String();
-
+			GPMSCommonInfo userInfo = new GPMSCommonInfo();
 			if (root != null && root.has("gpmsCommonObj")) {
 				JsonNode commonObj = root.get("gpmsCommonObj");
-				if (commonObj != null && commonObj.has("UserProfileID")) {
-					userProfileID = commonObj.get("UserProfileID").textValue();
-				}
-				if (commonObj != null && commonObj.has("UserName")) {
-					userName = commonObj.get("UserName").textValue();
-				}
-				if (commonObj != null && commonObj.has("UserIsAdmin")) {
-					userIsAdmin = Boolean.parseBoolean(commonObj.get(
-							"UserIsAdmin").textValue());
-				}
-				if (commonObj != null && commonObj.has("UserCollege")) {
-					userCollege = commonObj.get("UserCollege").textValue();
-				}
-				if (commonObj != null && commonObj.has("UserDepartment")) {
-					userDepartment = commonObj.get("UserDepartment")
-							.textValue();
-				}
-				if (commonObj != null && commonObj.has("UserPositionType")) {
-					userPositionType = commonObj.get("UserPositionType")
-							.textValue();
-				}
-				if (commonObj != null && commonObj.has("UserPositionTitle")) {
-					userPositionTitle = commonObj.get("UserPositionTitle")
-							.textValue();
-				}
+				userInfo = new GPMSCommonInfo(commonObj);
 			}
-
-			ObjectId authorId = new ObjectId(userProfileID);
+			ObjectId authorId = new ObjectId(userInfo.getUserProfileID());
 			UserProfile authorProfile = userProfileDAO
 					.findUserDetailsByProfileID(authorId);
-			// String authorFullName = authorProfile.getFullName();
 			String authorUserName = authorProfile.getUserAccount()
 					.getUserName();
-
 			String proposalID = new String();
 			Proposal existingProposal = new Proposal();
 			Proposal oldProposal = new Proposal();
-
 			if (root != null && root.has("proposalInfo")) {
 				JsonNode proposalInfo = root.get("proposalInfo");
 
@@ -4419,51 +3115,12 @@ public class ProposalService {
 
 			ObjectMapper mapper = new ObjectMapper();
 			JsonNode root = mapper.readTree(message);
-
-			String userProfileID = new String();
-			@SuppressWarnings("unused")
-			String userName = new String();
-			@SuppressWarnings("unused")
-			Boolean userIsAdmin = false;
-			@SuppressWarnings("unused")
-			String userCollege = new String();
-			@SuppressWarnings("unused")
-			String userDepartment = new String();
-			@SuppressWarnings("unused")
-			String userPositionType = new String();
-			@SuppressWarnings("unused")
-			String userPositionTitle = new String();
-
+			GPMSCommonInfo userInfo = new GPMSCommonInfo();
 			if (root != null && root.has("gpmsCommonObj")) {
 				JsonNode commonObj = root.get("gpmsCommonObj");
-				if (commonObj != null && commonObj.has("UserProfileID")) {
-					userProfileID = commonObj.get("UserProfileID").textValue();
-				}
-				if (commonObj != null && commonObj.has("UserName")) {
-					userName = commonObj.get("UserName").textValue();
-				}
-				if (commonObj != null && commonObj.has("UserIsAdmin")) {
-					userIsAdmin = Boolean.parseBoolean(commonObj.get(
-							"UserIsAdmin").textValue());
-				}
-				if (commonObj != null && commonObj.has("UserCollege")) {
-					userCollege = commonObj.get("UserCollege").textValue();
-				}
-				if (commonObj != null && commonObj.has("UserDepartment")) {
-					userDepartment = commonObj.get("UserDepartment")
-							.textValue();
-				}
-				if (commonObj != null && commonObj.has("UserPositionType")) {
-					userPositionType = commonObj.get("UserPositionType")
-							.textValue();
-				}
-				if (commonObj != null && commonObj.has("UserPositionTitle")) {
-					userPositionTitle = commonObj.get("UserPositionTitle")
-							.textValue();
-				}
+				userInfo = new GPMSCommonInfo(commonObj);
 			}
-
-			ObjectId authorId = new ObjectId(userProfileID);
+			ObjectId authorId = new ObjectId(userInfo.getUserProfileID());
 			UserProfile authorProfile = userProfileDAO
 					.findUserDetailsByProfileID(authorId);
 			String authorFullName = authorProfile.getFullName();
@@ -4880,8 +3537,6 @@ public class ProposalService {
 									removeSign);
 						}
 					}
-					// SignatureInfo
-					// addedSignatures = newSignatureInfo;
 					if (!proposalID.equals("0")) {
 						if (!existingProposal.getSignatureInfo().equals(
 								allSignatureInfo)) {
@@ -4896,7 +3551,8 @@ public class ProposalService {
 
 					for (SignatureInfo sign : existingProposal
 							.getSignatureInfo()) {
-						if (sign.getUserProfileId().equals(userProfileID)
+						if (sign.getUserProfileId().equals(
+								userInfo.getUserProfileID())
 								&& !sign.getSignature().trim().equals("")) {
 							signedByCurrentUser = true;
 							break;
@@ -5125,17 +3781,6 @@ public class ProposalService {
 								break;
 							}
 						}
-
-						// TODO only check this for required not all XACML
-
-						// Need to add Environment to detect the Campus or
-						// outside
-						// network
-						// network.type
-
-						// Device type
-						// device.type
-
 						List<SignatureUserInfo> signatures = new ArrayList<SignatureUserInfo>();
 						SignatureByAllUsers signByAllUsersInfo = new SignatureByAllUsers();
 
@@ -5149,129 +3794,11 @@ public class ProposalService {
 							contentProfile.append("<Content>");
 							contentProfile
 									.append("<ak:record xmlns:ak=\"http://akpower.org\">");
-							contentProfile.append("<ak:proposal>");
+							genearteProposalInfoContentProfile(proposalID,
+									existingProposal, contentProfile);
 
-							contentProfile.append("<ak:proposalid>");
-							contentProfile.append(proposalID);
-							contentProfile.append("</ak:proposalid>");
-
-							contentProfile.append("<ak:proposaltitle>");
-							contentProfile.append(existingProposal
-									.getProjectInfo().getProjectTitle());
-							contentProfile.append("</ak:proposaltitle>");
-
-							contentProfile.append("<ak:irbApprovalRequired>");
-							contentProfile.append(existingProposal
-									.isIrbApprovalRequired());
-							contentProfile.append("</ak:irbApprovalRequired>");
-
-							contentProfile.append("<ak:submittedbypi>");
-							contentProfile.append(existingProposal
-									.getSubmittedByPI().name());
-							contentProfile.append("</ak:submittedbypi>");
-
-							contentProfile
-									.append("<ak:readyforsubmissionbypi>");
-							contentProfile.append(existingProposal
-									.isReadyForSubmissionByPI());
-							contentProfile
-									.append("</ak:readyforsubmissionbypi>");
-
-							contentProfile.append("<ak:deletedbypi>");
-							contentProfile.append(existingProposal
-									.getDeletedByPI().name());
-							contentProfile.append("</ak:deletedbypi>");
-
-							contentProfile
-									.append("<ak:approvedbydepartmentchair>");
-							contentProfile.append(existingProposal
-									.getChairApproval().name());
-							contentProfile
-									.append("</ak:approvedbydepartmentchair>");
-
-							contentProfile
-									.append("<ak:approvedbybusinessmanager>");
-							contentProfile.append(existingProposal
-									.getBusinessManagerApproval().name());
-							contentProfile
-									.append("</ak:approvedbybusinessmanager>");
-
-							contentProfile.append("<ak:approvedbyirb>");
-							contentProfile.append(existingProposal
-									.getIrbApproval().name());
-							contentProfile.append("</ak:approvedbyirb>");
-
-							contentProfile.append("<ak:approvedbydean>");
-							contentProfile.append(existingProposal
-									.getDeanApproval().name());
-							contentProfile.append("</ak:approvedbydean>");
-
-							contentProfile
-									.append("<ak:approvedbyuniversityresearchadministrator>");
-							contentProfile.append(existingProposal
-									.getResearchAdministratorApproval().name());
-							contentProfile
-									.append("</ak:approvedbyuniversityresearchadministrator>");
-
-							contentProfile
-									.append("<ak:withdrawnbyuniversityresearchadministrator>");
-							contentProfile.append(existingProposal
-									.getResearchAdministratorWithdraw().name());
-							contentProfile
-									.append("</ak:withdrawnbyuniversityresearchadministrator>");
-
-							contentProfile
-									.append("<ak:submittedbyuniversityresearchadministrator>");
-							contentProfile.append(existingProposal
-									.getResearchAdministratorSubmission()
-									.name());
-							contentProfile
-									.append("</ak:submittedbyuniversityresearchadministrator>");
-
-							contentProfile
-									.append("<ak:approvedbyuniversityresearchdirector>");
-							contentProfile.append(existingProposal
-									.getResearchDirectorDeletion().name());
-							contentProfile
-									.append("</ak:approvedbyuniversityresearchdirector>");
-
-							contentProfile
-									.append("<ak:deletedbyuniversityresearchdirector>");
-							contentProfile.append(existingProposal
-									.getResearchDirectorDeletion().name());
-							contentProfile
-									.append("</ak:deletedbyuniversityresearchdirector>");
-
-							contentProfile
-									.append("<ak:archivedbyuniversityresearchdirector>");
-							contentProfile.append(existingProposal
-									.getResearchDirectorArchived().name());
-							contentProfile
-									.append("</ak:archivedbyuniversityresearchdirector>");
-
-							contentProfile.append("<ak:authorprofile>");
-							// contentProfile.append("<ak:firstname>");
-							// contentProfile.append(authorProfile.getFirstName());
-							// contentProfile.append("</ak:firstname>");
-							// contentProfile.append("<ak:middlename>");
-							// contentProfile
-							// .append(authorProfile.getMiddleName());
-							// contentProfile.append("</ak:middlename>");
-							//
-							// contentProfile.append("<ak:lastname>");
-							// contentProfile.append(authorProfile.getLastName());
-							// contentProfile.append("</ak:lastname>");
-
-							contentProfile.append("<ak:fullname>");
-							contentProfile.append(authorFullName);
-							contentProfile.append("</ak:fullname>");
-
-							contentProfile.append("<ak:userid>");
-							contentProfile.append(authorProfile.getId()
-									.toString());
-							contentProfile.append("</ak:userid>");
-
-							contentProfile.append("</ak:authorprofile>");
+							generateAuthorContentProfile(contentProfile,
+									authorProfile, authorFullName);
 
 							DateFormat dateFormat = new SimpleDateFormat(
 									"yyyy-MM-dd'T'HH:mm:ssXXX");
@@ -5424,21 +3951,17 @@ public class ProposalService {
 									contentProfile.append(signatureInfo
 											.getFullName());
 									contentProfile.append("</ak:fullname>");
-
 									contentProfile.append("<ak:workemail>");
 									contentProfile.append(signatureInfo
 											.getEmail());
 									contentProfile.append("</ak:workemail>");
-
 									contentProfile.append("<ak:userid>");
 									contentProfile.append(signatureInfo
 											.getUserProfileId());
 									contentProfile.append("</ak:userid>");
 									contentProfile.append("</ak:chair>");
-
 									requiredChairSigns.add(signatureInfo
 											.getUserProfileId());
-
 									break;
 								case "Business Manager":
 									contentProfile.append("<ak:manager>");
@@ -5446,22 +3969,18 @@ public class ProposalService {
 									contentProfile.append(signatureInfo
 											.getFullName());
 									contentProfile.append("</ak:fullname>");
-
 									contentProfile.append("<ak:workemail>");
 									contentProfile.append(signatureInfo
 											.getEmail());
 									contentProfile.append("</ak:workemail>");
-
 									contentProfile.append("<ak:userid>");
 									contentProfile.append(signatureInfo
 											.getUserProfileId());
 									contentProfile.append("</ak:userid>");
 									contentProfile.append("</ak:manager>");
-
 									requiredBusinessManagerSigns
 											.add(signatureInfo
 													.getUserProfileId());
-
 									break;
 								case "Dean":
 									contentProfile.append("<ak:dean>");
@@ -5469,21 +3988,17 @@ public class ProposalService {
 									contentProfile.append(signatureInfo
 											.getFullName());
 									contentProfile.append("</ak:fullname>");
-
 									contentProfile.append("<ak:workemail>");
 									contentProfile.append(signatureInfo
 											.getEmail());
 									contentProfile.append("</ak:workemail>");
-
 									contentProfile.append("<ak:userid>");
 									contentProfile.append(signatureInfo
 											.getUserProfileId());
 									contentProfile.append("</ak:userid>");
 									contentProfile.append("</ak:dean>");
-
 									requiredDeanSigns.add(signatureInfo
 											.getUserProfileId());
-
 									break;
 								case "IRB":
 									contentProfile.append("<ak:irb>");
@@ -5491,21 +4006,17 @@ public class ProposalService {
 									contentProfile.append(signatureInfo
 											.getFullName());
 									contentProfile.append("</ak:fullname>");
-
 									contentProfile.append("<ak:workemail>");
 									contentProfile.append(signatureInfo
 											.getEmail());
 									contentProfile.append("</ak:workemail>");
-
 									contentProfile.append("<ak:userid>");
 									contentProfile.append(signatureInfo
 											.getUserProfileId());
 									contentProfile.append("</ak:userid>");
 									contentProfile.append("</ak:irb>");
-
 									requiredIRBSigns.add(signatureInfo
 											.getUserProfileId());
-
 									break;
 								case "University Research Administrator":
 									contentProfile.append("<ak:administrator>");
@@ -5513,23 +4024,19 @@ public class ProposalService {
 									contentProfile.append(signatureInfo
 											.getFullName());
 									contentProfile.append("</ak:fullname>");
-
 									contentProfile.append("<ak:workemail>");
 									contentProfile.append(signatureInfo
 											.getEmail());
 									contentProfile.append("</ak:workemail>");
-
 									contentProfile.append("<ak:userid>");
 									contentProfile.append(signatureInfo
 											.getUserProfileId());
 									contentProfile.append("</ak:userid>");
 									contentProfile
 											.append("</ak:administrator>");
-
 									requiredResearchAdminSigns
 											.add(signatureInfo
 													.getUserProfileId());
-
 									break;
 								case "University Research Director":
 									contentProfile.append("<ak:director>");
@@ -5537,22 +4044,20 @@ public class ProposalService {
 									contentProfile.append(signatureInfo
 											.getFullName());
 									contentProfile.append("</ak:fullname>");
-
 									contentProfile.append("<ak:workemail>");
 									contentProfile.append(signatureInfo
 											.getEmail());
 									contentProfile.append("</ak:workemail>");
-
 									contentProfile.append("<ak:userid>");
 									contentProfile.append(signatureInfo
 											.getUserProfileId());
 									contentProfile.append("</ak:userid>");
 									contentProfile.append("</ak:director>");
-
 									requiredResearchDirectorSigns
 											.add(signatureInfo
 													.getUserProfileId());
-
+									break;
+								default:
 									break;
 								}
 							}
@@ -5678,88 +4183,11 @@ public class ProposalService {
 									.isIrbApprovalRequired());
 							contentProfile.append("</ak:irbApprovalRequired>");
 
-							contentProfile.append("<ak:authorprofile>");
-							// contentProfile.append("<ak:firstname>");
-							// contentProfile.append(authorProfile.getFirstName());
-							// contentProfile.append("</ak:firstname>");
-							// contentProfile.append("<ak:middlename>");
-							// contentProfile
-							// .append(authorProfile.getMiddleName());
-							// contentProfile.append("</ak:middlename>");
-							//
-							// contentProfile.append("<ak:lastname>");
-							// contentProfile.append(authorProfile.getLastName());
-							// contentProfile.append("</ak:lastname>");
+							generateAuthorContentProfile(contentProfile,
+									authorProfile, authorFullName);
 
-							contentProfile.append("<ak:fullname>");
-							contentProfile.append(authorFullName);
-							contentProfile.append("</ak:fullname>");
-
-							contentProfile.append("<ak:userid>");
-							contentProfile.append(authorProfile.getId()
-									.toString());
-							contentProfile.append("</ak:userid>");
-
-							contentProfile.append("</ak:authorprofile>");
-
-							contentProfile.append("<ak:pi>");
-							contentProfile.append("<ak:fullname>");
-							contentProfile.append(existingProposal
-									.getInvestigatorInfo().getPi().getUserRef()
-									.getFullName());
-							contentProfile.append("</ak:fullname>");
-
-							contentProfile.append("<ak:workemail>");
-							contentProfile.append(existingProposal
-									.getInvestigatorInfo().getPi().getUserRef()
-									.getWorkEmails().get(0));
-							contentProfile.append("</ak:workemail>");
-
-							contentProfile.append("<ak:userid>");
-							contentProfile.append(existingProposal
-									.getInvestigatorInfo().getPi()
-									.getUserProfileId());
-							contentProfile.append("</ak:userid>");
-							contentProfile.append("</ak:pi>");
-
-							for (InvestigatorRefAndPosition copis : existingProposal
-									.getInvestigatorInfo().getCo_pi()) {
-								contentProfile.append("<ak:copi>");
-								contentProfile.append("<ak:fullname>");
-								contentProfile.append(copis.getUserRef()
-										.getFullName());
-								contentProfile.append("</ak:fullname>");
-
-								contentProfile.append("<ak:workemail>");
-								contentProfile.append(copis.getUserRef()
-										.getWorkEmails().get(0));
-								contentProfile.append("</ak:workemail>");
-
-								contentProfile.append("<ak:userid>");
-								contentProfile.append(copis.getUserProfileId());
-								contentProfile.append("</ak:userid>");
-								contentProfile.append("</ak:copi>");
-							}
-
-							for (InvestigatorRefAndPosition seniors : existingProposal
-									.getInvestigatorInfo().getSeniorPersonnel()) {
-								contentProfile.append("<ak:senior>");
-								contentProfile.append("<ak:fullname>");
-								contentProfile.append(seniors.getUserRef()
-										.getFullName());
-								contentProfile.append("</ak:fullname>");
-
-								contentProfile.append("<ak:workemail>");
-								contentProfile.append(seniors.getUserRef()
-										.getWorkEmails().get(0));
-								contentProfile.append("</ak:workemail>");
-
-								contentProfile.append("<ak:userid>");
-								contentProfile.append(seniors
-										.getUserProfileId());
-								contentProfile.append("</ak:userid>");
-								contentProfile.append("</ak:senior>");
-							}
+							generateInvestigatorContentProfile(
+									existingProposal, contentProfile);
 
 							contentProfile.append("<ak:signedByCurrentUser>");
 							contentProfile.append(signedByCurrentUser);
@@ -5811,45 +4239,10 @@ public class ProposalService {
 									List<ObligationResult> ongoingObligations = new ArrayList<ObligationResult>();
 
 									for (ObligationResult obligation : obligations) {
-										if (obligation instanceof org.wso2.balana.xacml3.Obligation) {
-											List<AttributeAssignment> assignments = ((org.wso2.balana.xacml3.Obligation) obligation)
-													.getAssignments();
-
-											String obligationType = "postobligation";
-
-											for (AttributeAssignment assignment : assignments) {
-												if (assignment
-														.getAttributeId()
-														.toString()
-														.equalsIgnoreCase(
-																"obligationType")) {
-													obligationType = assignment
-															.getContent();
-													break;
-												}
-											}
-
-											if (obligationType
-													.equals("preobligation")) {
-												preObligations.add(obligation);
-												System.out
-														.println(obligationType
-																+ " is FOUND");
-											} else if (obligationType
-													.equals("postobligation")) {
-												postObligations.add(obligation);
-												System.out
-														.println(obligationType
-																+ " is FOUND");
-											} else {
-												ongoingObligations
-														.add(obligation);
-												System.out
-														.println(obligationType
-																+ " is FOUND");
-											}
-
-										}
+										categorizeObligationTypes(
+												preObligations,
+												postObligations,
+												ongoingObligations, obligation);
 									}
 
 									Boolean preCondition = true;
@@ -9170,116 +7563,7 @@ public class ProposalService {
 				if (policyInfo != null && policyInfo.isArray()
 						&& policyInfo.size() > 0) {
 					Accesscontrol ac = new Accesscontrol();
-					HashMap<String, Multimap<String, String>> attrMap = new HashMap<String, Multimap<String, String>>();
-
-					Multimap<String, String> subjectMap = ArrayListMultimap
-							.create();
-					Multimap<String, String> resourceMap = ArrayListMultimap
-							.create();
-					Multimap<String, String> actionMap = ArrayListMultimap
-							.create();
-					Multimap<String, String> environmentMap = ArrayListMultimap
-							.create();
-					for (JsonNode node : policyInfo) {
-						String attributeName = node.path("attributeName")
-								.asText();
-						String attributeValue = node.path("attributeValue")
-								.asText();
-						String attributeType = node.path("attributeType")
-								.asText();
-						switch (attributeType) {
-						case "Subject":
-							subjectMap.put(attributeName, attributeValue);
-							attrMap.put("Subject", subjectMap);
-							break;
-						case "Resource":
-							resourceMap.put(attributeName, attributeValue);
-							attrMap.put("Resource", resourceMap);
-							break;
-						case "Action":
-							actionMap.put(attributeName, attributeValue);
-							attrMap.put("Action", actionMap);
-							break;
-						case "Environment":
-							environmentMap.put(attributeName, attributeValue);
-							attrMap.put("Environment", environmentMap);
-							break;
-						default:
-							break;
-						}
-					}
-
-					@SuppressWarnings("unused")
-					String userProfileID = new String();
-					@SuppressWarnings("unused")
-					String userName = new String();
-					@SuppressWarnings("unused")
-					Boolean userIsAdmin = false;
-					@SuppressWarnings("unused")
-					String userCollege = new String();
-					@SuppressWarnings("unused")
-					String userDepartment = new String();
-					@SuppressWarnings("unused")
-					String userPositionType = new String();
-					@SuppressWarnings("unused")
-					String userPositionTitle = new String();
-
-					if (root != null && root.has("gpmsCommonObj")) {
-						JsonNode commonObj = root.get("gpmsCommonObj");
-						if (commonObj != null && commonObj.has("UserProfileID")) {
-							userProfileID = commonObj.get("UserProfileID")
-									.textValue();
-						}
-						if (commonObj != null && commonObj.has("UserName")) {
-							userName = commonObj.get("UserName").textValue();
-						}
-						if (commonObj != null && commonObj.has("UserIsAdmin")) {
-							userIsAdmin = Boolean.parseBoolean(commonObj.get(
-									"UserIsAdmin").textValue());
-						}
-						if (commonObj != null && commonObj.has("UserCollege")) {
-							userCollege = commonObj.get("UserCollege")
-									.textValue();
-						}
-						if (commonObj != null
-								&& commonObj.has("UserDepartment")) {
-							userDepartment = commonObj.get("UserDepartment")
-									.textValue();
-						}
-						if (commonObj != null
-								&& commonObj.has("UserPositionType")) {
-							userPositionType = commonObj
-									.get("UserPositionType").textValue();
-						}
-						if (commonObj != null
-								&& commonObj.has("UserPositionTitle")) {
-							userPositionTitle = commonObj.get(
-									"UserPositionTitle").textValue();
-						}
-					}
-
-					// // TODO only check this for required not all XACML call
-					// if (root != null && root.has("proposalId")) {
-					// String proposalId = new String();
-					// JsonNode proposal_Id = root.get("proposalId");
-					// proposalId = proposal_Id.textValue();
-					// if (!proposalId.equals("")) {
-					// ObjectId id = new ObjectId(proposalId);
-					// Proposal proposal = proposalDAO
-					// .findProposalByProposalID(id);
-					// resourceMap.put("status", proposal.getProposalStatus()
-					// .toString());
-					// attrMap.put("Resource", resourceMap);
-					// }
-					// }
-
-					// Need to add Environment to detect the Campus or outside
-					// network
-					// network.type
-
-					// Device type
-					// device.type
-
+					HashMap<String, Multimap<String, String>> attrMap = generateAttributes(policyInfo);
 					String decision = ac.getXACMLdecision(attrMap);
 					if (decision.equals("Permit")) {
 						return Response

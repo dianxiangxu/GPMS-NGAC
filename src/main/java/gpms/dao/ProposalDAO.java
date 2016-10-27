@@ -3,15 +3,18 @@ package gpms.dao;
 import gpms.DAL.MongoDBConnector;
 import gpms.model.ApprovalType;
 import gpms.model.AuditLog;
+import gpms.model.AuditLogCommonInfo;
 import gpms.model.AuditLogInfo;
 import gpms.model.CollegeDepartmentInfo;
 import gpms.model.Delegation;
 import gpms.model.DeleteType;
+import gpms.model.GPMSCommonInfo;
 import gpms.model.InvestigatorRefAndPosition;
 import gpms.model.PositionDetails;
 import gpms.model.ProjectLocation;
 import gpms.model.ProjectType;
 import gpms.model.Proposal;
+import gpms.model.ProposalCommonInfo;
 import gpms.model.ProposalInfo;
 import gpms.model.SignatureInfo;
 import gpms.model.SignatureUserInfo;
@@ -191,14 +194,15 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	}
 
 	public List<AuditLogInfo> findAllForProposalAuditLogGrid(int offset,
-			int limit, ObjectId id, String action, String auditedBy,
-			String activityOnFrom, String activityOnTo) throws ParseException {
+			int limit, ObjectId id, AuditLogCommonInfo auditLogInfo)
+			throws ParseException {
 		Datastore ds = getDatastore();
-
+		String action = auditLogInfo.getAction();
+		String auditedBy = auditLogInfo.getAuditedBy();
+		String activityOnFrom = auditLogInfo.getActivityOnFrom();
+		String activityOnTo = auditLogInfo.getActivityOnTo();
 		Query<Proposal> proposalQuery = ds.createQuery(Proposal.class);
-
 		Proposal q = proposalQuery.field("_id").equal(id).get();
-
 		List<AuditLogInfo> allAuditLogs = new ArrayList<AuditLogInfo>();
 		int rowTotal = 0;
 		if (q.getAuditLog() != null && q.getAuditLog().size() != 0) {
@@ -208,7 +212,6 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 				boolean isAuditedByMatch = false;
 				boolean isActivityDateFromMatch = false;
 				boolean isActivityDateToMatch = false;
-
 				if (action != null) {
 					if (poposalAudit.getAction().toLowerCase()
 							.contains(action.toLowerCase())) {
@@ -217,7 +220,6 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 				} else {
 					isActionMatch = true;
 				}
-
 				if (auditedBy != null) {
 					if (poposalAudit.getUserProfile().getUserAccount()
 							.getUserName().toLowerCase()
@@ -236,7 +238,6 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 				} else {
 					isAuditedByMatch = true;
 				}
-
 				if (activityOnFrom != null) {
 					Date activityDateFrom = formatter.parse(activityOnFrom);
 					if (poposalAudit.getActivityDate().compareTo(
@@ -252,7 +253,6 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 				} else {
 					isActivityDateFromMatch = true;
 				}
-
 				if (activityOnTo != null) {
 					Date activityDateTo = formatter.parse(activityOnTo);
 					if (poposalAudit.getActivityDate()
@@ -268,7 +268,6 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 				} else {
 					isActivityDateToMatch = true;
 				}
-
 				if (isActionMatch && isAuditedByMatch
 						&& isActivityDateFromMatch && isActivityDateToMatch) {
 					proposalAuditLog.setUserName(poposalAudit.getUserProfile()
@@ -278,21 +277,17 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 					proposalAuditLog.setAction(poposalAudit.getAction());
 					proposalAuditLog.setActivityDate(poposalAudit
 							.getActivityDate());
-
 					allAuditLogs.add(proposalAuditLog);
 				}
 			}
 		}
-
 		Collections.sort(allAuditLogs);
-
 		rowTotal = allAuditLogs.size();
 		if (rowTotal > 0) {
 			for (AuditLogInfo t : allAuditLogs) {
 				t.setRowTotal(rowTotal);
 			}
 		}
-
 		if (rowTotal >= (offset + limit - 1)) {
 			return allAuditLogs.subList(offset - 1, offset + limit - 1);
 		} else {
@@ -301,16 +296,15 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	}
 
 	public List<AuditLogInfo> findAllUserProposalAuditLogs(ObjectId id,
-			String action, String auditedBy, String activityOnFrom,
-			String activityOnTo) throws ParseException {
+			AuditLogCommonInfo auditLogInfo) throws ParseException {
 		Datastore ds = getDatastore();
-
+		String action = auditLogInfo.getAction();
+		String auditedBy = auditLogInfo.getAuditedBy();
+		String activityOnFrom = auditLogInfo.getActivityOnFrom();
+		String activityOnTo = auditLogInfo.getActivityOnTo();
 		Query<Proposal> proposalQuery = ds.createQuery(Proposal.class);
-
 		Proposal q = proposalQuery.field("_id").equal(id).get();
-
 		List<AuditLogInfo> allAuditLogs = new ArrayList<AuditLogInfo>();
-
 		if (q.getAuditLog() != null && q.getAuditLog().size() != 0) {
 			for (AuditLog poposalAudit : q.getAuditLog()) {
 				AuditLogInfo proposalAuditLog = new AuditLogInfo();
@@ -318,7 +312,6 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 				boolean isAuditedByMatch = false;
 				boolean isActivityDateFromMatch = false;
 				boolean isActivityDateToMatch = false;
-
 				if (action != null) {
 					if (poposalAudit.getAction().toLowerCase()
 							.contains(action.toLowerCase())) {
@@ -431,20 +424,22 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	}
 
 	public List<ProposalInfo> findAllForProposalGrid(int offset, int limit,
-			String projectTitle, String usernameBy, String submittedOnFrom,
-			String submittedOnTo, Double totalCostsFrom, Double totalCostsTo,
-			String proposalStatus) throws ParseException {
+			ProposalCommonInfo proposalInfo) throws ParseException {
 		Datastore ds = getDatastore();
+		String projectTitle = proposalInfo.getProjectTitle();
+		String usernameBy = proposalInfo.getUsernameBy();
+		Double totalCostsFrom = proposalInfo.getTotalCostsFrom();
+		Double totalCostsTo = proposalInfo.getTotalCostsTo();
+		String submittedOnFrom = proposalInfo.getSubmittedOnFrom();
+		String submittedOnTo = proposalInfo.getSubmittedOnTo();
+		String proposalStatus = proposalInfo.getProposalStatus();
 		List<ProposalInfo> proposals = new ArrayList<ProposalInfo>();
-
 		Query<Proposal> proposalQuery = ds.createQuery(Proposal.class);
 		Query<UserProfile> profileQuery = ds.createQuery(UserProfile.class);
-
 		if (projectTitle != null) {
 			proposalQuery.field("project info.project title")
 					.containsIgnoreCase(projectTitle);
 		}
-
 		if (submittedOnFrom != null && !submittedOnFrom.isEmpty()) {
 			Date receivedOnF = formatter.parse(submittedOnFrom);
 			proposalQuery.field("date submitted").greaterThanOrEq(receivedOnF);
@@ -462,11 +457,9 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 			proposalQuery.field("sponsor and budget info.total costs")
 					.lessThanOrEq(totalCostsTo);
 		}
-
 		if (proposalStatus != null) {
 			proposalQuery.field("proposal status").contains(proposalStatus);
 		}
-
 		if (usernameBy != null) {
 			profileQuery.or(
 					profileQuery.criteria("first name").containsIgnoreCase(
@@ -484,14 +477,11 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 							"investigator info.senior personnel.user profile")
 							.in(profileQuery.asKeyList()));
 		}
-
 		int rowTotal = proposalQuery.asList().size();
 		List<Proposal> allProposals = proposalQuery.offset(offset - 1)
 				.limit(limit).order("-audit log.activity on").asList();
-
 		for (Proposal userProposal : allProposals) {
 			ProposalInfo proposal = new ProposalInfo();
-
 			// Proposal
 			proposal.setRowTotal(rowTotal);
 			proposal.setId(userProposal.getId().toString());
@@ -658,22 +648,29 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	}
 
 	public List<ProposalInfo> findUserProposalGrid(int offset, int limit,
-			String projectTitle, String usernameBy, String submittedOnFrom,
-			String submittedOnTo, Double totalCostsFrom, Double totalCostsTo,
-			String proposalStatus, String userRole, String userId,
-			String college, String department, String positionType,
-			String positionTitle) throws ParseException {
+			ProposalCommonInfo proposalInfo, GPMSCommonInfo userInfo)
+			throws ParseException {
 		Datastore ds = getDatastore();
+		String projectTitle = proposalInfo.getProjectTitle();
+		String usernameBy = proposalInfo.getUsernameBy();
+		Double totalCostsFrom = proposalInfo.getTotalCostsFrom();
+		Double totalCostsTo = proposalInfo.getTotalCostsTo();
+		String submittedOnFrom = proposalInfo.getSubmittedOnFrom();
+		String submittedOnTo = proposalInfo.getSubmittedOnTo();
+		String proposalStatus = proposalInfo.getProposalStatus();
+		String userRole = proposalInfo.getUserRole();
+		String userId = userInfo.getUserProfileID();
+		String college = userInfo.getUserCollege();
+		String department = userInfo.getUserDepartment();
+		String positionType = userInfo.getUserPositionType();
+		String positionTitle = userInfo.getUserPositionTitle();
 		List<ProposalInfo> proposals = new ArrayList<ProposalInfo>();
-
 		Query<Proposal> proposalQuery = ds.createQuery(Proposal.class);
 		Query<UserProfile> profileQuery = ds.createQuery(UserProfile.class);
-
 		if (projectTitle != null) {
 			proposalQuery.field("project info.project title")
 					.containsIgnoreCase(projectTitle);
 		}
-
 		if (submittedOnFrom != null && !submittedOnFrom.isEmpty()) {
 			Date receivedOnF = formatter.parse(submittedOnFrom);
 			proposalQuery.field("date submitted").greaterThanOrEq(receivedOnF);
@@ -695,17 +692,9 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 		if (proposalStatus != null) {
 			proposalQuery.field("proposal status").contains(proposalStatus);
 		}
-
-		// High Level Users University Level --> IRB, University Research
-		// Administrator,University Research Director
-		// College Level --> Dean,Associate Dean
-		// Department Level --> Business Manager, Department Administrative
-		// Assistant,Department Chair,Associate Chair
-
 		if (positionTitle.equals("IRB")) {
 			proposalQuery.criteria("irb approval required").equal(true);
 		}
-
 		if (!positionTitle.equals("University Research Administrator")
 				&& !positionTitle.equals("University Research Director")
 				&& !positionTitle.equals("IRB")) {
@@ -815,8 +804,6 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 		}
 
 		if (usernameBy != null) {
-			// accountQuery.field("username").containsIgnoreCase(usernameBy);
-			// profileQuery.criteria("user id").in(accountQuery.asKeyList());
 			profileQuery.or(
 					profileQuery.criteria("first name").containsIgnoreCase(
 							usernameBy),
@@ -834,13 +821,11 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 							"investigator info.co_pi.user profile").in(
 							profileQuery.asKeyList());
 					break;
-
 				case "Senior Personnel":
 					proposalQuery.criteria(
 							"investigator info.senior personnel.user profile")
 							.in(profileQuery.asKeyList());
 					break;
-
 				default:
 					break;
 				}
@@ -868,13 +853,11 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 						"investigator info.co_pi.user profile id")
 						.equal(userId);
 				break;
-
 			case "Senior Personnel":
 				proposalQuery.criteria(
 						"investigator info.senior personnel.user profile id")
 						.equal(userId);
 				break;
-
 			default:
 				break;
 			}
@@ -1090,25 +1073,26 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 
 			proposals.add(proposal);
 		}
-		// Collections.sort(proposals);
 		return proposals;
 	}
 
-	public List<ProposalInfo> findAllProposals(String projectTitle,
-			String usernameBy, String submittedOnFrom, String submittedOnTo,
-			Double totalCostsFrom, Double totalCostsTo, String proposalStatus)
+	public List<ProposalInfo> findAllProposals(ProposalCommonInfo proposalInfo)
 			throws ParseException {
 		Datastore ds = getDatastore();
+		String projectTitle = proposalInfo.getProjectTitle();
+		String usernameBy = proposalInfo.getUsernameBy();
+		Double totalCostsFrom = proposalInfo.getTotalCostsFrom();
+		Double totalCostsTo = proposalInfo.getTotalCostsTo();
+		String submittedOnFrom = proposalInfo.getSubmittedOnFrom();
+		String submittedOnTo = proposalInfo.getSubmittedOnTo();
+		String proposalStatus = proposalInfo.getProposalStatus();
 		List<ProposalInfo> proposals = new ArrayList<ProposalInfo>();
-
 		Query<Proposal> proposalQuery = ds.createQuery(Proposal.class);
 		Query<UserProfile> profileQuery = ds.createQuery(UserProfile.class);
-
 		if (projectTitle != null) {
 			proposalQuery.field("project info.project title")
 					.containsIgnoreCase(projectTitle);
 		}
-
 		if (submittedOnFrom != null && !submittedOnFrom.isEmpty()) {
 			Date receivedOnF = formatter.parse(submittedOnFrom);
 			proposalQuery.field("date submitted").greaterThanOrEq(receivedOnF);
@@ -1117,7 +1101,6 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 			Date receivedOnT = formatter.parse(submittedOnTo);
 			proposalQuery.field("date submitted").lessThanOrEq(receivedOnT);
 		}
-
 		if (totalCostsFrom != null && totalCostsFrom != 0.0) {
 			proposalQuery.field("sponsor and budget info.total costs")
 					.greaterThanOrEq(totalCostsFrom);
@@ -1126,11 +1109,9 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 			proposalQuery.field("sponsor and budget info.total costs")
 					.lessThanOrEq(totalCostsTo);
 		}
-
 		if (proposalStatus != null) {
 			proposalQuery.field("proposal status").contains(proposalStatus);
 		}
-
 		if (usernameBy != null) {
 			profileQuery.or(
 					profileQuery.criteria("first name").containsIgnoreCase(
@@ -1148,11 +1129,9 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 							"investigator info.senior personnel.user profile")
 							.in(profileQuery.asKeyList()));
 		}
-
 		int rowTotal = proposalQuery.asList().size();
 		List<Proposal> allProposals = proposalQuery.order(
 				"-audit log.activity on").asList();
-
 		for (Proposal userProposal : allProposals) {
 			ProposalInfo proposal = new ProposalInfo();
 
@@ -1321,22 +1300,30 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 		return proposals;
 	}
 
-	public List<ProposalInfo> findAllUserProposals(String projectTitle,
-			String usernameBy, String submittedOnFrom, String submittedOnTo,
-			Double totalCostsFrom, Double totalCostsTo, String proposalStatus,
-			String userRole, String userId, String college, String department,
-			String positionType, String positionTitle) throws ParseException {
+	public List<ProposalInfo> findAllUserProposals(
+			ProposalCommonInfo proposalInfo, GPMSCommonInfo userInfo)
+			throws ParseException {
 		Datastore ds = getDatastore();
+		String projectTitle = proposalInfo.getProjectTitle();
+		String usernameBy = proposalInfo.getUsernameBy();
+		Double totalCostsFrom = proposalInfo.getTotalCostsFrom();
+		Double totalCostsTo = proposalInfo.getTotalCostsTo();
+		String submittedOnFrom = proposalInfo.getSubmittedOnFrom();
+		String submittedOnTo = proposalInfo.getSubmittedOnTo();
+		String proposalStatus = proposalInfo.getProposalStatus();
+		String userRole = proposalInfo.getUserRole();
+		String userId = userInfo.getUserProfileID();
+		String college = userInfo.getUserCollege();
+		String department = userInfo.getUserDepartment();
+		String positionType = userInfo.getUserPositionType();
+		String positionTitle = userInfo.getUserPositionTitle();
 		List<ProposalInfo> proposals = new ArrayList<ProposalInfo>();
-
 		Query<Proposal> proposalQuery = ds.createQuery(Proposal.class);
 		Query<UserProfile> profileQuery = ds.createQuery(UserProfile.class);
-
 		if (projectTitle != null) {
 			proposalQuery.field("project info.project title")
 					.containsIgnoreCase(projectTitle);
 		}
-
 		if (submittedOnFrom != null && !submittedOnFrom.isEmpty()) {
 			Date receivedOnF = formatter.parse(submittedOnFrom);
 			proposalQuery.field("date submitted").greaterThanOrEq(receivedOnF);
@@ -1345,7 +1332,6 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 			Date receivedOnT = formatter.parse(submittedOnTo);
 			proposalQuery.field("date submitted").lessThanOrEq(receivedOnT);
 		}
-
 		if (totalCostsFrom != null && totalCostsFrom != 0.0) {
 			proposalQuery.field("sponsor and budget info.total costs")
 					.greaterThanOrEq(totalCostsFrom);
@@ -1354,17 +1340,9 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 			proposalQuery.field("sponsor and budget info.total costs")
 					.lessThanOrEq(totalCostsTo);
 		}
-
 		if (proposalStatus != null) {
 			proposalQuery.field("proposal status").contains(proposalStatus);
 		}
-
-		// High Level Users University Level --> IRB, University Research
-		// Administrator, University Research Director
-		// College Level --> Dean,Associate Dean
-		// Department Level --> Business Manager,Department Administrative
-		// Assistant,Department Chair,Associate Chair
-
 		if (!positionTitle.equals("IRB")
 				&& !positionTitle.equals("University Research Administrator")
 				&& !positionTitle.equals("University Research Director")) {
@@ -1474,8 +1452,6 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 		}
 
 		if (usernameBy != null) {
-			// accountQuery.field("username").containsIgnoreCase(usernameBy);
-			// profileQuery.criteria("user id").in(accountQuery.asKeyList());
 			profileQuery.or(
 					profileQuery.criteria("first name").containsIgnoreCase(
 							usernameBy),
@@ -1493,13 +1469,11 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 							"investigator info.co_pi.user profile").in(
 							profileQuery.asKeyList());
 					break;
-
 				case "Senior Personnel":
 					proposalQuery.criteria(
 							"investigator info.senior personnel.user profile")
 							.in(profileQuery.asKeyList());
 					break;
-
 				default:
 					break;
 				}
@@ -2037,7 +2011,7 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 								}
 							} else if (isDelegator(user.getId().toString(),
 									posDetails)) {
-								// here we used Transfer mode of Delegation 
+								// here we used Transfer mode of Delegation
 								List<SignatureInfo> delegatedChair = findDelegatedUsersForAUser(
 										user.getId(), id.toString(),
 										posDetails.getCollege(),
@@ -2112,7 +2086,7 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 
 						boolean businessManagerAlreadySigned = false;
 						for (SignatureInfo signature : proposalSignatures) {
-							//businessManagerAlreadySigned = false;
+							// businessManagerAlreadySigned = false;
 							if (user.getId().toString()
 									.equals(signature.getUserProfileId())
 									&& signature.getPositionTitle().equals(
@@ -2247,7 +2221,7 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 
 						boolean deanAlreadySigned = false;
 						for (SignatureInfo signature : proposalSignatures) {
-							//deanAlreadySigned = false;
+							// deanAlreadySigned = false;
 							if (user.getId().toString()
 									.equals(signature.getUserProfileId())
 									&& signature.getPositionTitle().equals(

@@ -173,12 +173,20 @@ public class DelegationDAO extends BasicDAO<Delegation, String> {
 		return delegation;
 	}
 
-	public List<DelegationInfo> findAllUserDelegations(String delegatee,
-			String createdFrom, String createdTo, String delegatedAction,
-			Boolean isRevoked, String delegatorID, String delegatedCollege,
-			String delegatedDepartment, String delegatedPositionType,
-			String delegatedPositionTitle) throws ParseException {
+	public List<DelegationInfo> findAllUserDelegations(
+			DelegationCommonInfo delegationInfo, GPMSCommonInfo userInfo)
+			throws ParseException {
 		Datastore ds = getDatastore();
+		String delegatee = delegationInfo.getDelegatee();
+		String createdFrom = delegationInfo.getCreatedFrom();
+		String createdTo = delegationInfo.getCreatedTo();
+		String delegatedAction = delegationInfo.getDelegatedAction();
+		Boolean isRevoked = delegationInfo.isRevoked();
+		String delegatorID = userInfo.getUserProfileID();
+		String delegatedCollege = userInfo.getUserCollege();
+		String delegatedDepartment = userInfo.getUserDepartment();
+		String delegatedPositionType = userInfo.getUserPositionType();
+		String delegatedPositionTitle = userInfo.getUserPositionTitle();
 		List<DelegationInfo> delegations = new ArrayList<DelegationInfo>();
 		Query<Delegation> delegationQuery = ds.createQuery(Delegation.class);
 		if (delegatorID != null) {
