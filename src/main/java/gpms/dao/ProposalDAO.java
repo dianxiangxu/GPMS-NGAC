@@ -118,9 +118,7 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	public boolean updateProposalStatus(Proposal existingProposal,
 			UserProfile authorProfile) {
 		Datastore ds = getDatastore();
-
 		boolean isStatusUpdated = false;
-
 		audit = new AuditLog(authorProfile, "Updated proposal by "
 				+ authorProfile.getUserAccount().getUserName(), new Date());
 		existingProposal.getAuditLog().add(audit);
@@ -132,14 +130,9 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	public boolean deleteProposalByAdmin(Proposal proposal,
 			UserProfile authorProfile) {
 		Datastore ds = getDatastore();
-
-		// This is obvious choice to make admin delete as director deleted!
 		proposal.setResearchDirectorDeletion(DeleteType.DELETED);
-
-		// Proposal Status
 		proposal.getProposalStatus().clear();
 		proposal.getProposalStatus().add(Status.DELETEDBYADMIN);
-
 		AuditLog entry = new AuditLog(authorProfile, "Deleted Proposal by "
 				+ authorProfile.getUserAccount().getUserName(), new Date());
 		proposal.getAuditLog().add(entry);
