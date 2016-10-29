@@ -58,10 +58,12 @@ public class ResearchAdminApprovalFail {
 		driver.findElement(By.cssSelector("i.sidebarExpand")).click();
 		Thread.sleep(200);
 		driver.findElement(By.id("lblSection2")).click();
+		Thread.sleep(200);
 		driver.findElement(By.id("txtProjectTitle")).click();
+		Thread.sleep(200);
 		driver.findElement(By.id("txtProjectTitle")).clear();
+		Thread.sleep(200);
 		int randTest = (int) (Math.random() * 9999);
-		Thread.sleep(500);
 		driver.findElement(By.id("txtProjectTitle")).sendKeys(
 				"Proposal withdraw Test" + randTest);
 		Thread.sleep(200);

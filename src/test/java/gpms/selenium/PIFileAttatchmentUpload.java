@@ -258,6 +258,7 @@ public class PIFileAttatchmentUpload {
 		driver.findElement(By.id("ui-id-21")).click();
 		Thread.sleep(200);
 		driver.findElement(By.id("pi_signature")).clear();
+		Thread.sleep(200);
 		driver.findElement(By.id("pi_signature")).sendKeys("Nicholas chapa");
 		Thread.sleep(200);
 		driver.findElement(By.id("pi_signaturedate")).click();
