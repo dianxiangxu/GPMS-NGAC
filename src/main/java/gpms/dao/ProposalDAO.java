@@ -4701,7 +4701,6 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	}
 
 	/**
-	 * @param mapper
 	 * @param proposalId
 	 * @param existingProposal
 	 * @param oldProposal
@@ -4711,10 +4710,11 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @throws JsonParseException
 	 * @throws JsonMappingException
 	 */
-	public void getAppendixDetails(ObjectMapper mapper, String proposalId,
+	public void getAppendixDetails(String proposalId,
 			Proposal existingProposal, Proposal oldProposal,
 			JsonNode proposalInfo) throws IOException, JsonParseException,
 			JsonMappingException {
+		ObjectMapper mapper = new ObjectMapper();
 		// Appendix Info
 		if (proposalInfo != null && proposalInfo.has("AppendixInfo")) {
 			List<Appendix> appendixInfo = Arrays.asList(mapper.readValue(
@@ -5706,14 +5706,14 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * 
 	 * @param proposals
 	 * @param proposalAuditLogs
-	 * @param mapper
 	 * @return
 	 * @throws URISyntaxException
 	 * @throws JsonProcessingException
 	 */
 	public String exportToExcelFile(List<ProposalInfo> proposals,
-			List<AuditLogInfo> proposalAuditLogs, ObjectMapper mapper)
-			throws URISyntaxException, JsonProcessingException {
+			List<AuditLogInfo> proposalAuditLogs) throws URISyntaxException,
+			JsonProcessingException {
+		ObjectMapper mapper = new ObjectMapper();
 		String filename = new String();
 		Xcelite xcelite = new Xcelite();
 		if (proposals != null) {

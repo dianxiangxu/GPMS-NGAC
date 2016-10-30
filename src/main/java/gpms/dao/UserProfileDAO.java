@@ -1679,13 +1679,13 @@ public class UserProfileDAO extends BasicDAO<UserProfile, String> {
 	 * Exports to Excel File for Users and Admin Users
 	 * 
 	 * @param users
-	 * @param mapper
 	 * @return
 	 * @throws URISyntaxException
 	 * @throws JsonProcessingException
 	 */
-	public String exportToExcelFile(List<UserInfo> users, ObjectMapper mapper)
+	public String exportToExcelFile(List<UserInfo> users)
 			throws URISyntaxException, JsonProcessingException {
+		ObjectMapper mapper = new ObjectMapper();
 		String filename = new String();
 		Xcelite xcelite = new Xcelite();
 		XceliteSheet sheet = xcelite.createSheet("Users");

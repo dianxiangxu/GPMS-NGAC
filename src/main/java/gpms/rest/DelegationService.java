@@ -183,8 +183,7 @@ public class DelegationService {
 					userInfo);
 			String filename = new String();
 			if (delegations.size() > 0) {
-				filename = delegationDAO.exportToExcelFile(delegations, null,
-						mapper);
+				filename = delegationDAO.exportToExcelFile(delegations, null);
 			} else {
 				filename = mapper.writerWithDefaultPrettyPrinter()
 						.writeValueAsString("No Record");
@@ -273,7 +272,7 @@ public class DelegationService {
 			String filename = new String();
 			if (delegationAuditLogs.size() > 0) {
 				filename = delegationDAO.exportToExcelFile(null,
-						delegationAuditLogs, mapper);
+						delegationAuditLogs);
 			} else {
 				filename = mapper.writerWithDefaultPrettyPrinter()
 						.writeValueAsString("No Record");
@@ -531,8 +530,8 @@ public class DelegationService {
 				} else {
 					delegationDAO.save(newDelegation);
 					try {
-						delegationDAO.saveDelegation(mapper, userInfo,
-								authorProfile, delegatorName, newDelegation);
+						delegationDAO.saveDelegation(userInfo, authorProfile,
+								delegatorName, newDelegation);
 						String notificationMessage = "Delegation Added by "
 								+ userInfo.getUserName() + ".";
 						notificationDAO.sendNotification(newDelegation,
@@ -628,9 +627,8 @@ public class DelegationService {
 				System.out.println("Decision:" + intDecision + " that is: "
 						+ AbstractResult.DECISIONS[intDecision]);
 				if (AbstractResult.DECISIONS[intDecision].equals("Permit")) {
-					return revokeDelegation(mapper, userInfo,
-							existingDelegation, authorProfile, authorUserName,
-							ar);
+					return revokeDelegation(userInfo, existingDelegation,
+							authorProfile, authorUserName, ar);
 				} else {
 					return Response
 							.status(403)
@@ -662,10 +660,11 @@ public class DelegationService {
 	 * @return
 	 * @throws JsonProcessingException
 	 */
-	public Response revokeDelegation(ObjectMapper mapper,
-			GPMSCommonInfo userInfo, Delegation existingDelegation,
-			UserProfile authorProfile, String authorUserName, AbstractResult ar)
+	public Response revokeDelegation(GPMSCommonInfo userInfo,
+			Delegation existingDelegation, UserProfile authorProfile,
+			String authorUserName, AbstractResult ar)
 			throws JsonProcessingException {
+		ObjectMapper mapper = new ObjectMapper();
 		List<ObligationResult> obligations = ar.getObligations();
 		EmailUtil emailUtil = new EmailUtil();
 		String emailSubject = new String();
@@ -707,10 +706,9 @@ public class DelegationService {
 		boolean isRevoked = delegationDAO.revokeDelegation(existingDelegation,
 				authorProfile);
 		if (isRevoked) {
-			return sendNotificationAfterRevoke(mapper, userInfo,
-					existingDelegation, authorUserName, emailUtil,
-					emailSubject, emailBody, delegatorName, delegatorEmail,
-					emaillist);
+			return sendNotificationAfterRevoke(userInfo, existingDelegation,
+					authorUserName, emailUtil, emailSubject, emailBody,
+					delegatorName, delegatorEmail, emaillist);
 		} else {
 			return Response
 					.status(200)
@@ -736,11 +734,12 @@ public class DelegationService {
 	 * @return
 	 * @throws JsonProcessingException
 	 */
-	public Response sendNotificationAfterRevoke(ObjectMapper mapper,
-			GPMSCommonInfo userInfo, Delegation existingDelegation,
-			String authorUserName, EmailUtil emailUtil, String emailSubject,
-			String emailBody, String delegatorName, String delegatorEmail,
-			List<String> emaillist) throws JsonProcessingException {
+	public Response sendNotificationAfterRevoke(GPMSCommonInfo userInfo,
+			Delegation existingDelegation, String authorUserName,
+			EmailUtil emailUtil, String emailSubject, String emailBody,
+			String delegatorName, String delegatorEmail, List<String> emaillist)
+			throws JsonProcessingException {
+		ObjectMapper mapper = new ObjectMapper();
 		if (!emailSubject.equals("")) {
 			emailUtil.sendMailMultipleUsersWithoutAuth(delegatorEmail,
 					emaillist, emailSubject + delegatorName, emailBody);

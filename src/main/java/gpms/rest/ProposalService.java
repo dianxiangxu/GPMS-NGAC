@@ -261,8 +261,7 @@ public class ProposalService {
 			proposals = proposalDAO.findAllProposals(proposalInfo);
 			String filename = new String();
 			if (proposals.size() > 0) {
-				filename = proposalDAO.exportToExcelFile(proposals, null,
-						mapper);
+				filename = proposalDAO.exportToExcelFile(proposals, null);
 			} else {
 				filename = mapper.writerWithDefaultPrettyPrinter()
 						.writeValueAsString("No Record");
@@ -305,8 +304,7 @@ public class ProposalService {
 					.findAllUserProposals(proposalInfo, userInfo);
 			String filename = new String();
 			if (proposals.size() > 0) {
-				filename = proposalDAO.exportToExcelFile(proposals, null,
-						mapper);
+				filename = proposalDAO.exportToExcelFile(proposals, null);
 			} else {
 				filename = mapper.writerWithDefaultPrettyPrinter()
 						.writeValueAsString("No Record");
@@ -702,7 +700,7 @@ public class ProposalService {
 			String filename = new String();
 			if (proposalAuditLogs.size() > 0) {
 				filename = proposalDAO.exportToExcelFile(null,
-						proposalAuditLogs, mapper);
+						proposalAuditLogs);
 			} else {
 				filename = mapper.writerWithDefaultPrettyPrinter()
 						.writeValueAsString("No Record");
@@ -979,8 +977,8 @@ public class ProposalService {
 								.cloneThroughSerialize(existingProposal);
 					}
 				}
-				proposalDAO.getAppendixDetails(mapper, proposalId,
-						existingProposal, oldProposal, proposalInfo);
+				proposalDAO.getAppendixDetails(proposalId, existingProposal,
+						oldProposal, proposalInfo);
 				getInvestigatorInfoDetails(proposalId, existingProposal,
 						oldProposal, proposalInfo);
 				Boolean irbApprovalRequired = proposalDAO.getComplianceDetails(
@@ -1048,8 +1046,8 @@ public class ProposalService {
 								.cloneThroughSerialize(existingProposal);
 					}
 				}
-				proposalDAO.getAppendixDetails(mapper, proposalId,
-						existingProposal, oldProposal, proposalInfo);
+				proposalDAO.getAppendixDetails(proposalId, existingProposal,
+						oldProposal, proposalInfo);
 				getInvestigatorInfoDetails(proposalId, existingProposal,
 						oldProposal, proposalInfo);
 				Boolean irbApprovalRequired = proposalDAO.getComplianceDetails(

@@ -251,7 +251,7 @@ public class UserService {
 			users = userProfileDAO.findAllUsers(userInfo);
 			String filename = new String();
 			if (users.size() > 0) {
-				filename = exportToExcelFile(users, mapper);
+				filename = exportToExcelFile(users);
 			} else {
 				filename = mapper.writerWithDefaultPrettyPrinter()
 						.writeValueAsString("No Record");
@@ -288,7 +288,7 @@ public class UserService {
 			users = userProfileDAO.findAllAdminUsers(userInfo);
 			String filename = new String();
 			if (users.size() > 0) {
-				exportToExcelFile(users, mapper);
+				exportToExcelFile(users);
 			} else {
 				filename = mapper.writerWithDefaultPrettyPrinter()
 						.writeValueAsString("No Record");
@@ -307,13 +307,13 @@ public class UserService {
 	 * Exports to Excel File for Users and Admin Users
 	 * 
 	 * @param users
-	 * @param mapper
 	 * @return
 	 * @throws URISyntaxException
 	 * @throws JsonProcessingException
 	 */
-	private String exportToExcelFile(List<UserInfo> users, ObjectMapper mapper)
+	private String exportToExcelFile(List<UserInfo> users)
 			throws URISyntaxException, JsonProcessingException {
+		ObjectMapper mapper = new ObjectMapper();
 		String filename = new String();
 		Xcelite xcelite = new Xcelite();
 		XceliteSheet sheet = xcelite.createSheet("Users");

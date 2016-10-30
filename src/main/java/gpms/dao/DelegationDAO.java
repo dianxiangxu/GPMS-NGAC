@@ -462,14 +462,14 @@ public class DelegationDAO extends BasicDAO<Delegation, String> {
 	 * 
 	 * @param delegations
 	 * @param delegationAuditLogs
-	 * @param mapper
 	 * @return
 	 * @throws URISyntaxException
 	 * @throws JsonProcessingException
 	 */
 	public String exportToExcelFile(List<DelegationInfo> delegations,
-			List<AuditLogInfo> delegationAuditLogs, ObjectMapper mapper)
-			throws URISyntaxException, JsonProcessingException {
+			List<AuditLogInfo> delegationAuditLogs) throws URISyntaxException,
+			JsonProcessingException {
+		ObjectMapper mapper = new ObjectMapper();
 		String filename = new String();
 		Xcelite xcelite = new Xcelite();
 		if (delegations != null) {
@@ -606,7 +606,6 @@ public class DelegationDAO extends BasicDAO<Delegation, String> {
 	/**
 	 * Saves Delegation
 	 * 
-	 * @param mapper
 	 * @param userInfo
 	 * @param authorProfile
 	 * @param delegatorName
@@ -616,12 +615,11 @@ public class DelegationDAO extends BasicDAO<Delegation, String> {
 	 * @throws IOException
 	 * @throws JsonProcessingException
 	 */
-	public void saveDelegation(ObjectMapper mapper, GPMSCommonInfo userInfo,
+	public void saveDelegation(GPMSCommonInfo userInfo,
 			UserProfile authorProfile, String delegatorName,
 			Delegation newDelegation) throws SAXException, IOException,
 			JsonProcessingException {
 		String policyId = new String();
-
 		policyId = createDynamicPolicy(userInfo.getUserProfileID(),
 				delegatorName, DelegationService.policyLocation, newDelegation);
 		newDelegation.setDelegationPolicyId(policyId);
