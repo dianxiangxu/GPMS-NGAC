@@ -58,12 +58,14 @@ public class DeanApprovalFail {
 		driver.findElement(By.cssSelector("i.sidebarExpand")).click();
 		Thread.sleep(200);
 		driver.findElement(By.id("lblSection2")).click();
+		Thread.sleep(200);
 		driver.findElement(By.id("txtProjectTitle")).click();
+		Thread.sleep(200);
 		driver.findElement(By.id("txtProjectTitle")).clear();
-
+		Thread.sleep(200);
 		int randTest = (int) (Math.random() * 9999);
 		driver.findElement(By.id("txtProjectTitle")).sendKeys(
-				"Proposal test" + randTest);
+				"Dean Proposal Approval test" + randTest);
 
 		driver.findElement(By.cssSelector("td.cssClassTableRightCol")).click();
 		new Select(driver.findElement(By.id("ddlProjectType")))
