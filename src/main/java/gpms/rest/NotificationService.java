@@ -124,7 +124,8 @@ public class NotificationService {
 		}
 		EventOutput eventOutput = new EventOutput();
 		HttpSession session = request.getSession();
-		GPMSCommonInfo userInfo = bindUserInfoFromSession(session);
+		GPMSCommonInfo userInfo = userProfileDAO
+				.bindUserInfoFromSession(session);
 		long notificationCount = notificationDAO
 				.findAllNotificationCountAUser(userInfo);
 		OutboundEvent.Builder eventBuilder = new OutboundEvent.Builder();
@@ -134,49 +135,6 @@ public class NotificationService {
 		eventOutput.write(event);
 		BROADCASTER.add(eventOutput);
 		return eventOutput;
-	}
-
-	/**
-	 * Binds User Info From login user Session
-	 * 
-	 * @param session
-	 * @throws ServletException
-	 */
-	private GPMSCommonInfo bindUserInfoFromSession(HttpSession session)
-			throws ServletException {
-		GPMSCommonInfo userInfo = new GPMSCommonInfo();
-		if (session.getAttribute("userProfileId") == null
-				|| session.getAttribute("userCollege") == null
-				|| session.getAttribute("userDepartment") == null
-				|| session.getAttribute("userPositionType") == null
-				|| session.getAttribute("userPositionTitle") == null) {
-			throw new ServletException("User Session can't be null or empty");
-		}
-		if (session.getAttribute("userProfileId") != null) {
-			userInfo.setUserProfileID((String) session
-					.getAttribute("userProfileId"));
-		}
-		if (session.getAttribute("userCollege") != null) {
-			userInfo.setUserCollege((String) session
-					.getAttribute("userCollege"));
-		}
-		if (session.getAttribute("userDepartment") != null) {
-			userInfo.setUserDepartment((String) session
-					.getAttribute("userDepartment"));
-		}
-		if (session.getAttribute("userPositionType") != null) {
-			userInfo.setUserPositionType((String) session
-					.getAttribute("userPositionType"));
-		}
-		if (session.getAttribute("userPositionTitle") != null) {
-			userInfo.setUserPositionTitle((String) session
-					.getAttribute("userPositionTitle"));
-		}
-		if (session.getAttribute("isAdmin") != null) {
-			userInfo.setUserIsAdmin((Boolean) session.getAttribute("isAdmin"));
-		}
-
-		return userInfo;
 	}
 
 	@POST

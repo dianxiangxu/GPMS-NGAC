@@ -9,8 +9,14 @@ import gpms.model.DelegationCommonInfo;
 import gpms.model.DelegationInfo;
 import gpms.model.GPMSCommonInfo;
 import gpms.model.UserAccount;
+import gpms.model.UserDetail;
 import gpms.model.UserProfile;
+import gpms.rest.DelegationService;
+import gpms.utils.WriteXMLUtil;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -20,13 +26,24 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.Datastore;
 import org.mongodb.morphia.Morphia;
 import org.mongodb.morphia.dao.BasicDAO;
 import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.UpdateOperations;
+import org.wso2.balana.ctx.AbstractResult;
+import org.wso2.balana.ctx.AttributeAssignment;
+import org.wso2.balana.xacml3.Advice;
+import org.xml.sax.SAXException;
 
+import com.ebay.xcelite.Xcelite;
+import com.ebay.xcelite.sheet.XceliteSheet;
+import com.ebay.xcelite.writer.SheetWriter;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoException;
 
@@ -438,6 +455,479 @@ public class DelegationDAO extends BasicDAO<Delegation, String> {
 			e.printStackTrace();
 		}
 		return false;
+	}
+
+	/***
+	 * Exports to Excel File for Delegation and its Audit Logs
+	 * 
+	 * @param delegations
+	 * @param delegationAuditLogs
+	 * @param mapper
+	 * @return
+	 * @throws URISyntaxException
+	 * @throws JsonProcessingException
+	 */
+	public String exportToExcelFile(List<DelegationInfo> delegations,
+			List<AuditLogInfo> delegationAuditLogs, ObjectMapper mapper)
+			throws URISyntaxException, JsonProcessingException {
+		String filename = new String();
+		Xcelite xcelite = new Xcelite();
+		if (delegations != null) {
+			XceliteSheet sheet = xcelite.createSheet("Delegations");
+			SheetWriter<DelegationInfo> writer = sheet
+					.getBeanWriter(DelegationInfo.class);
+			writer.write(delegations);
+		} else {
+			XceliteSheet sheet = xcelite.createSheet("AuditLogs");
+			SheetWriter<AuditLogInfo> writer = sheet
+					.getBeanWriter(AuditLogInfo.class);
+			writer.write(delegationAuditLogs);
+		}
+
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy_MM_dd");
+		Date date = new Date();
+		String fileName = String.format(
+				"%s.%s",
+				RandomStringUtils.randomAlphanumeric(8) + "_"
+						+ dateFormat.format(date), "xlsx");
+		String downloadLocation = this.getClass().getResource("/uploads")
+				.toURI().getPath();
+		xcelite.write(new File(downloadLocation + fileName));
+		filename = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(
+				fileName);
+		return filename;
+	}
+
+	/**
+	 * Gets Delegable User Details From Advice response
+	 * 
+	 * @param userDetails
+	 *            UserDetail
+	 * @param result
+	 */
+	public void getDelegableUserDetailsFromAdvice(List<UserDetail> userDetails,
+			AbstractResult result) {
+		List<Advice> advices = result.getAdvices();
+		for (Advice advice : advices) {
+			if (advice instanceof org.wso2.balana.xacml3.Advice) {
+				UserDetail userDeatil = new UserDetail();
+				List<AttributeAssignment> assignments = ((org.wso2.balana.xacml3.Advice) advice)
+						.getAssignments();
+				for (AttributeAssignment assignment : assignments) {
+					switch (assignment.getAttributeId().toString()) {
+					case "userId":
+						userDeatil.setUserProfileId(assignment.getContent());
+						break;
+					case "userfullName":
+						userDeatil.setFullName(assignment.getContent());
+						break;
+					case "userName":
+						userDeatil.setUserName(assignment.getContent());
+						break;
+					case "userEmail":
+						userDeatil.setEmail(assignment.getContent());
+						break;
+					case "userCollege":
+						userDeatil.setCollege(assignment.getContent());
+						break;
+					case "userDepartment":
+						userDeatil.setDepartment(assignment.getContent());
+						break;
+					case "userPositionType":
+						userDeatil.setPositionType(assignment.getContent());
+						break;
+					case "userPositionTitle":
+						userDeatil.setPositionTitle(assignment.getContent());
+						break;
+					default:
+						break;
+					}
+				}
+				userDetails.add(userDeatil);
+			}
+		}
+	}
+
+	/**
+	 * Generates Content Profile for Admin Users
+	 * 
+	 * @param userProfileID
+	 *            User Profile Id
+	 * @param userCollege
+	 *            User's College
+	 * @param userDepartment
+	 *            User's Department
+	 * @return
+	 * @throws UnknownHostException
+	 */
+	public StringBuffer generateContentProfile(List<UserDetail> delegableUsers)
+			throws UnknownHostException {
+		StringBuffer contentProfile = new StringBuffer();
+		contentProfile.append("<Content>");
+		contentProfile.append("<ak:record xmlns:ak=\"http://akpower.org\">");
+		for (UserDetail userDetail : delegableUsers) {
+			contentProfile.append("<ak:user>");
+			contentProfile.append("<ak:userid>");
+			contentProfile.append(userDetail.getUserProfileId());
+			contentProfile.append("</ak:userid>");
+			contentProfile.append("<ak:fullname>");
+			contentProfile.append(userDetail.getFullName());
+			contentProfile.append("</ak:fullname>");
+			contentProfile.append("<ak:username>");
+			contentProfile.append(userDetail.getUserName());
+			contentProfile.append("</ak:username>");
+			contentProfile.append("<ak:email>");
+			contentProfile.append(userDetail.getEmail());
+			contentProfile.append("</ak:email>");
+			contentProfile.append("<ak:college>");
+			contentProfile.append(userDetail.getCollege());
+			contentProfile.append("</ak:college>");
+			contentProfile.append("<ak:department>");
+			contentProfile.append(userDetail.getDepartment());
+			contentProfile.append("</ak:department>");
+			contentProfile.append("<ak:positionType>");
+			contentProfile.append(userDetail.getPositionType());
+			contentProfile.append("</ak:positionType>");
+			contentProfile.append("<ak:positiontitle>");
+			contentProfile.append(userDetail.getPositionTitle());
+			contentProfile.append("</ak:positiontitle>");
+			contentProfile.append("</ak:user>");
+		}
+		contentProfile.append("</ak:record>");
+		contentProfile.append("</Content>");
+		contentProfile
+				.append("<Attribute AttributeId=\"urn:oasis:names:tc:xacml:3.0:profile:multiple:content-selector\" IncludeInResult=\"false\">");
+		contentProfile
+				.append("<AttributeValue DataType=\"urn:oasis:names:tc:xacml:3.0:data-type:xpathExpression\" XPathCategory=\"urn:oasis:names:tc:xacml:3.0:attribute-category:resource\">//ak:record//ak:user</AttributeValue>");
+		contentProfile.append("</Attribute>");
+		return contentProfile;
+	}
+
+	/**
+	 * Saves Delegation
+	 * 
+	 * @param mapper
+	 * @param userInfo
+	 * @param authorProfile
+	 * @param delegatorName
+	 * @param newDelegation
+	 * @return
+	 * @throws SAXException
+	 * @throws IOException
+	 * @throws JsonProcessingException
+	 */
+	public void saveDelegation(ObjectMapper mapper, GPMSCommonInfo userInfo,
+			UserProfile authorProfile, String delegatorName,
+			Delegation newDelegation) throws SAXException, IOException,
+			JsonProcessingException {
+		String policyId = new String();
+
+		policyId = createDynamicPolicy(userInfo.getUserProfileID(),
+				delegatorName, DelegationService.policyLocation, newDelegation);
+		newDelegation.setDelegationPolicyId(policyId);
+		saveDelegation(newDelegation, authorProfile);
+	}
+
+	/**
+	 * Updates Delegation
+	 * 
+	 * @param userInfo
+	 * @param authorProfile
+	 * @param delegatorName
+	 * @param existingDelegation
+	 * @throws SAXException
+	 * @throws IOException
+	 */
+	public void updateDelegation(GPMSCommonInfo userInfo,
+			UserProfile authorProfile, String delegatorName,
+			Delegation existingDelegation) throws SAXException, IOException {
+		String policyId = new String();
+		policyId = createDynamicPolicy(userInfo.getUserProfileID(),
+				delegatorName, DelegationService.policyLocation,
+				existingDelegation);
+		existingDelegation.setDelegationPolicyId(policyId);
+		updateDelegation(existingDelegation, authorProfile);
+	}
+
+	/**
+	 * Generates Delegation Details
+	 *
+	 * @param userInfo
+	 * @param delegationID
+	 * @param newDelegation
+	 * @param existingDelegation
+	 * @param delegationInfo
+	 * @throws Exception
+	 * @throws ParseException
+	 */
+	public void generateDelegationDetails(GPMSCommonInfo userInfo,
+			String delegationID, UserProfile delegateeProfile,
+			Delegation newDelegation, Delegation existingDelegation,
+			JsonNode delegationInfo) throws Exception, ParseException {
+		addDelegatedActions(delegationID, newDelegation, existingDelegation,
+				delegationInfo);
+		addDelegateeInfo(userInfo, delegationID, delegateeProfile,
+				newDelegation, delegationInfo);
+		addDelegationDuration(delegationID, newDelegation, existingDelegation,
+				delegationInfo);
+		addDelegationReason(delegationID, newDelegation, existingDelegation,
+				delegationInfo);
+	}
+
+	/**
+	 * @param delegationID
+	 * @param newDelegation
+	 * @param existingDelegation
+	 * @param delegationInfo
+	 * @throws Exception
+	 */
+	public void addDelegationReason(String delegationID,
+			Delegation newDelegation, Delegation existingDelegation,
+			JsonNode delegationInfo) throws Exception {
+		if (delegationInfo != null && delegationInfo.has("DelegationReason")) {
+			final String reason = delegationInfo.get("DelegationReason")
+					.textValue().trim().replaceAll("\\<[^>]*>", "");
+			if (validateNotEmptyValue(reason)) {
+				if (!delegationID.equals("0")) {
+					if (!existingDelegation.getReason().equals(
+							delegationInfo.get("DelegationReason").textValue())) {
+						existingDelegation.setReason(reason);
+					}
+				} else {
+					newDelegation.setReason(reason);
+				}
+			} else {
+				throw new Exception("The Delegation Reason can not be Empty");
+			}
+		}
+	}
+
+	/**
+	 * Adds Delegatee Info
+	 * 
+	 * @param userInfo
+	 * @param delegationID
+	 * @param newDelegation
+	 * @param delegationInfo
+	 * @throws Exception
+	 */
+	public void addDelegateeInfo(GPMSCommonInfo userInfo, String delegationID,
+			UserProfile delegateeProfile, Delegation newDelegation,
+			JsonNode delegationInfo) throws Exception {
+		if (delegationID.equals("0")) {
+			newDelegation.setDelegateeId(delegationID);
+			newDelegation.setDelegateeUsername(delegateeProfile
+					.getUserAccount().getUserName());
+			newDelegation.setDelegateeEmail(delegateeProfile.getWorkEmails()
+					.get(0));
+			newDelegation.setDelegatedCollege(userInfo.getUserCollege());
+			newDelegation.setDelegatedDepartment(userInfo.getUserDepartment());
+			newDelegation.setDelegatedPositionType(userInfo
+					.getUserPositionType());
+			newDelegation.setDelegatedPositionTitle(userInfo
+					.getUserPositionTitle());
+		}
+		if (delegationInfo != null && delegationInfo.has("Delegatee")) {
+			final String delegatee = delegationInfo.get("Delegatee")
+					.textValue().trim().replaceAll("\\<[^>]*>", "");
+			if (validateNotEmptyValue(delegatee) && delegationID.equals("0")) {
+				newDelegation.setDelegatee(delegatee);
+			} else {
+				throw new Exception("The Delegatee can not be Empty");
+			}
+		}
+		if (delegationInfo != null && delegationInfo.has("DelegateeCollege")) {
+			final String college = delegationInfo.get("DelegateeCollege")
+					.textValue().trim().replaceAll("\\<[^>]*>", "");
+			if (validateNotEmptyValue(college) && delegationID.equals("0")) {
+				newDelegation.setDelegateeCollege(college);
+			}
+		}
+		if (delegationInfo != null && delegationInfo.has("DelegateeDepartment")) {
+			final String department = delegationInfo.get("DelegateeDepartment")
+					.textValue().trim().replaceAll("\\<[^>]*>", "");
+			if (validateNotEmptyValue(department) && delegationID.equals("0")) {
+				newDelegation.setDelegateeDepartment(department);
+			}
+		}
+		if (delegationInfo != null
+				&& delegationInfo.has("DelegateePositionType")) {
+			final String positionType = delegationInfo
+					.get("DelegateePositionType").textValue().trim()
+					.replaceAll("\\<[^>]*>", "");
+			if (validateNotEmptyValue(positionType) && delegationID.equals("0")) {
+				newDelegation.setDelegateePositionType(positionType);
+			}
+		}
+		if (delegationInfo != null
+				&& delegationInfo.has("DelegateePositionTitle")) {
+			final String positionTitle = delegationInfo
+					.get("DelegateePositionTitle").textValue().trim()
+					.replaceAll("\\<[^>]*>", "");
+			if (validateNotEmptyValue(positionTitle)) {
+				if (delegationID.equals("0")) {
+					newDelegation.setDelegateePositionTitle(positionTitle);
+				}
+			}
+		}
+	}
+
+	/**
+	 * Adds Delegated Actions
+	 * 
+	 * @param delegationID
+	 * @param newDelegation
+	 * @param existingDelegation
+	 * @param delegationInfo
+	 * @throws Exception
+	 */
+	public void addDelegatedActions(String delegationID,
+			Delegation newDelegation, Delegation existingDelegation,
+			JsonNode delegationInfo) throws Exception {
+		if (delegationInfo != null && delegationInfo.has("DelegatedAction")) {
+			final JsonNode delegatedActions = delegationInfo
+					.get("DelegatedAction");
+			if (delegatedActions.isArray()) {
+				if (delegatedActions.size() > 0) {
+					if (delegationID.equals("0")) {
+						for (final JsonNode action : delegatedActions) {
+							newDelegation.getActions().add(action.textValue());
+						}
+					} else {
+						existingDelegation.getActions().clear();
+						for (final JsonNode action : delegatedActions) {
+							existingDelegation.getActions().add(
+									action.textValue());
+						}
+					}
+				} else {
+					throw new Exception(
+							"The Delegation Action can not be Empty");
+				}
+			}
+		}
+	}
+
+	/**
+	 * Adds Delegation Duration
+	 * 
+	 * @param delegationID
+	 * @param newDelegation
+	 * @param existingDelegation
+	 * @param delegationInfo
+	 * @throws ParseException
+	 * @throws Exception
+	 */
+	public void addDelegationDuration(String delegationID,
+			Delegation newDelegation, Delegation existingDelegation,
+			JsonNode delegationInfo) throws ParseException, Exception {
+		if (delegationInfo != null && delegationInfo.has("DelegationFrom")) {
+			Date fromDate = formatter.parse(delegationInfo
+					.get("DelegationFrom").textValue().trim()
+					.replaceAll("\\<[^>]*>", ""));
+			if (validateNotEmptyValue(fromDate.toString())) {
+				if (!delegationID.equals("0")) {
+					if (!existingDelegation.getFrom().equals(
+							delegationInfo.get("DelegationFrom").textValue())) {
+						existingDelegation.setFrom(fromDate);
+					}
+				} else {
+					newDelegation.setFrom(fromDate);
+				}
+			} else {
+				throw new Exception(
+						"The Delegation Start From Date can not be Empty");
+			}
+		}
+		if (delegationInfo != null && delegationInfo.has("DelegationTo")) {
+			Date toDate = formatter.parse(delegationInfo.get("DelegationTo")
+					.textValue().trim().replaceAll("\\<[^>]*>", ""));
+			if (validateNotEmptyValue(toDate.toString())) {
+				if (!delegationID.equals("0")) {
+					if (!existingDelegation.getTo().equals(
+							delegationInfo.get("DelegationTo").textValue())) {
+						existingDelegation.setTo(toDate);
+					}
+				} else {
+					newDelegation.setTo(toDate);
+				}
+			} else {
+				throw new Exception("The Delegation End Date can not be Empty");
+			}
+		}
+	}
+
+	public String createDynamicPolicy(String delegatorId, String delegatorName,
+			String policyLocation, Delegation existingDelegation)
+			throws SAXException, IOException {
+		return WriteXMLUtil.saveDelegationPolicy(delegatorId, delegatorName,
+				policyLocation, existingDelegation);
+	}
+
+	public boolean validateNotEmptyValue(String value) {
+		if (!value.equalsIgnoreCase("")) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * Generates Content Profile for Delegation
+	 * 
+	 * @param authorFullName
+	 * @param delegationId
+	 * @param existingDelegation
+	 * @param authorProfile
+	 * @return
+	 */
+	public StringBuffer generateContentDelegationProfile(String delegationId,
+			Delegation existingDelegation, UserProfile authorProfile) {
+		StringBuffer contentProfile = new StringBuffer();
+		String authorFullName = authorProfile.getFullName();
+		contentProfile.append("<Content>");
+		contentProfile.append("<ak:record xmlns:ak=\"http://akpower.org\">");
+		contentProfile.append("<ak:delegation>");
+		contentProfile.append("<ak:delegationid>");
+		contentProfile.append(delegationId);
+		contentProfile.append("</ak:delegationid>");
+		contentProfile.append("<ak:delegationpolicyid>");
+		contentProfile.append(existingDelegation.getDelegationPolicyId());
+		contentProfile.append("</ak:delegationpolicyid>");
+		contentProfile.append("<ak:revoked>");
+		contentProfile.append(existingDelegation.isRevoked());
+		contentProfile.append("</ak:revoked>");
+		contentProfile.append("<ak:delegator>");
+		contentProfile.append("<ak:id>");
+		contentProfile.append(authorProfile.getId().toString());
+		contentProfile.append("</ak:id>");
+		contentProfile.append("<ak:fullname>");
+		contentProfile.append(authorFullName);
+		contentProfile.append("</ak:fullname>");
+		contentProfile.append("<ak:email>");
+		contentProfile.append(authorProfile.getWorkEmails().get(0));
+		contentProfile.append("</ak:email>");
+		contentProfile.append("</ak:delegator>");
+		contentProfile.append("<ak:delegatee>");
+		contentProfile.append("<ak:id>");
+		contentProfile.append(existingDelegation.getDelegateeId());
+		contentProfile.append("</ak:id>");
+		contentProfile.append("<ak:fullname>");
+		contentProfile.append(existingDelegation.getDelegatee());
+		contentProfile.append("</ak:fullname>");
+		contentProfile.append("<ak:email>");
+		contentProfile.append(existingDelegation.getDelegateeEmail());
+		contentProfile.append("</ak:email>");
+		contentProfile.append("</ak:delegatee>");
+		contentProfile.append("</ak:delegation>");
+		contentProfile.append("</ak:record>");
+		contentProfile.append("</Content>");
+		contentProfile
+				.append("<Attribute AttributeId=\"urn:oasis:names:tc:xacml:3.0:content-selector\" IncludeInResult=\"false\">");
+		contentProfile
+				.append("<AttributeValue XPathCategory=\"urn:oasis:names:tc:xacml:3.0:attribute-category:resource\" DataType=\"urn:oasis:names:tc:xacml:3.0:data-type:xpathExpression\">//ak:record/ak:delegation</AttributeValue>");
+		contentProfile.append("</Attribute>");
+		return contentProfile;
 	}
 
 }

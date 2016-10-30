@@ -1,10 +1,12 @@
 package gpms.dao;
 
 import gpms.DAL.MongoDBConnector;
+import gpms.model.Delegation;
 import gpms.model.GPMSCommonInfo;
 import gpms.model.NotificationLog;
 import gpms.model.UserAccount;
 import gpms.model.UserProfile;
+import gpms.rest.NotificationService;
 
 import java.net.UnknownHostException;
 import java.text.DateFormat;
@@ -13,6 +15,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.ws.rs.core.MediaType;
+
+import org.glassfish.jersey.media.sse.OutboundEvent;
 import org.mongodb.morphia.Datastore;
 import org.mongodb.morphia.Morphia;
 import org.mongodb.morphia.dao.BasicDAO;
@@ -238,6 +243,54 @@ public class NotificationDAO extends BasicDAO<NotificationLog, String> {
 				NotificationLog.class).set("viewed by admin", true);
 		ds.update(removeNotifyQuery, ops);
 		return notifications;
+	}
+
+	public void sendNotification(Delegation existingDelegation,
+			GPMSCommonInfo userInfo, String notificationMessage,
+			String notificationType, boolean isCritical) {
+		String userProfileID = userInfo.getUserProfileID();
+		String userName = userInfo.getUserName();
+		String userCollege = userInfo.getUserCollege();
+		String userDepartment = userInfo.getUserDepartment();
+		String userPositionType = userInfo.getUserPositionType();
+		String userPositionTitle = userInfo.getUserPositionTitle();
+		NotificationLog notification = new NotificationLog();
+		// For Admin
+		notification.setType(notificationType);
+		notification.setAction(notificationMessage);
+		notification.setUserProfileId(existingDelegation.getDelegateeId());
+		notification.setUsername(existingDelegation.getDelegateeUsername());
+		notification.setForAdmin(true);
+		notification.setCritical(isCritical);
+		// notification.isViewedByUser(true);
+		save(notification);
+		// For Delegator
+		notification = new NotificationLog();
+		notification.setType(notificationType);
+		notification.setAction(notificationMessage);
+		notification.setUserProfileId(userProfileID);
+		notification.setUsername(userName);
+		notification.setCollege(userCollege);
+		notification.setDepartment(userDepartment);
+		notification.setPositionType(userPositionType);
+		notification.setPositionTitle(userPositionTitle);
+		notification.setCritical(isCritical);
+		// notification.isViewedByUser(true);
+		save(notification);
+		// For Delegatee
+		notification = new NotificationLog();
+		notification.setType(notificationType);
+		notification.setAction(notificationMessage);
+		notification.setUserProfileId(existingDelegation.getDelegateeId());
+		notification.setUsername(existingDelegation.getDelegateeUsername());
+		notification.setCollege(existingDelegation.getDelegateeCollege());
+		notification.setDepartment(existingDelegation.getDelegateeDepartment());
+		notification.setPositionType(existingDelegation
+				.getDelegateePositionType());
+		notification.setPositionTitle(userPositionTitle);
+		notification.setCritical(isCritical);
+		// notification.isViewedByUser(true);
+		save(notification);
 	}
 
 	@SuppressWarnings("unused")

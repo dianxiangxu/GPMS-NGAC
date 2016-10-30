@@ -25,6 +25,9 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpSession;
+
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.Datastore;
 import org.mongodb.morphia.Morphia;
@@ -1046,6 +1049,49 @@ public class UserProfileDAO extends BasicDAO<UserProfile, String> {
 					profileQuery.criteria("details.college").equal(College));
 		}
 		return profileQuery.asList();
+	}
+
+	/**
+	 * Binds User Info From login user Session
+	 * 
+	 * @param session
+	 * @throws ServletException
+	 */
+	public GPMSCommonInfo bindUserInfoFromSession(HttpSession session)
+			throws ServletException {
+		GPMSCommonInfo userInfo = new GPMSCommonInfo();
+		if (session.getAttribute("userProfileId") == null
+				|| session.getAttribute("userCollege") == null
+				|| session.getAttribute("userDepartment") == null
+				|| session.getAttribute("userPositionType") == null
+				|| session.getAttribute("userPositionTitle") == null) {
+			throw new ServletException("User Session can't be null or empty");
+		}
+		if (session.getAttribute("userProfileId") != null) {
+			userInfo.setUserProfileID((String) session
+					.getAttribute("userProfileId"));
+		}
+		if (session.getAttribute("userCollege") != null) {
+			userInfo.setUserCollege((String) session
+					.getAttribute("userCollege"));
+		}
+		if (session.getAttribute("userDepartment") != null) {
+			userInfo.setUserDepartment((String) session
+					.getAttribute("userDepartment"));
+		}
+		if (session.getAttribute("userPositionType") != null) {
+			userInfo.setUserPositionType((String) session
+					.getAttribute("userPositionType"));
+		}
+		if (session.getAttribute("userPositionTitle") != null) {
+			userInfo.setUserPositionTitle((String) session
+					.getAttribute("userPositionTitle"));
+		}
+		if (session.getAttribute("isAdmin") != null) {
+			userInfo.setUserIsAdmin((Boolean) session.getAttribute("isAdmin"));
+		}
+
+		return userInfo;
 	}
 
 }
