@@ -6,10 +6,10 @@ package gpms.selenium;
  * Creates a new proposal, Senior personal is added, senior personal then logs in and attempts to delete proposal.
  */
 
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.io.File;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.After;
@@ -17,7 +17,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.support.ui.Select;
@@ -29,8 +28,11 @@ public class SeniorPersonalProposalDeleteFail {
 
 	@Before
 	public void setUp() throws Exception {
-		System.setProperty("webdriver.chrome.driver",
-				"F:/chromedriver_win32/chromedriver.exe");
+		String seleniumDriverFolderName = "/selenium_driver";
+		String seleniumDriverLocation = this.getClass()
+				.getResource(seleniumDriverFolderName).toURI().getPath();
+		System.setProperty("webdriver.chrome.driver", seleniumDriverLocation
+				+ File.separator + "chromedriver.exe");
 		driver = new ChromeDriver();
 		baseUrl = "http://localhost:8181/";
 		driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
@@ -305,7 +307,7 @@ public class SeniorPersonalProposalDeleteFail {
 		((JavascriptExecutor) driver)
 				.executeScript("var s=document.getElementById('edit0');s.click();");
 		Thread.sleep(200);
-		
+
 		((JavascriptExecutor) driver)
 				.executeScript("var s=document.getElementById('btnDeleteProposal');s.click();");
 
@@ -322,7 +324,7 @@ public class SeniorPersonalProposalDeleteFail {
 
 		driver.findElement(By.id("BoxAlertBtnOk")).click();
 		Thread.sleep(200);
-		
+
 		driver.findElement(By.cssSelector("span.myProfile.icon-arrow-s"))
 				.click();
 		Thread.sleep(200);
@@ -336,15 +338,6 @@ public class SeniorPersonalProposalDeleteFail {
 		String verificationErrorString = verificationErrors.toString();
 		if (!"".equals(verificationErrorString)) {
 			fail(verificationErrorString);
-		}
-	}
-
-	private boolean isElementPresent(By by) {
-		try {
-			driver.findElement(by);
-			return true;
-		} catch (NoSuchElementException e) {
-			return false;
 		}
 	}
 
