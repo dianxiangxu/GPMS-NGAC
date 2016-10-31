@@ -12,7 +12,7 @@ public class GPMSCommonInfo implements Serializable {
 
 	private String userProfileID = new String();
 	private String userName = new String();
-	private boolean userIsAdmin;
+	private boolean userIsAdmin = false;
 	private String userCollege = new String();
 	private String userDepartment = new String();
 	private String userPositionType = new String();

@@ -52,8 +52,9 @@ public class SeniorPersonalProposalSaveFail {
 		assertTrue(driver.findElement(By.cssSelector("BODY")).getText()
 				.matches("^[\\s\\S]*$"));
 		driver.findElement(By.cssSelector("li.sfLevel1 > a > span")).click();
-		driver.findElement(By.id("btnAddNew")).click();
 		Thread.sleep(200);
+		driver.findElement(By.id("btnAddNew")).click();
+		Thread.sleep(500);
 		driver.findElement(By.name("AddSenior")).click();
 		Thread.sleep(200);
 		driver.findElement(By.cssSelector("i.sidebarExpand")).click();

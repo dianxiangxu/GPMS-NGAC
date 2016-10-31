@@ -43,53 +43,53 @@ public class PIDeletesCoPI {
 		driver.findElement(By.id("user_email")).clear();
 		driver.findElement(By.id("user_email")).sendKeys(
 				"nicholas1234@gmail.com");
-		Thread.sleep(500);
+		Thread.sleep(200);
 		driver.findElement(By.name("commit")).click();
-		Thread.sleep(500);
+		Thread.sleep(200);
 		driver.findElement(By.linkText("My Proposals")).click();
-		Thread.sleep(500);
+		Thread.sleep(200);
 		((JavascriptExecutor) driver)
 				.executeScript("var s=document.getElementById('edit0');s.click();");
-		Thread.sleep(500);
+		Thread.sleep(200);
 		driver.findElement(By.cssSelector("i.sidebarExpand")).click();
-		Thread.sleep(500);
+		Thread.sleep(200);
 		driver.findElement(By.id("lblSection1")).click();
-		Thread.sleep(500);
+		Thread.sleep(200);
 		driver.findElement(By.name("AddCoPI")).click();
-		Thread.sleep(500);
+		Thread.sleep(200);
 		driver.findElement(By.id("btnSaveProposal")).click();
-		Thread.sleep(500);
+		Thread.sleep(200);
 		driver.findElement(By.id("BoxConfirmBtnOk")).click();
-		Thread.sleep(500);
+		Thread.sleep(200);
 		assertTrue(driver.findElement(By.cssSelector("BODY")).getText()
 				.matches("^[\\s\\S]*$"));
-		Thread.sleep(500);
+		Thread.sleep(200);
 		driver.findElement(By.id("BoxAlertBtnOk")).click();
-		Thread.sleep(500);
+		Thread.sleep(200);
 
 		((JavascriptExecutor) driver)
 				.executeScript("var s=document.getElementById('edit0');s.click();");
-		Thread.sleep(500);
+		Thread.sleep(200);
 
 		driver.findElement(By.id("ui-id-1")).click();
-		Thread.sleep(500);
+		Thread.sleep(200);
 		driver.findElement(By.name("DeleteOption")).click();
-		Thread.sleep(500);
+		Thread.sleep(200);
 		driver.findElement(By.id("BoxConfirmBtnOk")).click();
-		Thread.sleep(500);
+		Thread.sleep(200);
 		driver.findElement(By.id("btnSaveProposal")).click();
-		Thread.sleep(500);
+		Thread.sleep(200);
 		driver.findElement(By.id("BoxConfirmBtnOk")).click();
-		Thread.sleep(500);
+		Thread.sleep(200);
 		assertTrue(driver.findElement(By.cssSelector("BODY")).getText()
 				.matches("^[\\s\\S]*$"));
-		Thread.sleep(500);
+		Thread.sleep(200);
 		driver.findElement(By.id("BoxAlertBtnOk")).click();
-		Thread.sleep(500);
+		Thread.sleep(200);
 
 		driver.findElement(By.cssSelector("span.myProfile.icon-arrow-s"))
 				.click();
-		Thread.sleep(500);
+		Thread.sleep(200);
 		driver.findElement(By.linkText("Log Out")).click();
 		Thread.sleep(2000);
 	}

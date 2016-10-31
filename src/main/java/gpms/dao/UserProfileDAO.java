@@ -1,6 +1,7 @@
 package gpms.dao;
 
 import gpms.DAL.MongoDBConnector;
+import gpms.model.Address;
 import gpms.model.AuditLog;
 import gpms.model.AuditLogCommonInfo;
 import gpms.model.AuditLogInfo;
@@ -16,6 +17,8 @@ import gpms.model.UserProfile;
 import gpms.model.UserProposalCount;
 import gpms.utils.EmailUtil;
 
+import java.io.File;
+import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -26,14 +29,22 @@ import java.util.Date;
 import java.util.List;
 
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.Datastore;
 import org.mongodb.morphia.Morphia;
 import org.mongodb.morphia.dao.BasicDAO;
 import org.mongodb.morphia.query.Query;
 
+import com.ebay.xcelite.Xcelite;
+import com.ebay.xcelite.sheet.XceliteSheet;
+import com.ebay.xcelite.writer.SheetWriter;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import com.mongodb.MongoClient;
@@ -46,6 +57,7 @@ public class UserProfileDAO extends BasicDAO<UserProfile, String> {
 	private static Morphia morphia;
 	private static Datastore ds;
 	private AuditLog audit = new AuditLog();
+	private DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 
 	private static Morphia getMorphia() throws UnknownHostException,
 			MongoException {
@@ -73,12 +85,6 @@ public class UserProfileDAO extends BasicDAO<UserProfile, String> {
 	public UserProfileDAO(MongoClient mongo, Morphia morphia, String dbName) {
 		super(mongo, morphia, dbName);
 	}
-
-	/**
-	 * 
-	 * @return list of all users in the ds
-	 * @throws UnknownHostException
-	 */
 
 	/**
 	 * 
@@ -1092,6 +1098,611 @@ public class UserProfileDAO extends BasicDAO<UserProfile, String> {
 		}
 
 		return userInfo;
+	}
+
+	/**
+	 * Binds User Info From user Sign up from
+	 * 
+	 * @param newAccount
+	 * @param newProfile
+	 * @param userInfo
+	 * @throws ParseException
+	 */
+	public void bindUserInfo(UserAccount newAccount, UserProfile newProfile,
+			JsonNode userInfo) throws ParseException {
+		String userEmail = new String();
+		newAccount.setAddedOn(new Date());
+		if (userInfo != null && userInfo.has("UserName")) {
+			String loginUserName = userInfo.get("UserName").textValue();
+			newAccount.setUserName(loginUserName);
+		}
+		if (userInfo != null && userInfo.has("Password")) {
+			newAccount.setPassword(userInfo.get("Password").textValue());
+		}
+		newProfile.setUserAccount(newAccount);
+		if (userInfo != null && userInfo.has("FirstName")) {
+			newProfile.setFirstName(userInfo.get("FirstName").textValue());
+		}
+		if (userInfo != null && userInfo.has("MiddleName")) {
+			newProfile.setMiddleName(userInfo.get("MiddleName").textValue());
+		}
+		if (userInfo != null && userInfo.has("LastName")) {
+			newProfile.setLastName(userInfo.get("LastName").textValue());
+		}
+		if (userInfo != null && userInfo.has("DOB")) {
+			Date dob = formatter.parse(userInfo.get("DOB").textValue());
+			newProfile.setDateOfBirth(dob);
+		}
+		if (userInfo != null && userInfo.has("Gender")) {
+			newProfile.setGender(userInfo.get("Gender").textValue());
+		}
+		Address newAddress = new Address();
+		if (userInfo != null && userInfo.has("Street")) {
+			newAddress.setStreet(userInfo.get("Street").textValue());
+		}
+		if (userInfo != null && userInfo.has("Apt")) {
+			newAddress.setApt(userInfo.get("Apt").textValue());
+		}
+		if (userInfo != null && userInfo.has("City")) {
+			newAddress.setCity(userInfo.get("City").textValue());
+		}
+		if (userInfo != null && userInfo.has("State")) {
+			newAddress.setState(userInfo.get("State").textValue());
+		}
+		if (userInfo != null && userInfo.has("Zip")) {
+			newAddress.setZipcode(userInfo.get("Zip").textValue());
+		}
+		if (userInfo != null && userInfo.has("Country")) {
+			newAddress.setCountry(userInfo.get("Country").textValue());
+		}
+		newProfile.getAddresses().add(newAddress);
+		if (userInfo != null && userInfo.has("MobileNumber")) {
+			newProfile.getMobileNumbers().add(
+					userInfo.get("MobileNumber").textValue());
+		}
+		if (userInfo != null && userInfo.has("WorkEmail")) {
+			userEmail = userInfo.get("WorkEmail").textValue();
+			newProfile.getWorkEmails().add(userEmail);
+		}
+	}
+
+	public void setUserCurrentSession(HttpServletRequest req, String userName,
+			boolean admin, String userId, String college, String department,
+			String positionType, String positionTitle) {
+		HttpSession session = req.getSession();
+		if (session.getAttribute("userProfileId") == null) {
+			session.setAttribute("userProfileId", userId);
+		}
+		if (session.getAttribute("gpmsUserName") == null) {
+			session.setAttribute("gpmsUserName", userName);
+		}
+		if (session.getAttribute("isAdmin") == null) {
+			session.setAttribute("isAdmin", admin);
+		}
+		if (session.getAttribute("userCollege") == null) {
+			session.setAttribute("userCollege", college);
+		}
+		if (session.getAttribute("userDepartment") == null) {
+			session.setAttribute("userDepartment", department);
+		}
+		if (session.getAttribute("userPositionType") == null) {
+			session.setAttribute("userPositionType", positionType);
+		}
+		if (session.getAttribute("userPositionTitle") == null) {
+			session.setAttribute("userPositionTitle", positionTitle);
+		}
+	}
+
+	public void deleteAllSession(HttpServletRequest req) {
+		HttpSession session = req.getSession();
+		session.removeAttribute("userProfileId");
+		session.removeAttribute("gpmsUserName");
+		session.removeAttribute("isAdmin");
+		session.removeAttribute("userCollege");
+		session.removeAttribute("userDepartment");
+		session.removeAttribute("userPositionType");
+		session.removeAttribute("userPositionTitle");
+		session.invalidate();
+	}
+
+	public void setMySessionID(HttpServletRequest req, String sessionValue) {
+		try {
+			if (req == null) {
+				System.out.println("Null request in context");
+			}
+			HttpSession session = req.getSession();
+			if (session.getAttribute("userProfileId") == null) {
+				// id = System.currentTimeMillis();
+				session.setAttribute("userProfileId", sessionValue);
+			}
+			UserProfile existingUserProfile = new UserProfile();
+			if (!sessionValue.equals("null")) {
+				ObjectId id = new ObjectId(sessionValue);
+				existingUserProfile = findUserDetailsByProfileID(id);
+			}
+			if (session.getAttribute("gpmsUserName") == null) {
+				session.setAttribute("gpmsUserName", existingUserProfile
+						.getUserAccount().getUserName());
+			}
+			if (session.getAttribute("isAdmin") == null) {
+				session.setAttribute("isAdmin", existingUserProfile
+						.getUserAccount().isAdmin());
+			}
+			for (PositionDetails userDetails : existingUserProfile.getDetails()) {
+				if (userDetails.isAsDefault()) {
+					if (session.getAttribute("userPositionType") == null) {
+						session.setAttribute("userPositionType",
+								userDetails.getPositionType());
+					}
+					if (session.getAttribute("userPositionTitle") == null) {
+						session.setAttribute("userPositionTitle",
+								userDetails.getPositionTitle());
+					}
+					if (session.getAttribute("userDepartment") == null) {
+						session.setAttribute("userDepartment",
+								userDetails.getDepartment());
+					}
+					if (session.getAttribute("userCollege") == null) {
+						session.setAttribute("userCollege",
+								userDetails.getCollege());
+					}
+				}
+			}
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
+	}
+
+	public String getMySessionId(HttpServletRequest req) {
+		HttpSession session = req.getSession();
+		if (session.getAttribute("userProfileId") != null) {
+			return (String) session.getAttribute("userProfileId");
+		}
+		if (session.getAttribute("gpmsUserName") != null) {
+			return (String) session.getAttribute("gpmsUserName");
+		}
+		if (session.getAttribute("userPositionType") != null) {
+			return (String) session.getAttribute("userPositionType");
+		}
+		if (session.getAttribute("userPositionTitle") != null) {
+			return (String) session.getAttribute("userPositionTitle");
+		}
+		if (session.getAttribute("userDepartment") != null) {
+			return (String) session.getAttribute("userDepartment");
+		}
+		if (session.getAttribute("userCollege") != null) {
+			return (String) session.getAttribute("userCollege");
+		}
+		if (session.getAttribute("isAdmin") != null) {
+			return (String) session.getAttribute("isAdmin");
+		}
+		return null;
+	}
+
+	/**
+	 * Adds User Login Details
+	 * 
+	 * @param userID
+	 * @param newAccount
+	 * @param existingUserAccount
+	 * @param existingUserProfile
+	 * @param userInfo
+	 * @return
+	 */
+	public UserAccount addUserLoginDetails(String userID,
+			UserAccount newAccount, UserAccount existingUserAccount,
+			UserProfile existingUserProfile, JsonNode userInfo) {
+		if (userInfo != null && userInfo.has("UserName")) {
+			String userNameOf = userInfo.get("UserName").textValue();
+			if (!userID.equals("0") && existingUserProfile != null) {
+				existingUserAccount = existingUserProfile.getUserAccount();
+				if (!existingUserAccount.getUserName().equals(userNameOf)) {
+					existingUserAccount = null;
+				}
+			} else {
+				newAccount.setUserName(userNameOf);
+			}
+		}
+		if (userInfo != null && userInfo.has("Password")) {
+			if (!userID.equals("0")) {
+				if (!existingUserAccount.getPassword().equals(
+						userInfo.get("Password").textValue())) {
+					existingUserAccount.setPassword(userInfo.get("Password")
+							.textValue());
+				}
+			} else {
+				newAccount.setPassword(userInfo.get("Password").textValue());
+			}
+		}
+		return existingUserAccount;
+	}
+
+	/**
+	 * Adds User's Active Status
+	 * 
+	 * @param userID
+	 * @param newAccount
+	 * @param newProfile
+	 * @param existingUserAccount
+	 * @param existingUserProfile
+	 * @param isActiveUser
+	 * @param userInfo
+	 * @return
+	 */
+	public boolean addUserActiveStatus(String userID, UserAccount newAccount,
+			UserProfile newProfile, UserAccount existingUserAccount,
+			UserProfile existingUserProfile, boolean isActiveUser,
+			JsonNode userInfo) {
+		if (userInfo != null && userInfo.has("IsActive")) {
+			if (!userID.equals("0")) {
+				if (existingUserAccount.isActive() != userInfo.get("IsActive")
+						.booleanValue()) {
+					existingUserAccount.setActive(userInfo.get("IsActive")
+							.booleanValue());
+					isActiveUser = userInfo.get("IsActive").booleanValue();
+				}
+			} else {
+				newAccount.setActive(userInfo.get("IsActive").booleanValue());
+			}
+			if (!userID.equals("0")) {
+				if (existingUserAccount.isDeleted() != !userInfo
+						.get("IsActive").booleanValue()) {
+					existingUserAccount.setDeleted(!userInfo.get("IsActive")
+							.booleanValue());
+				}
+			} else {
+				newAccount.setDeleted(!userInfo.get("IsActive").booleanValue());
+			}
+			if (!userID.equals("0")) {
+				if (existingUserProfile.isDeleted() != !userInfo
+						.get("IsActive").booleanValue()) {
+					existingUserProfile.setDeleted(!userInfo.get("IsActive")
+							.booleanValue());
+				}
+			} else {
+				newProfile.setDeleted(!userInfo.get("IsActive").booleanValue());
+			}
+		}
+		return isActiveUser;
+	}
+
+	/**
+	 * Adds General User Info
+	 * 
+	 * @param userID
+	 * @param newProfile
+	 * @param existingUserProfile
+	 * @param userInfo
+	 * @throws ParseException
+	 */
+	public void addGeneralUserInfo(String userID, UserProfile newProfile,
+			UserProfile existingUserProfile, JsonNode userInfo)
+			throws ParseException {
+		if (userInfo != null && userInfo.has("FirstName")) {
+			if (!userID.equals("0")) {
+				if (!existingUserProfile.getFirstName().equals(
+						userInfo.get("FirstName").textValue())) {
+					existingUserProfile.setFirstName(userInfo.get("FirstName")
+							.textValue());
+				}
+			} else {
+				newProfile.setFirstName(userInfo.get("FirstName").textValue());
+			}
+		}
+		if (userInfo != null && userInfo.has("MiddleName")) {
+			if (!userID.equals("0")) {
+				if (!existingUserProfile.getMiddleName().equals(
+						userInfo.get("MiddleName").textValue())) {
+					existingUserProfile.setMiddleName(userInfo
+							.get("MiddleName").textValue());
+				}
+			} else {
+				newProfile
+						.setMiddleName(userInfo.get("MiddleName").textValue());
+			}
+		}
+		if (userInfo != null && userInfo.has("LastName")) {
+			if (!userID.equals("0")) {
+				if (!existingUserProfile.getLastName().equals(
+						userInfo.get("LastName").textValue())) {
+					existingUserProfile.setLastName(userInfo.get("LastName")
+							.textValue());
+				}
+			} else {
+				newProfile.setLastName(userInfo.get("LastName").textValue());
+			}
+		}
+		if (userInfo != null && userInfo.has("DOB")) {
+			Date dob = formatter.parse(userInfo.get("DOB").textValue());
+			if (!userID.equals("0")) {
+				if (!existingUserProfile.getDateOfBirth().equals(dob)) {
+					existingUserProfile.setDateOfBirth(dob);
+				}
+			} else {
+				newProfile.setDateOfBirth(dob);
+			}
+		}
+		if (userInfo != null && userInfo.has("Gender")) {
+			if (!userID.equals("0")) {
+				if (!existingUserProfile.getGender().equals(
+						userInfo.get("Gender").textValue())) {
+					existingUserProfile.setGender(userInfo.get("Gender")
+							.textValue());
+				}
+			} else {
+				newProfile.setGender(userInfo.get("Gender").textValue());
+			}
+		}
+	}
+
+	/**
+	 * Adds Admin User's Details
+	 * 
+	 * @param userID
+	 * @param newProfile
+	 * @param existingUserProfile
+	 * @param userInfo
+	 */
+	public void addAdminUserDetails(String userID, UserProfile newProfile,
+			UserProfile existingUserProfile, JsonNode userInfo) {
+		PositionDetails newDetails = new PositionDetails();
+		newDetails.setPositionType("University administrator");
+		newDetails.setPositionTitle(userInfo.get("positionTitle").textValue());
+		newDetails.setAsDefault(true);
+		if (!userID.equals("0")) {
+			existingUserProfile.getDetails().clear();
+			existingUserProfile.getDetails().add(newDetails);
+		} else {
+			newProfile.getDetails().add(newDetails);
+		}
+	}
+
+	/**
+	 * Adds User's Position Details
+	 * 
+	 * @param userID
+	 * @param newProfile
+	 * @param existingUserProfile
+	 * @param userInfo
+	 */
+	public void addUserPositionDetails(String userID, UserProfile newProfile,
+			UserProfile existingUserProfile, JsonNode userInfo) {
+		if (!userID.equals("0")) {
+			existingUserProfile.getDetails().clear();
+		}
+		String[] rows = userInfo.get("SaveOptions").textValue().split("#!#");
+		for (String col : rows) {
+			String[] cols = col.split("!#!");
+			PositionDetails newDetails = new PositionDetails();
+			newDetails.setCollege(cols[0]);
+			newDetails.setDepartment(cols[1]);
+			newDetails.setPositionType(cols[2]);
+			newDetails.setPositionTitle(cols[3]);
+			newDetails.setAsDefault(Boolean.parseBoolean(cols[4]));
+			if (!userID.equals("0")) {
+				existingUserProfile.getDetails().add(newDetails);
+			} else {
+				newProfile.getDetails().add(newDetails);
+			}
+		}
+	}
+
+	/**
+	 * Adds User's Email Details
+	 * 
+	 * @param userID
+	 * @param newProfile
+	 * @param existingUserProfile
+	 * @param userInfo
+	 */
+	public void addEmailDetails(String userID, UserProfile newProfile,
+			UserProfile existingUserProfile, JsonNode userInfo) {
+		if (userInfo != null && userInfo.has("WorkEmail")) {
+			if (!userID.equals("0")) {
+				boolean alreadyExist = false;
+				for (String workEmail : existingUserProfile.getWorkEmails()) {
+					if (workEmail.equals(userInfo.get("WorkEmail").textValue())) {
+						alreadyExist = true;
+						break;
+					}
+				}
+				if (!alreadyExist) {
+					existingUserProfile.getWorkEmails().clear();
+					existingUserProfile.getWorkEmails().add(
+							userInfo.get("WorkEmail").textValue());
+				}
+			} else {
+				newProfile.getWorkEmails().add(
+						userInfo.get("WorkEmail").textValue());
+			}
+		}
+		if (userInfo != null && userInfo.has("PersonalEmail")) {
+			if (!userID.equals("0")) {
+				boolean alreadyExist = false;
+				for (String personalEmail : existingUserProfile
+						.getPersonalEmails()) {
+					if (personalEmail.equals(userInfo.get("PersonalEmail")
+							.textValue())) {
+						alreadyExist = true;
+						break;
+					}
+				}
+				if (!alreadyExist) {
+					existingUserProfile.getPersonalEmails().clear();
+					existingUserProfile.getPersonalEmails().add(
+							userInfo.get("PersonalEmail").textValue());
+				}
+			} else {
+				newProfile.getPersonalEmails().add(
+						userInfo.get("PersonalEmail").textValue());
+			}
+		}
+	}
+
+	/**
+	 * Adds User's Phone Number Details
+	 * 
+	 * @param userID
+	 * @param newProfile
+	 * @param existingUserProfile
+	 * @param userInfo
+	 */
+	public void addPhoneNumberDetails(String userID, UserProfile newProfile,
+			UserProfile existingUserProfile, JsonNode userInfo) {
+		if (userInfo != null && userInfo.has("OfficeNumber")) {
+			if (!userID.equals("0")) {
+				boolean alreadyExist = false;
+				for (String officeNo : existingUserProfile.getOfficeNumbers()) {
+					if (officeNo.equals(userInfo.get("OfficeNumber")
+							.textValue())) {
+						alreadyExist = true;
+						break;
+					}
+				}
+				if (!alreadyExist) {
+					existingUserProfile.getOfficeNumbers().clear();
+					existingUserProfile.getOfficeNumbers().add(
+							userInfo.get("OfficeNumber").textValue());
+				}
+			} else {
+				newProfile.getOfficeNumbers().add(
+						userInfo.get("OfficeNumber").textValue());
+			}
+		}
+		if (userInfo != null && userInfo.has("MobileNumber")) {
+			if (!userID.equals("0")) {
+				boolean alreadyExist = false;
+				for (String mobileNo : existingUserProfile.getMobileNumbers()) {
+					if (mobileNo.equals(userInfo.get("MobileNumber")
+							.textValue())) {
+						alreadyExist = true;
+						break;
+					}
+				}
+				if (!alreadyExist) {
+					existingUserProfile.getMobileNumbers().clear();
+					existingUserProfile.getMobileNumbers().add(
+							userInfo.get("MobileNumber").textValue());
+				}
+			} else {
+				newProfile.getMobileNumbers().add(
+						userInfo.get("MobileNumber").textValue());
+			}
+		}
+		if (userInfo != null && userInfo.has("HomeNumber")) {
+			if (!userID.equals("0")) {
+				boolean alreadyExist = false;
+				for (String homeNo : existingUserProfile.getHomeNumbers()) {
+					if (homeNo.equals(userInfo.get("HomeNumber").textValue())) {
+						alreadyExist = true;
+						break;
+					}
+				}
+				if (!alreadyExist) {
+					existingUserProfile.getHomeNumbers().clear();
+					existingUserProfile.getHomeNumbers().add(
+							userInfo.get("HomeNumber").textValue());
+				}
+			} else {
+				newProfile.getHomeNumbers().add(
+						userInfo.get("HomeNumber").textValue());
+			}
+		}
+		if (userInfo != null && userInfo.has("OtherNumber")) {
+			if (!userID.equals("0")) {
+				boolean alreadyExist = false;
+				for (String otherNo : existingUserProfile.getOtherNumbers()) {
+					if (otherNo.equals(userInfo.get("OtherNumber").textValue())) {
+						alreadyExist = true;
+						break;
+					}
+				}
+				if (!alreadyExist) {
+					existingUserProfile.getOtherNumbers().clear();
+					existingUserProfile.getOtherNumbers().add(
+							userInfo.get("OtherNumber").textValue());
+				}
+			} else {
+				newProfile.getOtherNumbers().add(
+						userInfo.get("OtherNumber").textValue());
+			}
+		}
+	}
+
+	/**
+	 * Adds User's Address Details
+	 * 
+	 * @param userID
+	 * @param newProfile
+	 * @param existingUserProfile
+	 * @param userInfo
+	 */
+	public void addAddressDetails(String userID, UserProfile newProfile,
+			UserProfile existingUserProfile, JsonNode userInfo) {
+		Address newAddress = new Address();
+		if (userInfo != null && userInfo.has("Street")) {
+			newAddress.setStreet(userInfo.get("Street").textValue());
+		}
+		if (userInfo != null && userInfo.has("Apt")) {
+			newAddress.setApt(userInfo.get("Apt").textValue());
+		}
+		if (userInfo != null && userInfo.has("City")) {
+			newAddress.setCity(userInfo.get("City").textValue());
+		}
+		if (userInfo != null && userInfo.has("State")) {
+			newAddress.setState(userInfo.get("State").textValue());
+		}
+		if (userInfo != null && userInfo.has("Zip")) {
+			newAddress.setZipcode(userInfo.get("Zip").textValue());
+		}
+		if (userInfo != null && userInfo.has("Country")) {
+			newAddress.setCountry(userInfo.get("Country").textValue());
+		}
+		if (!userID.equals("0")) {
+			boolean alreadyExist = false;
+			for (Address address : existingUserProfile.getAddresses()) {
+				if (address.equals(newAddress)) {
+					alreadyExist = true;
+					break;
+				}
+			}
+			if (!alreadyExist) {
+				existingUserProfile.getAddresses().clear();
+				existingUserProfile.getAddresses().add(newAddress);
+			}
+		} else {
+			newProfile.getAddresses().add(newAddress);
+		}
+	}
+
+	/**
+	 * Exports to Excel File for Users and Admin Users
+	 * 
+	 * @param users
+	 * @param mapper
+	 * @return
+	 * @throws URISyntaxException
+	 * @throws JsonProcessingException
+	 */
+	public String exportToExcelFile(List<UserInfo> users, ObjectMapper mapper)
+			throws URISyntaxException, JsonProcessingException {
+		String filename = new String();
+		Xcelite xcelite = new Xcelite();
+		XceliteSheet sheet = xcelite.createSheet("Users");
+		SheetWriter<UserInfo> writer = sheet.getBeanWriter(UserInfo.class);
+		writer.write(users);
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy_MM_dd");
+		Date date = new Date();
+		String fileName = String.format(
+				"%s.%s",
+				RandomStringUtils.randomAlphanumeric(8) + "_"
+						+ dateFormat.format(date), "xlsx");
+		String downloadLocation = this.getClass().getResource("/uploads")
+				.toURI().getPath();
+		xcelite.write(new File(downloadLocation + fileName));
+		filename = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(
+				fileName);
+		return filename;
 	}
 
 }

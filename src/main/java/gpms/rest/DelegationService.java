@@ -12,7 +12,6 @@ import gpms.model.Delegation;
 import gpms.model.DelegationCommonInfo;
 import gpms.model.DelegationInfo;
 import gpms.model.GPMSCommonInfo;
-import gpms.model.NotificationLog;
 import gpms.model.UserAccount;
 import gpms.model.UserDetail;
 import gpms.model.UserProfile;
@@ -45,7 +44,6 @@ import javax.ws.rs.core.Response;
 
 import org.apache.log4j.Logger;
 import org.bson.types.ObjectId;
-import org.glassfish.jersey.media.sse.OutboundEvent;
 import org.mongodb.morphia.Morphia;
 import org.wso2.balana.ObligationResult;
 import org.wso2.balana.ctx.AbstractResult;
@@ -497,9 +495,17 @@ public class DelegationService {
 								.getUserProfileID());
 					}
 				}
-				ObjectId id = new ObjectId(delegationID);
-				UserProfile delegateeProfile = userProfileDAO
-						.findUserDetailsByProfileID(id);
+				UserProfile delegateeProfile = null;
+				if (delegationInfo != null && delegationInfo.has("DelegateeId")) {
+					String delegateeId = delegationInfo.get("DelegateeId")
+							.textValue();
+					if (delegationID.equals("0")) {
+						newDelegation.setDelegateeId(delegateeId);
+						ObjectId id = new ObjectId(delegateeId);
+						delegateeProfile = userProfileDAO
+								.findUserDetailsByProfileID(id);
+					}
+				}
 				delegationDAO.generateDelegationDetails(userInfo, delegationID,
 						delegateeProfile, newDelegation, existingDelegation,
 						delegationInfo);
@@ -514,7 +520,6 @@ public class DelegationService {
 							notificationDAO.sendNotification(
 									existingDelegation, userInfo,
 									notificationMessage, "Delegation", false);
-							broadcastNotifications();
 						} catch (Exception e) {
 							return Response
 									.status(403)
@@ -533,7 +538,6 @@ public class DelegationService {
 						notificationDAO.sendNotification(newDelegation,
 								userInfo, notificationMessage, "Delegation",
 								false);
-						broadcastNotifications();
 						return Response
 								.status(200)
 								.type(MediaType.APPLICATION_JSON)
@@ -574,8 +578,7 @@ public class DelegationService {
 	@ApiResponses(value = {
 			@ApiResponse(code = 200, message = "Success: { True }"),
 			@ApiResponse(code = 403, message = "Failed: { \"error\":\"error description\", \"status\": \"FAIL\" }") })
-	public Response revokeDelegationByDelegationID(
-			DelegationService delegationService, String message) {
+	public Response revokeDelegationByDelegationID(String message) {
 		try {
 			DelegationService.log
 					.info("DelegationService::revokeDelegationByDelegationID started");
@@ -594,7 +597,7 @@ public class DelegationService {
 			Delegation existingDelegation = delegationDAO
 					.findDelegationByDelegationID(id);
 			ObjectId authorId = new ObjectId(userInfo.getUserProfileID());
-			UserProfile authorProfile = delegationService.userProfileDAO
+			UserProfile authorProfile = userProfileDAO
 					.findUserDetailsByProfileID(authorId);
 			String authorUserName = authorProfile.getUserAccount()
 					.getUserName();
@@ -755,21 +758,10 @@ public class DelegationService {
 			return Response.status(403).type(MediaType.APPLICATION_JSON)
 					.entity("File delete permission is not enabled!").build();
 		}
-		broadcastNotifications();
-
 		return Response
 				.status(200)
 				.type(MediaType.APPLICATION_JSON)
 				.entity(mapper.writerWithDefaultPrettyPrinter()
 						.writeValueAsString(true)).build();
-	}
-
-	private void broadcastNotifications() {
-		// Broadcasting SSE
-		OutboundEvent.Builder eventBuilder = new OutboundEvent.Builder();
-		OutboundEvent event = eventBuilder.name("notification")
-				.mediaType(MediaType.TEXT_PLAIN_TYPE).data(String.class, "1")
-				.build();
-		NotificationService.BROADCASTER.broadcast(event);
 	}
 }

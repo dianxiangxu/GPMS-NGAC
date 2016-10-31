@@ -27,6 +27,7 @@ public class PIUploadsFileAttatchment {
 	private WebDriver driver;
 	private String baseUrl;
 	private StringBuffer verificationErrors = new StringBuffer();
+	private String uploadFile = new String();
 
 	@Before
 	public void setUp() throws Exception {
@@ -38,6 +39,12 @@ public class PIUploadsFileAttatchment {
 		driver = new ChromeDriver();
 		baseUrl = "http://localhost:8181/";
 		driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
+
+		String uploadFolderName = "/uploads";
+		String uploadLocation = this.getClass().getResource(uploadFolderName)
+				.toURI().getPath();
+		uploadFile = uploadLocation + "/teapot.jpg";
+		uploadFile = uploadFile.substring(1).replace("/", "\\");
 	}
 
 	@Test
@@ -54,8 +61,8 @@ public class PIUploadsFileAttatchment {
 		driver.findElement(By.linkText("My Proposals")).click();
 		Thread.sleep(500);
 
-		// "F:/mine work.txt"
-		StringSelection st = new StringSelection("F:\\mine work.txt");
+		// File Attachments
+		StringSelection st = new StringSelection(uploadFile);
 
 		Toolkit.getDefaultToolkit().getSystemClipboard().setContents(st, null);
 		Thread.sleep(500);

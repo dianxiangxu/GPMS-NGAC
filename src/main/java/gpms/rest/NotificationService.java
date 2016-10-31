@@ -65,7 +65,7 @@ public class NotificationService {
 	DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 	private static final Logger log = Logger
 			.getLogger(NotificationService.class.getName());
-	static final SseBroadcaster BROADCASTER = new SseBroadcaster();
+	public static final SseBroadcaster BROADCASTER = new SseBroadcaster();
 
 	public NotificationService() {
 		mongoClient = MongoDBConnector.getMongo();

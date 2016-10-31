@@ -6,7 +6,6 @@ import gpms.dao.NotificationDAO;
 import gpms.dao.ProposalDAO;
 import gpms.dao.UserAccountDAO;
 import gpms.dao.UserProfileDAO;
-import gpms.model.Address;
 import gpms.model.AuditLogCommonInfo;
 import gpms.model.AuditLogInfo;
 import gpms.model.GPMSCommonInfo;
@@ -16,7 +15,6 @@ import gpms.model.UserAccount;
 import gpms.model.UserInfo;
 import gpms.model.UserProfile;
 import gpms.model.UserProposalCount;
-import gpms.utils.EmailUtil;
 import gpms.utils.MultimapAdapter;
 import gpms.utils.PasswordHash;
 import gpms.utils.SerializationHelper;
@@ -29,7 +27,6 @@ import io.swagger.annotations.ApiResponses;
 import java.io.File;
 import java.net.URISyntaxException;
 import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -37,7 +34,6 @@ import java.util.HashMap;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
@@ -80,7 +76,7 @@ public class UserService {
 	UserProfileDAO userProfileDAO = null;
 	ProposalDAO proposalDAO = null;
 	NotificationDAO notificationDAO = null;
-	DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+	private DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 	private static final Logger log = Logger.getLogger(UserService.class
 			.getName());
 
@@ -513,7 +509,7 @@ public class UserService {
 			userAccount.setDeleted(true);
 			userAccount.setActive(false);
 			userAccountDAO.save(userAccount);
-			sendNotification(userProfile, userAccount);
+			notificationDAO.sendNotification(userProfile, userAccount);
 			OutboundEvent.Builder eventBuilder = new OutboundEvent.Builder();
 			OutboundEvent event = eventBuilder.name("notification")
 					.mediaType(MediaType.TEXT_PLAIN_TYPE)
@@ -569,7 +565,7 @@ public class UserService {
 				userAccount.setDeleted(true);
 				userAccount.setActive(false);
 				userAccountDAO.save(userAccount);
-				sendNotification(userProfile, userAccount);
+				notificationDAO.sendNotification(userProfile, userAccount);
 			}
 			OutboundEvent.Builder eventBuilder = new OutboundEvent.Builder();
 			OutboundEvent event = eventBuilder.name("notification")
@@ -587,34 +583,6 @@ public class UserService {
 				.status(Response.Status.BAD_REQUEST)
 				.entity("{\"error\": \"Could Not Delete All Selected Users\", \"status\": \"FAIL\"}")
 				.build();
-	}
-
-	/**
-	 * Sends Notification for User Account is Deleted
-	 * 
-	 * @param userProfile
-	 * @param userAccount
-	 */
-	private void sendNotification(UserProfile userProfile,
-			UserAccount userAccount) {
-		String messageBody = new String();
-		EmailUtil emailUtil = new EmailUtil();
-		if (userProfile.isDeleted()) {
-			messageBody = "Hello "
-					+ userProfile.getFullName()
-					+ ",<br/> Your account has been deleted to reactivate you can contact administrator: <a href='http://seal.boisestate.edu:8080/GPMS/ContactUs.jsp' title='GPMS Contact Us' target='_blank'>Contact Us</a><br/><br/>Thank you, <br/> GPMS Team";
-			emailUtil.sendMailWithoutAuth(userProfile.getWorkEmails().get(0),
-					"You have been deleted " + userProfile.getFullName(),
-					messageBody);
-		}
-		NotificationLog notification = new NotificationLog();
-		notification.setType("User");
-		notification.setAction("Account is deleted.");
-		notification.setUserProfileId(userProfile.getId().toString());
-		notification.setUsername(userAccount.getUserName());
-		notification.setForAdmin(true);
-		notification.setCritical(true);
-		notificationDAO.save(notification);
 	}
 
 	@POST
@@ -654,7 +622,8 @@ public class UserService {
 			userAccount.setDeleted(!isActive);
 			userAccount.setActive(isActive);
 			userAccountDAO.save(userAccount);
-			sendNotification(isActive, userProfile, userAccount);
+			notificationDAO
+					.sendNotification(isActive, userProfile, userAccount);
 			return Response
 					.status(Response.Status.OK)
 					.entity(mapper.writerWithDefaultPrettyPrinter()
@@ -666,67 +635,6 @@ public class UserService {
 				.status(Response.Status.BAD_REQUEST)
 				.entity("{\"error\": \"Could Not Update User's IsActive Field\", \"status\": \"FAIL\"}")
 				.build();
-	}
-
-	/**
-	 * Sends Notification for User Account is Activated/ Deactivated
-	 * 
-	 * @param isActive
-	 * @param userProfile
-	 * @param userAccount
-	 */
-	private void sendNotification(Boolean isActive, UserProfile userProfile,
-			UserAccount userAccount) {
-		String messageBody = new String();
-		EmailUtil emailUtil = new EmailUtil();
-		NotificationLog notification = new NotificationLog();
-		String notificationMessage = new String();
-		boolean isCritical = false;
-		if (isActive) {
-			notificationMessage = "Account is activated.";
-			messageBody = "Hello "
-					+ userProfile.getFullName()
-					+ ",<br/><br/> Your account has been activated and you can login now using your credential: <a href='http://seal.boisestate.edu:8080/GPMS/Login.jsp' title='GPMS Login' target='_blank'>Login Here</a><br/><br/>Thank you, <br/> GPMS Team";
-			emailUtil.sendMailWithoutAuth(
-					userProfile.getWorkEmails().get(0),
-					"Successfully Activated your account "
-							+ userProfile.getFullName(), messageBody);
-		} else {
-			notificationMessage = "Account is deactivated.";
-			isCritical = true;
-
-			messageBody = "Hello "
-					+ userProfile.getFullName()
-					+ ",<br/> Your account has been deactivated to reactivate you can contact administrator: <a href='http://seal.boisestate.edu:8080/GPMS/ContactUs.jsp' title='GPMS Contact Us' target='_blank'>Contact Us</a><br/><br/>Thank you, <br/> GPMS Team";
-			emailUtil.sendMailWithoutAuth(userProfile.getWorkEmails().get(0),
-					"You have been Deactivated " + userProfile.getFullName(),
-					messageBody);
-		}
-		notification.setType("User");
-		notification.setAction(notificationMessage);
-		notification.setUserProfileId(userProfile.getId().toString());
-		notification.setUsername(userAccount.getUserName());
-		notification.setForAdmin(true);
-		notification.setCritical(isCritical);
-		notificationDAO.save(notification);
-		for (PositionDetails positions : userProfile.getDetails()) {
-			notification = new NotificationLog();
-			notification.setType("User");
-			notification.setAction(notificationMessage);
-			notification.setUserProfileId(userProfile.getId().toString());
-			notification.setUsername(userAccount.getUserName());
-			notification.setCollege(positions.getCollege());
-			notification.setDepartment(positions.getDepartment());
-			notification.setPositionType(positions.getPositionType());
-			notification.setPositionTitle(positions.getPositionTitle());
-			notification.setCritical(isCritical);
-			notificationDAO.save(notification);
-		}
-		OutboundEvent.Builder eventBuilder = new OutboundEvent.Builder();
-		OutboundEvent event = eventBuilder.name("notification")
-				.mediaType(MediaType.TEXT_PLAIN_TYPE).data(String.class, "1")
-				.build();
-		NotificationService.BROADCASTER.broadcast(event);
 	}
 
 	@POST
@@ -851,7 +759,8 @@ public class UserService {
 					userID = userInfo.get("UserID").textValue();
 				}
 				if (userID.equals("0")) {
-					bindUserInfo(newAccount, newProfile, userInfo);
+					userProfileDAO.bindUserInfo(newAccount, newProfile,
+							userInfo);
 				}
 				userAccountDAO.save(newAccount);
 				userProfileDAO.signUpUser(newProfile);
@@ -880,72 +789,6 @@ public class UserService {
 				.status(Response.Status.BAD_REQUEST)
 				.entity("{\"error\": \"Could Not Register A New User\", \"status\": \"FAIL\"}")
 				.build();
-	}
-
-	/**
-	 * Binds User Info From user Sign up from
-	 * 
-	 * @param newAccount
-	 * @param newProfile
-	 * @param userInfo
-	 * @throws ParseException
-	 */
-	private void bindUserInfo(UserAccount newAccount, UserProfile newProfile,
-			JsonNode userInfo) throws ParseException {
-		String userEmail = new String();
-		newAccount.setAddedOn(new Date());
-		if (userInfo != null && userInfo.has("UserName")) {
-			String loginUserName = userInfo.get("UserName").textValue();
-			newAccount.setUserName(loginUserName);
-		}
-		if (userInfo != null && userInfo.has("Password")) {
-			newAccount.setPassword(userInfo.get("Password").textValue());
-		}
-		newProfile.setUserAccount(newAccount);
-		if (userInfo != null && userInfo.has("FirstName")) {
-			newProfile.setFirstName(userInfo.get("FirstName").textValue());
-		}
-		if (userInfo != null && userInfo.has("MiddleName")) {
-			newProfile.setMiddleName(userInfo.get("MiddleName").textValue());
-		}
-		if (userInfo != null && userInfo.has("LastName")) {
-			newProfile.setLastName(userInfo.get("LastName").textValue());
-		}
-		if (userInfo != null && userInfo.has("DOB")) {
-			Date dob = formatter.parse(userInfo.get("DOB").textValue());
-			newProfile.setDateOfBirth(dob);
-		}
-		if (userInfo != null && userInfo.has("Gender")) {
-			newProfile.setGender(userInfo.get("Gender").textValue());
-		}
-		Address newAddress = new Address();
-		if (userInfo != null && userInfo.has("Street")) {
-			newAddress.setStreet(userInfo.get("Street").textValue());
-		}
-		if (userInfo != null && userInfo.has("Apt")) {
-			newAddress.setApt(userInfo.get("Apt").textValue());
-		}
-		if (userInfo != null && userInfo.has("City")) {
-			newAddress.setCity(userInfo.get("City").textValue());
-		}
-		if (userInfo != null && userInfo.has("State")) {
-			newAddress.setState(userInfo.get("State").textValue());
-		}
-		if (userInfo != null && userInfo.has("Zip")) {
-			newAddress.setZipcode(userInfo.get("Zip").textValue());
-		}
-		if (userInfo != null && userInfo.has("Country")) {
-			newAddress.setCountry(userInfo.get("Country").textValue());
-		}
-		newProfile.getAddresses().add(newAddress);
-		if (userInfo != null && userInfo.has("MobileNumber")) {
-			newProfile.getMobileNumbers().add(
-					userInfo.get("MobileNumber").textValue());
-		}
-		if (userInfo != null && userInfo.has("WorkEmail")) {
-			userEmail = userInfo.get("WorkEmail").textValue();
-			newProfile.getWorkEmails().add(userEmail);
-		}
 	}
 
 	@POST
@@ -979,7 +822,8 @@ public class UserService {
 								&& !user.getUserAccount().isDeleted()) {
 							isFound = true;
 
-							setMySessionID(req, user.getId().toString());
+							userProfileDAO.setMySessionID(req, user.getId()
+									.toString());
 							java.net.URI location = new java.net.URI(
 									"../Home.jsp");
 							if (user.getUserAccount().isAdmin()) {
@@ -1019,7 +863,7 @@ public class UserService {
 			@ApiParam(value = "Message", required = true, defaultValue = "", allowableValues = "", allowMultiple = false) String message) {
 		try {
 			log.info("UserService::setUserViewSession started");
-			deleteAllSession(req);
+			userProfileDAO.deleteAllSession(req);
 			ObjectMapper mapper = new ObjectMapper();
 			JsonNode root = mapper.readTree(message);
 			if (root != null && root.has("userId") && root.has("userName")
@@ -1051,9 +895,9 @@ public class UserService {
 						userName, isAdminUser, college, department,
 						positionType, positionTitle);
 				if (user != null) {
-					setUserCurrentSession(req, userName, isAdminUser,
-							profileId, college, department, positionType,
-							positionTitle);
+					userProfileDAO.setUserCurrentSession(req, userName,
+							isAdminUser, profileId, college, department,
+							positionType, positionTitle);
 				}
 				return Response
 						.status(Response.Status.OK)
@@ -1069,33 +913,6 @@ public class UserService {
 				.status(Response.Status.BAD_REQUEST)
 				.entity("{\"error\": \"Could Not Set User Session Based On Selected Position Detail\", \"status\": \"FAIL\"}")
 				.build();
-	}
-
-	private void setUserCurrentSession(HttpServletRequest req, String userName,
-			boolean admin, String userId, String college, String department,
-			String positionType, String positionTitle) {
-		HttpSession session = req.getSession();
-		if (session.getAttribute("userProfileId") == null) {
-			session.setAttribute("userProfileId", userId);
-		}
-		if (session.getAttribute("gpmsUserName") == null) {
-			session.setAttribute("gpmsUserName", userName);
-		}
-		if (session.getAttribute("isAdmin") == null) {
-			session.setAttribute("isAdmin", admin);
-		}
-		if (session.getAttribute("userCollege") == null) {
-			session.setAttribute("userCollege", college);
-		}
-		if (session.getAttribute("userDepartment") == null) {
-			session.setAttribute("userDepartment", department);
-		}
-		if (session.getAttribute("userPositionType") == null) {
-			session.setAttribute("userPositionType", positionType);
-		}
-		if (session.getAttribute("userPositionTitle") == null) {
-			session.setAttribute("userPositionTitle", positionTitle);
-		}
 	}
 
 	@GET
@@ -1115,7 +932,7 @@ public class UserService {
 						.entity("{\"error\": \"Could Not Logout the User\", \"status\": \"FAIL\"}")
 						.build();
 			}
-			deleteAllSession(req);
+			userProfileDAO.deleteAllSession(req);
 			return Response.seeOther(new java.net.URI("../Login.jsp")).build();
 		} catch (Exception e) {
 			log.error("Could not logout the user error e=", e);
@@ -1124,94 +941,6 @@ public class UserService {
 				.status(Response.Status.BAD_REQUEST)
 				.entity("{\"error\": \"Could Not Logout the User\", \"status\": \"FAIL\"}")
 				.build();
-	}
-
-	private void deleteAllSession(@Context HttpServletRequest req) {
-		HttpSession session = req.getSession();
-		session.removeAttribute("userProfileId");
-		session.removeAttribute("gpmsUserName");
-		session.removeAttribute("isAdmin");
-		session.removeAttribute("userCollege");
-		session.removeAttribute("userDepartment");
-		session.removeAttribute("userPositionType");
-		session.removeAttribute("userPositionTitle");
-		session.invalidate();
-	}
-
-	private void setMySessionID(@Context HttpServletRequest req,
-			String sessionValue) {
-		try {
-			if (req == null) {
-				System.out.println("Null request in context");
-			}
-			HttpSession session = req.getSession();
-			if (session.getAttribute("userProfileId") == null) {
-				// id = System.currentTimeMillis();
-				session.setAttribute("userProfileId", sessionValue);
-			}
-			UserProfile existingUserProfile = new UserProfile();
-			if (!sessionValue.equals("null")) {
-				ObjectId id = new ObjectId(sessionValue);
-				existingUserProfile = userProfileDAO
-						.findUserDetailsByProfileID(id);
-			}
-			if (session.getAttribute("gpmsUserName") == null) {
-				session.setAttribute("gpmsUserName", existingUserProfile
-						.getUserAccount().getUserName());
-			}
-			if (session.getAttribute("isAdmin") == null) {
-				session.setAttribute("isAdmin", existingUserProfile
-						.getUserAccount().isAdmin());
-			}
-			for (PositionDetails userDetails : existingUserProfile.getDetails()) {
-				if (userDetails.isAsDefault()) {
-					if (session.getAttribute("userPositionType") == null) {
-						session.setAttribute("userPositionType",
-								userDetails.getPositionType());
-					}
-					if (session.getAttribute("userPositionTitle") == null) {
-						session.setAttribute("userPositionTitle",
-								userDetails.getPositionTitle());
-					}
-					if (session.getAttribute("userDepartment") == null) {
-						session.setAttribute("userDepartment",
-								userDetails.getDepartment());
-					}
-					if (session.getAttribute("userCollege") == null) {
-						session.setAttribute("userCollege",
-								userDetails.getCollege());
-					}
-				}
-			}
-		} catch (Exception e) {
-			System.out.println(e.getMessage());
-		}
-	}
-
-	public String getMySessionId(@Context HttpServletRequest req) {
-		HttpSession session = req.getSession();
-		if (session.getAttribute("userProfileId") != null) {
-			return (String) session.getAttribute("userProfileId");
-		}
-		if (session.getAttribute("gpmsUserName") != null) {
-			return (String) session.getAttribute("gpmsUserName");
-		}
-		if (session.getAttribute("userPositionType") != null) {
-			return (String) session.getAttribute("userPositionType");
-		}
-		if (session.getAttribute("userPositionTitle") != null) {
-			return (String) session.getAttribute("userPositionTitle");
-		}
-		if (session.getAttribute("userDepartment") != null) {
-			return (String) session.getAttribute("userDepartment");
-		}
-		if (session.getAttribute("userCollege") != null) {
-			return (String) session.getAttribute("userCollege");
-		}
-		if (session.getAttribute("isAdmin") != null) {
-			return (String) session.getAttribute("isAdmin");
-		}
-		return null;
 	}
 
 	@POST
@@ -1380,27 +1109,28 @@ public class UserService {
 						newAccount.setAddedOn(new Date());
 					}
 				}
-				existingUserAccount = addUserLoginDetails(userID, newAccount,
-						existingUserAccount, existingUserProfile, userInfo);
-				isActiveUser = addUserActiveStatus(userID, newAccount,
-						newProfile, existingUserAccount, existingUserProfile,
-						isActiveUser, userInfo);
+				existingUserAccount = userProfileDAO.addUserLoginDetails(
+						userID, newAccount, existingUserAccount,
+						existingUserProfile, userInfo);
+				isActiveUser = userProfileDAO.addUserActiveStatus(userID,
+						newAccount, newProfile, existingUserAccount,
+						existingUserProfile, isActiveUser, userInfo);
 				if (userID.equals("0")) {
 					newProfile.setUserAccount(newAccount);
 				}
-				addGeneralUserInfo(userID, newProfile, existingUserProfile,
-						userInfo);
-				addAddressDetails(userID, newProfile, existingUserProfile,
-						userInfo);
-				addPhoneNumberDetails(userID, newProfile, existingUserProfile,
-						userInfo);
-				addEmailDetails(userID, newProfile, existingUserProfile,
-						userInfo);
+				userProfileDAO.addGeneralUserInfo(userID, newProfile,
+						existingUserProfile, userInfo);
+				userProfileDAO.addAddressDetails(userID, newProfile,
+						existingUserProfile, userInfo);
+				userProfileDAO.addPhoneNumberDetails(userID, newProfile,
+						existingUserProfile, userInfo);
+				userProfileDAO.addEmailDetails(userID, newProfile,
+						existingUserProfile, userInfo);
 				if (userInfo != null && userInfo.has("SaveOptions")) {
-					addUserPositionDetails(userID, newProfile,
+					userProfileDAO.addUserPositionDetails(userID, newProfile,
 							existingUserProfile, userInfo);
 				} else if (userInfo != null && userInfo.has("positionTitle")) {
-					addAdminUserDetails(userID, newProfile,
+					userProfileDAO.addAdminUserDetails(userID, newProfile,
 							existingUserProfile, userInfo);
 				}
 			}
@@ -1428,402 +1158,6 @@ public class UserService {
 				.status(Response.Status.BAD_REQUEST)
 				.entity("{\"error\": \"Could Not Save A New User OR Update AN Existing User\", \"status\": \"FAIL\"}")
 				.build();
-	}
-
-	/**
-	 * Adds User Login Details
-	 * 
-	 * @param userID
-	 * @param newAccount
-	 * @param existingUserAccount
-	 * @param existingUserProfile
-	 * @param userInfo
-	 * @return
-	 */
-	private UserAccount addUserLoginDetails(String userID,
-			UserAccount newAccount, UserAccount existingUserAccount,
-			UserProfile existingUserProfile, JsonNode userInfo) {
-		if (userInfo != null && userInfo.has("UserName")) {
-			String userNameOf = userInfo.get("UserName").textValue();
-			if (!userID.equals("0") && existingUserProfile != null) {
-				existingUserAccount = existingUserProfile.getUserAccount();
-				if (!existingUserAccount.getUserName().equals(userNameOf)) {
-					existingUserAccount = null;
-				}
-			} else {
-				newAccount.setUserName(userNameOf);
-			}
-		}
-		if (userInfo != null && userInfo.has("Password")) {
-			if (!userID.equals("0")) {
-				if (!existingUserAccount.getPassword().equals(
-						userInfo.get("Password").textValue())) {
-					existingUserAccount.setPassword(userInfo.get("Password")
-							.textValue());
-				}
-			} else {
-				newAccount.setPassword(userInfo.get("Password").textValue());
-			}
-		}
-		return existingUserAccount;
-	}
-
-	/**
-	 * Adds User's Active Status
-	 * 
-	 * @param userID
-	 * @param newAccount
-	 * @param newProfile
-	 * @param existingUserAccount
-	 * @param existingUserProfile
-	 * @param isActiveUser
-	 * @param userInfo
-	 * @return
-	 */
-	private boolean addUserActiveStatus(String userID, UserAccount newAccount,
-			UserProfile newProfile, UserAccount existingUserAccount,
-			UserProfile existingUserProfile, boolean isActiveUser,
-			JsonNode userInfo) {
-		if (userInfo != null && userInfo.has("IsActive")) {
-			if (!userID.equals("0")) {
-				if (existingUserAccount.isActive() != userInfo.get("IsActive")
-						.booleanValue()) {
-					existingUserAccount.setActive(userInfo.get("IsActive")
-							.booleanValue());
-					isActiveUser = userInfo.get("IsActive").booleanValue();
-				}
-			} else {
-				newAccount.setActive(userInfo.get("IsActive").booleanValue());
-			}
-			if (!userID.equals("0")) {
-				if (existingUserAccount.isDeleted() != !userInfo
-						.get("IsActive").booleanValue()) {
-					existingUserAccount.setDeleted(!userInfo.get("IsActive")
-							.booleanValue());
-				}
-			} else {
-				newAccount.setDeleted(!userInfo.get("IsActive").booleanValue());
-			}
-			if (!userID.equals("0")) {
-				if (existingUserProfile.isDeleted() != !userInfo
-						.get("IsActive").booleanValue()) {
-					existingUserProfile.setDeleted(!userInfo.get("IsActive")
-							.booleanValue());
-				}
-			} else {
-				newProfile.setDeleted(!userInfo.get("IsActive").booleanValue());
-			}
-		}
-		return isActiveUser;
-	}
-
-	/**
-	 * Adds General User Info
-	 * 
-	 * @param userID
-	 * @param newProfile
-	 * @param existingUserProfile
-	 * @param userInfo
-	 * @throws ParseException
-	 */
-	private void addGeneralUserInfo(String userID, UserProfile newProfile,
-			UserProfile existingUserProfile, JsonNode userInfo)
-			throws ParseException {
-		if (userInfo != null && userInfo.has("FirstName")) {
-			if (!userID.equals("0")) {
-				if (!existingUserProfile.getFirstName().equals(
-						userInfo.get("FirstName").textValue())) {
-					existingUserProfile.setFirstName(userInfo.get("FirstName")
-							.textValue());
-				}
-			} else {
-				newProfile.setFirstName(userInfo.get("FirstName").textValue());
-			}
-		}
-		if (userInfo != null && userInfo.has("MiddleName")) {
-			if (!userID.equals("0")) {
-				if (!existingUserProfile.getMiddleName().equals(
-						userInfo.get("MiddleName").textValue())) {
-					existingUserProfile.setMiddleName(userInfo
-							.get("MiddleName").textValue());
-				}
-			} else {
-				newProfile
-						.setMiddleName(userInfo.get("MiddleName").textValue());
-			}
-		}
-		if (userInfo != null && userInfo.has("LastName")) {
-			if (!userID.equals("0")) {
-				if (!existingUserProfile.getLastName().equals(
-						userInfo.get("LastName").textValue())) {
-					existingUserProfile.setLastName(userInfo.get("LastName")
-							.textValue());
-				}
-			} else {
-				newProfile.setLastName(userInfo.get("LastName").textValue());
-			}
-		}
-		if (userInfo != null && userInfo.has("DOB")) {
-			Date dob = formatter.parse(userInfo.get("DOB").textValue());
-			if (!userID.equals("0")) {
-				if (!existingUserProfile.getDateOfBirth().equals(dob)) {
-					existingUserProfile.setDateOfBirth(dob);
-				}
-			} else {
-				newProfile.setDateOfBirth(dob);
-			}
-		}
-		if (userInfo != null && userInfo.has("Gender")) {
-			if (!userID.equals("0")) {
-				if (!existingUserProfile.getGender().equals(
-						userInfo.get("Gender").textValue())) {
-					existingUserProfile.setGender(userInfo.get("Gender")
-							.textValue());
-				}
-			} else {
-				newProfile.setGender(userInfo.get("Gender").textValue());
-			}
-		}
-	}
-
-	/**
-	 * Adds Admin User's Details
-	 * 
-	 * @param userID
-	 * @param newProfile
-	 * @param existingUserProfile
-	 * @param userInfo
-	 */
-	private void addAdminUserDetails(String userID, UserProfile newProfile,
-			UserProfile existingUserProfile, JsonNode userInfo) {
-		PositionDetails newDetails = new PositionDetails();
-		newDetails.setPositionType("University administrator");
-		newDetails.setPositionTitle(userInfo.get("positionTitle").textValue());
-		newDetails.setAsDefault(true);
-		if (!userID.equals("0")) {
-			existingUserProfile.getDetails().clear();
-			existingUserProfile.getDetails().add(newDetails);
-		} else {
-			newProfile.getDetails().add(newDetails);
-		}
-	}
-
-	/**
-	 * Adds User's Position Details
-	 * 
-	 * @param userID
-	 * @param newProfile
-	 * @param existingUserProfile
-	 * @param userInfo
-	 */
-	private void addUserPositionDetails(String userID, UserProfile newProfile,
-			UserProfile existingUserProfile, JsonNode userInfo) {
-		if (!userID.equals("0")) {
-			existingUserProfile.getDetails().clear();
-		}
-		String[] rows = userInfo.get("SaveOptions").textValue().split("#!#");
-		for (String col : rows) {
-			String[] cols = col.split("!#!");
-			PositionDetails newDetails = new PositionDetails();
-			newDetails.setCollege(cols[0]);
-			newDetails.setDepartment(cols[1]);
-			newDetails.setPositionType(cols[2]);
-			newDetails.setPositionTitle(cols[3]);
-			newDetails.setAsDefault(Boolean.parseBoolean(cols[4]));
-			if (!userID.equals("0")) {
-				existingUserProfile.getDetails().add(newDetails);
-			} else {
-				newProfile.getDetails().add(newDetails);
-			}
-		}
-	}
-
-	/**
-	 * Adds User's Email Details
-	 * 
-	 * @param userID
-	 * @param newProfile
-	 * @param existingUserProfile
-	 * @param userInfo
-	 */
-	private void addEmailDetails(String userID, UserProfile newProfile,
-			UserProfile existingUserProfile, JsonNode userInfo) {
-		if (userInfo != null && userInfo.has("WorkEmail")) {
-			if (!userID.equals("0")) {
-				boolean alreadyExist = false;
-				for (String workEmail : existingUserProfile.getWorkEmails()) {
-					if (workEmail.equals(userInfo.get("WorkEmail").textValue())) {
-						alreadyExist = true;
-						break;
-					}
-				}
-				if (!alreadyExist) {
-					existingUserProfile.getWorkEmails().clear();
-					existingUserProfile.getWorkEmails().add(
-							userInfo.get("WorkEmail").textValue());
-				}
-			} else {
-				newProfile.getWorkEmails().add(
-						userInfo.get("WorkEmail").textValue());
-			}
-		}
-		if (userInfo != null && userInfo.has("PersonalEmail")) {
-			if (!userID.equals("0")) {
-				boolean alreadyExist = false;
-				for (String personalEmail : existingUserProfile
-						.getPersonalEmails()) {
-					if (personalEmail.equals(userInfo.get("PersonalEmail")
-							.textValue())) {
-						alreadyExist = true;
-						break;
-					}
-				}
-				if (!alreadyExist) {
-					existingUserProfile.getPersonalEmails().clear();
-					existingUserProfile.getPersonalEmails().add(
-							userInfo.get("PersonalEmail").textValue());
-				}
-			} else {
-				newProfile.getPersonalEmails().add(
-						userInfo.get("PersonalEmail").textValue());
-			}
-		}
-	}
-
-	/**
-	 * Adds User's Phone Number Details
-	 * 
-	 * @param userID
-	 * @param newProfile
-	 * @param existingUserProfile
-	 * @param userInfo
-	 */
-	private void addPhoneNumberDetails(String userID, UserProfile newProfile,
-			UserProfile existingUserProfile, JsonNode userInfo) {
-		if (userInfo != null && userInfo.has("OfficeNumber")) {
-			if (!userID.equals("0")) {
-				boolean alreadyExist = false;
-				for (String officeNo : existingUserProfile.getOfficeNumbers()) {
-					if (officeNo.equals(userInfo.get("OfficeNumber")
-							.textValue())) {
-						alreadyExist = true;
-						break;
-					}
-				}
-				if (!alreadyExist) {
-					existingUserProfile.getOfficeNumbers().clear();
-					existingUserProfile.getOfficeNumbers().add(
-							userInfo.get("OfficeNumber").textValue());
-				}
-			} else {
-				newProfile.getOfficeNumbers().add(
-						userInfo.get("OfficeNumber").textValue());
-			}
-		}
-		if (userInfo != null && userInfo.has("MobileNumber")) {
-			if (!userID.equals("0")) {
-				boolean alreadyExist = false;
-				for (String mobileNo : existingUserProfile.getMobileNumbers()) {
-					if (mobileNo.equals(userInfo.get("MobileNumber")
-							.textValue())) {
-						alreadyExist = true;
-						break;
-					}
-				}
-				if (!alreadyExist) {
-					existingUserProfile.getMobileNumbers().clear();
-					existingUserProfile.getMobileNumbers().add(
-							userInfo.get("MobileNumber").textValue());
-				}
-			} else {
-				newProfile.getMobileNumbers().add(
-						userInfo.get("MobileNumber").textValue());
-			}
-		}
-		if (userInfo != null && userInfo.has("HomeNumber")) {
-			if (!userID.equals("0")) {
-				boolean alreadyExist = false;
-				for (String homeNo : existingUserProfile.getHomeNumbers()) {
-					if (homeNo.equals(userInfo.get("HomeNumber").textValue())) {
-						alreadyExist = true;
-						break;
-					}
-				}
-				if (!alreadyExist) {
-					existingUserProfile.getHomeNumbers().clear();
-					existingUserProfile.getHomeNumbers().add(
-							userInfo.get("HomeNumber").textValue());
-				}
-			} else {
-				newProfile.getHomeNumbers().add(
-						userInfo.get("HomeNumber").textValue());
-			}
-		}
-		if (userInfo != null && userInfo.has("OtherNumber")) {
-			if (!userID.equals("0")) {
-				boolean alreadyExist = false;
-				for (String otherNo : existingUserProfile.getOtherNumbers()) {
-					if (otherNo.equals(userInfo.get("OtherNumber").textValue())) {
-						alreadyExist = true;
-						break;
-					}
-				}
-				if (!alreadyExist) {
-					existingUserProfile.getOtherNumbers().clear();
-					existingUserProfile.getOtherNumbers().add(
-							userInfo.get("OtherNumber").textValue());
-				}
-			} else {
-				newProfile.getOtherNumbers().add(
-						userInfo.get("OtherNumber").textValue());
-			}
-		}
-	}
-
-	/**
-	 * Adds User's Address Details
-	 * 
-	 * @param userID
-	 * @param newProfile
-	 * @param existingUserProfile
-	 * @param userInfo
-	 */
-	private void addAddressDetails(String userID, UserProfile newProfile,
-			UserProfile existingUserProfile, JsonNode userInfo) {
-		Address newAddress = new Address();
-		if (userInfo != null && userInfo.has("Street")) {
-			newAddress.setStreet(userInfo.get("Street").textValue());
-		}
-		if (userInfo != null && userInfo.has("Apt")) {
-			newAddress.setApt(userInfo.get("Apt").textValue());
-		}
-		if (userInfo != null && userInfo.has("City")) {
-			newAddress.setCity(userInfo.get("City").textValue());
-		}
-		if (userInfo != null && userInfo.has("State")) {
-			newAddress.setState(userInfo.get("State").textValue());
-		}
-		if (userInfo != null && userInfo.has("Zip")) {
-			newAddress.setZipcode(userInfo.get("Zip").textValue());
-		}
-		if (userInfo != null && userInfo.has("Country")) {
-			newAddress.setCountry(userInfo.get("Country").textValue());
-		}
-		if (!userID.equals("0")) {
-			boolean alreadyExist = false;
-			for (Address address : existingUserProfile.getAddresses()) {
-				if (address.equals(newAddress)) {
-					alreadyExist = true;
-					break;
-				}
-			}
-			if (!alreadyExist) {
-				existingUserProfile.getAddresses().clear();
-				existingUserProfile.getAddresses().add(newAddress);
-			}
-		} else {
-			newProfile.getAddresses().add(newAddress);
-		}
 	}
 
 	/**

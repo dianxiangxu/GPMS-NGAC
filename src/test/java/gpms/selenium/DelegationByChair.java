@@ -296,16 +296,14 @@ public class DelegationByChair {
 
 		((JavascriptExecutor) driver)
 				.executeScript("var s=document.getElementById('edit0');s.click();");
-		Thread.sleep(500);
-
-		// assertTrue(isElementPresent(By.id("btnApproveProposal")));
+		Thread.sleep(1000);
 
 		assertFalse(driver.findElement(By.id("btnApproveProposal"))
 				.isDisplayed());
-		Thread.sleep(2000);
+		Thread.sleep(1000);
 
 		driver.findElement(By.id("ui-id-21")).click();
-		Thread.sleep(500);
+		Thread.sleep(1000);
 
 		driver.findElement(By.cssSelector("span.myProfile.icon-arrow-s"))
 				.click();
@@ -333,19 +331,19 @@ public class DelegationByChair {
 		driver.findElement(By.id("txtDelegationFrom")).click();
 		Thread.sleep(500);
 		driver.findElement(By.linkText("1")).click();
-		Thread.sleep(400);
+		Thread.sleep(500);
 		driver.findElement(By.id("txtDelegationTo")).click();
 		Thread.sleep(500);
-		driver.findElement(By.linkText("30")).click();
-		Thread.sleep(400);
+		driver.findElement(By.linkText("31")).click();
+		Thread.sleep(500);
 		driver.findElement(By.id("txtDelegationReason")).clear();
-		Thread.sleep(1000);
+		Thread.sleep(500);
 		driver.findElement(By.id("txtDelegationReason"))
 				.sendKeys("Sick Leave!");
-		Thread.sleep(2000);
+		Thread.sleep(500);
 
 		driver.findElement(By.id("btnSaveDelegation")).click();
-		Thread.sleep(1000);
+		Thread.sleep(500);
 		driver.findElement(By.id("BoxConfirmBtnOk")).click();
 		Thread.sleep(500);
 
@@ -358,7 +356,7 @@ public class DelegationByChair {
 				.click();
 		Thread.sleep(200);
 		driver.findElement(By.linkText("Log Out")).click();
-		Thread.sleep(2000);
+		Thread.sleep(1000);
 
 		// Associate Chair Approve Success
 		driver.get(baseUrl + "GPMS/");

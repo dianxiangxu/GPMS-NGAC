@@ -268,13 +268,11 @@ public class ProposalAddSuccessByTenuredFaculty {
 		driver.findElement(By.id("btnSaveProposal")).click();
 		Thread.sleep(200);
 		driver.findElement(By.id("BoxConfirmBtnOk")).click();
-		Thread.sleep(2000);
+		Thread.sleep(200);
 		assertTrue(driver.findElement(By.cssSelector("BODY")).getText()
 				.matches("^[\\s\\S]*$"));
 		Thread.sleep(200);
 		driver.findElement(By.id("BoxAlertBtnOk")).click();
-		// Thread.sleep(2000);
-		// driver.findElement(By.linkText("My Proposals")).click();
 		Thread.sleep(200);
 		((JavascriptExecutor) driver)
 				.executeScript("var s=document.getElementById('edit0');s.click();");

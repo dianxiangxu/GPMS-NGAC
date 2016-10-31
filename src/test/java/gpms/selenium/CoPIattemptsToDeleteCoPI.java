@@ -59,11 +59,12 @@ public class CoPIattemptsToDeleteCoPI {
 		Thread.sleep(200);
 		driver.findElement(By.name("AddCoPI")).click();
 		Thread.sleep(200);
-		driver.findElement(By.name("AddCoPI")).click();
-		Thread.sleep(200);
 		driver.findElement(By.id("btnSaveProposal")).click();
 		Thread.sleep(200);
 		driver.findElement(By.id("BoxConfirmBtnOk")).click();
+		Thread.sleep(200);
+		assertTrue(driver.findElement(By.cssSelector("BODY")).getText()
+				.matches("^[\\s\\S]*$"));
 		Thread.sleep(200);
 		driver.findElement(By.id("BoxAlertBtnOk")).click();
 		Thread.sleep(200);

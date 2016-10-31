@@ -54,7 +54,7 @@ public class DelegationDAO extends BasicDAO<Delegation, String> {
 	private static Morphia morphia;
 	private static Datastore ds;
 	private AuditLog audit = new AuditLog();
-	DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+	private DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 
 	private static Morphia getMorphia() throws UnknownHostException,
 			MongoException {
@@ -91,7 +91,7 @@ public class DelegationDAO extends BasicDAO<Delegation, String> {
 		String createdFrom = delegationInfo.getCreatedFrom();
 		String createdTo = delegationInfo.getCreatedTo();
 		String delegatedAction = delegationInfo.getDelegatedAction();
-		Boolean isRevoked = delegationInfo.isRevoked();
+		Boolean isRevoked = delegationInfo.getIsRevoked();
 		String delegatorID = userInfo.getUserProfileID();
 		String delegatedCollege = userInfo.getUserCollege();
 		String delegatedDepartment = userInfo.getUserDepartment();
@@ -198,7 +198,7 @@ public class DelegationDAO extends BasicDAO<Delegation, String> {
 		String createdFrom = delegationInfo.getCreatedFrom();
 		String createdTo = delegationInfo.getCreatedTo();
 		String delegatedAction = delegationInfo.getDelegatedAction();
-		Boolean isRevoked = delegationInfo.isRevoked();
+		Boolean isRevoked = delegationInfo.getIsRevoked();
 		String delegatorID = userInfo.getUserProfileID();
 		String delegatedCollege = userInfo.getUserCollege();
 		String delegatedDepartment = userInfo.getUserDepartment();
@@ -666,8 +666,10 @@ public class DelegationDAO extends BasicDAO<Delegation, String> {
 			JsonNode delegationInfo) throws Exception, ParseException {
 		addDelegatedActions(delegationID, newDelegation, existingDelegation,
 				delegationInfo);
-		addDelegateeInfo(userInfo, delegationID, delegateeProfile,
-				newDelegation, delegationInfo);
+		if (delegateeProfile != null) {
+			addDelegateeInfo(userInfo, delegationID, delegateeProfile,
+					newDelegation, delegationInfo);
+		}
 		addDelegationDuration(delegationID, newDelegation, existingDelegation,
 				delegationInfo);
 		addDelegationReason(delegationID, newDelegation, existingDelegation,
@@ -714,18 +716,22 @@ public class DelegationDAO extends BasicDAO<Delegation, String> {
 	public void addDelegateeInfo(GPMSCommonInfo userInfo, String delegationID,
 			UserProfile delegateeProfile, Delegation newDelegation,
 			JsonNode delegationInfo) throws Exception {
-		if (delegationID.equals("0")) {
-			newDelegation.setDelegateeId(delegationID);
-			newDelegation.setDelegateeUsername(delegateeProfile
-					.getUserAccount().getUserName());
-			newDelegation.setDelegateeEmail(delegateeProfile.getWorkEmails()
-					.get(0));
-			newDelegation.setDelegatedCollege(userInfo.getUserCollege());
-			newDelegation.setDelegatedDepartment(userInfo.getUserDepartment());
-			newDelegation.setDelegatedPositionType(userInfo
-					.getUserPositionType());
-			newDelegation.setDelegatedPositionTitle(userInfo
-					.getUserPositionTitle());
+		if (delegationInfo != null && delegationInfo.has("DelegateeId")) {
+			String delegateeId = delegationInfo.get("DelegateeId").textValue();
+			if (delegationID.equals("0")) {
+				newDelegation.setDelegateeId(delegateeId);
+				newDelegation.setDelegateeUsername(delegateeProfile
+						.getUserAccount().getUserName());
+				newDelegation.setDelegateeEmail(delegateeProfile
+						.getWorkEmails().get(0));
+				newDelegation.setDelegatedCollege(userInfo.getUserCollege());
+				newDelegation.setDelegatedDepartment(userInfo
+						.getUserDepartment());
+				newDelegation.setDelegatedPositionType(userInfo
+						.getUserPositionType());
+				newDelegation.setDelegatedPositionTitle(userInfo
+						.getUserPositionTitle());
+			}
 		}
 		if (delegationInfo != null && delegationInfo.has("Delegatee")) {
 			final String delegatee = delegationInfo.get("Delegatee")

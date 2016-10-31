@@ -11,11 +11,11 @@ public class DelegationCommonInfo implements Serializable {
 	 */
 	private static final long serialVersionUID = 1L;
 
-	private String delegatee;
-	private String createdFrom;
-	private String createdTo;
-	private String delegatedAction;
-	private Boolean isRevoked;
+	private String delegatee = new String();
+	private String createdFrom = new String();
+	private String createdTo = new String();
+	private String delegatedAction = new String();
+	private Boolean isRevoked = null;
 
 	public DelegationCommonInfo() {
 
@@ -75,11 +75,11 @@ public class DelegationCommonInfo implements Serializable {
 		this.delegatedAction = delegatedAction;
 	}
 
-	public boolean isRevoked() {
+	public Boolean getIsRevoked() {
 		return isRevoked;
 	}
 
-	public void setRevoked(boolean isRevoked) {
+	public void setIsRevoked(Boolean isRevoked) {
 		this.isRevoked = isRevoked;
 	}
 
