@@ -44,7 +44,7 @@ public class PIUploadsFileAttatchment {
 		String uploadLocation = this.getClass().getResource(uploadFolderName)
 				.toURI().getPath();
 		uploadFile = uploadLocation + "/teapot.jpg";
-		uploadFile = uploadFile.substring(1).replace("/", "\\");
+		uploadFile = uploadFile.replace("/", "\\").substring(1);
 	}
 
 	@Test
@@ -116,7 +116,7 @@ public class PIUploadsFileAttatchment {
 				.click();
 		Thread.sleep(500);
 		driver.findElement(By.linkText("Log Out")).click();
-		Thread.sleep(2000);
+		Thread.sleep(1000);
 	}
 
 	@After

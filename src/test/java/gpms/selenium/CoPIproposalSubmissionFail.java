@@ -52,8 +52,6 @@ public class CoPIproposalSubmissionFail {
 		driver.findElement(By.cssSelector("li.sfLevel1 > a > span")).click();
 		driver.findElement(By.id("btnAddNew")).click();
 		Thread.sleep(200);
-		driver.findElement(By.name("AddCoPI")).click();
-		Thread.sleep(200);
 		driver.findElement(By.cssSelector("i.sidebarExpand")).click();
 		Thread.sleep(200);
 		driver.findElement(By.id("lblSection2")).click();
@@ -62,11 +60,10 @@ public class CoPIproposalSubmissionFail {
 		Thread.sleep(200);
 		driver.findElement(By.id("txtProjectTitle")).clear();
 		Thread.sleep(200);
-
 		int randTest = (int) (Math.random() * 9999);
 
 		driver.findElement(By.id("txtProjectTitle")).sendKeys(
-				"proposal tests" + randTest);
+				"Chemistry Proposal" + randTest);
 		Thread.sleep(200);
 		driver.findElement(By.cssSelector("td.cssClassTableRightCol")).click();
 		Thread.sleep(200);
@@ -183,10 +180,9 @@ public class CoPIproposalSubmissionFail {
 				By.cssSelector("#ddlUseHumanSubjects > option[value=\"1\"]"))
 				.click();
 		Thread.sleep(200);
-		// driver.findElement(By.name("IRBOptions")).click();
+		new Select(driver.findElement(By.id("ddlUseHumanSubjects")))
+				.selectByVisibleText("No");
 		Thread.sleep(200);
-		new Select(driver.findElement(By.id("ddlIRBOptions")))
-				.selectByVisibleText("Pending");
 		driver.findElement(
 				By.cssSelector("#ddlUseHumanSubjects > option[value=\"2\"]"))
 				.click();
@@ -249,7 +245,6 @@ public class CoPIproposalSubmissionFail {
 		driver.findElement(By.id("ui-id-21")).click();
 		Thread.sleep(200);
 		driver.findElement(By.id("pi_signature")).clear();
-		Thread.sleep(200);
 		driver.findElement(By.id("pi_signature")).sendKeys("Nicholas chapa");
 		Thread.sleep(200);
 		driver.findElement(By.id("pi_signaturedate")).click();
@@ -273,8 +268,24 @@ public class CoPIproposalSubmissionFail {
 				.matches("^[\\s\\S]*$"));
 		Thread.sleep(200);
 		driver.findElement(By.id("BoxAlertBtnOk")).click();
-		Thread.sleep(200);
+		Thread.sleep(500);
 
+		((JavascriptExecutor) driver)
+				.executeScript("var s=document.getElementById('edit0');s.click();");
+		Thread.sleep(200);
+		driver.findElement(By.id("lblSection1")).click();
+		Thread.sleep(200);
+		driver.findElement(By.name("AddCoPI")).click();
+		Thread.sleep(200);
+		driver.findElement(By.id("btnSaveProposal")).click();
+		Thread.sleep(200);
+		driver.findElement(By.id("BoxConfirmBtnOk")).click();
+		Thread.sleep(200);
+		assertTrue(driver.findElement(By.cssSelector("BODY")).getText()
+				.matches("^[\\s\\S]*$"));
+		Thread.sleep(200);
+		driver.findElement(By.id("BoxAlertBtnOk")).click();
+		Thread.sleep(200);
 		driver.findElement(By.cssSelector("span.myProfile.icon-arrow-s"))
 				.click();
 		Thread.sleep(200);

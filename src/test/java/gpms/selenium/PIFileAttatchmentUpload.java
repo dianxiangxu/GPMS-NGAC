@@ -45,7 +45,7 @@ public class PIFileAttatchmentUpload {
 		String uploadLocation = this.getClass().getResource(uploadFolderName)
 				.toURI().getRawPath();
 		uploadFile = uploadLocation + "/teapot.jpg";
-		uploadFile = uploadFile.substring(1).replace("/", "\\");
+		uploadFile = uploadFile.replace("/", "\\").substring(1);
 	}
 
 	@Test
@@ -282,32 +282,26 @@ public class PIFileAttatchmentUpload {
 		Thread.sleep(2000);
 		driver.findElement(By.id("BoxAlertBtnOk")).click();
 
-		Thread.sleep(2000);
-		((JavascriptExecutor) driver)
-				.executeScript("var s=document.getElementById('edit0');s.click();");
-
-		Thread.sleep(200);
-
 		// File Attachments
 		StringSelection st = new StringSelection(uploadFile);
 
 		Toolkit.getDefaultToolkit().getSystemClipboard().setContents(st, null);
-		Thread.sleep(200);
+		Thread.sleep(500);
 
 		((JavascriptExecutor) driver)
 				.executeScript("var s=document.getElementById('edit0');s.click();");
-		Thread.sleep(200);
+		Thread.sleep(500);
 		driver.findElement(By.id("lblSection13")).click();
 		Thread.sleep(1000);
 
 		driver.findElement(By.cssSelector("div.ajax-file-upload")).click();
-		Thread.sleep(200);
+		Thread.sleep(500);
 		Robot robot = new Robot();
 
 		robot.keyPress(KeyEvent.VK_ENTER);
 		robot.keyRelease(KeyEvent.VK_ENTER);
 
-		Thread.sleep(200);
+		Thread.sleep(500);
 
 		robot.keyPress(KeyEvent.VK_CONTROL);
 		robot.keyPress(KeyEvent.VK_V);
@@ -320,13 +314,13 @@ public class PIFileAttatchmentUpload {
 		robot.keyPress(KeyEvent.VK_ENTER);
 		robot.keyRelease(KeyEvent.VK_ENTER);
 
-		Thread.sleep(200);
+		Thread.sleep(500);
 
 		driver.findElement(
 				By.xpath(".//*[@id='ui-id-26']/div[2]/div/div[2]/input"))
 				.sendKeys("Test" + randTest);
 
-		Thread.sleep(200);
+		Thread.sleep(500);
 
 		driver.findElement(By.id("btnSaveProposal")).click();
 		Thread.sleep(200);

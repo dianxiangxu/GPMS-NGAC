@@ -60,8 +60,9 @@ public class ChairApprovalFail {
 		driver.findElement(By.id("lblSection2")).click();
 		driver.findElement(By.id("txtProjectTitle")).click();
 		driver.findElement(By.id("txtProjectTitle")).clear();
+		int randTest = (int) (Math.random() * 9999);
 		driver.findElement(By.id("txtProjectTitle")).sendKeys(
-				"Chair approval fail test2223");
+				"Chair approval fail test" + randTest);
 		driver.findElement(By.cssSelector("td.cssClassTableRightCol")).click();
 		new Select(driver.findElement(By.id("ddlProjectType")))
 				.selectByVisibleText("Research-Applied");
