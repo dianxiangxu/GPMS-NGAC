@@ -332,7 +332,7 @@ public class NotificationDAO extends BasicDAO<NotificationLog, String> {
 		if (userProfile.isDeleted()) {
 			messageBody = "Hello "
 					+ userProfile.getFullName()
-					+ ",<br/> Your account has been deleted to reactivate you can contact administrator: <a href='http://seal.boisestate.edu:8080/GPMS/ContactUs.jsp' title='GPMS Contact Us' target='_blank'>Contact Us</a><br/><br/>Thank you, <br/> GPMS Team";
+					+ ",<br/> Your account has been deleted to reactivate you can contact administrator: <a href='http://seal.boisestate.edu/GPMS/ContactUs.jsp' title='GPMS Contact Us' target='_blank'>Contact Us</a><br/><br/>Thank you, <br/> GPMS Team";
 			emailUtil.sendMailWithoutAuth(userProfile.getWorkEmails().get(0),
 					"You have been deleted " + userProfile.getFullName(),
 					messageBody);
@@ -365,7 +365,7 @@ public class NotificationDAO extends BasicDAO<NotificationLog, String> {
 			notificationMessage = "Account is activated.";
 			messageBody = "Hello "
 					+ userProfile.getFullName()
-					+ ",<br/><br/> Your account has been activated and you can login now using your credential: <a href='http://seal.boisestate.edu:8080/GPMS/Login.jsp' title='GPMS Login' target='_blank'>Login Here</a><br/><br/>Thank you, <br/> GPMS Team";
+					+ ",<br/><br/> Your account has been activated and you can login now using your credential: <a href='http://seal.boisestate.edu/GPMS/Login.jsp' title='GPMS Login' target='_blank'>Login Here</a><br/><br/>Thank you, <br/> GPMS Team";
 			emailUtil.sendMailWithoutAuth(
 					userProfile.getWorkEmails().get(0),
 					"Successfully Activated your account "
@@ -376,7 +376,7 @@ public class NotificationDAO extends BasicDAO<NotificationLog, String> {
 
 			messageBody = "Hello "
 					+ userProfile.getFullName()
-					+ ",<br/> Your account has been deactivated to reactivate you can contact administrator: <a href='http://seal.boisestate.edu:8080/GPMS/ContactUs.jsp' title='GPMS Contact Us' target='_blank'>Contact Us</a><br/><br/>Thank you, <br/> GPMS Team";
+					+ ",<br/> Your account has been deactivated to reactivate you can contact administrator: <a href='http://seal.boisestate.edu/GPMS/ContactUs.jsp' title='GPMS Contact Us' target='_blank'>Contact Us</a><br/><br/>Thank you, <br/> GPMS Team";
 			emailUtil.sendMailWithoutAuth(userProfile.getWorkEmails().get(0),
 					"You have been Deactivated " + userProfile.getFullName(),
 					messageBody);

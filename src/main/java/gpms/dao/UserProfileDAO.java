@@ -622,7 +622,7 @@ public class UserProfileDAO extends BasicDAO<UserProfile, String> {
 		ds.save(newProfile);
 		String messageBody = "Hello "
 				+ newProfile.getFullName()
-				+ ",<br/><br/> You have successfully created an account. As soon as administrator will activate and assign you on positions you will get an email and then only you can login. If you want to activate as soon as possible please contact administrator: <a href='http://seal.boisestate.edu:8080/GPMS/ContactUs.jsp' title='GPMS Contact Us' target='_blank'>Contact Us</a><br/><br/>Thank you, <br/> GPMS Team";
+				+ ",<br/><br/> You have successfully created an account. As soon as administrator will activate and assign you on positions you will get an email and then only you can login. If you want to activate as soon as possible please contact administrator: <a href='http://seal.boisestate.edu/GPMS/ContactUs.jsp' title='GPMS Contact Us' target='_blank'>Contact Us</a><br/><br/>Thank you, <br/> GPMS Team";
 		EmailUtil emailUtil = new EmailUtil();
 		emailUtil.sendMailWithoutAuth(newProfile.getWorkEmails().get(0),
 				"Successfully created an account " + newProfile.getFullName(),
@@ -641,7 +641,7 @@ public class UserProfileDAO extends BasicDAO<UserProfile, String> {
 		if (newProfile.getUserAccount().isActive()) {
 			messageBody = "Hello "
 					+ newProfile.getFullName()
-					+ ",<br/><br/> You have been activated and you can login now using your credential: <a href='http://seal.boisestate.edu:8080/GPMS/Login.jsp' title='GPMS Login' target='_blank'>Login Here</a><br/><br/>Thank you, <br/> GPMS Team";
+					+ ",<br/><br/> You have been activated and you can login now using your credential: <a href='http://seal.boisestate.edu/GPMS/Login.jsp' title='GPMS Login' target='_blank'>Login Here</a><br/><br/>Thank you, <br/> GPMS Team";
 			emailUtil.sendMailWithoutAuth(
 					newProfile.getWorkEmails().get(0),
 					"Successfully Activated your account "
@@ -649,7 +649,7 @@ public class UserProfileDAO extends BasicDAO<UserProfile, String> {
 		} else {
 			messageBody = "Hello "
 					+ newProfile.getFullName()
-					+ ",<br/> You are not activated yet to activate please contact administrator: <a href='http://seal.boisestate.edu:8080/GPMS/ContactUs.jsp' title='GPMS Contact Us' target='_blank'>Contact Us</a><br/><br/>Thank you, <br/> GPMS Team";
+					+ ",<br/> You are not activated yet to activate please contact administrator: <a href='http://seal.boisestate.edu/GPMS/ContactUs.jsp' title='GPMS Contact Us' target='_blank'>Contact Us</a><br/><br/>Thank you, <br/> GPMS Team";
 			emailUtil.sendMailWithoutAuth(newProfile.getWorkEmails().get(0),
 					"You are not activated yet " + newProfile.getFullName(),
 					messageBody);
@@ -670,14 +670,14 @@ public class UserProfileDAO extends BasicDAO<UserProfile, String> {
 		if (existingUserProfile.getUserAccount().isActive()) {
 			messageBody = "Hello "
 					+ existingUserProfile.getFullName()
-					+ ",<br/><br/> Your account has been activated and you can login now using your credential: <a href='http://seal.boisestate.edu:8080/GPMS/Login.jsp' title='GPMS Login' target='_blank'>Login Here</a><br/><br/>Thank you, <br/> GPMS Team";
+					+ ",<br/><br/> Your account has been activated and you can login now using your credential: <a href='http://seal.boisestate.edu/GPMS/Login.jsp' title='GPMS Login' target='_blank'>Login Here</a><br/><br/>Thank you, <br/> GPMS Team";
 			emailUtil.sendMailWithoutAuth(existingUserProfile.getWorkEmails()
 					.get(0), "Successfully Activated your account "
 					+ existingUserProfile.getFullName(), messageBody);
 		} else {
 			messageBody = "Hello "
 					+ existingUserProfile.getFullName()
-					+ ",<br/> Your account has been deactivated to reactivate you can contact administrator: <a href='http://seal.boisestate.edu:8080/GPMS/ContactUs.jsp' title='GPMS Contact Us' target='_blank'>Contact Us</a><br/><br/>Thank you, <br/> GPMS Team";
+					+ ",<br/> Your account has been deactivated to reactivate you can contact administrator: <a href='http://seal.boisestate.edu/GPMS/ContactUs.jsp' title='GPMS Contact Us' target='_blank'>Contact Us</a><br/><br/>Thank you, <br/> GPMS Team";
 			emailUtil.sendMailWithoutAuth(
 					existingUserProfile.getWorkEmails().get(0),
 					"You have been Deactivated "
@@ -699,7 +699,7 @@ public class UserProfileDAO extends BasicDAO<UserProfile, String> {
 		if (userProfile.isDeleted()) {
 			messageBody = "Hello "
 					+ userProfile.getFullName()
-					+ ",<br/> Your account has been deleted to reactivate you can contact administrator: <a href='http://seal.boisestate.edu:8080/GPMS/ContactUs.jsp' title='GPMS Contact Us' target='_blank'>Contact Us</a><br/><br/>Thank you, <br/> GPMS Team";
+					+ ",<br/> Your account has been deleted to reactivate you can contact administrator: <a href='http://seal.boisestate.edu/GPMS/ContactUs.jsp' title='GPMS Contact Us' target='_blank'>Contact Us</a><br/><br/>Thank you, <br/> GPMS Team";
 			emailUtil.sendMailWithoutAuth(userProfile.getWorkEmails().get(0),
 					"You have been deleted " + userProfile.getFullName(),
 					messageBody);
