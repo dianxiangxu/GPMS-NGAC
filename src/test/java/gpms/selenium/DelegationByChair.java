@@ -334,7 +334,7 @@ public class DelegationByChair {
 		Thread.sleep(500);
 		driver.findElement(By.id("txtDelegationTo")).click();
 		Thread.sleep(500);
-		driver.findElement(By.linkText("31")).click();
+		driver.findElement(By.linkText("29")).click();
 		Thread.sleep(500);
 		driver.findElement(By.id("txtDelegationReason")).clear();
 		Thread.sleep(500);

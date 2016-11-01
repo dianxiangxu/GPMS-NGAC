@@ -311,12 +311,12 @@ public class SeniorPersonalProposalDeleteFail {
 		((JavascriptExecutor) driver)
 				.executeScript("var s=document.getElementById('btnDeleteProposal');s.click();");
 
-		Thread.sleep(500);
+		Thread.sleep(1000);
 		driver.findElement(By.id("BoxConfirmBtnOk")).click();
 		Thread.sleep(200);
 		assertTrue(driver.findElement(By.cssSelector("BODY")).getText()
 				.matches("^[\\s\\S]*$"));
-		Thread.sleep(200);
+		Thread.sleep(500);
 
 		assertTrue(driver.findElement(By.cssSelector("div.BoxError"))
 				.isDisplayed());
