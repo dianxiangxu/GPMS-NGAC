@@ -1032,8 +1032,6 @@ public class ProposalService {
 			Proposal existingProposal = new Proposal();
 			Proposal oldProposal = new Proposal();
 			boolean signedByCurrentUser = false;
-			StringBuffer contentProfile = new StringBuffer();
-			Accesscontrol ac = new Accesscontrol();
 			if (root != null && root.has("proposalInfo")) {
 				JsonNode proposalInfo = root.get("proposalInfo");
 				if (proposalInfo != null && proposalInfo.has("ProposalID")) {
@@ -1059,52 +1057,10 @@ public class ProposalService {
 					JsonNode policyInfo = root.get("policyInfo");
 					if (policyInfo != null && policyInfo.isArray()
 							&& policyInfo.size() > 0) {
-						HashMap<String, Multimap<String, String>> attrMap = proposalDAO
-								.generateAttributes(policyInfo);
-						List<SignatureUserInfo> signatures = new ArrayList<SignatureUserInfo>();
-						SignatureByAllUsers signByAllUsersInfo = new SignatureByAllUsers();
-						signatures = proposalDAO
-								.generateProposalContentProfile(authorProfile,
-										authorFullName, proposalId,
-										existingProposal, signedByCurrentUser,
-										contentProfile, irbApprovalRequired,
-										signatures, signByAllUsersInfo);
-						Set<AbstractResult> set = ac
-								.getXACMLdecisionWithObligations(attrMap,
-										contentProfile);
-						Iterator<AbstractResult> it = set.iterator();
-						int intDecision = AbstractResult.DECISION_NOT_APPLICABLE;
-						while (it.hasNext()) {
-							AbstractResult ar = it.next();
-							intDecision = ar.getDecision();
-							if (intDecision == AbstractResult.DECISION_INDETERMINATE_DENY
-									|| intDecision == AbstractResult.DECISION_INDETERMINATE_PERMIT
-									|| intDecision == AbstractResult.DECISION_INDETERMINATE_DENY_OR_PERMIT) {
-								intDecision = AbstractResult.DECISION_INDETERMINATE;
-							}
-							System.out.println("Decision:" + intDecision
-									+ " that is: "
-									+ AbstractResult.DECISIONS[intDecision]);
-							if (AbstractResult.DECISIONS[intDecision]
-									.equals("Permit")) {
-								List<ObligationResult> obligations = ar
-										.getObligations();
-								EmailCommonInfo emailDetails = proposalDAO
-										.saveProposalWithObligations(obligations);
-								return sendSaveUpdateNotification(message,
-										proposalId, existingProposal,
-										oldProposal, authorProfile, false,
-										signatures, irbApprovalRequired,
-										signByAllUsersInfo, emailDetails);
-							} else {
-								return Response
-										.status(403)
-										.type(MediaType.APPLICATION_JSON)
-										.entity("Your permission is: "
-												+ AbstractResult.DECISIONS[intDecision])
-										.build();
-							}
-						}
+						checkAccessControlRules(message, authorProfile,
+								authorFullName, proposalId, existingProposal,
+								oldProposal, signedByCurrentUser,
+								irbApprovalRequired, policyInfo);
 					}
 				}
 			} else {
@@ -1117,6 +1073,58 @@ public class ProposalService {
 			log.error(
 					"Could not save a New Proposal or update an existing Proposal error e=",
 					e);
+		}
+		return Response
+				.status(403)
+				.entity("{\"error\": \"Could Not Save A New Proposal OR Update AN Existing Proposal\", \"status\": \"FAIL\"}")
+				.build();
+	}
+
+	private Response checkAccessControlRules(String message,
+			UserProfile authorProfile, String authorFullName,
+			String proposalId, Proposal existingProposal, Proposal oldProposal,
+			boolean signedByCurrentUser, Boolean irbApprovalRequired,
+			JsonNode policyInfo) throws JsonProcessingException {
+		StringBuffer contentProfile = new StringBuffer();
+		Accesscontrol ac = new Accesscontrol();
+		HashMap<String, Multimap<String, String>> attrMap = proposalDAO
+				.generateAttributes(policyInfo);
+		List<SignatureUserInfo> signatures = new ArrayList<SignatureUserInfo>();
+		SignatureByAllUsers signByAllUsersInfo = new SignatureByAllUsers();
+		signatures = proposalDAO.generateProposalContentProfile(authorProfile,
+				authorFullName, proposalId, existingProposal,
+				signedByCurrentUser, contentProfile, irbApprovalRequired,
+				signatures, signByAllUsersInfo);
+		Set<AbstractResult> set = ac.getXACMLdecisionWithObligations(attrMap,
+				contentProfile);
+		Iterator<AbstractResult> it = set.iterator();
+		int intDecision = AbstractResult.DECISION_NOT_APPLICABLE;
+		while (it.hasNext()) {
+			AbstractResult ar = it.next();
+			intDecision = ar.getDecision();
+			if (intDecision == AbstractResult.DECISION_INDETERMINATE_DENY
+					|| intDecision == AbstractResult.DECISION_INDETERMINATE_PERMIT
+					|| intDecision == AbstractResult.DECISION_INDETERMINATE_DENY_OR_PERMIT) {
+				intDecision = AbstractResult.DECISION_INDETERMINATE;
+			}
+			System.out.println("Decision:" + intDecision + " that is: "
+					+ AbstractResult.DECISIONS[intDecision]);
+			if (AbstractResult.DECISIONS[intDecision].equals("Permit")) {
+				List<ObligationResult> obligations = ar.getObligations();
+				EmailCommonInfo emailDetails = proposalDAO
+						.saveProposalWithObligations(obligations);
+				return sendSaveUpdateNotification(message, proposalId,
+						existingProposal, oldProposal, authorProfile, false,
+						signatures, irbApprovalRequired, signByAllUsersInfo,
+						emailDetails);
+			} else {
+				return Response
+						.status(403)
+						.type(MediaType.APPLICATION_JSON)
+						.entity("Your permission is: "
+								+ AbstractResult.DECISIONS[intDecision])
+						.build();
+			}
 		}
 		return Response
 				.status(403)
@@ -1209,7 +1217,7 @@ public class ProposalService {
 				.findUsersExceptInvestigatorForAproposal(id, needPI, needCoPI,
 						needSenior, needChair, needManager, needDean, needIrb,
 						needResearchadmin, needDirector);
-		NotificationLog notification;
+		NotificationLog notification = new NotificationLog();
 		notificationDAO.notifyAdmin(proposalID, projectTitle,
 				notificationMessage, notificationType, isCritical);
 		for (SignatureUserInfo notifyUsers : signatures) {
@@ -1367,6 +1375,7 @@ public class ProposalService {
 			JsonNode root, JsonNode proposalUserTitle) {
 		String notificationMessage = new String();
 		boolean isCritical = false;
+		final String notificationType = "Proposal";
 		if (proposalUserTitle != null) {
 			// For Proposal Roles : PI, Co-PI, Senior
 			JsonNode proposalRoles = root.get("proposalRoles");
@@ -1378,7 +1387,6 @@ public class ProposalService {
 			JsonNode buttonType = root.get("buttonType");
 			// For Proposal Status
 			if (buttonType != null) {
-				NotificationLog notification = new NotificationLog();
 				switch (buttonType.textValue()) {
 				case "Save":
 					notificationMessage = proposalDAO.updateForProposalSave(
@@ -1410,692 +1418,48 @@ public class ProposalService {
 								&& (proposalUserTitle.textValue().equals(
 										"Department Chair") || proposalUserTitle
 										.textValue().equals("Associate Chair"))) {
-							// Returned by Chair
-							existingProposal
-									.setChairApproval(ApprovalType.DISAPPROVED);
-							existingProposal
-									.setSubmittedByPI(SubmitType.NOTSUBMITTED);
-							if (coPICount > 0) {
-								existingProposal
-										.setReadyForSubmissionByPI(false);
-							}
-							existingProposal.getSignatureInfo().clear();
-							// Proposal Status
-							existingProposal.getProposalStatus().clear();
-							existingProposal.getProposalStatus().add(
-									Status.RETURNEDBYCHAIR);
-							for (SignatureUserInfo userToNotify : signatures) {
-								notification = new NotificationLog();
-								if (userToNotify.getPositionTitle().equals(
-										"Department Chair")) {
-									notification.setCritical(true);
-									notification.setType("Proposal");
-									notification.setAction(notificationMessage);
-									notification.setProposalId(proposalID);
-									notification
-											.setProposalTitle(existingProposal
-													.getProjectInfo()
-													.getProjectTitle());
-									notification.setUserProfileId(userToNotify
-											.getUserProfileId());
-									notification.setUsername(userToNotify
-											.getUserName());
-									notification.setCollege(userToNotify
-											.getCollege());
-									notification.setDepartment(userToNotify
-											.getDepartment());
-									notification.setPositionType(userToNotify
-											.getPositionType());
-									notification.setPositionTitle(userToNotify
-											.getPositionTitle());
-								}
-							}
+							notifyReturnedByChair(existingProposal, proposalID,
+									signatures, notificationMessage,
+									isCritical, notificationType, coPICount);
 						} else if (existingProposal
 								.getBusinessManagerApproval() == ApprovalType.READYFORAPPROVAL
 								&& (proposalUserTitle.textValue().equals(
 										"Business Manager") || proposalUserTitle
 										.textValue()
 										.equals("Department Administrative Assistant"))) {
-							// Disapproved by Business Manager
-							existingProposal
-									.setBusinessManagerApproval(ApprovalType.DISAPPROVED);
-							existingProposal
-									.setSubmittedByPI(SubmitType.NOTSUBMITTED);
-							existingProposal
-									.setIrbApproval(ApprovalType.NOTREADYFORAPPROVAL);
-							if (coPICount > 0) {
-								existingProposal
-										.setReadyForSubmissionByPI(false);
-							}
-							existingProposal.getSignatureInfo().clear();
-							// Proposal Status
-							existingProposal.getProposalStatus().clear();
-							existingProposal.getProposalStatus().add(
-									Status.DISAPPROVEDBYBUSINESSMANAGER);
-							for (SignatureUserInfo userToNotify : signatures) {
-								notification = new NotificationLog();
-								if (userToNotify.getPositionTitle().equals(
-										"Business Manager")) {
-									notification.setCritical(true);
-									notification.setType("Proposal");
-									notification.setAction(notificationMessage);
-									notification.setProposalId(proposalID);
-									notification
-											.setProposalTitle(existingProposal
-													.getProjectInfo()
-													.getProjectTitle());
-									notification.setUserProfileId(userToNotify
-											.getUserProfileId());
-									notification.setUsername(userToNotify
-											.getUserName());
-									notification.setCollege(userToNotify
-											.getCollege());
-									notification.setDepartment(userToNotify
-											.getDepartment());
-									notification.setPositionType(userToNotify
-											.getPositionType());
-									notification.setPositionTitle(userToNotify
-											.getPositionTitle());
-								} else if (userToNotify.getPositionTitle()
-										.equals("Department Chair")) {
-									notification.setCritical(true);
-									notification.setType("Proposal");
-									notification.setAction(notificationMessage);
-									notification.setProposalId(proposalID);
-									notification
-											.setProposalTitle(existingProposal
-													.getProjectInfo()
-													.getProjectTitle());
-									notification.setUserProfileId(userToNotify
-											.getUserProfileId());
-									notification.setUsername(userToNotify
-											.getUserName());
-									notification.setCollege(userToNotify
-											.getCollege());
-									notification.setDepartment(userToNotify
-											.getDepartment());
-									notification.setPositionType(userToNotify
-											.getPositionType());
-									notification.setPositionTitle(userToNotify
-											.getPositionTitle());
-								} else if (userToNotify.getPositionTitle()
-										.equals("IRB")) {
-									if (existingProposal.getIrbApproval() == ApprovalType.APPROVED) {
-										notification.setCritical(true);
-										notification.setType("Proposal");
-										notification
-												.setAction(notificationMessage);
-										notification.setProposalId(proposalID);
-										notification
-												.setProposalTitle(existingProposal
-														.getProjectInfo()
-														.getProjectTitle());
-										notification
-												.setUserProfileId(userToNotify
-														.getUserProfileId());
-										notification.setUsername(userToNotify
-												.getUserName());
-										notification.setCollege(userToNotify
-												.getCollege());
-										notification.setDepartment(userToNotify
-												.getDepartment());
-										notification
-												.setPositionType(userToNotify
-														.getPositionType());
-										notification
-												.setPositionTitle(userToNotify
-														.getPositionTitle());
-									}
-								}
-								notificationDAO.save(notification);
-							}
+							notifyDisapprovedByBusinessManager(
+									existingProposal, proposalID, signatures,
+									notificationMessage, isCritical,
+									notificationType, coPICount);
 						} else if (existingProposal.getDeanApproval() == ApprovalType.READYFORAPPROVAL
 								&& (proposalUserTitle.textValue()
 										.equals("Dean") || proposalUserTitle
 										.textValue().equals("Associate Dean"))) {
-							// Returned by Dean
-							existingProposal
-									.setDeanApproval(ApprovalType.DISAPPROVED);
-							existingProposal
-									.setSubmittedByPI(SubmitType.NOTSUBMITTED);
-							if (coPICount > 0) {
-								existingProposal
-										.setReadyForSubmissionByPI(false);
-							}
-							existingProposal.getSignatureInfo().clear();
-							existingProposal.getProposalStatus().clear();
-							existingProposal.getProposalStatus().add(
-									Status.RETURNEDBYDEAN);
-							for (SignatureUserInfo userToNotify : signatures) {
-								notification = new NotificationLog();
-								if (userToNotify.getPositionTitle().equals(
-										"Dean")) {
-									notification.setCritical(true);
-									notification.setType("Proposal");
-									notification.setAction(notificationMessage);
-									notification.setProposalId(proposalID);
-									notification
-											.setProposalTitle(existingProposal
-													.getProjectInfo()
-													.getProjectTitle());
-									notification.setUserProfileId(userToNotify
-											.getUserProfileId());
-									notification.setUsername(userToNotify
-											.getUserName());
-									notification.setCollege(userToNotify
-											.getCollege());
-									notification.setDepartment(userToNotify
-											.getDepartment());
-									notification.setPositionType(userToNotify
-											.getPositionType());
-									notification.setPositionTitle(userToNotify
-											.getPositionTitle());
-								} else if (userToNotify.getPositionTitle()
-										.equals("Business Manager")) {
-									notification.setCritical(true);
-									notification.setType("Proposal");
-									notification.setAction(notificationMessage);
-									notification.setProposalId(proposalID);
-									notification
-											.setProposalTitle(existingProposal
-													.getProjectInfo()
-													.getProjectTitle());
-									notification.setUserProfileId(userToNotify
-											.getUserProfileId());
-									notification.setUsername(userToNotify
-											.getUserName());
-									notification.setCollege(userToNotify
-											.getCollege());
-									notification.setDepartment(userToNotify
-											.getDepartment());
-									notification.setPositionType(userToNotify
-											.getPositionType());
-									notification.setPositionTitle(userToNotify
-											.getPositionTitle());
-								} else if (userToNotify.getPositionTitle()
-										.equals("Department Chair")) {
-									notification.setCritical(true);
-									notification.setType("Proposal");
-									notification.setAction(notificationMessage);
-									notification.setProposalId(proposalID);
-									notification
-											.setProposalTitle(existingProposal
-													.getProjectInfo()
-													.getProjectTitle());
-									notification.setUserProfileId(userToNotify
-											.getUserProfileId());
-									notification.setUsername(userToNotify
-											.getUserName());
-									notification.setCollege(userToNotify
-											.getCollege());
-									notification.setDepartment(userToNotify
-											.getDepartment());
-									notification.setPositionType(userToNotify
-											.getPositionType());
-									notification.setPositionTitle(userToNotify
-											.getPositionTitle());
-								} else if (userToNotify.getPositionTitle()
-										.equals("IRB")) {
-									if (existingProposal.getIrbApproval() == ApprovalType.APPROVED) {
-										notification.setCritical(true);
-										notification.setType("Proposal");
-										notification
-												.setAction(notificationMessage);
-										notification.setProposalId(proposalID);
-										notification
-												.setProposalTitle(existingProposal
-														.getProjectInfo()
-														.getProjectTitle());
-										notification
-												.setUserProfileId(userToNotify
-														.getUserProfileId());
-										notification.setUsername(userToNotify
-												.getUserName());
-										notification.setCollege(userToNotify
-												.getCollege());
-										notification.setDepartment(userToNotify
-												.getDepartment());
-										notification
-												.setPositionType(userToNotify
-														.getPositionType());
-										notification
-												.setPositionTitle(userToNotify
-														.getPositionTitle());
-									}
-								}
-								notificationDAO.save(notification);
-							}
+							notifyReturnedByDean(existingProposal, proposalID,
+									signatures, notificationMessage,
+									isCritical, notificationType, coPICount);
 						} else if (existingProposal.getIrbApproval() == ApprovalType.READYFORAPPROVAL
 								&& proposalUserTitle.textValue().equals("IRB")) {
-							// Disapproved by IRB
-							existingProposal
-									.setIrbApproval(ApprovalType.DISAPPROVED);
-							existingProposal
-									.setSubmittedByPI(SubmitType.NOTSUBMITTED);
-							if (coPICount > 0) {
-								existingProposal
-										.setReadyForSubmissionByPI(false);
-							}
-							existingProposal.getSignatureInfo().clear();
-							// Proposal Status
-							existingProposal.getProposalStatus().clear();
-							existingProposal.getProposalStatus().add(
-									Status.DISAPPROVEDBYIRB);
-
-							for (SignatureUserInfo userToNotify : signatures) {
-								notification = new NotificationLog();
-								if (userToNotify.getPositionTitle().equals(
-										"IRB")) {
-									notification.setCritical(true);
-									notification.setType("Proposal");
-									notification.setAction(notificationMessage);
-									notification.setProposalId(proposalID);
-									notification
-											.setProposalTitle(existingProposal
-													.getProjectInfo()
-													.getProjectTitle());
-									notification.setUserProfileId(userToNotify
-											.getUserProfileId());
-									notification.setUsername(userToNotify
-											.getUserName());
-									notification.setCollege(userToNotify
-											.getCollege());
-									notification.setDepartment(userToNotify
-											.getDepartment());
-									notification.setPositionType(userToNotify
-											.getPositionType());
-									notification.setPositionTitle(userToNotify
-											.getPositionTitle());
-								} else if (userToNotify.getPositionTitle()
-										.equals("Department Chair")) {
-									notification.setCritical(true);
-									notification.setType("Proposal");
-									notification.setAction(notificationMessage);
-									notification.setProposalId(proposalID);
-									notification
-											.setProposalTitle(existingProposal
-													.getProjectInfo()
-													.getProjectTitle());
-									notification.setUserProfileId(userToNotify
-											.getUserProfileId());
-									notification.setUsername(userToNotify
-											.getUserName());
-									notification.setCollege(userToNotify
-											.getCollege());
-									notification.setDepartment(userToNotify
-											.getDepartment());
-									notification.setPositionType(userToNotify
-											.getPositionType());
-									notification.setPositionTitle(userToNotify
-											.getPositionTitle());
-								} else if (userToNotify.getPositionTitle()
-										.equals("Business Manager")) {
-									if (existingProposal
-											.getBusinessManagerApproval() == ApprovalType.APPROVED) {
-										notification.setCritical(true);
-										notification.setType("Proposal");
-										notification
-												.setAction(notificationMessage);
-										notification.setProposalId(proposalID);
-										notification
-												.setProposalTitle(existingProposal
-														.getProjectInfo()
-														.getProjectTitle());
-										notification
-												.setUserProfileId(userToNotify
-														.getUserProfileId());
-										notification.setUsername(userToNotify
-												.getUserName());
-										notification.setCollege(userToNotify
-												.getCollege());
-										notification.setDepartment(userToNotify
-												.getDepartment());
-										notification
-												.setPositionType(userToNotify
-														.getPositionType());
-										notification
-												.setPositionTitle(userToNotify
-														.getPositionTitle());
-									}
-								} else if (userToNotify.getPositionTitle()
-										.equals("Dean")) {
-									if (existingProposal.getDeanApproval() == ApprovalType.APPROVED) {
-										notification.setCritical(true);
-										notification.setType("Proposal");
-										notification
-												.setAction(notificationMessage);
-										notification.setProposalId(proposalID);
-										notification
-												.setProposalTitle(existingProposal
-														.getProjectInfo()
-														.getProjectTitle());
-										notification
-												.setUserProfileId(userToNotify
-														.getUserProfileId());
-										notification.setUsername(userToNotify
-												.getUserName());
-										notification.setCollege(userToNotify
-												.getCollege());
-										notification.setDepartment(userToNotify
-												.getDepartment());
-										notification
-												.setPositionType(userToNotify
-														.getPositionType());
-										notification
-												.setPositionTitle(userToNotify
-														.getPositionTitle());
-									}
-								}
-								notificationDAO.save(notification);
-							}
+							notifyDisapprovedByIRB(existingProposal,
+									proposalID, signatures,
+									notificationMessage, isCritical,
+									notificationType, coPICount);
 						} else if (existingProposal
 								.getResearchAdministratorApproval() == ApprovalType.READYFORAPPROVAL
 								&& proposalUserTitle.textValue().equals(
 										"University Research Administrator")) {
-							// Disapproved by Research
-							// Administrator
-							existingProposal
-									.setResearchAdministratorApproval(ApprovalType.DISAPPROVED);
-							existingProposal
-									.setSubmittedByPI(SubmitType.NOTSUBMITTED);
-							if (coPICount > 0) {
-								existingProposal
-										.setReadyForSubmissionByPI(false);
-							}
-							existingProposal.getSignatureInfo().clear();
-							// Proposal Status
-							existingProposal.getProposalStatus().clear();
-							existingProposal.getProposalStatus().add(
-									Status.DISAPPROVEDBYRESEARCHADMIN);
-							for (SignatureUserInfo userToNotify : signatures) {
-								notification = new NotificationLog();
-								if (userToNotify.getPositionTitle().equals(
-										"University Research Administrator")) {
-									notification.setCritical(true);
-									notification.setType("Proposal");
-									notification.setAction(notificationMessage);
-									notification.setProposalId(proposalID);
-									notification
-											.setProposalTitle(existingProposal
-													.getProjectInfo()
-													.getProjectTitle());
-									notification.setUserProfileId(userToNotify
-											.getUserProfileId());
-									notification.setUsername(userToNotify
-											.getUserName());
-									notification.setCollege(userToNotify
-											.getCollege());
-									notification.setDepartment(userToNotify
-											.getDepartment());
-									notification.setPositionType(userToNotify
-											.getPositionType());
-									notification.setPositionTitle(userToNotify
-											.getPositionTitle());
-								} else if (userToNotify.getPositionTitle()
-										.equals("Dean")) {
-									notification.setCritical(true);
-									notification.setType("Proposal");
-									notification.setAction(notificationMessage);
-									notification.setProposalId(proposalID);
-									notification
-											.setProposalTitle(existingProposal
-													.getProjectInfo()
-													.getProjectTitle());
-									notification.setUserProfileId(userToNotify
-											.getUserProfileId());
-									notification.setUsername(userToNotify
-											.getUserName());
-									notification.setCollege(userToNotify
-											.getCollege());
-									notification.setDepartment(userToNotify
-											.getDepartment());
-									notification.setPositionType(userToNotify
-											.getPositionType());
-									notification.setPositionTitle(userToNotify
-											.getPositionTitle());
-								} else if (userToNotify.getPositionTitle()
-										.equals("Business Manager")) {
-									notification.setCritical(true);
-									notification.setType("Proposal");
-									notification.setAction(notificationMessage);
-									notification.setProposalId(proposalID);
-									notification
-											.setProposalTitle(existingProposal
-													.getProjectInfo()
-													.getProjectTitle());
-									notification.setUserProfileId(userToNotify
-											.getUserProfileId());
-									notification.setUsername(userToNotify
-											.getUserName());
-									notification.setCollege(userToNotify
-											.getCollege());
-									notification.setDepartment(userToNotify
-											.getDepartment());
-									notification.setPositionType(userToNotify
-											.getPositionType());
-									notification.setPositionTitle(userToNotify
-											.getPositionTitle());
-								} else if (userToNotify.getPositionTitle()
-										.equals("Department Chair")) {
-									notification.setCritical(true);
-									notification.setType("Proposal");
-									notification.setAction(notificationMessage);
-									notification.setProposalId(proposalID);
-									notification
-											.setProposalTitle(existingProposal
-													.getProjectInfo()
-													.getProjectTitle());
-									notification.setUserProfileId(userToNotify
-											.getUserProfileId());
-									notification.setUsername(userToNotify
-											.getUserName());
-									notification.setCollege(userToNotify
-											.getCollege());
-									notification.setDepartment(userToNotify
-											.getDepartment());
-									notification.setPositionType(userToNotify
-											.getPositionType());
-									notification.setPositionTitle(userToNotify
-											.getPositionTitle());
-								} else if (userToNotify.getPositionTitle()
-										.equals("IRB")) {
-									if (irbApprovalRequired) {
-										notification.setCritical(true);
-										notification.setType("Proposal");
-										notification
-												.setAction(notificationMessage);
-										notification.setProposalId(proposalID);
-										notification
-												.setProposalTitle(existingProposal
-														.getProjectInfo()
-														.getProjectTitle());
-										notification
-												.setUserProfileId(userToNotify
-														.getUserProfileId());
-										notification.setUsername(userToNotify
-												.getUserName());
-										notification.setCollege(userToNotify
-												.getCollege());
-										notification.setDepartment(userToNotify
-												.getDepartment());
-										notification
-												.setPositionType(userToNotify
-														.getPositionType());
-										notification
-												.setPositionTitle(userToNotify
-														.getPositionTitle());
-									}
-								}
-								notificationDAO.save(notification);
-							}
+							notifyDisapprovedByResearchAdmin(existingProposal,
+									proposalID, signatures,
+									irbApprovalRequired, notificationMessage,
+									isCritical, notificationType, coPICount);
 						} else if (existingProposal
 								.getResearchDirectorApproval() == ApprovalType.READYFORAPPROVAL
 								&& proposalUserTitle.textValue().equals(
 										"University Research Director")) {
-							// Disapproved by University
-							// Research
-							// Director
-							existingProposal
-									.setResearchDirectorApproval(ApprovalType.DISAPPROVED);
-							existingProposal
-									.setSubmittedByPI(SubmitType.NOTSUBMITTED);
-							if (coPICount > 0) {
-								existingProposal
-										.setReadyForSubmissionByPI(false);
-							}
-							existingProposal.getSignatureInfo().clear();
-							// Proposal Status
-							existingProposal.getProposalStatus().clear();
-							existingProposal.getProposalStatus().add(
-									Status.DISAPPROVEDBYRESEARCHDIRECTOR);
-							for (SignatureUserInfo userToNotify : signatures) {
-								notification = new NotificationLog();
-								if (userToNotify.getPositionTitle().equals(
-										"University Research Director")) {
-									notification.setCritical(true);
-									notification.setType("Proposal");
-									notification.setAction(notificationMessage);
-									notification.setProposalId(proposalID);
-									notification
-											.setProposalTitle(existingProposal
-													.getProjectInfo()
-													.getProjectTitle());
-									notification.setUserProfileId(userToNotify
-											.getUserProfileId());
-									notification.setUsername(userToNotify
-											.getUserName());
-									notification.setCollege(userToNotify
-											.getCollege());
-									notification.setDepartment(userToNotify
-											.getDepartment());
-									notification.setPositionType(userToNotify
-											.getPositionType());
-									notification.setPositionTitle(userToNotify
-											.getPositionTitle());
-								} else if (userToNotify
-										.getPositionTitle()
-										.equals("University Research Administrator")) {
-									notification.setCritical(true);
-									notification.setType("Proposal");
-									notification.setAction(notificationMessage);
-									notification.setProposalId(proposalID);
-									notification
-											.setProposalTitle(existingProposal
-													.getProjectInfo()
-													.getProjectTitle());
-									notification.setUserProfileId(userToNotify
-											.getUserProfileId());
-									notification.setUsername(userToNotify
-											.getUserName());
-									notification.setCollege(userToNotify
-											.getCollege());
-									notification.setDepartment(userToNotify
-											.getDepartment());
-									notification.setPositionType(userToNotify
-											.getPositionType());
-									notification.setPositionTitle(userToNotify
-											.getPositionTitle());
-								} else if (userToNotify.getPositionTitle()
-										.equals("Dean")) {
-									notification.setCritical(true);
-									notification.setType("Proposal");
-									notification.setAction("Disapproved by "
-											+ authorUserName);
-									notification.setProposalId(proposalID);
-									notification
-											.setProposalTitle(existingProposal
-													.getProjectInfo()
-													.getProjectTitle());
-									notification.setUserProfileId(userToNotify
-											.getUserProfileId());
-									notification.setUsername(userToNotify
-											.getUserName());
-									notification.setCollege(userToNotify
-											.getCollege());
-									notification.setDepartment(userToNotify
-											.getDepartment());
-									notification.setPositionType(userToNotify
-											.getPositionType());
-									notification.setPositionTitle(userToNotify
-											.getPositionTitle());
-								} else if (userToNotify.getPositionTitle()
-										.equals("Business Manager")) {
-									notification.setCritical(true);
-									notification.setType("Proposal");
-									notification.setAction("Disapproved by "
-											+ authorUserName);
-									notification.setProposalId(proposalID);
-									notification
-											.setProposalTitle(existingProposal
-													.getProjectInfo()
-													.getProjectTitle());
-									notification.setUserProfileId(userToNotify
-											.getUserProfileId());
-									notification.setUsername(userToNotify
-											.getUserName());
-									notification.setCollege(userToNotify
-											.getCollege());
-									notification.setDepartment(userToNotify
-											.getDepartment());
-									notification.setPositionType(userToNotify
-											.getPositionType());
-									notification.setPositionTitle(userToNotify
-											.getPositionTitle());
-								} else if (userToNotify.getPositionTitle()
-										.equals("Department Chair")) {
-									notification.setCritical(true);
-									notification.setType("Proposal");
-									notification.setAction("Disapproved by "
-											+ authorUserName);
-									notification.setProposalId(proposalID);
-									notification
-											.setProposalTitle(existingProposal
-													.getProjectInfo()
-													.getProjectTitle());
-									notification.setUserProfileId(userToNotify
-											.getUserProfileId());
-									notification.setUsername(userToNotify
-											.getUserName());
-									notification.setCollege(userToNotify
-											.getCollege());
-									notification.setDepartment(userToNotify
-											.getDepartment());
-									notification.setPositionType(userToNotify
-											.getPositionType());
-									notification.setPositionTitle(userToNotify
-											.getPositionTitle());
-								} else if (userToNotify.getPositionTitle()
-										.equals("IRB")) {
-									if (irbApprovalRequired) {
-										notification.setCritical(true);
-										notification.setType("Proposal");
-										notification
-												.setAction("Disapproved by "
-														+ authorUserName);
-										notification.setProposalId(proposalID);
-										notification
-												.setProposalTitle(existingProposal
-														.getProjectInfo()
-														.getProjectTitle());
-										notification
-												.setUserProfileId(userToNotify
-														.getUserProfileId());
-										notification.setUsername(userToNotify
-												.getUserName());
-										notification.setCollege(userToNotify
-												.getCollege());
-										notification.setDepartment(userToNotify
-												.getDepartment());
-										notification
-												.setPositionType(userToNotify
-														.getPositionType());
-										notification
-												.setPositionTitle(userToNotify
-														.getPositionTitle());
-									}
-								}
-								notificationDAO.save(notification);
-							}
+							notifyDisapprovedByDirector(existingProposal,
+									proposalID, signatures,
+									irbApprovalRequired, notificationMessage,
+									isCritical, notificationType, coPICount);
 						}
 					}
 					break;
@@ -2118,9 +1482,315 @@ public class ProposalService {
 			notificationDAO.NotifyAllExistingInvestigators(existingProposal
 					.getId().toString(), existingProposal.getProjectInfo()
 					.getProjectTitle(), existingProposal, notificationMessage,
-					"Proposal", isCritical);
+					notificationType, isCritical);
 		}
 		return proposalIsChanged;
+	}
+
+	/**
+	 * @param existingProposal
+	 * @param proposalID
+	 * @param signatures
+	 * @param irbApprovalRequired
+	 * @param notificationMessage
+	 * @param isCritical
+	 * @param notificationType
+	 * @param coPICount
+	 */
+	private void notifyDisapprovedByDirector(Proposal existingProposal,
+			String proposalID, List<SignatureUserInfo> signatures,
+			boolean irbApprovalRequired, String notificationMessage,
+			boolean isCritical, final String notificationType, int coPICount) {
+		NotificationLog notification;
+		// Disapproved by University
+		// Research
+		// Director
+		existingProposal.setResearchDirectorApproval(ApprovalType.DISAPPROVED);
+		existingProposal.setSubmittedByPI(SubmitType.NOTSUBMITTED);
+		if (coPICount > 0) {
+			existingProposal.setReadyForSubmissionByPI(false);
+		}
+		existingProposal.getSignatureInfo().clear();
+		// Proposal Status
+		existingProposal.getProposalStatus().clear();
+		existingProposal.getProposalStatus().add(
+				Status.DISAPPROVEDBYRESEARCHDIRECTOR);
+		for (SignatureUserInfo userToNotify : signatures) {
+			notification = new NotificationLog();
+			if (userToNotify.getPositionTitle().equals(
+					"University Research Director")
+					|| userToNotify.getPositionTitle().equals(
+							"University Research Administrator")
+					|| userToNotify.getPositionTitle().equals("Dean")
+					|| userToNotify.getPositionTitle().equals(
+							"Business Manager")
+					|| userToNotify.getPositionTitle().equals(
+							"Department Chair")) {
+				createNotificationForAUser(existingProposal, proposalID,
+						notificationMessage, isCritical, notificationType,
+						notification, userToNotify);
+			} else if (userToNotify.getPositionTitle().equals("IRB")) {
+				if (irbApprovalRequired) {
+					createNotificationForAUser(existingProposal, proposalID,
+							notificationMessage, isCritical, notificationType,
+							notification, userToNotify);
+				}
+			}
+			notificationDAO.save(notification);
+		}
+	}
+
+	/**
+	 * @param existingProposal
+	 * @param proposalID
+	 * @param signatures
+	 * @param irbApprovalRequired
+	 * @param notificationMessage
+	 * @param isCritical
+	 * @param notificationType
+	 * @param coPICount
+	 */
+	private void notifyDisapprovedByResearchAdmin(Proposal existingProposal,
+			String proposalID, List<SignatureUserInfo> signatures,
+			boolean irbApprovalRequired, String notificationMessage,
+			boolean isCritical, final String notificationType, int coPICount) {
+		NotificationLog notification;
+		// Disapproved by Research
+		// Administrator
+		existingProposal
+				.setResearchAdministratorApproval(ApprovalType.DISAPPROVED);
+		existingProposal.setSubmittedByPI(SubmitType.NOTSUBMITTED);
+		if (coPICount > 0) {
+			existingProposal.setReadyForSubmissionByPI(false);
+		}
+		existingProposal.getSignatureInfo().clear();
+		// Proposal Status
+		existingProposal.getProposalStatus().clear();
+		existingProposal.getProposalStatus().add(
+				Status.DISAPPROVEDBYRESEARCHADMIN);
+		for (SignatureUserInfo userToNotify : signatures) {
+			notification = new NotificationLog();
+			if (userToNotify.getPositionTitle().equals(
+					"University Research Administrator")
+					|| userToNotify.getPositionTitle().equals("Dean")
+					|| userToNotify.getPositionTitle().equals(
+							"Business Manager")
+					|| userToNotify.getPositionTitle().equals(
+							"Department Chair")) {
+				createNotificationForAUser(existingProposal, proposalID,
+						notificationMessage, isCritical, notificationType,
+						notification, userToNotify);
+			} else if (userToNotify.getPositionTitle().equals("IRB")) {
+				if (irbApprovalRequired) {
+					createNotificationForAUser(existingProposal, proposalID,
+							notificationMessage, isCritical, notificationType,
+							notification, userToNotify);
+				}
+			}
+			notificationDAO.save(notification);
+		}
+	}
+
+	/**
+	 * @param existingProposal
+	 * @param proposalID
+	 * @param signatures
+	 * @param notificationMessage
+	 * @param isCritical
+	 * @param notificationType
+	 * @param coPICount
+	 */
+	private void notifyDisapprovedByIRB(Proposal existingProposal,
+			String proposalID, List<SignatureUserInfo> signatures,
+			String notificationMessage, boolean isCritical,
+			final String notificationType, int coPICount) {
+		NotificationLog notification;
+		// Disapproved by IRB
+		existingProposal.setIrbApproval(ApprovalType.DISAPPROVED);
+		existingProposal.setSubmittedByPI(SubmitType.NOTSUBMITTED);
+		if (coPICount > 0) {
+			existingProposal.setReadyForSubmissionByPI(false);
+		}
+		existingProposal.getSignatureInfo().clear();
+		// Proposal Status
+		existingProposal.getProposalStatus().clear();
+		existingProposal.getProposalStatus().add(Status.DISAPPROVEDBYIRB);
+
+		for (SignatureUserInfo userToNotify : signatures) {
+			notification = new NotificationLog();
+			if (userToNotify.getPositionTitle().equals("IRB")
+					|| userToNotify.getPositionTitle().equals(
+							"Department Chair")) {
+				createNotificationForAUser(existingProposal, proposalID,
+						notificationMessage, isCritical, notificationType,
+						notification, userToNotify);
+			} else if (userToNotify.getPositionTitle().equals(
+					"Business Manager")) {
+				if (existingProposal.getBusinessManagerApproval() == ApprovalType.APPROVED) {
+					createNotificationForAUser(existingProposal, proposalID,
+							notificationMessage, isCritical, notificationType,
+							notification, userToNotify);
+				}
+			} else if (userToNotify.getPositionTitle().equals("Dean")) {
+				if (existingProposal.getDeanApproval() == ApprovalType.APPROVED) {
+					createNotificationForAUser(existingProposal, proposalID,
+							notificationMessage, isCritical, notificationType,
+							notification, userToNotify);
+				}
+			}
+			notificationDAO.save(notification);
+		}
+	}
+
+	/**
+	 * @param existingProposal
+	 * @param proposalID
+	 * @param signatures
+	 * @param notificationMessage
+	 * @param isCritical
+	 * @param notificationType
+	 * @param coPICount
+	 */
+	private void notifyReturnedByDean(Proposal existingProposal,
+			String proposalID, List<SignatureUserInfo> signatures,
+			String notificationMessage, boolean isCritical,
+			final String notificationType, int coPICount) {
+		NotificationLog notification;
+		// Returned by Dean
+		existingProposal.setDeanApproval(ApprovalType.DISAPPROVED);
+		existingProposal.setSubmittedByPI(SubmitType.NOTSUBMITTED);
+		if (coPICount > 0) {
+			existingProposal.setReadyForSubmissionByPI(false);
+		}
+		existingProposal.getSignatureInfo().clear();
+		existingProposal.getProposalStatus().clear();
+		existingProposal.getProposalStatus().add(Status.RETURNEDBYDEAN);
+		for (SignatureUserInfo userToNotify : signatures) {
+			notification = new NotificationLog();
+			if (userToNotify.getPositionTitle().equals("Dean")
+					|| userToNotify.getPositionTitle().equals(
+							"Business Manager")
+					|| userToNotify.getPositionTitle().equals(
+							"Department Chair")) {
+				createNotificationForAUser(existingProposal, proposalID,
+						notificationMessage, isCritical, notificationType,
+						notification, userToNotify);
+			} else if (userToNotify.getPositionTitle().equals("IRB")) {
+				if (existingProposal.getIrbApproval() == ApprovalType.APPROVED) {
+					createNotificationForAUser(existingProposal, proposalID,
+							notificationMessage, isCritical, notificationType,
+							notification, userToNotify);
+				}
+			}
+			notificationDAO.save(notification);
+		}
+	}
+
+	/**
+	 * @param existingProposal
+	 * @param proposalID
+	 * @param signatures
+	 * @param notificationMessage
+	 * @param isCritical
+	 * @param notificationType
+	 * @param coPICount
+	 */
+	private void notifyDisapprovedByBusinessManager(Proposal existingProposal,
+			String proposalID, List<SignatureUserInfo> signatures,
+			String notificationMessage, boolean isCritical,
+			final String notificationType, int coPICount) {
+		NotificationLog notification;
+		// Disapproved by Business Manager
+		existingProposal.setBusinessManagerApproval(ApprovalType.DISAPPROVED);
+		existingProposal.setSubmittedByPI(SubmitType.NOTSUBMITTED);
+		existingProposal.setIrbApproval(ApprovalType.NOTREADYFORAPPROVAL);
+		if (coPICount > 0) {
+			existingProposal.setReadyForSubmissionByPI(false);
+		}
+		existingProposal.getSignatureInfo().clear();
+		// Proposal Status
+		existingProposal.getProposalStatus().clear();
+		existingProposal.getProposalStatus().add(
+				Status.DISAPPROVEDBYBUSINESSMANAGER);
+		for (SignatureUserInfo userToNotify : signatures) {
+			notification = new NotificationLog();
+			if (userToNotify.getPositionTitle().equals("Business Manager")
+					|| userToNotify.getPositionTitle().equals(
+							"Department Chair")) {
+				createNotificationForAUser(existingProposal, proposalID,
+						notificationMessage, isCritical, notificationType,
+						notification, userToNotify);
+			} else if (userToNotify.getPositionTitle().equals("IRB")) {
+				if (existingProposal.getIrbApproval() == ApprovalType.APPROVED) {
+					createNotificationForAUser(existingProposal, proposalID,
+							notificationMessage, isCritical, notificationType,
+							notification, userToNotify);
+				}
+			}
+			notificationDAO.save(notification);
+		}
+	}
+
+	/**
+	 * @param existingProposal
+	 * @param proposalID
+	 * @param signatures
+	 * @param notificationMessage
+	 * @param isCritical
+	 * @param notificationType
+	 * @param coPICount
+	 */
+	private void notifyReturnedByChair(Proposal existingProposal,
+			String proposalID, List<SignatureUserInfo> signatures,
+			String notificationMessage, boolean isCritical,
+			final String notificationType, int coPICount) {
+		NotificationLog notification;
+		// Returned by Chair
+		existingProposal.setChairApproval(ApprovalType.DISAPPROVED);
+		existingProposal.setSubmittedByPI(SubmitType.NOTSUBMITTED);
+		if (coPICount > 0) {
+			existingProposal.setReadyForSubmissionByPI(false);
+		}
+		existingProposal.getSignatureInfo().clear();
+		// Proposal Status
+		existingProposal.getProposalStatus().clear();
+		existingProposal.getProposalStatus().add(Status.RETURNEDBYCHAIR);
+		for (SignatureUserInfo userToNotify : signatures) {
+			notification = new NotificationLog();
+			if (userToNotify.getPositionTitle().equals("Department Chair")) {
+				createNotificationForAUser(existingProposal, proposalID,
+						notificationMessage, isCritical, notificationType,
+						notification, userToNotify);
+			}
+			notificationDAO.save(notification);
+		}
+	}
+
+	/**
+	 * @param existingProposal
+	 * @param proposalID
+	 * @param notificationMessage
+	 * @param isCritical
+	 * @param notificationType
+	 * @param notification
+	 * @param userToNotify
+	 */
+	private void createNotificationForAUser(Proposal existingProposal,
+			String proposalID, String notificationMessage, boolean isCritical,
+			final String notificationType, NotificationLog notification,
+			SignatureUserInfo userToNotify) {
+		notification.setCritical(isCritical);
+		notification.setType(notificationType);
+		notification.setAction(notificationMessage);
+		notification.setProposalId(proposalID);
+		notification.setProposalTitle(existingProposal.getProjectInfo()
+				.getProjectTitle());
+		notification.setUserProfileId(userToNotify.getUserProfileId());
+		notification.setUsername(userToNotify.getUserName());
+		notification.setCollege(userToNotify.getCollege());
+		notification.setDepartment(userToNotify.getDepartment());
+		notification.setPositionType(userToNotify.getPositionType());
+		notification.setPositionTitle(userToNotify.getPositionTitle());
 	}
 
 	/**
@@ -2130,7 +1800,7 @@ public class ProposalService {
 	 */
 	public void notifyProposalSubmittedByAdmin(Proposal existingProposal,
 			String proposalID, List<SignatureUserInfo> signatures) {
-		NotificationLog notification;
+		NotificationLog notification = new NotificationLog();
 		existingProposal
 				.setResearchAdministratorSubmission(SubmitType.SUBMITTED);
 		existingProposal.getProposalStatus().clear();
@@ -2367,7 +2037,7 @@ public class ProposalService {
 	 */
 	public void notifyChairProposalSubmittedByPI(Proposal existingProposal,
 			String proposalID, List<SignatureUserInfo> signatures) {
-		NotificationLog notification;
+		NotificationLog notification = new NotificationLog();
 		existingProposal.setDateSubmitted(new Date());
 		existingProposal.setSubmittedByPI(SubmitType.SUBMITTED);
 		existingProposal.setChairApproval(ApprovalType.READYFORAPPROVAL);
@@ -2402,7 +2072,7 @@ public class ProposalService {
 	 */
 	public void notifyBusinessManager(Proposal existingProposal,
 			String proposalID, SignatureUserInfo businessManager) {
-		NotificationLog notification;
+		NotificationLog notification = new NotificationLog();
 		if (businessManager.getPositionTitle().equals("Business Manager")) {
 			notification = new NotificationLog();
 			notification.setCritical(true);
@@ -2476,7 +2146,6 @@ public class ProposalService {
 			Proposal existingProposal, Proposal oldProposal,
 			JsonNode proposalInfo) {
 		InvestigatorInfo addedInvestigators = new InvestigatorInfo();
-		InvestigatorInfo existingInvestigators = new InvestigatorInfo();
 		InvestigatorInfo deletedInvestigators = new InvestigatorInfo();
 		if (proposalInfo != null && proposalInfo.has("InvestigatorInfo")) {
 			if (!proposalId.equals("0")) {
@@ -2550,44 +2219,56 @@ public class ProposalService {
 				existingProposal.setInvestigatorInfo(newInvestigatorInfo);
 				addedInvestigators = newInvestigatorInfo;
 			} else {
-				existingInvestigators = oldProposal.getInvestigatorInfo();
-				for (InvestigatorRefAndPosition coPI : existingInvestigators
-						.getCo_pi()) {
-					if (!existingProposal.getInvestigatorInfo().getCo_pi()
-							.contains(coPI)) {
-						if (!deletedInvestigators.getCo_pi().contains(coPI)) {
-							deletedInvestigators.getCo_pi().add(coPI);
-							existingProposal.getInvestigatorInfo().getCo_pi()
-									.remove(coPI);
-						}
-					} else {
-						addedInvestigators.getCo_pi().remove(coPI);
-					}
+				updateInvestigatorList(existingProposal, oldProposal,
+						addedInvestigators, deletedInvestigators);
+			}
+		}
+	}
+
+	/**
+	 * Updates Proposal's Investigator List
+	 * 
+	 * @param existingProposal
+	 * @param oldProposal
+	 * @param addedInvestigators
+	 * @param deletedInvestigators
+	 */
+	private void updateInvestigatorList(Proposal existingProposal,
+			Proposal oldProposal, InvestigatorInfo addedInvestigators,
+			InvestigatorInfo deletedInvestigators) {
+		InvestigatorInfo existingInvestigators = new InvestigatorInfo();
+		existingInvestigators = oldProposal.getInvestigatorInfo();
+		for (InvestigatorRefAndPosition coPI : existingInvestigators.getCo_pi()) {
+			if (!existingProposal.getInvestigatorInfo().getCo_pi()
+					.contains(coPI)) {
+				if (!deletedInvestigators.getCo_pi().contains(coPI)) {
+					deletedInvestigators.getCo_pi().add(coPI);
+					existingProposal.getInvestigatorInfo().getCo_pi()
+							.remove(coPI);
 				}
-				for (InvestigatorRefAndPosition senior : existingInvestigators
-						.getSeniorPersonnel()) {
-					if (!existingProposal.getInvestigatorInfo()
-							.getSeniorPersonnel().contains(senior)) {
-						if (!deletedInvestigators.getSeniorPersonnel()
-								.contains(senior)) {
-							deletedInvestigators.getSeniorPersonnel().add(
-									senior);
-							existingProposal.getInvestigatorInfo()
-									.getSeniorPersonnel().remove(senior);
-						}
-					} else {
-						addedInvestigators.getSeniorPersonnel().remove(senior);
-					}
+			} else {
+				addedInvestigators.getCo_pi().remove(coPI);
+			}
+		}
+		for (InvestigatorRefAndPosition senior : existingInvestigators
+				.getSeniorPersonnel()) {
+			if (!existingProposal.getInvestigatorInfo().getSeniorPersonnel()
+					.contains(senior)) {
+				if (!deletedInvestigators.getSeniorPersonnel().contains(senior)) {
+					deletedInvestigators.getSeniorPersonnel().add(senior);
+					existingProposal.getInvestigatorInfo().getSeniorPersonnel()
+							.remove(senior);
 				}
-				// Remove Signatures FOR Deleted Investigators
-				for (InvestigatorRefAndPosition coPI : deletedInvestigators
-						.getCo_pi()) {
-					for (SignatureInfo sign : oldProposal.getSignatureInfo()) {
-						if (coPI.getUserProfileId().equalsIgnoreCase(
-								sign.getUserProfileId())) {
-							existingProposal.getSignatureInfo().remove(sign);
-						}
-					}
+			} else {
+				addedInvestigators.getSeniorPersonnel().remove(senior);
+			}
+		}
+		// Remove Signatures FOR Deleted Investigators
+		for (InvestigatorRefAndPosition coPI : deletedInvestigators.getCo_pi()) {
+			for (SignatureInfo sign : oldProposal.getSignatureInfo()) {
+				if (coPI.getUserProfileId().equalsIgnoreCase(
+						sign.getUserProfileId())) {
+					existingProposal.getSignatureInfo().remove(sign);
 				}
 			}
 		}
