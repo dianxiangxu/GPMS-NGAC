@@ -1,7 +1,7 @@
 package gpms.rest;
 
 import gpms.DAL.MongoDBConnector;
-import gpms.accesscontrol.Accesscontrol;
+import gpms.accesscontrol.BalanaConnector;
 import gpms.dao.DelegationDAO;
 import gpms.dao.NotificationDAO;
 import gpms.dao.UserAccountDAO;
@@ -334,7 +334,7 @@ public class DelegationService {
 			log.info("DelegationService::produceDelegableActionsForAUser started");
 			ObjectMapper mapper = new ObjectMapper();
 			JsonNode root = mapper.readTree(message);
-			Accesscontrol ac = new Accesscontrol();
+			BalanaConnector ac = new BalanaConnector();
 			HashMap<String, Multimap<String, String>> attrMap = new HashMap<String, Multimap<String, String>>();
 			Multimap<String, String> subjectMap = ArrayListMultimap.create();
 			Multimap<String, String> actionMap = ArrayListMultimap.create();
@@ -418,7 +418,7 @@ public class DelegationService {
 
 			StringBuffer contentProfile = delegationDAO
 					.generateContentProfile(delegableUsers);
-			Accesscontrol ac = new Accesscontrol();
+			BalanaConnector ac = new BalanaConnector();
 			Set<AbstractResult> results = ac.getXACMLdecisionWithObligations(
 					attrMap, contentProfile);
 			List<UserDetail> userDetails = new ArrayList<UserDetail>();
@@ -603,7 +603,7 @@ public class DelegationService {
 			StringBuffer contentProfile = delegationDAO
 					.generateContentDelegationProfile(delegationId,
 							existingDelegation, authorProfile);
-			Accesscontrol ac = new Accesscontrol();
+			BalanaConnector ac = new BalanaConnector();
 			HashMap<String, Multimap<String, String>> attrMap = new HashMap<String, Multimap<String, String>>();
 			Multimap<String, String> resourceMap = ArrayListMultimap.create();
 			if (attrMap.get("Resource") == null) {

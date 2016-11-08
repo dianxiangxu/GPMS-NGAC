@@ -1,7 +1,7 @@
 package gpms.dao;
 
 import gpms.DAL.MongoDBConnector;
-import gpms.accesscontrol.Accesscontrol;
+import gpms.accesscontrol.BalanaConnector;
 import gpms.model.AdditionalInfo;
 import gpms.model.Appendix;
 import gpms.model.ApprovalType;
@@ -5750,7 +5750,7 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	public List<String> generateMDPDecision(
 			HashMap<String, Multimap<String, String>> attrMap,
 			Multimap<String, String> actionMap, StringBuffer contentProfile) {
-		Accesscontrol ac = new Accesscontrol();
+		BalanaConnector ac = new BalanaConnector();
 		List<String> attributeValue = Arrays.asList("Save", "Submit",
 				"Approve", "Disapprove", "Withdraw", "Archive", "Delete");
 		for (String action : attributeValue) {

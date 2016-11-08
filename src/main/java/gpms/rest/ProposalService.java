@@ -1,7 +1,7 @@
 package gpms.rest;
 
 import gpms.DAL.MongoDBConnector;
-import gpms.accesscontrol.Accesscontrol;
+import gpms.accesscontrol.BalanaConnector;
 import gpms.dao.DelegationDAO;
 import gpms.dao.NotificationDAO;
 import gpms.dao.ProposalDAO;
@@ -417,7 +417,7 @@ public class ProposalService {
 									existingProposal, signatures, authorProfile);
 					HashMap<String, Multimap<String, String>> attrMap = proposalDAO
 							.generateAttributes(policyInfo);
-					Accesscontrol ac = new Accesscontrol();
+					BalanaConnector ac = new BalanaConnector();
 					Set<AbstractResult> set = ac
 							.getXACMLdecisionWithObligations(attrMap,
 									contentProfile);
@@ -865,7 +865,7 @@ public class ProposalService {
 					StringBuffer contentProfile = proposalDAO
 							.generateContentProfile(proposalId,
 									existingProposal, signatures, authorProfile);
-					Accesscontrol ac = new Accesscontrol();
+					BalanaConnector ac = new BalanaConnector();
 					HashMap<String, Multimap<String, String>> attrMap = proposalDAO
 							.generateAttributes(policyInfo);
 					Set<AbstractResult> set = ac
@@ -1032,6 +1032,8 @@ public class ProposalService {
 			Proposal existingProposal = new Proposal();
 			Proposal oldProposal = new Proposal();
 			boolean signedByCurrentUser = false;
+			StringBuffer contentProfile = new StringBuffer();
+			BalanaConnector ac = new BalanaConnector();
 			if (root != null && root.has("proposalInfo")) {
 				JsonNode proposalInfo = root.get("proposalInfo");
 				if (proposalInfo != null && proposalInfo.has("ProposalID")) {
@@ -1057,10 +1059,52 @@ public class ProposalService {
 					JsonNode policyInfo = root.get("policyInfo");
 					if (policyInfo != null && policyInfo.isArray()
 							&& policyInfo.size() > 0) {
-						checkAccessControlRules(message, authorProfile,
-								authorFullName, proposalId, existingProposal,
-								oldProposal, signedByCurrentUser,
-								irbApprovalRequired, policyInfo);
+						HashMap<String, Multimap<String, String>> attrMap = proposalDAO
+								.generateAttributes(policyInfo);
+						List<SignatureUserInfo> signatures = new ArrayList<SignatureUserInfo>();
+						SignatureByAllUsers signByAllUsersInfo = new SignatureByAllUsers();
+						signatures = proposalDAO
+								.generateProposalContentProfile(authorProfile,
+										authorFullName, proposalId,
+										existingProposal, signedByCurrentUser,
+										contentProfile, irbApprovalRequired,
+										signatures, signByAllUsersInfo);
+						Set<AbstractResult> set = ac
+								.getXACMLdecisionWithObligations(attrMap,
+										contentProfile);
+						Iterator<AbstractResult> it = set.iterator();
+						int intDecision = AbstractResult.DECISION_NOT_APPLICABLE;
+						while (it.hasNext()) {
+							AbstractResult ar = it.next();
+							intDecision = ar.getDecision();
+							if (intDecision == AbstractResult.DECISION_INDETERMINATE_DENY
+									|| intDecision == AbstractResult.DECISION_INDETERMINATE_PERMIT
+									|| intDecision == AbstractResult.DECISION_INDETERMINATE_DENY_OR_PERMIT) {
+								intDecision = AbstractResult.DECISION_INDETERMINATE;
+							}
+							System.out.println("Decision:" + intDecision
+									+ " that is: "
+									+ AbstractResult.DECISIONS[intDecision]);
+							if (AbstractResult.DECISIONS[intDecision]
+									.equals("Permit")) {
+								List<ObligationResult> obligations = ar
+										.getObligations();
+								EmailCommonInfo emailDetails = proposalDAO
+										.saveProposalWithObligations(obligations);
+								return sendSaveUpdateNotification(message,
+										proposalId, existingProposal,
+										oldProposal, authorProfile, false,
+										signatures, irbApprovalRequired,
+										signByAllUsersInfo, emailDetails);
+							} else {
+								return Response
+										.status(403)
+										.type(MediaType.APPLICATION_JSON)
+										.entity("Your permission is: "
+												+ AbstractResult.DECISIONS[intDecision])
+										.build();
+							}
+						}
 					}
 				}
 			} else {
@@ -1073,58 +1117,6 @@ public class ProposalService {
 			log.error(
 					"Could not save a New Proposal or update an existing Proposal error e=",
 					e);
-		}
-		return Response
-				.status(403)
-				.entity("{\"error\": \"Could Not Save A New Proposal OR Update AN Existing Proposal\", \"status\": \"FAIL\"}")
-				.build();
-	}
-
-	private Response checkAccessControlRules(String message,
-			UserProfile authorProfile, String authorFullName,
-			String proposalId, Proposal existingProposal, Proposal oldProposal,
-			boolean signedByCurrentUser, Boolean irbApprovalRequired,
-			JsonNode policyInfo) throws JsonProcessingException {
-		StringBuffer contentProfile = new StringBuffer();
-		Accesscontrol ac = new Accesscontrol();
-		HashMap<String, Multimap<String, String>> attrMap = proposalDAO
-				.generateAttributes(policyInfo);
-		List<SignatureUserInfo> signatures = new ArrayList<SignatureUserInfo>();
-		SignatureByAllUsers signByAllUsersInfo = new SignatureByAllUsers();
-		signatures = proposalDAO.generateProposalContentProfile(authorProfile,
-				authorFullName, proposalId, existingProposal,
-				signedByCurrentUser, contentProfile, irbApprovalRequired,
-				signatures, signByAllUsersInfo);
-		Set<AbstractResult> set = ac.getXACMLdecisionWithObligations(attrMap,
-				contentProfile);
-		Iterator<AbstractResult> it = set.iterator();
-		int intDecision = AbstractResult.DECISION_NOT_APPLICABLE;
-		while (it.hasNext()) {
-			AbstractResult ar = it.next();
-			intDecision = ar.getDecision();
-			if (intDecision == AbstractResult.DECISION_INDETERMINATE_DENY
-					|| intDecision == AbstractResult.DECISION_INDETERMINATE_PERMIT
-					|| intDecision == AbstractResult.DECISION_INDETERMINATE_DENY_OR_PERMIT) {
-				intDecision = AbstractResult.DECISION_INDETERMINATE;
-			}
-			System.out.println("Decision:" + intDecision + " that is: "
-					+ AbstractResult.DECISIONS[intDecision]);
-			if (AbstractResult.DECISIONS[intDecision].equals("Permit")) {
-				List<ObligationResult> obligations = ar.getObligations();
-				EmailCommonInfo emailDetails = proposalDAO
-						.saveProposalWithObligations(obligations);
-				return sendSaveUpdateNotification(message, proposalId,
-						existingProposal, oldProposal, authorProfile, false,
-						signatures, irbApprovalRequired, signByAllUsersInfo,
-						emailDetails);
-			} else {
-				return Response
-						.status(403)
-						.type(MediaType.APPLICATION_JSON)
-						.entity("Your permission is: "
-								+ AbstractResult.DECISIONS[intDecision])
-						.build();
-			}
 		}
 		return Response
 				.status(403)
@@ -1151,7 +1143,7 @@ public class ProposalService {
 						&& policyInfo.size() > 0) {
 					HashMap<String, Multimap<String, String>> attrMap = proposalDAO
 							.generateAttributes(policyInfo);
-					Accesscontrol ac = new Accesscontrol();
+					BalanaConnector ac = new BalanaConnector();
 					String decision = ac.getXACMLdecision(attrMap);
 					if (decision.equals("Permit")) {
 						return Response

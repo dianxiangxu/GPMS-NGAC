@@ -32,13 +32,13 @@ import com.google.common.collect.Multimap;
  * @author milsonmunakami
  *
  */
-public class Accesscontrol {
+public class BalanaConnector {
 	private static Balana balana = null;
 	private AbstractResult ar;
 	AttributeSpreadSheet attrSpreadSheet = null;
 	private static String policyLocation = new String();
 
-	public Accesscontrol() {
+	public BalanaConnector() {
 		try {
 			String file = "/XACMLAttributeDictionary.xls";
 			InputStream inputStream = this.getClass().getResourceAsStream(file);
@@ -56,7 +56,7 @@ public class Accesscontrol {
 	 */
 	public static void initBalana() {
 		if (balana == null) {
-			synchronized (Accesscontrol.class) {
+			synchronized (BalanaConnector.class) {
 				if (balana == null) {
 					System.setProperty(
 							FileBasedPolicyFinderModule.POLICY_DIR_PROPERTY,
