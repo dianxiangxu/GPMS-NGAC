@@ -175,7 +175,6 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	public boolean deleteProposal(Proposal proposal, String proposalRoles,
 			String proposalUserTitle, UserProfile authorProfile) {
 		Datastore ds = getDatastore();
-		boolean isDeleted = false;
 		if (proposal.getSubmittedByPI() == SubmitType.NOTSUBMITTED
 				&& proposal.getDeletedByPI() == DeleteType.NOTDELETED
 				&& proposalRoles.equals("PI")
@@ -187,7 +186,7 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 					+ authorProfile.getUserAccount().getUserName(), new Date());
 			proposal.getAuditLog().add(entry);
 			ds.save(proposal);
-			isDeleted = true;
+			return true;
 		} else if (proposal.getResearchDirectorDeletion() == DeleteType.NOTDELETED
 				&& proposal.getResearchDirectorApproval() == ApprovalType.READYFORAPPROVAL
 				&& !proposalRoles.equals("PI")
@@ -200,100 +199,44 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 					+ authorProfile.getUserAccount().getUserName(), new Date());
 			proposal.getAuditLog().add(entry);
 			ds.save(proposal);
-			isDeleted = true;
+			return true;
 		}
-		return isDeleted;
+		return false;
 	}
 
+	/**
+	 * Finds All Logs in a AuditLog Grid for a Proposal
+	 * 
+	 * @param offset
+	 * @param limit
+	 * @param id
+	 * @param auditLogInfo
+	 * @return
+	 * @throws ParseException
+	 */
 	public List<AuditLogInfo> findAllForProposalAuditLogGrid(int offset,
 			int limit, ObjectId id, AuditLogCommonInfo auditLogInfo)
 			throws ParseException {
-		Datastore ds = getDatastore();
-		String action = auditLogInfo.getAction();
-		String auditedBy = auditLogInfo.getAuditedBy();
-		String activityOnFrom = auditLogInfo.getActivityOnFrom();
-		String activityOnTo = auditLogInfo.getActivityOnTo();
-		Query<Proposal> proposalQuery = ds.createQuery(Proposal.class);
-		Proposal q = proposalQuery.field("_id").equal(id).get();
-		List<AuditLogInfo> allAuditLogs = new ArrayList<AuditLogInfo>();
+
+		return getAuditListBasedOnPageing(
+				offset,
+				limit,
+				getAuditLogResults(auditLogInfo.getAction(),
+						auditLogInfo.getAuditedBy(),
+						auditLogInfo.getActivityOnFrom(),
+						auditLogInfo.getActivityOnTo(), id));
+	}
+
+	/**
+	 * @param offset
+	 * @param limit
+	 * @param allAuditLogs
+	 * @return
+	 */
+	private List<AuditLogInfo> getAuditListBasedOnPageing(int offset,
+			int limit, List<AuditLogInfo> allAuditLogs) {
+
 		int rowTotal = 0;
-		if (q.getAuditLog() != null && q.getAuditLog().size() != 0) {
-			for (AuditLog poposalAudit : q.getAuditLog()) {
-				AuditLogInfo proposalAuditLog = new AuditLogInfo();
-				boolean isActionMatch = false;
-				boolean isAuditedByMatch = false;
-				boolean isActivityDateFromMatch = false;
-				boolean isActivityDateToMatch = false;
-				if (action != null) {
-					if (poposalAudit.getAction().toLowerCase()
-							.contains(action.toLowerCase())) {
-						isActionMatch = true;
-					}
-				} else {
-					isActionMatch = true;
-				}
-				if (auditedBy != null) {
-					if (poposalAudit.getUserProfile().getUserAccount()
-							.getUserName().toLowerCase()
-							.contains(auditedBy.toLowerCase())) {
-						isAuditedByMatch = true;
-					} else if (poposalAudit.getUserProfile().getFirstName()
-							.toLowerCase().contains(auditedBy.toLowerCase())) {
-						isAuditedByMatch = true;
-					} else if (poposalAudit.getUserProfile().getMiddleName()
-							.toLowerCase().contains(auditedBy.toLowerCase())) {
-						isAuditedByMatch = true;
-					} else if (poposalAudit.getUserProfile().getLastName()
-							.toLowerCase().contains(auditedBy.toLowerCase())) {
-						isAuditedByMatch = true;
-					}
-				} else {
-					isAuditedByMatch = true;
-				}
-				if (activityOnFrom != null) {
-					Date activityDateFrom = formatter.parse(activityOnFrom);
-					if (poposalAudit.getActivityDate().compareTo(
-							activityDateFrom) > 0) {
-						isActivityDateFromMatch = true;
-					} else if (poposalAudit.getActivityDate().compareTo(
-							activityDateFrom) < 0) {
-						isActivityDateFromMatch = false;
-					} else if (poposalAudit.getActivityDate().compareTo(
-							activityDateFrom) == 0) {
-						isActivityDateFromMatch = true;
-					}
-				} else {
-					isActivityDateFromMatch = true;
-				}
-				if (activityOnTo != null) {
-					Date activityDateTo = formatter.parse(activityOnTo);
-					if (poposalAudit.getActivityDate()
-							.compareTo(activityDateTo) > 0) {
-						isActivityDateToMatch = false;
-					} else if (poposalAudit.getActivityDate().compareTo(
-							activityDateTo) < 0) {
-						isActivityDateToMatch = true;
-					} else if (poposalAudit.getActivityDate().compareTo(
-							activityDateTo) == 0) {
-						isActivityDateToMatch = true;
-					}
-				} else {
-					isActivityDateToMatch = true;
-				}
-				if (isActionMatch && isAuditedByMatch
-						&& isActivityDateFromMatch && isActivityDateToMatch) {
-					proposalAuditLog.setUserName(poposalAudit.getUserProfile()
-							.getUserAccount().getUserName());
-					proposalAuditLog.setUserFullName(poposalAudit
-							.getUserProfile().getFullName());
-					proposalAuditLog.setAction(poposalAudit.getAction());
-					proposalAuditLog.setActivityDate(poposalAudit
-							.getActivityDate());
-					allAuditLogs.add(proposalAuditLog);
-				}
-			}
-		}
-		Collections.sort(allAuditLogs);
 		rowTotal = allAuditLogs.size();
 		if (rowTotal > 0) {
 			for (AuditLogInfo t : allAuditLogs) {
@@ -307,79 +250,38 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 		}
 	}
 
-	public List<AuditLogInfo> findAllUserProposalAuditLogs(ObjectId id,
-			AuditLogCommonInfo auditLogInfo) throws ParseException {
-		Datastore ds = getDatastore();
-		String action = auditLogInfo.getAction();
-		String auditedBy = auditLogInfo.getAuditedBy();
-		String activityOnFrom = auditLogInfo.getActivityOnFrom();
-		String activityOnTo = auditLogInfo.getActivityOnTo();
-		Query<Proposal> proposalQuery = ds.createQuery(Proposal.class);
+	/***
+	 * 
+	 * @param action
+	 * @param auditedBy
+	 * @param activityOnFrom
+	 * @param activityOnTo
+	 * @param id
+	 * @return
+	 * @throws ParseException
+	 */
+	private List<AuditLogInfo> getAuditLogResults(String action,
+			String auditedBy, String activityOnFrom, String activityOnTo,
+			ObjectId id) throws ParseException {
+
+		Query<Proposal> proposalQuery = getDatastore().createQuery(
+				Proposal.class);
 		Proposal q = proposalQuery.field("_id").equal(id).get();
 		List<AuditLogInfo> allAuditLogs = new ArrayList<AuditLogInfo>();
 		if (q.getAuditLog() != null && q.getAuditLog().size() != 0) {
+
 			for (AuditLog poposalAudit : q.getAuditLog()) {
+
 				AuditLogInfo proposalAuditLog = new AuditLogInfo();
-				boolean isActionMatch = false;
-				boolean isAuditedByMatch = false;
-				boolean isActivityDateFromMatch = false;
-				boolean isActivityDateToMatch = false;
-				if (action != null) {
-					if (poposalAudit.getAction().toLowerCase()
-							.contains(action.toLowerCase())) {
-						isActionMatch = true;
-					}
-				} else {
-					isActionMatch = true;
-				}
-				if (auditedBy != null) {
-					if (poposalAudit.getUserProfile().getUserAccount()
-							.getUserName().toLowerCase()
-							.contains(auditedBy.toLowerCase())) {
-						isAuditedByMatch = true;
-					} else if (poposalAudit.getUserProfile().getFirstName()
-							.toLowerCase().contains(auditedBy.toLowerCase())) {
-						isAuditedByMatch = true;
-					} else if (poposalAudit.getUserProfile().getMiddleName()
-							.toLowerCase().contains(auditedBy.toLowerCase())) {
-						isAuditedByMatch = true;
-					} else if (poposalAudit.getUserProfile().getLastName()
-							.toLowerCase().contains(auditedBy.toLowerCase())) {
-						isAuditedByMatch = true;
-					}
-				} else {
-					isAuditedByMatch = true;
-				}
-				if (activityOnFrom != null) {
-					Date activityDateFrom = formatter.parse(activityOnFrom);
-					if (poposalAudit.getActivityDate().compareTo(
-							activityDateFrom) > 0) {
-						isActivityDateFromMatch = true;
-					} else if (poposalAudit.getActivityDate().compareTo(
-							activityDateFrom) < 0) {
-						isActivityDateFromMatch = false;
-					} else if (poposalAudit.getActivityDate().compareTo(
-							activityDateFrom) == 0) {
-						isActivityDateFromMatch = true;
-					}
-				} else {
-					isActivityDateFromMatch = true;
-				}
-				if (activityOnTo != null) {
-					Date activityDateTo = formatter.parse(activityOnTo);
-					if (poposalAudit.getActivityDate()
-							.compareTo(activityDateTo) > 0) {
-						isActivityDateToMatch = false;
-					} else if (poposalAudit.getActivityDate().compareTo(
-							activityDateTo) < 0) {
-						isActivityDateToMatch = true;
-					} else if (poposalAudit.getActivityDate().compareTo(
-							activityDateTo) == 0) {
-						isActivityDateToMatch = true;
-					}
-				} else {
-					isActivityDateToMatch = true;
-				}
+				boolean isActionMatch = isAuditLogActionFieldSelected(action,
+						poposalAudit);
+				boolean isAuditedByMatch = isAuditLogAuditedByFieldSelected(
+						auditedBy, poposalAudit);
+				boolean isActivityDateFromMatch = isAuditLogActivityDateFromSelected(
+						activityOnFrom, poposalAudit);
+				boolean isActivityDateToMatch = isAuditLogActivityDateToSelected(
+						activityOnTo, poposalAudit);
+
 				if (isActionMatch && isAuditedByMatch
 						&& isActivityDateFromMatch && isActivityDateToMatch) {
 					proposalAuditLog.setUserName(poposalAudit.getUserProfile()
@@ -397,10 +299,127 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 		return allAuditLogs;
 	}
 
+	/**
+	 * @param activityOnTo
+	 * @param poposalAudit
+	 * @param isActivityDateToMatch
+	 * @return
+	 * @throws ParseException
+	 */
+	private boolean isAuditLogActivityDateToSelected(String activityOnTo,
+			AuditLog poposalAudit) throws ParseException {
+
+		if (activityOnTo != null) {
+			Date activityDateTo = formatter.parse(activityOnTo);
+			if (poposalAudit.getActivityDate().compareTo(activityDateTo) > 0) {
+				return false;
+			} else if (poposalAudit.getActivityDate().compareTo(activityDateTo) < 0) {
+				return true;
+			} else if (poposalAudit.getActivityDate().compareTo(activityDateTo) == 0) {
+				return true;
+			}
+		} else {
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * @param activityOnFrom
+	 * @param poposalAudit
+	 * @param isActivityDateFromMatch
+	 * @return
+	 * @throws ParseException
+	 */
+	private boolean isAuditLogActivityDateFromSelected(String activityOnFrom,
+			AuditLog poposalAudit) throws ParseException {
+
+		if (activityOnFrom != null) {
+			Date activityDateFrom = formatter.parse(activityOnFrom);
+			if (poposalAudit.getActivityDate().compareTo(activityDateFrom) > 0) {
+				return true;
+			} else if (poposalAudit.getActivityDate().compareTo(
+					activityDateFrom) < 0) {
+				return false;
+			} else if (poposalAudit.getActivityDate().compareTo(
+					activityDateFrom) == 0) {
+				return true;
+			}
+		} else {
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * @param auditedBy
+	 * @param poposalAudit
+	 * @param isAuditedByMatch
+	 * @return
+	 */
+	private boolean isAuditLogAuditedByFieldSelected(String auditedBy,
+			AuditLog poposalAudit) {
+
+		if (auditedBy != null) {
+			if (poposalAudit.getUserProfile().getUserAccount().getUserName()
+					.toLowerCase().contains(auditedBy.toLowerCase())) {
+				return true;
+			} else if (poposalAudit.getUserProfile().getFirstName()
+					.toLowerCase().contains(auditedBy.toLowerCase())) {
+				return true;
+			} else if (poposalAudit.getUserProfile().getMiddleName()
+					.toLowerCase().contains(auditedBy.toLowerCase())) {
+				return true;
+			} else if (poposalAudit.getUserProfile().getLastName()
+					.toLowerCase().contains(auditedBy.toLowerCase())) {
+				return true;
+			}
+		} else {
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * @param action
+	 * @param poposalAudit
+	 * @param isActionMatch
+	 * @return
+	 */
+	private boolean isAuditLogActionFieldSelected(String action,
+			AuditLog poposalAudit) {
+
+		if (action != null) {
+			if (poposalAudit.getAction().toLowerCase()
+					.contains(action.toLowerCase())) {
+				return true;
+			}
+		} else {
+			return true;
+		}
+		return false;
+	}
+
+	/***
+	 * Gets Audit Logs for User Export
+	 * 
+	 * @param id
+	 * @param auditLogInfo
+	 * @return
+	 * @throws ParseException
+	 */
+	public List<AuditLogInfo> findAllUserProposalAuditLogs(ObjectId id,
+			AuditLogCommonInfo auditLogInfo) throws ParseException {
+		return getAuditLogResults(auditLogInfo.getAction(),
+				auditLogInfo.getAuditedBy(), auditLogInfo.getActivityOnFrom(),
+				auditLogInfo.getActivityOnTo(), id);
+	}
+
 	public Proposal findNextProposalWithSameProjectTitle(ObjectId id,
 			String newProjectTitle) {
-		Datastore ds = getDatastore();
-		Query<Proposal> proposalQuery = ds.createQuery(Proposal.class);
+
+		Query<Proposal> proposalQuery = getDatastore().createQuery(
+				Proposal.class);
 		proposalQuery.and(proposalQuery.criteria("_id").notEqual(id),
 				proposalQuery.criteria("project info.project title")
 						.equalIgnoreCase(newProjectTitle));
@@ -408,51 +427,83 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	}
 
 	public Proposal findAnyProposalWithSameProjectTitle(String newProjectTitle) {
-		Datastore ds = getDatastore();
-		Query<Proposal> proposalQuery = ds.createQuery(Proposal.class);
+
+		Query<Proposal> proposalQuery = getDatastore().createQuery(
+				Proposal.class);
 		proposalQuery.criteria("project info.project title").equalIgnoreCase(
 				newProjectTitle);
 		return proposalQuery.get();
 	}
 
+	/**
+	 * 
+	 * @param offset
+	 * @param limit
+	 * @param proposalInfo
+	 * @return
+	 * @throws ParseException
+	 */
 	public List<ProposalInfo> findAllForProposalGrid(int offset, int limit,
 			ProposalCommonInfo proposalInfo) throws ParseException {
+
+		Query<Proposal> queryPropsal = getMyProposalSearchSelectedFields(proposalInfo);
+		List<Proposal> allCurrentLoginUserProposalsList = queryPropsal
+				.offset(offset - 1).limit(limit)
+				.order("-audit log.activity on").asList();
+		return getMyProposalGridForTheCurrentUser(queryPropsal.asList().size(),
+				allCurrentLoginUserProposalsList);
+
+	}
+
+	/**
+	 * 
+	 * @param proposalInfo
+	 * @param ds
+	 * @param proposalQuery
+	 * @throws ParseException
+	 * @Refactored
+	 */
+	private Query<Proposal> getMyProposalSearchSelectedFields(
+			ProposalCommonInfo proposalInfo) throws ParseException {
+
 		Datastore ds = getDatastore();
-		String projectTitle = proposalInfo.getProjectTitle();
-		String usernameBy = proposalInfo.getUsernameBy();
-		Double totalCostsFrom = proposalInfo.getTotalCostsFrom();
-		Double totalCostsTo = proposalInfo.getTotalCostsTo();
-		String submittedOnFrom = proposalInfo.getSubmittedOnFrom();
-		String submittedOnTo = proposalInfo.getSubmittedOnTo();
-		String proposalStatus = proposalInfo.getProposalStatus();
-		List<ProposalInfo> proposals = new ArrayList<ProposalInfo>();
 		Query<Proposal> proposalQuery = ds.createQuery(Proposal.class);
-		Query<UserProfile> profileQuery = ds.createQuery(UserProfile.class);
-		if (projectTitle != null) {
+		if (proposalInfo.getProjectTitle() != null) {
 			proposalQuery.field("project info.project title")
-					.containsIgnoreCase(projectTitle);
+					.containsIgnoreCase(proposalInfo.getProjectTitle());
 		}
-		if (submittedOnFrom != null && !submittedOnFrom.isEmpty()) {
-			Date receivedOnF = formatter.parse(submittedOnFrom);
+
+		if (proposalInfo.getSubmittedOnFrom() != null
+				&& !proposalInfo.getSubmittedOnFrom().isEmpty()) {
+			Date receivedOnF = formatter.parse(proposalInfo
+					.getSubmittedOnFrom());
 			proposalQuery.field("date submitted").greaterThanOrEq(receivedOnF);
 		}
-		if (submittedOnTo != null && !submittedOnTo.isEmpty()) {
-			Date receivedOnT = formatter.parse(submittedOnTo);
+		if (proposalInfo.getSubmittedOnTo() != null
+				&& !proposalInfo.getSubmittedOnTo().isEmpty()) {
+			Date receivedOnT = formatter.parse(proposalInfo.getSubmittedOnTo());
 			proposalQuery.field("date submitted").lessThanOrEq(receivedOnT);
 		}
 
-		if (totalCostsFrom != null && totalCostsFrom != 0.0) {
+		if (proposalInfo.getTotalCostsFrom() != null
+				&& proposalInfo.getTotalCostsFrom() != 0.0) {
 			proposalQuery.field("sponsor and budget info.total costs")
-					.greaterThanOrEq(totalCostsFrom);
+					.greaterThanOrEq(proposalInfo.getTotalCostsFrom());
 		}
-		if (totalCostsTo != null && totalCostsTo != 0.0) {
+		if (proposalInfo.getTotalCostsTo() != null
+				&& proposalInfo.getTotalCostsTo() != 0.0) {
 			proposalQuery.field("sponsor and budget info.total costs")
-					.lessThanOrEq(totalCostsTo);
+					.lessThanOrEq(proposalInfo.getTotalCostsTo());
 		}
-		if (proposalStatus != null) {
-			proposalQuery.field("proposal status").contains(proposalStatus);
+		if (proposalInfo.getProposalStatus() != null) {
+			proposalQuery.field("proposal status").contains(
+					proposalInfo.getProposalStatus());
 		}
+
+		String usernameBy = proposalInfo.getUsernameBy();
+
 		if (usernameBy != null) {
+			Query<UserProfile> profileQuery = ds.createQuery(UserProfile.class);
 			profileQuery.or(
 					profileQuery.criteria("first name").containsIgnoreCase(
 							usernameBy),
@@ -469,147 +520,274 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 							"investigator info.senior personnel.user profile")
 							.in(profileQuery.asKeyList()));
 		}
-		int rowTotal = proposalQuery.asList().size();
-		List<Proposal> allProposals = proposalQuery.offset(offset - 1)
-				.limit(limit).order("-audit log.activity on").asList();
-		for (Proposal userProposal : allProposals) {
-			ProposalInfo proposal = new ProposalInfo();
-			// Proposal
-			proposal.setRowTotal(rowTotal);
-			proposal.setId(userProposal.getId().toString());
-			// ProjectInfo
-			proposal.setProjectTitle(userProposal.getProjectInfo()
-					.getProjectTitle());
-			ProjectType pt = userProposal.getProjectInfo().getProjectType();
-			if (pt.isResearchBasic()) {
-				proposal.setProjectType("Research-basic");
-			} else if (pt.isResearchApplied()) {
-				proposal.setProjectType("Research-applied");
-			} else if (pt.isResearchDevelopment()) {
-				proposal.setProjectType("Research-development");
-			} else if (pt.isInstruction()) {
-				proposal.setProjectType("Instruction");
-			} else if (pt.isOtherSponsoredActivity()) {
-				proposal.setProjectType("Other sponsored activity");
-			}
-			TypeOfRequest tor = userProposal.getProjectInfo()
-					.getTypeOfRequest();
-			if (tor.isPreProposal()) {
-				proposal.getTypeOfRequest().add("Pre-proposal");
-			} else if (tor.isNewProposal()) {
-				proposal.getTypeOfRequest().add("New proposal");
-			} else if (tor.isContinuation()) {
-				proposal.getTypeOfRequest().add("Continuation");
-			} else if (tor.isSupplement()) {
-				proposal.getTypeOfRequest().add("Supplement");
-			}
-			ProjectLocation pl = userProposal.getProjectInfo()
-					.getProjectLocation();
-			if (pl.isOffCampus()) {
-				proposal.setProjectLocation("Off-campus");
-			} else if (pl.isOnCampus()) {
-				proposal.setProjectLocation("On-campus");
-			}
-			// SponsorAndBudgetInfo
-			proposal.setGrantingAgencies(userProposal.getSponsorAndBudgetInfo()
-					.getGrantingAgency());
-			proposal.setDirectCosts(userProposal.getSponsorAndBudgetInfo()
-					.getDirectCosts());
-			proposal.setFaCosts(userProposal.getSponsorAndBudgetInfo()
-					.getFaCosts());
-			proposal.setTotalCosts(userProposal.getSponsorAndBudgetInfo()
-					.getTotalCosts());
-			proposal.setFaRate(userProposal.getSponsorAndBudgetInfo()
-					.getFaRate());
-			proposal.setDateCreated(userProposal.getDateCreated());
-			proposal.setDateSubmitted(userProposal.getDateSubmitted());
-			proposal.setDueDate(userProposal.getProjectInfo().getDueDate());
-			proposal.setProjectPeriodFrom(userProposal.getProjectInfo()
-					.getProjectPeriod().getFrom());
-			proposal.setProjectPeriodTo(userProposal.getProjectInfo()
-					.getProjectPeriod().getTo());
-			// Proposal Status
-			for (Status status : userProposal.getProposalStatus()) {
-				proposal.getProposalStatus().add(status.toString());
-			}
-			// PI
-			proposal.setSubmittedByPI(userProposal.getSubmittedByPI());
-			proposal.setReadyForSubmissionByPI(userProposal
-					.isReadyForSubmissionByPI());
-			proposal.setDeletedByPI(userProposal.getDeletedByPI());
-			// Chair
-			proposal.setChairApproval(userProposal.getChairApproval());
-			// Business Manager
-			proposal.setBusinessManagerApproval(userProposal
-					.getBusinessManagerApproval());
-			// IRB
-			proposal.setIrbApproval(userProposal.getIrbApproval());
-			// Dean
-			proposal.setDeanApproval(userProposal.getDeanApproval());
-			// University Research Administrator
-			proposal.setResearchAdministratorApproval(userProposal
-					.getResearchAdministratorApproval());
-			proposal.setResearchAdministratorWithdraw(userProposal
-					.getResearchAdministratorWithdraw());
-			proposal.setResearchAdministratorSubmission(userProposal
-					.getResearchAdministratorSubmission());
-			// University Research Director
-			proposal.setResearchDirectorApproval(userProposal
-					.getResearchDirectorApproval());
-			proposal.setResearchDirectorDeletion(userProposal
-					.getResearchDirectorDeletion());
-			proposal.setResearchDirectorArchived(userProposal
-					.getResearchDirectorArchived());
-			proposal.setIrbApprovalRequired(userProposal
-					.isIrbApprovalRequired());
-			if (userProposal.getDeletedByPI().equals(DeleteType.DELETED)
-					|| userProposal.getResearchDirectorDeletion().equals(
-							DeleteType.DELETED)) {
-				proposal.setDeleted(true);
-			}
-			Date lastAudited = null;
-			String lastAuditedBy = new String();
-			String lastAuditAction = new String();
-			int auditLogCount = userProposal.getAuditLog().size();
-			if (userProposal.getAuditLog() != null && auditLogCount != 0) {
-				AuditLog auditLog = userProposal.getAuditLog().get(
-						auditLogCount - 1);
-				lastAudited = auditLog.getActivityDate();
-				lastAuditedBy = auditLog.getUserProfile().getFullName();
-				lastAuditAction = auditLog.getAction();
-			}
-			proposal.setLastAudited(lastAudited);
-			proposal.setLastAuditedBy(lastAuditedBy);
-			proposal.setLastAuditAction(lastAuditAction);
-			String piUserId = userProposal.getInvestigatorInfo().getPi()
-					.getUserProfileId();
-			proposal.setPiUser(piUserId);
-			if (!proposal.getAllUsers().contains(piUserId)) {
-				proposal.getAllUsers().add(piUserId);
-			}
-			List<InvestigatorRefAndPosition> allCoPI = userProposal
-					.getInvestigatorInfo().getCo_pi();
-			for (InvestigatorRefAndPosition coPI : allCoPI) {
-				String coPIUser = coPI.getUserProfileId();
-				proposal.getCopiUsers().add(coPIUser);
-				if (!proposal.getAllUsers().contains(coPIUser)) {
-					proposal.getAllUsers().add(coPIUser);
-				}
-			}
-			List<InvestigatorRefAndPosition> allSeniors = userProposal
-					.getInvestigatorInfo().getSeniorPersonnel();
-			for (InvestigatorRefAndPosition senior : allSeniors) {
-				String seniorUser = senior.getUserProfileId();
-				proposal.getSeniorUsers().add(seniorUser);
-				if (!proposal.getAllUsers().contains(seniorUser)) {
-					proposal.getAllUsers().add(seniorUser);
-				}
-			}
-			proposals.add(proposal);
-		}
-		return proposals;
+
+		return proposalQuery;
 	}
 
+	/**
+	 * @param proposalsGridInfoList
+	 * @param rowTotal
+	 * @param allCurrentLoginUserProposalsList
+	 * @Refactored
+	 */
+	private List<ProposalInfo> getMyProposalGridForTheCurrentUser(int rowTotal,
+			List<Proposal> allCurrentLoginUserProposalsList) {
+
+		List<ProposalInfo> proposalsGridInfoList = new ArrayList<ProposalInfo>();
+
+		for (Proposal userProposal : allCurrentLoginUserProposalsList) {
+			ProposalInfo proposalGridInfo = new ProposalInfo();
+			// Proposal
+			proposalGridInfo.setRowTotal(rowTotal);
+			proposalGridInfo.setId(userProposal.getId().toString());
+			// ProjectInfo
+			setProposalProjectInfo(userProposal, proposalGridInfo);
+
+			// SponsorAndBudgetInfo
+			setSponsorAndBudgetInfo(userProposal, proposalGridInfo);
+
+			// Proposal Status
+			setCurrentProposalStatusAttribute(userProposal, proposalGridInfo);
+
+			// set audit log
+			setLastProposalModificationAuditLog(userProposal, proposalGridInfo);
+
+			setProposalPIInfo(userProposal, proposalGridInfo);
+
+			setPropsalCoPIsInfo(userProposal, proposalGridInfo);
+
+			setProposalSeniorsInfo(userProposal, proposalGridInfo);
+
+			proposalsGridInfoList.add(proposalGridInfo);
+		}
+		return proposalsGridInfoList;
+	}
+
+	/**
+	 * @param userProposal
+	 * @param proposalGridInfo
+	 * @Refactored
+	 */
+	private void setProposalSeniorsInfo(Proposal userProposal,
+			ProposalInfo proposalGridInfo) {
+		List<InvestigatorRefAndPosition> allSeniors = userProposal
+				.getInvestigatorInfo().getSeniorPersonnel();
+		for (InvestigatorRefAndPosition senior : allSeniors) {
+			String seniorUser = senior.getUserProfileId();
+			proposalGridInfo.getSeniorUsers().add(seniorUser);
+			if (!proposalGridInfo.getAllUsers().contains(seniorUser)) {
+				proposalGridInfo.getAllUsers().add(seniorUser);
+			}
+		}
+	}
+
+	/**
+	 * @param userProposal
+	 * @param proposalGridInfo
+	 * @Refactored
+	 */
+	private void setPropsalCoPIsInfo(Proposal userProposal,
+			ProposalInfo proposalGridInfo) {
+		List<InvestigatorRefAndPosition> allCoPI = userProposal
+				.getInvestigatorInfo().getCo_pi();
+		for (InvestigatorRefAndPosition coPI : allCoPI) {
+			String coPIUser = coPI.getUserProfileId();
+			proposalGridInfo.getCopiUsers().add(coPIUser);
+			if (!proposalGridInfo.getAllUsers().contains(coPIUser)) {
+				proposalGridInfo.getAllUsers().add(coPIUser);
+			}
+		}
+	}
+
+	/**
+	 * @param userProposal
+	 * @param proposalGridInfo
+	 * @Refactored
+	 */
+	private void setProposalPIInfo(Proposal userProposal,
+			ProposalInfo proposalGridInfo) {
+		String piUserId = userProposal.getInvestigatorInfo().getPi()
+				.getUserProfileId();
+		proposalGridInfo.setPiUser(piUserId);
+		if (!proposalGridInfo.getAllUsers().contains(piUserId)) {
+			proposalGridInfo.getAllUsers().add(piUserId);
+		}
+	}
+
+	/**
+	 * @param userProposal
+	 * @param proposalGridInfo
+	 * @Refactored
+	 */
+	private void setLastProposalModificationAuditLog(Proposal userProposal,
+			ProposalInfo proposalGridInfo) {
+		Date lastAudited = null;
+		String lastAuditedBy = new String();
+		String lastAuditAction = new String();
+		int auditLogCount = userProposal.getAuditLog().size();
+		if (userProposal.getAuditLog() != null && auditLogCount != 0) {
+			AuditLog auditLog = userProposal.getAuditLog().get(
+					auditLogCount - 1);
+			lastAudited = auditLog.getActivityDate();
+			lastAuditedBy = auditLog.getUserProfile().getFullName();
+			lastAuditAction = auditLog.getAction();
+		}
+		proposalGridInfo.setLastAudited(lastAudited);
+		proposalGridInfo.setLastAuditedBy(lastAuditedBy);
+		proposalGridInfo.setLastAuditAction(lastAuditAction);
+	}
+
+	/**
+	 * @param userProposal
+	 * @param proposalGridInfo
+	 * @Refactored
+	 */
+	private void setCurrentProposalStatusAttribute(Proposal userProposal,
+			ProposalInfo proposalGridInfo) {
+
+		for (Status status : userProposal.getProposalStatus()) {
+			proposalGridInfo.getProposalStatus().add(status.toString());
+		}
+
+		// PI
+		proposalGridInfo.setSubmittedByPI(userProposal.getSubmittedByPI());
+		proposalGridInfo.setReadyForSubmissionByPI(userProposal
+				.isReadyForSubmissionByPI());
+		proposalGridInfo.setDeletedByPI(userProposal.getDeletedByPI());
+
+		// Chair
+		proposalGridInfo.setChairApproval(userProposal.getChairApproval());
+
+		// Business Manager
+		proposalGridInfo.setBusinessManagerApproval(userProposal
+				.getBusinessManagerApproval());
+		// IRB
+		proposalGridInfo.setIrbApproval(userProposal.getIrbApproval());
+		// Dean
+		proposalGridInfo.setDeanApproval(userProposal.getDeanApproval());
+		// University Research Administrator
+		proposalGridInfo.setResearchAdministratorApproval(userProposal
+				.getResearchAdministratorApproval());
+		proposalGridInfo.setResearchAdministratorWithdraw(userProposal
+				.getResearchAdministratorWithdraw());
+		proposalGridInfo.setResearchAdministratorSubmission(userProposal
+				.getResearchAdministratorSubmission());
+		// University Research Director
+		proposalGridInfo.setResearchDirectorApproval(userProposal
+				.getResearchDirectorApproval());
+		proposalGridInfo.setResearchDirectorDeletion(userProposal
+				.getResearchDirectorDeletion());
+		proposalGridInfo.setResearchDirectorArchived(userProposal
+				.getResearchDirectorArchived());
+		proposalGridInfo.setIrbApprovalRequired(userProposal
+				.isIrbApprovalRequired());
+		if (userProposal.getDeletedByPI().equals(DeleteType.DELETED)
+				|| userProposal.getResearchDirectorDeletion().equals(
+						DeleteType.DELETED)) {
+			proposalGridInfo.setDeleted(true);
+		}
+	}
+
+	/**
+	 * @param userProposal
+	 * @param proposalGridInfo
+	 * @Refactored
+	 */
+	private void setSponsorAndBudgetInfo(Proposal userProposal,
+			ProposalInfo proposalGridInfo) {
+
+		proposalGridInfo.setGrantingAgencies(userProposal
+				.getSponsorAndBudgetInfo().getGrantingAgency());
+		proposalGridInfo.setDirectCosts(userProposal.getSponsorAndBudgetInfo()
+				.getDirectCosts());
+		proposalGridInfo.setFaCosts(userProposal.getSponsorAndBudgetInfo()
+				.getFaCosts());
+		proposalGridInfo.setTotalCosts(userProposal.getSponsorAndBudgetInfo()
+				.getTotalCosts());
+		proposalGridInfo.setFaRate(userProposal.getSponsorAndBudgetInfo()
+				.getFaRate());
+		proposalGridInfo.setDateCreated(userProposal.getDateCreated());
+		proposalGridInfo.setDateSubmitted(userProposal.getDateSubmitted());
+		proposalGridInfo.setDueDate(userProposal.getProjectInfo().getDueDate());
+		proposalGridInfo.setProjectPeriodFrom(userProposal.getProjectInfo()
+				.getProjectPeriod().getFrom());
+		proposalGridInfo.setProjectPeriodTo(userProposal.getProjectInfo()
+				.getProjectPeriod().getTo());
+	}
+
+	/**
+	 * @param userProposal
+	 * @param proposalGridInfo
+	 * @Refactored
+	 */
+	private void setProposalProjectInfo(Proposal userProposal,
+			ProposalInfo proposalGridInfo) {
+
+		proposalGridInfo.setProjectTitle(userProposal.getProjectInfo()
+				.getProjectTitle());
+		ProjectType projectPropsalType = userProposal.getProjectInfo()
+				.getProjectType();
+		if (projectPropsalType.isResearchBasic()) {
+			proposalGridInfo.setProjectType("Research-basic");
+		} else if (projectPropsalType.isResearchApplied()) {
+			proposalGridInfo.setProjectType("Research-applied");
+		} else if (projectPropsalType.isResearchDevelopment()) {
+			proposalGridInfo.setProjectType("Research-development");
+		} else if (projectPropsalType.isInstruction()) {
+			proposalGridInfo.setProjectType("Instruction");
+		} else if (projectPropsalType.isOtherSponsoredActivity()) {
+			proposalGridInfo.setProjectType("Other sponsored activity");
+		}
+
+		TypeOfRequest typeOfRequest = userProposal.getProjectInfo()
+				.getTypeOfRequest();
+
+		if (typeOfRequest.isPreProposal()) {
+			proposalGridInfo.getTypeOfRequest().add("Pre-proposal");
+		} else if (typeOfRequest.isNewProposal()) {
+			proposalGridInfo.getTypeOfRequest().add("New proposal");
+		} else if (typeOfRequest.isContinuation()) {
+			proposalGridInfo.getTypeOfRequest().add("Continuation");
+		} else if (typeOfRequest.isSupplement()) {
+			proposalGridInfo.getTypeOfRequest().add("Supplement");
+		}
+
+		ProjectLocation pl = userProposal.getProjectInfo().getProjectLocation();
+		if (pl.isOffCampus()) {
+			proposalGridInfo.setProjectLocation("Off-campus");
+		} else if (pl.isOnCampus()) {
+			proposalGridInfo.setProjectLocation("On-campus");
+		}
+	}
+
+	/**
+	 * 
+	 * @param proposalInfo
+	 * @return
+	 * @throws ParseException
+	 * @Refactored
+	 */
+	public List<ProposalInfo> findAllProposals(ProposalCommonInfo proposalInfo)
+			throws ParseException {
+
+		Query<Proposal> queryPropsal = getMyProposalSearchSelectedFields(proposalInfo);
+		int rowTotal = queryPropsal.asList().size();
+		List<Proposal> allProposals = queryPropsal.order(
+				"-audit log.activity on").asList();
+		return getMyProposalGridForTheCurrentUser(rowTotal, allProposals);
+	}
+
+	// ////////////////////////////////////////////////////////////////////////////////////
+
+	/**
+	 * 
+	 * @param offset
+	 * @param limit
+	 * @param proposalInfo
+	 * @param userInfo
+	 * @return
+	 * @throws ParseException
+	 */
 	public List<ProposalInfo> findUserProposalGrid(int offset, int limit,
 			ProposalCommonInfo proposalInfo, GPMSCommonInfo userInfo)
 			throws ParseException {
@@ -831,111 +1009,10 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 			// Proposal
 			proposal.setRowTotal(rowTotal);
 			proposal.setId(userProposal.getId().toString());
-			// ProjectInfo
-			proposal.setProjectTitle(userProposal.getProjectInfo()
-					.getProjectTitle());
-			ProjectType pt = userProposal.getProjectInfo().getProjectType();
-			if (pt.isResearchBasic()) {
-				proposal.setProjectType("Research-basic");
-			} else if (pt.isResearchApplied()) {
-				proposal.setProjectType("Research-applied");
-			} else if (pt.isResearchDevelopment()) {
-				proposal.setProjectType("Research-development");
-			} else if (pt.isInstruction()) {
-				proposal.setProjectType("Instruction");
-			} else if (pt.isOtherSponsoredActivity()) {
-				proposal.setProjectType("Other sponsored activity");
-			}
-			TypeOfRequest tor = userProposal.getProjectInfo()
-					.getTypeOfRequest();
-			if (tor.isPreProposal()) {
-				proposal.getTypeOfRequest().add("Pre-proposal");
-			} else if (tor.isNewProposal()) {
-				proposal.getTypeOfRequest().add("New proposal");
-			} else if (tor.isContinuation()) {
-				proposal.getTypeOfRequest().add("Continuation");
-			} else if (tor.isSupplement()) {
-				proposal.getTypeOfRequest().add("Supplement");
-			}
-			ProjectLocation pl = userProposal.getProjectInfo()
-					.getProjectLocation();
-			if (pl.isOffCampus()) {
-				proposal.setProjectLocation("Off-campus");
-			} else if (pl.isOnCampus()) {
-				proposal.setProjectLocation("On-campus");
-			}
-			// SponsorAndBudgetInfo
-			proposal.setGrantingAgencies(userProposal.getSponsorAndBudgetInfo()
-					.getGrantingAgency());
-			proposal.setDirectCosts(userProposal.getSponsorAndBudgetInfo()
-					.getDirectCosts());
-			proposal.setFaCosts(userProposal.getSponsorAndBudgetInfo()
-					.getFaCosts());
-			proposal.setTotalCosts(userProposal.getSponsorAndBudgetInfo()
-					.getTotalCosts());
-			proposal.setFaRate(userProposal.getSponsorAndBudgetInfo()
-					.getFaRate());
-			proposal.setDateCreated(userProposal.getDateCreated());
-			proposal.setDateSubmitted(userProposal.getDateSubmitted());
-
-			proposal.setDueDate(userProposal.getProjectInfo().getDueDate());
-			proposal.setProjectPeriodFrom(userProposal.getProjectInfo()
-					.getProjectPeriod().getFrom());
-			proposal.setProjectPeriodTo(userProposal.getProjectInfo()
-					.getProjectPeriod().getTo());
-			// Proposal Status
-			for (Status status : userProposal.getProposalStatus()) {
-				proposal.getProposalStatus().add(status.toString());
-			}
-			// PI
-			proposal.setSubmittedByPI(userProposal.getSubmittedByPI());
-			proposal.setReadyForSubmissionByPI(userProposal
-					.isReadyForSubmissionByPI());
-			proposal.setDeletedByPI(userProposal.getDeletedByPI());
-			// Chair
-			proposal.setChairApproval(userProposal.getChairApproval());
-			// Business Manager
-			proposal.setBusinessManagerApproval(userProposal
-					.getBusinessManagerApproval());
-			// IRB
-			proposal.setIrbApproval(userProposal.getIrbApproval());
-			// Dean
-			proposal.setDeanApproval(userProposal.getDeanApproval());
-			// University Research Administrator
-			proposal.setResearchAdministratorApproval(userProposal
-					.getResearchAdministratorApproval());
-			proposal.setResearchAdministratorWithdraw(userProposal
-					.getResearchAdministratorWithdraw());
-			proposal.setResearchAdministratorSubmission(userProposal
-					.getResearchAdministratorSubmission());
-			// University Research Director
-			proposal.setResearchDirectorApproval(userProposal
-					.getResearchDirectorApproval());
-			proposal.setResearchDirectorDeletion(userProposal
-					.getResearchDirectorDeletion());
-			proposal.setResearchDirectorArchived(userProposal
-					.getResearchDirectorArchived());
-			proposal.setIrbApprovalRequired(userProposal
-					.isIrbApprovalRequired());
-			if (userProposal.getDeletedByPI().equals(DeleteType.DELETED)
-					|| userProposal.getResearchDirectorDeletion().equals(
-							DeleteType.DELETED)) {
-				proposal.setDeleted(true);
-			}
-			Date lastAudited = null;
-			String lastAuditedBy = new String();
-			String lastAuditAction = new String();
-			int auditLogCount = userProposal.getAuditLog().size();
-			if (userProposal.getAuditLog() != null && auditLogCount != 0) {
-				AuditLog auditLog = userProposal.getAuditLog().get(
-						auditLogCount - 1);
-				lastAudited = auditLog.getActivityDate();
-				lastAuditedBy = auditLog.getUserProfile().getFullName();
-				lastAuditAction = auditLog.getAction();
-			}
-			proposal.setLastAudited(lastAudited);
-			proposal.setLastAuditedBy(lastAuditedBy);
-			proposal.setLastAuditAction(lastAuditAction);
+			setProposalProjectInfo(userProposal, proposal);
+			setSponsorAndBudgetInfo(userProposal, proposal);
+			setCurrentProposalStatusAttribute(userProposal, proposal);
+			setLastProposalModificationAuditLog(userProposal, proposal);
 			String piUserId = userProposal.getInvestigatorInfo().getPi()
 					.getUserProfileId();
 			String piUserCollege = userProposal.getInvestigatorInfo().getPi()
@@ -1001,203 +1078,17 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 		return proposals;
 	}
 
-	public List<ProposalInfo> findAllProposals(ProposalCommonInfo proposalInfo)
-			throws ParseException {
-		Datastore ds = getDatastore();
-		String projectTitle = proposalInfo.getProjectTitle();
-		String usernameBy = proposalInfo.getUsernameBy();
-		Double totalCostsFrom = proposalInfo.getTotalCostsFrom();
-		Double totalCostsTo = proposalInfo.getTotalCostsTo();
-		String submittedOnFrom = proposalInfo.getSubmittedOnFrom();
-		String submittedOnTo = proposalInfo.getSubmittedOnTo();
-		String proposalStatus = proposalInfo.getProposalStatus();
-		List<ProposalInfo> proposals = new ArrayList<ProposalInfo>();
-		Query<Proposal> proposalQuery = ds.createQuery(Proposal.class);
-		Query<UserProfile> profileQuery = ds.createQuery(UserProfile.class);
-		if (projectTitle != null) {
-			proposalQuery.field("project info.project title")
-					.containsIgnoreCase(projectTitle);
-		}
-		if (submittedOnFrom != null && !submittedOnFrom.isEmpty()) {
-			Date receivedOnF = formatter.parse(submittedOnFrom);
-			proposalQuery.field("date submitted").greaterThanOrEq(receivedOnF);
-		}
-		if (submittedOnTo != null && !submittedOnTo.isEmpty()) {
-			Date receivedOnT = formatter.parse(submittedOnTo);
-			proposalQuery.field("date submitted").lessThanOrEq(receivedOnT);
-		}
-		if (totalCostsFrom != null && totalCostsFrom != 0.0) {
-			proposalQuery.field("sponsor and budget info.total costs")
-					.greaterThanOrEq(totalCostsFrom);
-		}
-		if (totalCostsTo != null && totalCostsTo != 0.0) {
-			proposalQuery.field("sponsor and budget info.total costs")
-					.lessThanOrEq(totalCostsTo);
-		}
-		if (proposalStatus != null) {
-			proposalQuery.field("proposal status").contains(proposalStatus);
-		}
-		if (usernameBy != null) {
-			profileQuery.or(
-					profileQuery.criteria("first name").containsIgnoreCase(
-							usernameBy),
-					profileQuery.criteria("middle name").containsIgnoreCase(
-							usernameBy), profileQuery.criteria("last name")
-							.containsIgnoreCase(usernameBy));
-			proposalQuery.or(
-					proposalQuery.criteria("investigator info.pi.user profile")
-							.in(profileQuery.asKeyList()),
-					proposalQuery.criteria(
-							"investigator info.co_pi.user profile").in(
-							profileQuery.asKeyList()),
-					proposalQuery.criteria(
-							"investigator info.senior personnel.user profile")
-							.in(profileQuery.asKeyList()));
-		}
-		int rowTotal = proposalQuery.asList().size();
-		List<Proposal> allProposals = proposalQuery.order(
-				"-audit log.activity on").asList();
-		for (Proposal userProposal : allProposals) {
-			ProposalInfo proposal = new ProposalInfo();
-			// Proposal
-			proposal.setRowTotal(rowTotal);
-			proposal.setId(userProposal.getId().toString());
-			// ProjectInfo
-			proposal.setProjectTitle(userProposal.getProjectInfo()
-					.getProjectTitle());
-			ProjectType pt = userProposal.getProjectInfo().getProjectType();
-			if (pt.isResearchBasic()) {
-				proposal.setProjectType("Research-basic");
-			} else if (pt.isResearchApplied()) {
-				proposal.setProjectType("Research-applied");
-			} else if (pt.isResearchDevelopment()) {
-				proposal.setProjectType("Research-development");
-			} else if (pt.isInstruction()) {
-				proposal.setProjectType("Instruction");
-			} else if (pt.isOtherSponsoredActivity()) {
-				proposal.setProjectType("Other sponsored activity");
-			}
-			TypeOfRequest tor = userProposal.getProjectInfo()
-					.getTypeOfRequest();
-			if (tor.isPreProposal()) {
-				proposal.getTypeOfRequest().add("Pre-proposal");
-			} else if (tor.isNewProposal()) {
-				proposal.getTypeOfRequest().add("New proposal");
-			} else if (tor.isContinuation()) {
-				proposal.getTypeOfRequest().add("Continuation");
-			} else if (tor.isSupplement()) {
-				proposal.getTypeOfRequest().add("Supplement");
-			}
-			ProjectLocation pl = userProposal.getProjectInfo()
-					.getProjectLocation();
-			if (pl.isOffCampus()) {
-				proposal.setProjectLocation("Off-campus");
-			} else if (pl.isOnCampus()) {
-				proposal.setProjectLocation("On-campus");
-			}
-			// SponsorAndBudgetInfo
-			proposal.setGrantingAgencies(userProposal.getSponsorAndBudgetInfo()
-					.getGrantingAgency());
-			proposal.setDirectCosts(userProposal.getSponsorAndBudgetInfo()
-					.getDirectCosts());
-			proposal.setFaCosts(userProposal.getSponsorAndBudgetInfo()
-					.getFaCosts());
-			proposal.setTotalCosts(userProposal.getSponsorAndBudgetInfo()
-					.getTotalCosts());
-			proposal.setFaRate(userProposal.getSponsorAndBudgetInfo()
-					.getFaRate());
-			proposal.setDateCreated(userProposal.getDateCreated());
-			proposal.setDateSubmitted(userProposal.getDateSubmitted());
-			proposal.setDueDate(userProposal.getProjectInfo().getDueDate());
-			proposal.setProjectPeriodFrom(userProposal.getProjectInfo()
-					.getProjectPeriod().getFrom());
-			proposal.setProjectPeriodTo(userProposal.getProjectInfo()
-					.getProjectPeriod().getTo());
-			// Proposal Status
-			for (Status status : userProposal.getProposalStatus()) {
-				proposal.getProposalStatus().add(status.toString());
-			}
-			// PI
-			proposal.setSubmittedByPI(userProposal.getSubmittedByPI());
-			proposal.setReadyForSubmissionByPI(userProposal
-					.isReadyForSubmissionByPI());
-			proposal.setDeletedByPI(userProposal.getDeletedByPI());
-			// Chair
-			proposal.setChairApproval(userProposal.getChairApproval());
-			// Business Manager
-			proposal.setBusinessManagerApproval(userProposal
-					.getBusinessManagerApproval());
-			// IRB
-			proposal.setIrbApproval(userProposal.getIrbApproval());
-			// Dean
-			proposal.setDeanApproval(userProposal.getDeanApproval());
-			// University Research Administrator
-			proposal.setResearchAdministratorApproval(userProposal
-					.getResearchAdministratorApproval());
-			proposal.setResearchAdministratorWithdraw(userProposal
-					.getResearchAdministratorWithdraw());
-			proposal.setResearchAdministratorSubmission(userProposal
-					.getResearchAdministratorSubmission());
-			// University Research Director
-			proposal.setResearchDirectorApproval(userProposal
-					.getResearchDirectorApproval());
-			proposal.setResearchDirectorDeletion(userProposal
-					.getResearchDirectorDeletion());
-			proposal.setResearchDirectorArchived(userProposal
-					.getResearchDirectorArchived());
-			proposal.setIrbApprovalRequired(userProposal
-					.isIrbApprovalRequired());
-			if (userProposal.getDeletedByPI().equals(DeleteType.DELETED)
-					|| userProposal.getResearchDirectorDeletion().equals(
-							DeleteType.DELETED)) {
-				proposal.setDeleted(true);
-			}
-			Date lastAudited = null;
-			String lastAuditedBy = new String();
-			String lastAuditAction = new String();
-			int auditLogCount = userProposal.getAuditLog().size();
-			if (userProposal.getAuditLog() != null && auditLogCount != 0) {
-				AuditLog auditLog = userProposal.getAuditLog().get(
-						auditLogCount - 1);
-				lastAudited = auditLog.getActivityDate();
-				lastAuditedBy = auditLog.getUserProfile().getFullName();
-				lastAuditAction = auditLog.getAction();
-			}
-			proposal.setLastAudited(lastAudited);
-			proposal.setLastAuditedBy(lastAuditedBy);
-			proposal.setLastAuditAction(lastAuditAction);
-			String piUserId = userProposal.getInvestigatorInfo().getPi()
-					.getUserProfileId();
-			proposal.setPiUser(piUserId);
-			if (!proposal.getAllUsers().contains(piUserId)) {
-				proposal.getAllUsers().add(piUserId);
-			}
-			List<InvestigatorRefAndPosition> allCoPI = userProposal
-					.getInvestigatorInfo().getCo_pi();
-			for (InvestigatorRefAndPosition coPI : allCoPI) {
-				String coPIUser = coPI.getUserProfileId();
-				proposal.getCopiUsers().add(coPIUser);
-				if (!proposal.getAllUsers().contains(coPIUser)) {
-					proposal.getAllUsers().add(coPIUser);
-				}
-			}
-			List<InvestigatorRefAndPosition> allSeniors = userProposal
-					.getInvestigatorInfo().getSeniorPersonnel();
-			for (InvestigatorRefAndPosition senior : allSeniors) {
-				String seniorUser = senior.getUserProfileId();
-				proposal.getSeniorUsers().add(seniorUser);
-				if (!proposal.getAllUsers().contains(seniorUser)) {
-					proposal.getAllUsers().add(seniorUser);
-				}
-			}
-			proposals.add(proposal);
-		}
-		return proposals;
-	}
-
+	/**
+	 * 
+	 * @param proposalInfo
+	 * @param userInfo
+	 * @return
+	 * @throws ParseException
+	 */
 	public List<ProposalInfo> findAllUserProposals(
 			ProposalCommonInfo proposalInfo, GPMSCommonInfo userInfo)
 			throws ParseException {
+
 		Datastore ds = getDatastore();
 		String projectTitle = proposalInfo.getProjectTitle();
 		String usernameBy = proposalInfo.getUsernameBy();
@@ -1415,110 +1306,10 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 			// Proposal
 			proposal.setRowTotal(rowTotal);
 			proposal.setId(userProposal.getId().toString());
-			// ProjectInfo
-			proposal.setProjectTitle(userProposal.getProjectInfo()
-					.getProjectTitle());
-			ProjectType pt = userProposal.getProjectInfo().getProjectType();
-			if (pt.isResearchBasic()) {
-				proposal.setProjectType("Research-basic");
-			} else if (pt.isResearchApplied()) {
-				proposal.setProjectType("Research-applied");
-			} else if (pt.isResearchDevelopment()) {
-				proposal.setProjectType("Research-development");
-			} else if (pt.isInstruction()) {
-				proposal.setProjectType("Instruction");
-			} else if (pt.isOtherSponsoredActivity()) {
-				proposal.setProjectType("Other sponsored activity");
-			}
-			TypeOfRequest tor = userProposal.getProjectInfo()
-					.getTypeOfRequest();
-			if (tor.isPreProposal()) {
-				proposal.getTypeOfRequest().add("Pre-proposal");
-			} else if (tor.isNewProposal()) {
-				proposal.getTypeOfRequest().add("New proposal");
-			} else if (tor.isContinuation()) {
-				proposal.getTypeOfRequest().add("Continuation");
-			} else if (tor.isSupplement()) {
-				proposal.getTypeOfRequest().add("Supplement");
-			}
-			ProjectLocation pl = userProposal.getProjectInfo()
-					.getProjectLocation();
-			if (pl.isOffCampus()) {
-				proposal.setProjectLocation("Off-campus");
-			} else if (pl.isOnCampus()) {
-				proposal.setProjectLocation("On-campus");
-			}
-			// SponsorAndBudgetInfo
-			proposal.setGrantingAgencies(userProposal.getSponsorAndBudgetInfo()
-					.getGrantingAgency());
-			proposal.setDirectCosts(userProposal.getSponsorAndBudgetInfo()
-					.getDirectCosts());
-			proposal.setFaCosts(userProposal.getSponsorAndBudgetInfo()
-					.getFaCosts());
-			proposal.setTotalCosts(userProposal.getSponsorAndBudgetInfo()
-					.getTotalCosts());
-			proposal.setFaRate(userProposal.getSponsorAndBudgetInfo()
-					.getFaRate());
-			proposal.setDateCreated(userProposal.getDateCreated());
-			proposal.setDateSubmitted(userProposal.getDateSubmitted());
-			proposal.setDueDate(userProposal.getProjectInfo().getDueDate());
-			proposal.setProjectPeriodFrom(userProposal.getProjectInfo()
-					.getProjectPeriod().getFrom());
-			proposal.setProjectPeriodTo(userProposal.getProjectInfo()
-					.getProjectPeriod().getTo());
-			// Proposal Status
-			for (Status status : userProposal.getProposalStatus()) {
-				proposal.getProposalStatus().add(status.toString());
-			}
-			// PI
-			proposal.setSubmittedByPI(userProposal.getSubmittedByPI());
-			proposal.setReadyForSubmissionByPI(userProposal
-					.isReadyForSubmissionByPI());
-			proposal.setDeletedByPI(userProposal.getDeletedByPI());
-			// Chair
-			proposal.setChairApproval(userProposal.getChairApproval());
-			// Business Manager
-			proposal.setBusinessManagerApproval(userProposal
-					.getBusinessManagerApproval());
-			// IRB
-			proposal.setIrbApproval(userProposal.getIrbApproval());
-			// Dean
-			proposal.setDeanApproval(userProposal.getDeanApproval());
-			// University Research Administrator
-			proposal.setResearchAdministratorApproval(userProposal
-					.getResearchAdministratorApproval());
-			proposal.setResearchAdministratorWithdraw(userProposal
-					.getResearchAdministratorWithdraw());
-			proposal.setResearchAdministratorSubmission(userProposal
-					.getResearchAdministratorSubmission());
-			// University Research Director
-			proposal.setResearchDirectorApproval(userProposal
-					.getResearchDirectorApproval());
-			proposal.setResearchDirectorDeletion(userProposal
-					.getResearchDirectorDeletion());
-			proposal.setResearchDirectorArchived(userProposal
-					.getResearchDirectorArchived());
-			proposal.setIrbApprovalRequired(userProposal
-					.isIrbApprovalRequired());
-			if (userProposal.getDeletedByPI().equals(DeleteType.DELETED)
-					|| userProposal.getResearchDirectorDeletion().equals(
-							DeleteType.DELETED)) {
-				proposal.setDeleted(true);
-			}
-			Date lastAudited = null;
-			String lastAuditedBy = new String();
-			String lastAuditAction = new String();
-			int auditLogCount = userProposal.getAuditLog().size();
-			if (userProposal.getAuditLog() != null && auditLogCount != 0) {
-				AuditLog auditLog = userProposal.getAuditLog().get(
-						auditLogCount - 1);
-				lastAudited = auditLog.getActivityDate();
-				lastAuditedBy = auditLog.getUserProfile().getFullName();
-				lastAuditAction = auditLog.getAction();
-			}
-			proposal.setLastAudited(lastAudited);
-			proposal.setLastAuditedBy(lastAuditedBy);
-			proposal.setLastAuditAction(lastAuditAction);
+			setProposalProjectInfo(userProposal, proposal);
+			setSponsorAndBudgetInfo(userProposal, proposal);
+			setCurrentProposalStatusAttribute(userProposal, proposal);
+			setLastProposalModificationAuditLog(userProposal, proposal);
 			String piUserId = userProposal.getInvestigatorInfo().getPi()
 					.getUserProfileId().toString();
 			proposal.setPiUser(piUserId);
