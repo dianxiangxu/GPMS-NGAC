@@ -1493,7 +1493,6 @@ public class ProposalService {
 			String proposalID, List<SignatureUserInfo> signatures,
 			boolean irbApprovalRequired, String notificationMessage,
 			boolean isCritical, final String notificationType, int coPICount) {
-		NotificationLog notification;
 		// Disapproved by University
 		// Research
 		// Director
@@ -1508,7 +1507,7 @@ public class ProposalService {
 		existingProposal.getProposalStatus().add(
 				Status.DISAPPROVEDBYRESEARCHDIRECTOR);
 		for (SignatureUserInfo userToNotify : signatures) {
-			notification = new NotificationLog();
+			NotificationLog notification = new NotificationLog();
 			if (userToNotify.getPositionTitle().equals(
 					"University Research Director")
 					|| userToNotify.getPositionTitle().equals(
@@ -1518,14 +1517,19 @@ public class ProposalService {
 							"Business Manager")
 					|| userToNotify.getPositionTitle().equals(
 							"Department Chair")) {
-				createNotificationForAUser(existingProposal, proposalID,
-						notificationMessage, isCritical, notificationType,
-						notification, userToNotify);
+				notification = createNotificationForAUser(isCritical,
+						notificationType, notificationMessage, proposalID,
+						existingProposal.getProjectInfo().getProjectTitle(),
+						userToNotify);
 			} else if (userToNotify.getPositionTitle().equals("IRB")) {
 				if (irbApprovalRequired) {
-					createNotificationForAUser(existingProposal, proposalID,
-							notificationMessage, isCritical, notificationType,
-							notification, userToNotify);
+					notification = createNotificationForAUser(
+							isCritical,
+							notificationType,
+							notificationMessage,
+							proposalID,
+							existingProposal.getProjectInfo().getProjectTitle(),
+							userToNotify);
 				}
 			}
 			notificationDAO.save(notification);
@@ -1569,14 +1573,19 @@ public class ProposalService {
 							"Business Manager")
 					|| userToNotify.getPositionTitle().equals(
 							"Department Chair")) {
-				createNotificationForAUser(existingProposal, proposalID,
-						notificationMessage, isCritical, notificationType,
-						notification, userToNotify);
+				notification = createNotificationForAUser(isCritical,
+						notificationType, notificationMessage, proposalID,
+						existingProposal.getProjectInfo().getProjectTitle(),
+						userToNotify);
 			} else if (userToNotify.getPositionTitle().equals("IRB")) {
 				if (irbApprovalRequired) {
-					createNotificationForAUser(existingProposal, proposalID,
-							notificationMessage, isCritical, notificationType,
-							notification, userToNotify);
+					notification = createNotificationForAUser(
+							isCritical,
+							notificationType,
+							notificationMessage,
+							proposalID,
+							existingProposal.getProjectInfo().getProjectTitle(),
+							userToNotify);
 				}
 			}
 			notificationDAO.save(notification);
@@ -1596,7 +1605,6 @@ public class ProposalService {
 			String proposalID, List<SignatureUserInfo> signatures,
 			String notificationMessage, boolean isCritical,
 			final String notificationType, int coPICount) {
-		NotificationLog notification;
 		// Disapproved by IRB
 		existingProposal.setIrbApproval(ApprovalType.DISAPPROVED);
 		existingProposal.setSubmittedByPI(SubmitType.NOTSUBMITTED);
@@ -1609,25 +1617,34 @@ public class ProposalService {
 		existingProposal.getProposalStatus().add(Status.DISAPPROVEDBYIRB);
 
 		for (SignatureUserInfo userToNotify : signatures) {
-			notification = new NotificationLog();
+			NotificationLog notification = new NotificationLog();
 			if (userToNotify.getPositionTitle().equals("IRB")
 					|| userToNotify.getPositionTitle().equals(
 							"Department Chair")) {
-				createNotificationForAUser(existingProposal, proposalID,
-						notificationMessage, isCritical, notificationType,
-						notification, userToNotify);
+				notification = createNotificationForAUser(isCritical,
+						notificationType, notificationMessage, proposalID,
+						existingProposal.getProjectInfo().getProjectTitle(),
+						userToNotify);
 			} else if (userToNotify.getPositionTitle().equals(
 					"Business Manager")) {
 				if (existingProposal.getBusinessManagerApproval() == ApprovalType.APPROVED) {
-					createNotificationForAUser(existingProposal, proposalID,
-							notificationMessage, isCritical, notificationType,
-							notification, userToNotify);
+					notification = createNotificationForAUser(
+							isCritical,
+							notificationType,
+							notificationMessage,
+							proposalID,
+							existingProposal.getProjectInfo().getProjectTitle(),
+							userToNotify);
 				}
 			} else if (userToNotify.getPositionTitle().equals("Dean")) {
 				if (existingProposal.getDeanApproval() == ApprovalType.APPROVED) {
-					createNotificationForAUser(existingProposal, proposalID,
-							notificationMessage, isCritical, notificationType,
-							notification, userToNotify);
+					notification = createNotificationForAUser(
+							isCritical,
+							notificationType,
+							notificationMessage,
+							proposalID,
+							existingProposal.getProjectInfo().getProjectTitle(),
+							userToNotify);
 				}
 			}
 			notificationDAO.save(notification);
@@ -1647,7 +1664,6 @@ public class ProposalService {
 			String proposalID, List<SignatureUserInfo> signatures,
 			String notificationMessage, boolean isCritical,
 			final String notificationType, int coPICount) {
-		NotificationLog notification;
 		// Returned by Dean
 		existingProposal.setDeanApproval(ApprovalType.DISAPPROVED);
 		existingProposal.setSubmittedByPI(SubmitType.NOTSUBMITTED);
@@ -1658,20 +1674,25 @@ public class ProposalService {
 		existingProposal.getProposalStatus().clear();
 		existingProposal.getProposalStatus().add(Status.RETURNEDBYDEAN);
 		for (SignatureUserInfo userToNotify : signatures) {
-			notification = new NotificationLog();
+			NotificationLog notification = new NotificationLog();
 			if (userToNotify.getPositionTitle().equals("Dean")
 					|| userToNotify.getPositionTitle().equals(
 							"Business Manager")
 					|| userToNotify.getPositionTitle().equals(
 							"Department Chair")) {
-				createNotificationForAUser(existingProposal, proposalID,
-						notificationMessage, isCritical, notificationType,
-						notification, userToNotify);
+				notification = createNotificationForAUser(isCritical,
+						notificationType, notificationMessage, proposalID,
+						existingProposal.getProjectInfo().getProjectTitle(),
+						userToNotify);
 			} else if (userToNotify.getPositionTitle().equals("IRB")) {
 				if (existingProposal.getIrbApproval() == ApprovalType.APPROVED) {
-					createNotificationForAUser(existingProposal, proposalID,
-							notificationMessage, isCritical, notificationType,
-							notification, userToNotify);
+					notification = createNotificationForAUser(
+							isCritical,
+							notificationType,
+							notificationMessage,
+							proposalID,
+							existingProposal.getProjectInfo().getProjectTitle(),
+							userToNotify);
 				}
 			}
 			notificationDAO.save(notification);
@@ -1691,7 +1712,6 @@ public class ProposalService {
 			String proposalID, List<SignatureUserInfo> signatures,
 			String notificationMessage, boolean isCritical,
 			final String notificationType, int coPICount) {
-		NotificationLog notification;
 		// Disapproved by Business Manager
 		existingProposal.setBusinessManagerApproval(ApprovalType.DISAPPROVED);
 		existingProposal.setSubmittedByPI(SubmitType.NOTSUBMITTED);
@@ -1705,18 +1725,23 @@ public class ProposalService {
 		existingProposal.getProposalStatus().add(
 				Status.DISAPPROVEDBYBUSINESSMANAGER);
 		for (SignatureUserInfo userToNotify : signatures) {
-			notification = new NotificationLog();
+			NotificationLog notification = new NotificationLog();
 			if (userToNotify.getPositionTitle().equals("Business Manager")
 					|| userToNotify.getPositionTitle().equals(
 							"Department Chair")) {
-				createNotificationForAUser(existingProposal, proposalID,
-						notificationMessage, isCritical, notificationType,
-						notification, userToNotify);
+				notification = createNotificationForAUser(isCritical,
+						notificationType, notificationMessage, proposalID,
+						existingProposal.getProjectInfo().getProjectTitle(),
+						userToNotify);
 			} else if (userToNotify.getPositionTitle().equals("IRB")) {
 				if (existingProposal.getIrbApproval() == ApprovalType.APPROVED) {
-					createNotificationForAUser(existingProposal, proposalID,
-							notificationMessage, isCritical, notificationType,
-							notification, userToNotify);
+					notification = createNotificationForAUser(
+							isCritical,
+							notificationType,
+							notificationMessage,
+							proposalID,
+							existingProposal.getProjectInfo().getProjectTitle(),
+							userToNotify);
 				}
 			}
 			notificationDAO.save(notification);
@@ -1736,7 +1761,7 @@ public class ProposalService {
 			String proposalID, List<SignatureUserInfo> signatures,
 			String notificationMessage, boolean isCritical,
 			final String notificationType, int coPICount) {
-		NotificationLog notification;
+
 		// Returned by Chair
 		existingProposal.setChairApproval(ApprovalType.DISAPPROVED);
 		existingProposal.setSubmittedByPI(SubmitType.NOTSUBMITTED);
@@ -1748,41 +1773,34 @@ public class ProposalService {
 		existingProposal.getProposalStatus().clear();
 		existingProposal.getProposalStatus().add(Status.RETURNEDBYCHAIR);
 		for (SignatureUserInfo userToNotify : signatures) {
-			notification = new NotificationLog();
+			NotificationLog notification = new NotificationLog();
 			if (userToNotify.getPositionTitle().equals("Department Chair")) {
-				createNotificationForAUser(existingProposal, proposalID,
-						notificationMessage, isCritical, notificationType,
-						notification, userToNotify);
+				notification = createNotificationForAUser(isCritical,
+						notificationType, notificationMessage, proposalID,
+						existingProposal.getProjectInfo().getProjectTitle(),
+						userToNotify);
 			}
 			notificationDAO.save(notification);
 		}
 	}
 
-	/**
-	 * @param existingProposal
-	 * @param proposalID
-	 * @param notificationMessage
-	 * @param isCritical
-	 * @param notificationType
-	 * @param notification
-	 * @param userToNotify
-	 */
-	private void createNotificationForAUser(Proposal existingProposal,
-			String proposalID, String notificationMessage, boolean isCritical,
-			final String notificationType, NotificationLog notification,
+	private NotificationLog createNotificationForAUser(boolean isCritical,
+			String notificationType, String notificationMessage,
+			String proposalID, String projectTitle,
 			SignatureUserInfo userToNotify) {
+		NotificationLog notification = new NotificationLog();
 		notification.setCritical(isCritical);
 		notification.setType(notificationType);
 		notification.setAction(notificationMessage);
 		notification.setProposalId(proposalID);
-		notification.setProposalTitle(existingProposal.getProjectInfo()
-				.getProjectTitle());
+		notification.setProposalTitle(projectTitle);
 		notification.setUserProfileId(userToNotify.getUserProfileId());
 		notification.setUsername(userToNotify.getUserName());
 		notification.setCollege(userToNotify.getCollege());
 		notification.setDepartment(userToNotify.getDepartment());
 		notification.setPositionType(userToNotify.getPositionType());
 		notification.setPositionTitle(userToNotify.getPositionTitle());
+		return notification;
 	}
 
 	/**
@@ -1799,19 +1817,9 @@ public class ProposalService {
 		existingProposal.getProposalStatus().add(
 				Status.SUBMITTEDBYRESEARCHADMIN);
 		for (SignatureUserInfo allUsers : signatures) {
-			notification = new NotificationLog();
-			notification.setCritical(true);
-			notification.setType("Proposal");
-			notification.setAction("The Proposal is Submitted");
-			notification.setProposalId(proposalID);
-			notification.setProposalTitle(existingProposal.getProjectInfo()
-					.getProjectTitle());
-			notification.setUserProfileId(allUsers.getUserProfileId());
-			notification.setUsername(allUsers.getUserName());
-			notification.setCollege(allUsers.getCollege());
-			notification.setDepartment(allUsers.getDepartment());
-			notification.setPositionType(allUsers.getPositionType());
-			notification.setPositionTitle(allUsers.getPositionTitle());
+			notification = createNotificationForAUser(true, "Proposal",
+					"The Proposal is Submitted", proposalID, existingProposal
+							.getProjectInfo().getProjectTitle(), allUsers);
 			notificationDAO.save(notification);
 		}
 	}
@@ -2038,19 +2046,9 @@ public class ProposalService {
 				.add(Status.WAITINGFORCHAIRAPPROVAL);
 		for (SignatureUserInfo chair : signatures) {
 			if (chair.getPositionTitle().equals("Department Chair")) {
-				notification = new NotificationLog();
-				notification.setCritical(true);
-				notification.setType("Proposal");
-				notification.setAction("Ready for Approval");
-				notification.setProposalId(proposalID);
-				notification.setProposalTitle(existingProposal.getProjectInfo()
-						.getProjectTitle());
-				notification.setUserProfileId(chair.getUserProfileId());
-				notification.setUsername(chair.getUserName());
-				notification.setCollege(chair.getCollege());
-				notification.setDepartment(chair.getDepartment());
-				notification.setPositionType(chair.getPositionType());
-				notification.setPositionTitle(chair.getPositionTitle());
+				notification = createNotificationForAUser(true, "Proposal",
+						"Ready for Approval", proposalID, existingProposal
+								.getProjectInfo().getProjectTitle(), chair);
 				notificationDAO.save(notification);
 			}
 		}
@@ -2066,19 +2064,10 @@ public class ProposalService {
 			String proposalID, SignatureUserInfo businessManager) {
 		NotificationLog notification = new NotificationLog();
 		if (businessManager.getPositionTitle().equals("Business Manager")) {
-			notification = new NotificationLog();
-			notification.setCritical(true);
-			notification.setType("Proposal");
-			notification.setAction("Ready for Reviewal");
-			notification.setProposalId(proposalID);
-			notification.setProposalTitle(existingProposal.getProjectInfo()
-					.getProjectTitle());
-			notification.setUserProfileId(businessManager.getUserProfileId());
-			notification.setUsername(businessManager.getUserName());
-			notification.setCollege(businessManager.getCollege());
-			notification.setDepartment(businessManager.getDepartment());
-			notification.setPositionType(businessManager.getPositionType());
-			notification.setPositionTitle(businessManager.getPositionTitle());
+			notification = createNotificationForAUser(true, "Proposal",
+					"Ready for Reviewal", proposalID, existingProposal
+							.getProjectInfo().getProjectTitle(),
+					businessManager);
 			notificationDAO.save(notification);
 		}
 	}
