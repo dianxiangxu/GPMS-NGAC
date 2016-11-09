@@ -130,6 +130,26 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 		return ds.createQuery(Proposal.class).field("_id").equal(id).get();
 	}
 
+	public Proposal findNextProposalWithSameProjectTitle(ObjectId id,
+			String newProjectTitle) {
+
+		Query<Proposal> proposalQuery = getDatastore().createQuery(
+				Proposal.class);
+		proposalQuery.and(proposalQuery.criteria("_id").notEqual(id),
+				proposalQuery.criteria("project info.project title")
+						.equalIgnoreCase(newProjectTitle));
+		return proposalQuery.get();
+	}
+
+	public Proposal findAnyProposalWithSameProjectTitle(String newProjectTitle) {
+
+		Query<Proposal> proposalQuery = getDatastore().createQuery(
+				Proposal.class);
+		proposalQuery.criteria("project info.project title").equalIgnoreCase(
+				newProjectTitle);
+		return proposalQuery.get();
+	}
+
 	public void saveProposal(Proposal newProposal, UserProfile authorProfile) {
 		Datastore ds = getDatastore();
 		audit = new AuditLog(authorProfile, "Created proposal by "
@@ -221,7 +241,7 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 		return getAuditListBasedOnPageing(
 				offset,
 				limit,
-				getAuditLogResults(auditLogInfo.getAction(),
+				getSortedAuditLogResults(auditLogInfo.getAction(),
 						auditLogInfo.getAuditedBy(),
 						auditLogInfo.getActivityOnFrom(),
 						auditLogInfo.getActivityOnTo(), id));
@@ -260,7 +280,7 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @return
 	 * @throws ParseException
 	 */
-	private List<AuditLogInfo> getAuditLogResults(String action,
+	private List<AuditLogInfo> getSortedAuditLogResults(String action,
 			String auditedBy, String activityOnFrom, String activityOnTo,
 			ObjectId id) throws ParseException {
 
@@ -273,13 +293,13 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 			for (AuditLog poposalAudit : q.getAuditLog()) {
 
 				AuditLogInfo proposalAuditLog = new AuditLogInfo();
-				boolean isActionMatch = isAuditLogActionFieldSelected(action,
+				boolean isActionMatch = isAuditLogActionFieldProvided(action,
 						poposalAudit);
-				boolean isAuditedByMatch = isAuditLogAuditedByFieldSelected(
+				boolean isAuditedByMatch = isAuditLogAuditedByFieldProvided(
 						auditedBy, poposalAudit);
-				boolean isActivityDateFromMatch = isAuditLogActivityDateFromSelected(
+				boolean isActivityDateFromMatch = isAuditLogActivityDateFromProvided(
 						activityOnFrom, poposalAudit);
-				boolean isActivityDateToMatch = isAuditLogActivityDateToSelected(
+				boolean isActivityDateToMatch = isAuditLogActivityDateToProvided(
 						activityOnTo, poposalAudit);
 
 				if (isActionMatch && isAuditedByMatch
@@ -306,7 +326,7 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @return
 	 * @throws ParseException
 	 */
-	private boolean isAuditLogActivityDateToSelected(String activityOnTo,
+	private boolean isAuditLogActivityDateToProvided(String activityOnTo,
 			AuditLog poposalAudit) throws ParseException {
 
 		if (activityOnTo != null) {
@@ -331,7 +351,7 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @return
 	 * @throws ParseException
 	 */
-	private boolean isAuditLogActivityDateFromSelected(String activityOnFrom,
+	private boolean isAuditLogActivityDateFromProvided(String activityOnFrom,
 			AuditLog poposalAudit) throws ParseException {
 
 		if (activityOnFrom != null) {
@@ -357,7 +377,7 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param isAuditedByMatch
 	 * @return
 	 */
-	private boolean isAuditLogAuditedByFieldSelected(String auditedBy,
+	private boolean isAuditLogAuditedByFieldProvided(String auditedBy,
 			AuditLog poposalAudit) {
 
 		if (auditedBy != null) {
@@ -386,7 +406,7 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param isActionMatch
 	 * @return
 	 */
-	private boolean isAuditLogActionFieldSelected(String action,
+	private boolean isAuditLogActionFieldProvided(String action,
 			AuditLog poposalAudit) {
 
 		if (action != null) {
@@ -408,31 +428,11 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @return
 	 * @throws ParseException
 	 */
-	public List<AuditLogInfo> findAllUserProposalAuditLogs(ObjectId id,
-			AuditLogCommonInfo auditLogInfo) throws ParseException {
-		return getAuditLogResults(auditLogInfo.getAction(),
+	public List<AuditLogInfo> findAllUserProposalAuditLogsForExport(
+			ObjectId id, AuditLogCommonInfo auditLogInfo) throws ParseException {
+		return getSortedAuditLogResults(auditLogInfo.getAction(),
 				auditLogInfo.getAuditedBy(), auditLogInfo.getActivityOnFrom(),
 				auditLogInfo.getActivityOnTo(), id);
-	}
-
-	public Proposal findNextProposalWithSameProjectTitle(ObjectId id,
-			String newProjectTitle) {
-
-		Query<Proposal> proposalQuery = getDatastore().createQuery(
-				Proposal.class);
-		proposalQuery.and(proposalQuery.criteria("_id").notEqual(id),
-				proposalQuery.criteria("project info.project title")
-						.equalIgnoreCase(newProjectTitle));
-		return proposalQuery.get();
-	}
-
-	public Proposal findAnyProposalWithSameProjectTitle(String newProjectTitle) {
-
-		Query<Proposal> proposalQuery = getDatastore().createQuery(
-				Proposal.class);
-		proposalQuery.criteria("project info.project title").equalIgnoreCase(
-				newProjectTitle);
-		return proposalQuery.get();
 	}
 
 	/**
@@ -446,11 +446,11 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	public List<ProposalInfo> findAllForProposalGrid(int offset, int limit,
 			ProposalCommonInfo proposalInfo) throws ParseException {
 
-		Query<Proposal> queryPropsal = getMyProposalSearchSelectedFields(proposalInfo);
-		List<Proposal> allCurrentLoginUserProposalsList = queryPropsal
+		Query<Proposal> proposalQuery = getUserProposalSearchCriteria(proposalInfo);
+		List<Proposal> allCurrentLoginUserProposalsList = proposalQuery
 				.offset(offset - 1).limit(limit)
 				.order("-audit log.activity on").asList();
-		return getMyProposalGridForTheCurrentUser(queryPropsal.asList().size(),
+		return getCurrentUserProposalGrid(proposalQuery.asList().size(),
 				allCurrentLoginUserProposalsList);
 
 	}
@@ -463,7 +463,7 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @throws ParseException
 	 * @Refactored
 	 */
-	private Query<Proposal> getMyProposalSearchSelectedFields(
+	private Query<Proposal> getUserProposalSearchCriteria(
 			ProposalCommonInfo proposalInfo) throws ParseException {
 
 		Datastore ds = getDatastore();
@@ -530,7 +530,7 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param allCurrentLoginUserProposalsList
 	 * @Refactored
 	 */
-	private List<ProposalInfo> getMyProposalGridForTheCurrentUser(int rowTotal,
+	private List<ProposalInfo> getCurrentUserProposalGrid(int rowTotal,
 			List<Proposal> allCurrentLoginUserProposalsList) {
 
 		List<ProposalInfo> proposalsGridInfoList = new ArrayList<ProposalInfo>();
@@ -544,13 +544,13 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 			setProposalProjectInfo(userProposal, proposalGridInfo);
 
 			// SponsorAndBudgetInfo
-			setSponsorAndBudgetInfo(userProposal, proposalGridInfo);
+			setProposalSponsorAndBudgetInfo(userProposal, proposalGridInfo);
 
 			// Proposal Status
-			setCurrentProposalStatusAttribute(userProposal, proposalGridInfo);
+			setCurrentProposalStatusAttributes(userProposal, proposalGridInfo);
 
 			// set audit log
-			setLastProposalModificationAuditLog(userProposal, proposalGridInfo);
+			getRecentProposalAuditLog(userProposal, proposalGridInfo);
 
 			setProposalPIInfo(userProposal, proposalGridInfo);
 
@@ -570,6 +570,7 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 */
 	private void setProposalSeniorsInfo(Proposal userProposal,
 			ProposalInfo proposalGridInfo) {
+
 		List<InvestigatorRefAndPosition> allSeniors = userProposal
 				.getInvestigatorInfo().getSeniorPersonnel();
 		for (InvestigatorRefAndPosition senior : allSeniors) {
@@ -588,6 +589,7 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 */
 	private void setPropsalCoPIsInfo(Proposal userProposal,
 			ProposalInfo proposalGridInfo) {
+
 		List<InvestigatorRefAndPosition> allCoPI = userProposal
 				.getInvestigatorInfo().getCo_pi();
 		for (InvestigatorRefAndPosition coPI : allCoPI) {
@@ -606,6 +608,7 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 */
 	private void setProposalPIInfo(Proposal userProposal,
 			ProposalInfo proposalGridInfo) {
+
 		String piUserId = userProposal.getInvestigatorInfo().getPi()
 				.getUserProfileId();
 		proposalGridInfo.setPiUser(piUserId);
@@ -619,8 +622,9 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param proposalGridInfo
 	 * @Refactored
 	 */
-	private void setLastProposalModificationAuditLog(Proposal userProposal,
+	private void getRecentProposalAuditLog(Proposal userProposal,
 			ProposalInfo proposalGridInfo) {
+
 		Date lastAudited = null;
 		String lastAuditedBy = new String();
 		String lastAuditAction = new String();
@@ -642,7 +646,7 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param proposalGridInfo
 	 * @Refactored
 	 */
-	private void setCurrentProposalStatusAttribute(Proposal userProposal,
+	private void setCurrentProposalStatusAttributes(Proposal userProposal,
 			ProposalInfo proposalGridInfo) {
 
 		for (Status status : userProposal.getProposalStatus()) {
@@ -693,7 +697,7 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param proposalGridInfo
 	 * @Refactored
 	 */
-	private void setSponsorAndBudgetInfo(Proposal userProposal,
+	private void setProposalSponsorAndBudgetInfo(Proposal userProposal,
 			ProposalInfo proposalGridInfo) {
 
 		proposalGridInfo.setGrantingAgencies(userProposal
@@ -770,14 +774,12 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	public List<ProposalInfo> findAllProposals(ProposalCommonInfo proposalInfo)
 			throws ParseException {
 
-		Query<Proposal> queryPropsal = getMyProposalSearchSelectedFields(proposalInfo);
+		Query<Proposal> queryPropsal = getUserProposalSearchCriteria(proposalInfo);
 		int rowTotal = queryPropsal.asList().size();
 		List<Proposal> allProposals = queryPropsal.order(
 				"-audit log.activity on").asList();
-		return getMyProposalGridForTheCurrentUser(rowTotal, allProposals);
+		return getCurrentUserProposalGrid(rowTotal, allProposals);
 	}
-
-	// ////////////////////////////////////////////////////////////////////////////////////
 
 	/**
 	 * 
@@ -791,291 +793,395 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	public List<ProposalInfo> findUserProposalGrid(int offset, int limit,
 			ProposalCommonInfo proposalInfo, GPMSCommonInfo userInfo)
 			throws ParseException {
-		Datastore ds = getDatastore();
-		String projectTitle = proposalInfo.getProjectTitle();
-		String usernameBy = proposalInfo.getUsernameBy();
-		Double totalCostsFrom = proposalInfo.getTotalCostsFrom();
-		Double totalCostsTo = proposalInfo.getTotalCostsTo();
-		String submittedOnFrom = proposalInfo.getSubmittedOnFrom();
-		String submittedOnTo = proposalInfo.getSubmittedOnTo();
-		String proposalStatus = proposalInfo.getProposalStatus();
-		String userRole = proposalInfo.getUserRole();
-		String userId = userInfo.getUserProfileID();
-		String college = userInfo.getUserCollege();
-		String department = userInfo.getUserDepartment();
-		String positionType = userInfo.getUserPositionType();
-		String positionTitle = userInfo.getUserPositionTitle();
 		List<ProposalInfo> proposals = new ArrayList<ProposalInfo>();
-		Query<Proposal> proposalQuery = ds.createQuery(Proposal.class);
-		Query<UserProfile> profileQuery = ds.createQuery(UserProfile.class);
-		if (projectTitle != null) {
-			proposalQuery.field("project info.project title")
-					.containsIgnoreCase(projectTitle);
+		Query<Proposal> proposalQuery = buildSearchQuery(proposalInfo, userInfo);
+
+		int rowTotal = proposalQuery.asList().size();
+		List<Proposal> allProposals = proposalQuery.offset(offset - 1)
+				.limit(limit).order("-audit log.activity on").asList();
+
+		for (Proposal userProposal : allProposals) {
+			ProposalInfo proposal = getProposalInfoForGrid(userInfo, rowTotal,
+					userProposal);
+			proposals.add(proposal);
 		}
-		if (submittedOnFrom != null && !submittedOnFrom.isEmpty()) {
-			Date receivedOnF = formatter.parse(submittedOnFrom);
+		return proposals;
+	}
+
+	/**
+	 * @param userInfo
+	 * @param rowTotal
+	 * @param userProposal
+	 * @return
+	 */
+	private ProposalInfo getProposalInfoForGrid(GPMSCommonInfo userInfo,
+			int rowTotal, Proposal userProposal) {
+		ProposalInfo proposal = new ProposalInfo();
+		proposal.setRowTotal(rowTotal);
+		proposal.setId(userProposal.getId().toString());
+		setProposalProjectInfo(userProposal, proposal);
+		setProposalSponsorAndBudgetInfo(userProposal, proposal);
+		setCurrentProposalStatusAttributes(userProposal, proposal);
+		getRecentProposalAuditLog(userProposal, proposal);
+		setProposalPIUser(userInfo.getUserProfileID(),
+				userInfo.getUserCollege(), userInfo.getUserDepartment(),
+				userInfo.getUserPositionType(),
+				userInfo.getUserPositionTitle(), userProposal, proposal);
+		setProposalCoPIUsers(userInfo.getUserProfileID(),
+				userInfo.getUserCollege(), userInfo.getUserDepartment(),
+				userInfo.getUserPositionType(),
+				userInfo.getUserPositionTitle(), userProposal, proposal);
+		setProposalSeniorUsers(userInfo.getUserProfileID(),
+				userInfo.getUserCollege(), userInfo.getUserDepartment(),
+				userInfo.getUserPositionType(),
+				userInfo.getUserPositionTitle(), userProposal, proposal);
+		return proposal;
+	}
+
+	/**
+	 * @param proposalInfo
+	 * @param userInfo
+	 * @return
+	 * @throws ParseException
+	 */
+	private Query<Proposal> buildSearchQuery(ProposalCommonInfo proposalInfo,
+			GPMSCommonInfo userInfo) throws ParseException {
+		Query<Proposal> proposalQuery = getDatastore().createQuery(
+				Proposal.class);
+		Query<UserProfile> profileQuery = getDatastore().createQuery(
+				UserProfile.class);
+		if (proposalInfo.getProjectTitle() != null) {
+			proposalQuery.field("project info.project title")
+					.containsIgnoreCase(proposalInfo.getProjectTitle());
+		}
+		if (proposalInfo.getSubmittedOnFrom() != null
+				&& !proposalInfo.getSubmittedOnFrom().isEmpty()) {
+			Date receivedOnF = formatter.parse(proposalInfo
+					.getSubmittedOnFrom());
 			proposalQuery.field("date submitted").greaterThanOrEq(receivedOnF);
 		}
-		if (submittedOnTo != null && !submittedOnTo.isEmpty()) {
-			Date receivedOnT = formatter.parse(submittedOnTo);
+		if (proposalInfo.getSubmittedOnTo() != null
+				&& !proposalInfo.getSubmittedOnTo().isEmpty()) {
+			Date receivedOnT = formatter.parse(proposalInfo.getSubmittedOnTo());
 			proposalQuery.field("date submitted").lessThanOrEq(receivedOnT);
 		}
+		if (proposalInfo.getTotalCostsFrom() != null
+				&& proposalInfo.getTotalCostsFrom() != 0.0) {
+			proposalQuery.field("sponsor and budget info.total costs")
+					.greaterThanOrEq(proposalInfo.getTotalCostsFrom());
+		}
+		if (proposalInfo.getTotalCostsTo() != null
+				&& proposalInfo.getTotalCostsTo() != 0.0) {
+			proposalQuery.field("sponsor and budget info.total costs")
+					.lessThanOrEq(proposalInfo.getTotalCostsTo());
+		}
+		if (proposalInfo.getProposalStatus() != null) {
+			proposalQuery.field("proposal status").contains(
+					proposalInfo.getProposalStatus());
+		}
+		if (!userInfo.getUserPositionTitle().equals("IRB")
+				&& !userInfo.getUserPositionTitle().equals(
+						"University Research Administrator")
+				&& !userInfo.getUserPositionTitle().equals(
+						"University Research Director")) {
+			if (userInfo.getUserPositionTitle().equals("Dean")
+					|| userInfo.getUserPositionTitle().equals("Associate Dean")) {
+				buildQueryForCollege(userInfo.getUserCollege(), proposalQuery);
+			} else if (userInfo.getUserPositionTitle().equals(
+					"Business Manager")
+					|| userInfo.getUserPositionTitle().equals(
+							"Department Administrative Assistant")
+					|| userInfo.getUserPositionTitle().equals(
+							"Department Chair")
+					|| userInfo.getUserPositionTitle()
+							.equals("Associate Chair")) {
+				buildQueryForCollegeAndDepartment(userInfo.getUserCollege(),
+						userInfo.getUserDepartment(), proposalQuery);
+			} else {
+				buildQueryForCollegeDepartmentAndPosition(
+						userInfo.getUserProfileID(), userInfo.getUserCollege(),
+						userInfo.getUserDepartment(),
+						userInfo.getUserPositionType(),
+						userInfo.getUserPositionTitle(), proposalQuery);
+			}
+		}
+		if (proposalInfo.getUsernameBy() != null) {
+			buildQueryForUserNameBy(proposalInfo.getUsernameBy(),
+					proposalInfo.getUserRole(), proposalQuery, profileQuery);
+		} else if (proposalInfo.getUsernameBy() == null
+				&& proposalInfo.getUserRole() != null) {
+			buildQueryForUserProposalRole(proposalInfo.getUserRole(),
+					userInfo.getUserProfileID(), proposalQuery);
+		}
+		return proposalQuery;
+	}
 
-		if (totalCostsFrom != null && totalCostsFrom != 0.0) {
-			proposalQuery.field("sponsor and budget info.total costs")
-					.greaterThanOrEq(totalCostsFrom);
-		}
-		if (totalCostsTo != null && totalCostsTo != 0.0) {
-			proposalQuery.field("sponsor and budget info.total costs")
-					.lessThanOrEq(totalCostsTo);
-		}
-		if (proposalStatus != null) {
-			proposalQuery.field("proposal status").contains(proposalStatus);
-		}
-		if (positionTitle.equals("IRB")) {
-			proposalQuery.criteria("irb approval required").equal(true);
-		}
-		if (!positionTitle.equals("University Research Administrator")
-				&& !positionTitle.equals("University Research Director")
-				&& !positionTitle.equals("IRB")) {
-			if (positionTitle.equals("Dean")
-					|| positionTitle.equals("Associate Dean")) {
-				proposalQuery.or(
-						proposalQuery.criteria("investigator info.pi.college")
-								.equal(college),
-						proposalQuery.criteria(
-								"investigator info.co_pi.college").equal(
-								college),
-						proposalQuery.criteria(
-								"investigator info.senior personnel.college")
-								.equal(college));
-			} else if (positionTitle.equals("Business Manager")
-					|| positionTitle
-							.equals("Department Administrative Assistant")
-					|| positionTitle.equals("Department Chair")
-					|| positionTitle.equals("Associate Chair")) {
-				proposalQuery
-						.and(proposalQuery
-								.or(proposalQuery.criteria(
-										"investigator info.pi.college").equal(
-										college),
-										proposalQuery
-												.criteria(
-														"investigator info.co_pi.college")
-												.equal(college),
-										proposalQuery
-												.criteria(
-														"investigator info.senior personnel.college")
-												.equal(college)),
-								proposalQuery
-										.or(proposalQuery
-												.criteria(
-														"investigator info.pi.department")
-												.equal(department),
-												proposalQuery
-														.criteria(
-																"investigator info.co_pi.department")
-														.equal(department),
-												proposalQuery
-														.criteria(
-																"investigator info.senior personnel.department")
-														.equal(department)));
-			} else {
-				proposalQuery
-						.or(proposalQuery.and(
-								proposalQuery.criteria(
-										"investigator info.pi.user profile id")
-										.equal(userId),
-								proposalQuery.criteria(
-										"investigator info.pi.college").equal(
-										college),
-								proposalQuery.criteria(
-										"investigator info.pi.department")
-										.equal(department),
-								proposalQuery.criteria(
-										"investigator info.pi.position type")
-										.equal(positionType),
-								proposalQuery.criteria(
-										"investigator info.pi.position title")
-										.equal(positionTitle)),
-								proposalQuery
-										.and(proposalQuery
-												.criteria(
-														"investigator info.co_pi.user profile id")
-												.equal(userId),
-												proposalQuery
-														.criteria(
-																"investigator info.co_pi.college")
-														.equal(college),
-												proposalQuery
-														.criteria(
-																"investigator info.co_pi.department")
-														.equal(department),
-												proposalQuery
-														.criteria(
-																"investigator info.co_pi.position type")
-														.equal(positionType),
-												proposalQuery
-														.criteria(
-																"investigator info.co_pi.position title")
-														.equal(positionTitle)),
-								proposalQuery
-										.and(proposalQuery
-												.criteria(
-														"investigator info.senior personnel.user profile id")
-												.equal(userId),
-												proposalQuery
-														.criteria(
-																"investigator info.senior personnel.college")
-														.equal(college),
-												proposalQuery
-														.criteria(
-																"investigator info.senior personnel.department")
-														.equal(department),
-												proposalQuery
-														.criteria(
-																"investigator info.senior personnel.position type")
-														.equal(positionType),
-												proposalQuery
-														.criteria(
-																"investigator info.senior personnel.position title")
-														.equal(positionTitle)));
+	/**
+	 * @param userId
+	 * @param college
+	 * @param department
+	 * @param positionType
+	 * @param positionTitle
+	 * @param userProposal
+	 * @param proposal
+	 */
+	private void setProposalSeniorUsers(String userId, String college,
+			String department, String positionType, String positionTitle,
+			Proposal userProposal, ProposalInfo proposal) {
+		List<InvestigatorRefAndPosition> allSeniors = userProposal
+				.getInvestigatorInfo().getSeniorPersonnel();
+		for (InvestigatorRefAndPosition senior : allSeniors) {
+			String seniorUser = senior.getUserProfileId();
+			String seniorUserCollege = senior.getCollege();
+			String seniorUserDepartment = senior.getDepartment();
+			String seniorUserPositionType = senior.getPositionType();
+			String seniorUserPositionTitle = senior.getPositionTitle();
+			proposal.getSeniorUsers().add(seniorUser);
+			if (!proposal.getAllUsers().contains(seniorUser)) {
+				proposal.getAllUsers().add(seniorUser);
+			}
+			if (seniorUser.equals(userId) && seniorUserCollege.equals(college)
+					&& seniorUserDepartment.equals(department)
+					&& seniorUserPositionType.equals(positionType)
+					&& seniorUserPositionTitle.equals(positionTitle)) {
+				proposal.getCurrentuserProposalRoles().add("Senior Personnel");
 			}
 		}
-		if (usernameBy != null) {
-			profileQuery.or(
-					profileQuery.criteria("first name").containsIgnoreCase(
-							usernameBy),
-					profileQuery.criteria("middle name").containsIgnoreCase(
-							usernameBy), profileQuery.criteria("last name")
-							.containsIgnoreCase(usernameBy));
-			if (userRole != null) {
-				switch (userRole) {
-				case "PI":
-					proposalQuery.criteria("investigator info.pi.user profile")
-							.in(profileQuery.asKeyList());
-					break;
-				case "Co-PI":
-					proposalQuery.criteria(
-							"investigator info.co_pi.user profile").in(
-							profileQuery.asKeyList());
-					break;
-				case "Senior Personnel":
-					proposalQuery.criteria(
-							"investigator info.senior personnel.user profile")
-							.in(profileQuery.asKeyList());
-					break;
-				default:
-					break;
-				}
-			} else {
-				proposalQuery
-						.or(proposalQuery.criteria(
-								"investigator info.pi.user profile").in(
-								profileQuery.asKeyList()),
-								proposalQuery.criteria(
-										"investigator info.co_pi.user profile")
-										.in(profileQuery.asKeyList()),
-								proposalQuery
-										.criteria(
-												"investigator info.senior personnel.user profile")
-										.in(profileQuery.asKeyList()));
+	}
+
+	/**
+	 * @param userId
+	 * @param college
+	 * @param department
+	 * @param positionType
+	 * @param positionTitle
+	 * @param userProposal
+	 * @param proposal
+	 */
+	private void setProposalCoPIUsers(String userId, String college,
+			String department, String positionType, String positionTitle,
+			Proposal userProposal, ProposalInfo proposal) {
+		List<InvestigatorRefAndPosition> allCoPI = userProposal
+				.getInvestigatorInfo().getCo_pi();
+		for (InvestigatorRefAndPosition coPI : allCoPI) {
+			String coPIUser = coPI.getUserProfileId();
+			String coPIUserCollege = coPI.getCollege();
+			String coPIUserDepartment = coPI.getDepartment();
+			String coPIUserPositionType = coPI.getPositionType();
+			String coPIUserPositionTitle = coPI.getPositionTitle();
+			proposal.getCopiUsers().add(coPIUser);
+			if (!proposal.getAllUsers().contains(coPIUser)) {
+				proposal.getAllUsers().add(coPIUser);
 			}
-		} else if (usernameBy == null && userRole != null) {
+			if (coPIUser.equals(userId) && coPIUserCollege.equals(college)
+					&& coPIUserDepartment.equals(department)
+					&& coPIUserPositionType.equals(positionType)
+					&& coPIUserPositionTitle.equals(positionTitle)) {
+				proposal.getCurrentuserProposalRoles().add("Co-PI");
+			}
+		}
+	}
+
+	/**
+	 * @param userId
+	 * @param college
+	 * @param department
+	 * @param positionType
+	 * @param positionTitle
+	 * @param userProposal
+	 * @param proposal
+	 */
+	private void setProposalPIUser(String userId, String college,
+			String department, String positionType, String positionTitle,
+			Proposal userProposal, ProposalInfo proposal) {
+		String piUserId = userProposal.getInvestigatorInfo().getPi()
+				.getUserProfileId();
+		String piUserCollege = userProposal.getInvestigatorInfo().getPi()
+				.getCollege();
+		String piUserDepartment = userProposal.getInvestigatorInfo().getPi()
+				.getDepartment();
+		String piUserPositionType = userProposal.getInvestigatorInfo().getPi()
+				.getPositionType();
+		String piUserPositionTitle = userProposal.getInvestigatorInfo().getPi()
+				.getPositionTitle();
+		proposal.setPiUser(piUserId);
+		if (!proposal.getAllUsers().contains(piUserId)) {
+			proposal.getAllUsers().add(piUserId);
+		}
+		if (piUserId.equals(userId) && piUserCollege.equals(college)
+				&& piUserDepartment.equals(department)
+				&& piUserPositionType.equals(positionType)
+				&& piUserPositionTitle.equals(positionTitle)) {
+			proposal.getCurrentuserProposalRoles().add("PI");
+		}
+	}
+
+	/**
+	 * @param userRole
+	 * @param userId
+	 * @param proposalQuery
+	 */
+	private void buildQueryForUserProposalRole(String userRole, String userId,
+			Query<Proposal> proposalQuery) {
+		switch (userRole) {
+		case "PI":
+			proposalQuery.criteria("investigator info.pi.user profile id")
+					.equal(userId);
+			break;
+		case "Co-PI":
+			proposalQuery.criteria("investigator info.co_pi.user profile id")
+					.equal(userId);
+			break;
+
+		case "Senior Personnel":
+			proposalQuery.criteria(
+					"investigator info.senior personnel.user profile id")
+					.equal(userId);
+			break;
+
+		default:
+			break;
+		}
+	}
+
+	/**
+	 * @param usernameBy
+	 * @param userRole
+	 * @param proposalQuery
+	 * @param profileQuery
+	 */
+	private void buildQueryForUserNameBy(String usernameBy, String userRole,
+			Query<Proposal> proposalQuery, Query<UserProfile> profileQuery) {
+		profileQuery.or(
+				profileQuery.criteria("first name").containsIgnoreCase(
+						usernameBy),
+				profileQuery.criteria("middle name").containsIgnoreCase(
+						usernameBy),
+				profileQuery.criteria("last name").containsIgnoreCase(
+						usernameBy));
+		if (userRole != null) {
 			switch (userRole) {
 			case "PI":
-				proposalQuery.criteria("investigator info.pi.user profile id")
-						.equal(userId);
+				proposalQuery.criteria("investigator info.pi.user profile").in(
+						profileQuery.asKeyList());
 				break;
 			case "Co-PI":
-				proposalQuery.criteria(
-						"investigator info.co_pi.user profile id")
-						.equal(userId);
+				proposalQuery.criteria("investigator info.co_pi.user profile")
+						.in(profileQuery.asKeyList());
 				break;
 			case "Senior Personnel":
 				proposalQuery.criteria(
-						"investigator info.senior personnel.user profile id")
-						.equal(userId);
+						"investigator info.senior personnel.user profile").in(
+						profileQuery.asKeyList());
 				break;
 			default:
 				break;
 			}
+		} else {
+			proposalQuery.or(
+					proposalQuery.criteria("investigator info.pi.user profile")
+							.in(profileQuery.asKeyList()),
+					proposalQuery.criteria(
+							"investigator info.co_pi.user profile").in(
+							profileQuery.asKeyList()),
+					proposalQuery.criteria(
+							"investigator info.senior personnel.user profile")
+							.in(profileQuery.asKeyList()));
 		}
-		int rowTotal = proposalQuery.asList().size();
-		List<Proposal> allProposals = proposalQuery.offset(offset - 1)
-				.limit(limit).order("-audit log.activity on").asList();
-		for (Proposal userProposal : allProposals) {
-			ProposalInfo proposal = new ProposalInfo();
-			// Proposal
-			proposal.setRowTotal(rowTotal);
-			proposal.setId(userProposal.getId().toString());
-			setProposalProjectInfo(userProposal, proposal);
-			setSponsorAndBudgetInfo(userProposal, proposal);
-			setCurrentProposalStatusAttribute(userProposal, proposal);
-			setLastProposalModificationAuditLog(userProposal, proposal);
-			String piUserId = userProposal.getInvestigatorInfo().getPi()
-					.getUserProfileId();
-			String piUserCollege = userProposal.getInvestigatorInfo().getPi()
-					.getCollege();
-			String piUserDepartment = userProposal.getInvestigatorInfo()
-					.getPi().getDepartment();
-			String piUserPositionType = userProposal.getInvestigatorInfo()
-					.getPi().getPositionType();
-			String piUserPositionTitle = userProposal.getInvestigatorInfo()
-					.getPi().getPositionTitle();
-			proposal.setPiUser(piUserId);
-			if (!proposal.getAllUsers().contains(piUserId)) {
-				proposal.getAllUsers().add(piUserId);
-			}
-			if (piUserId.equals(userId) && piUserCollege.equals(college)
-					&& piUserDepartment.equals(department)
-					&& piUserPositionType.equals(positionType)
-					&& piUserPositionTitle.equals(positionTitle)) {
-				proposal.getCurrentuserProposalRoles().add("PI");
-			}
-			List<InvestigatorRefAndPosition> allCoPI = userProposal
-					.getInvestigatorInfo().getCo_pi();
-			for (InvestigatorRefAndPosition coPI : allCoPI) {
-				String coPIUser = coPI.getUserProfileId();
-				String coPIUserCollege = coPI.getCollege();
-				String coPIUserDepartment = coPI.getDepartment();
-				String coPIUserPositionType = coPI.getPositionType();
-				String coPIUserPositionTitle = coPI.getPositionTitle();
-				proposal.getCopiUsers().add(coPIUser);
-				if (!proposal.getAllUsers().contains(coPIUser)) {
-					proposal.getAllUsers().add(coPIUser);
-				}
-				if (coPIUser.equals(userId) && coPIUserCollege.equals(college)
-						&& coPIUserDepartment.equals(department)
-						&& coPIUserPositionType.equals(positionType)
-						&& coPIUserPositionTitle.equals(positionTitle)) {
-					proposal.getCurrentuserProposalRoles().add("Co-PI");
-				}
-			}
-			List<InvestigatorRefAndPosition> allSeniors = userProposal
-					.getInvestigatorInfo().getSeniorPersonnel();
-			for (InvestigatorRefAndPosition senior : allSeniors) {
-				String seniorUser = senior.getUserProfileId();
-				String seniorUserCollege = senior.getCollege();
-				String seniorUserDepartment = senior.getDepartment();
-				String seniorUserPositionType = senior.getPositionType();
-				String seniorUserPositionTitle = senior.getPositionTitle();
-				proposal.getSeniorUsers().add(seniorUser);
-				if (!proposal.getAllUsers().contains(seniorUser)) {
-					proposal.getAllUsers().add(seniorUser);
-				}
-				if (seniorUser.equals(userId)
-						&& seniorUserCollege.equals(college)
-						&& seniorUserDepartment.equals(department)
-						&& seniorUserPositionType.equals(positionType)
-						&& seniorUserPositionTitle.equals(positionTitle)) {
-					proposal.getCurrentuserProposalRoles().add(
-							"Senior Personnel");
-				}
-			}
-			proposals.add(proposal);
-		}
-		return proposals;
+	}
+
+	/**
+	 * @param userId
+	 * @param college
+	 * @param department
+	 * @param positionType
+	 * @param positionTitle
+	 * @param proposalQuery
+	 */
+	private void buildQueryForCollegeDepartmentAndPosition(String userId,
+			String college, String department, String positionType,
+			String positionTitle, Query<Proposal> proposalQuery) {
+		proposalQuery.or(proposalQuery.and(
+				proposalQuery.criteria("investigator info.pi.user profile id")
+						.equal(userId),
+				proposalQuery.criteria("investigator info.pi.college").equal(
+						college),
+				proposalQuery.criteria("investigator info.pi.department")
+						.equal(department),
+				proposalQuery.criteria("investigator info.pi.position type")
+						.equal(positionType),
+				proposalQuery.criteria("investigator info.pi.position title")
+						.equal(positionTitle)), proposalQuery.and(
+				proposalQuery.criteria(
+						"investigator info.co_pi.user profile id")
+						.equal(userId),
+				proposalQuery.criteria("investigator info.co_pi.college")
+						.equal(college),
+				proposalQuery.criteria("investigator info.co_pi.department")
+						.equal(department),
+				proposalQuery.criteria("investigator info.co_pi.position type")
+						.equal(positionType),
+				proposalQuery
+						.criteria("investigator info.co_pi.position title")
+						.equal(positionTitle)), proposalQuery.and(
+				proposalQuery.criteria(
+						"investigator info.senior personnel.user profile id")
+						.equal(userId),
+				proposalQuery.criteria(
+						"investigator info.senior personnel.college").equal(
+						college),
+				proposalQuery.criteria(
+						"investigator info.senior personnel.department").equal(
+						department),
+				proposalQuery.criteria(
+						"investigator info.senior personnel.position type")
+						.equal(positionType),
+				proposalQuery.criteria(
+						"investigator info.senior personnel.position title")
+						.equal(positionTitle)));
+	}
+
+	/**
+	 * @param college
+	 * @param department
+	 * @param proposalQuery
+	 */
+	private void buildQueryForCollegeAndDepartment(String college,
+			String department, Query<Proposal> proposalQuery) {
+		proposalQuery.and(proposalQuery.or(
+				proposalQuery.criteria("investigator info.pi.college").equal(
+						college),
+				proposalQuery.criteria("investigator info.co_pi.college")
+						.equal(college),
+				proposalQuery.criteria(
+						"investigator info.senior personnel.college").equal(
+						college)), proposalQuery.or(
+				proposalQuery.criteria("investigator info.pi.department")
+						.equal(department),
+				proposalQuery.criteria("investigator info.co_pi.department")
+						.equal(department),
+				proposalQuery.criteria(
+						"investigator info.senior personnel.department").equal(
+						department)));
+	}
+
+	/**
+	 * Creates Query for Investigator College Conditions
+	 * 
+	 * @param college
+	 * @param proposalQuery
+	 * @Refactored
+	 */
+	private void buildQueryForCollege(String college,
+			Query<Proposal> proposalQuery) {
+		proposalQuery.or(
+				proposalQuery.criteria("investigator info.pi.college").equal(
+						college),
+				proposalQuery.criteria("investigator info.co_pi.college")
+						.equal(college),
+				proposalQuery.criteria(
+						"investigator info.senior personnel.college").equal(
+						college));
 	}
 
 	/**
@@ -1085,410 +1191,72 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @return
 	 * @throws ParseException
 	 */
-	public List<ProposalInfo> findAllUserProposals(
+	public List<ProposalInfo> findAllUserProposalsForExport(
 			ProposalCommonInfo proposalInfo, GPMSCommonInfo userInfo)
 			throws ParseException {
 
-		Datastore ds = getDatastore();
-		String projectTitle = proposalInfo.getProjectTitle();
-		String usernameBy = proposalInfo.getUsernameBy();
-		Double totalCostsFrom = proposalInfo.getTotalCostsFrom();
-		Double totalCostsTo = proposalInfo.getTotalCostsTo();
-		String submittedOnFrom = proposalInfo.getSubmittedOnFrom();
-		String submittedOnTo = proposalInfo.getSubmittedOnTo();
-		String proposalStatus = proposalInfo.getProposalStatus();
-		String userRole = proposalInfo.getUserRole();
-		String userId = userInfo.getUserProfileID();
-		String college = userInfo.getUserCollege();
-		String department = userInfo.getUserDepartment();
-		String positionType = userInfo.getUserPositionType();
-		String positionTitle = userInfo.getUserPositionTitle();
 		List<ProposalInfo> proposals = new ArrayList<ProposalInfo>();
-		Query<Proposal> proposalQuery = ds.createQuery(Proposal.class);
-		Query<UserProfile> profileQuery = ds.createQuery(UserProfile.class);
-		if (projectTitle != null) {
-			proposalQuery.field("project info.project title")
-					.containsIgnoreCase(projectTitle);
-		}
-		if (submittedOnFrom != null && !submittedOnFrom.isEmpty()) {
-			Date receivedOnF = formatter.parse(submittedOnFrom);
-			proposalQuery.field("date submitted").greaterThanOrEq(receivedOnF);
-		}
-		if (submittedOnTo != null && !submittedOnTo.isEmpty()) {
-			Date receivedOnT = formatter.parse(submittedOnTo);
-			proposalQuery.field("date submitted").lessThanOrEq(receivedOnT);
-		}
-		if (totalCostsFrom != null && totalCostsFrom != 0.0) {
-			proposalQuery.field("sponsor and budget info.total costs")
-					.greaterThanOrEq(totalCostsFrom);
-		}
-		if (totalCostsTo != null && totalCostsTo != 0.0) {
-			proposalQuery.field("sponsor and budget info.total costs")
-					.lessThanOrEq(totalCostsTo);
-		}
-		if (proposalStatus != null) {
-			proposalQuery.field("proposal status").contains(proposalStatus);
-		}
-		if (!positionTitle.equals("IRB")
-				&& !positionTitle.equals("University Research Administrator")
-				&& !positionTitle.equals("University Research Director")) {
-			if (positionTitle.equals("Dean")
-					|| positionTitle.equals("Associate Dean")) {
-				proposalQuery.or(
-						proposalQuery.criteria("investigator info.pi.college")
-								.equal(college),
-						proposalQuery.criteria(
-								"investigator info.co_pi.college").equal(
-								college),
-						proposalQuery.criteria(
-								"investigator info.senior personnel.college")
-								.equal(college));
-			} else if (positionTitle.equals("Business Manager")
-					|| positionTitle
-							.equals("Department Administrative Assistant")
-					|| positionTitle.equals("Department Chair")
-					|| positionTitle.equals("Associate Chair")) {
-				proposalQuery
-						.and(proposalQuery
-								.or(proposalQuery.criteria(
-										"investigator info.pi.college").equal(
-										college),
-										proposalQuery
-												.criteria(
-														"investigator info.co_pi.college")
-												.equal(college),
-										proposalQuery
-												.criteria(
-														"investigator info.senior personnel.college")
-												.equal(college)),
-								proposalQuery
-										.or(proposalQuery
-												.criteria(
-														"investigator info.pi.department")
-												.equal(department),
-												proposalQuery
-														.criteria(
-																"investigator info.co_pi.department")
-														.equal(department),
-												proposalQuery
-														.criteria(
-																"investigator info.senior personnel.department")
-														.equal(department)));
-			} else {
-				proposalQuery
-						.or(proposalQuery.and(
-								proposalQuery.criteria(
-										"investigator info.pi.user profile id")
-										.equal(userId),
-								proposalQuery.criteria(
-										"investigator info.pi.college").equal(
-										college),
-								proposalQuery.criteria(
-										"investigator info.pi.department")
-										.equal(department),
-								proposalQuery.criteria(
-										"investigator info.pi.position type")
-										.equal(positionType),
-								proposalQuery.criteria(
-										"investigator info.pi.position title")
-										.equal(positionTitle)),
-								proposalQuery
-										.and(proposalQuery
-												.criteria(
-														"investigator info.co_pi.user profile id")
-												.equal(userId),
-												proposalQuery
-														.criteria(
-																"investigator info.co_pi.college")
-														.equal(college),
-												proposalQuery
-														.criteria(
-																"investigator info.co_pi.department")
-														.equal(department),
-												proposalQuery
-														.criteria(
-																"investigator info.co_pi.position type")
-														.equal(positionType),
-												proposalQuery
-														.criteria(
-																"investigator info.co_pi.position title")
-														.equal(positionTitle)),
-								proposalQuery
-										.and(proposalQuery
-												.criteria(
-														"investigator info.senior personnel.user profile id")
-												.equal(userId),
-												proposalQuery
-														.criteria(
-																"investigator info.senior personnel.college")
-														.equal(college),
-												proposalQuery
-														.criteria(
-																"investigator info.senior personnel.department")
-														.equal(department),
-												proposalQuery
-														.criteria(
-																"investigator info.senior personnel.position type")
-														.equal(positionType),
-												proposalQuery
-														.criteria(
-																"investigator info.senior personnel.position title")
-														.equal(positionTitle)));
-			}
-		}
-		if (usernameBy != null) {
-			profileQuery.or(
-					profileQuery.criteria("first name").containsIgnoreCase(
-							usernameBy),
-					profileQuery.criteria("middle name").containsIgnoreCase(
-							usernameBy), profileQuery.criteria("last name")
-							.containsIgnoreCase(usernameBy));
-			if (userRole != null) {
-				switch (userRole) {
-				case "PI":
-					proposalQuery.criteria("investigator info.pi.user profile")
-							.in(profileQuery.asKeyList());
-					break;
-				case "Co-PI":
-					proposalQuery.criteria(
-							"investigator info.co_pi.user profile").in(
-							profileQuery.asKeyList());
-					break;
-				case "Senior Personnel":
-					proposalQuery.criteria(
-							"investigator info.senior personnel.user profile")
-							.in(profileQuery.asKeyList());
-					break;
-				default:
-					break;
-				}
-			} else {
-				proposalQuery
-						.or(proposalQuery.criteria(
-								"investigator info.pi.user profile").in(
-								profileQuery.asKeyList()),
-								proposalQuery.criteria(
-										"investigator info.co_pi.user profile")
-										.in(profileQuery.asKeyList()),
-								proposalQuery
-										.criteria(
-												"investigator info.senior personnel.user profile")
-										.in(profileQuery.asKeyList()));
-			}
-		} else if (usernameBy == null && userRole != null) {
-			switch (userRole) {
-			case "PI":
-				proposalQuery.criteria("investigator info.pi.user profile id")
-						.equal(userId);
-				break;
-			case "Co-PI":
-				proposalQuery.criteria(
-						"investigator info.co_pi.user profile id")
-						.equal(userId);
-				break;
+		Query<Proposal> proposalQuery = buildSearchQuery(proposalInfo, userInfo);
 
-			case "Senior Personnel":
-				proposalQuery.criteria(
-						"investigator info.senior personnel.user profile id")
-						.equal(userId);
-				break;
-
-			default:
-				break;
-			}
-		}
 		int rowTotal = proposalQuery.asList().size();
 		List<Proposal> allProposals = proposalQuery.order(
 				"-audit log.activity on").asList();
 
 		for (Proposal userProposal : allProposals) {
-			ProposalInfo proposal = new ProposalInfo();
-			// Proposal
-			proposal.setRowTotal(rowTotal);
-			proposal.setId(userProposal.getId().toString());
-			setProposalProjectInfo(userProposal, proposal);
-			setSponsorAndBudgetInfo(userProposal, proposal);
-			setCurrentProposalStatusAttribute(userProposal, proposal);
-			setLastProposalModificationAuditLog(userProposal, proposal);
-			String piUserId = userProposal.getInvestigatorInfo().getPi()
-					.getUserProfileId().toString();
-			proposal.setPiUser(piUserId);
-			if (!proposal.getAllUsers().contains(piUserId)) {
-				proposal.getAllUsers().add(piUserId);
-			}
-			if (piUserId.equals(userId)) {
-				proposal.getCurrentuserProposalRoles().add("PI");
-			}
-			List<InvestigatorRefAndPosition> allCoPI = userProposal
-					.getInvestigatorInfo().getCo_pi();
-			for (InvestigatorRefAndPosition coPI : allCoPI) {
-				String coPIUser = coPI.getUserProfileId().toString();
-				proposal.getCopiUsers().add(coPIUser);
-				if (!proposal.getAllUsers().contains(coPIUser)) {
-					proposal.getAllUsers().add(coPIUser);
-				}
-				if (coPIUser.equals(userId)) {
-					proposal.getCurrentuserProposalRoles().add("Co-PI");
-				}
-			}
-			List<InvestigatorRefAndPosition> allSeniors = userProposal
-					.getInvestigatorInfo().getSeniorPersonnel();
-			for (InvestigatorRefAndPosition senior : allSeniors) {
-				String seniorUser = senior.getUserProfileId().toString();
-				proposal.getSeniorUsers().add(seniorUser);
-				if (!proposal.getAllUsers().contains(seniorUser)) {
-					proposal.getAllUsers().add(seniorUser);
-				}
-				if (seniorUser.equals(userId)) {
-					proposal.getCurrentuserProposalRoles().add(
-							"Senior Personnel");
-				}
-			}
+			ProposalInfo proposal = getProposalInfoForGrid(userInfo, rowTotal,
+					userProposal);
 			proposals.add(proposal);
 		}
 		return proposals;
 	}
 
-	public List<SignatureInfo> findAllSignatureForAProposal(ObjectId id,
+	/***
+	 * Gets all Signatures of a Proposal
+	 * 
+	 * @param id
+	 * @param irbApprovalRequired
+	 * @return
+	 * @throws ParseException
+	 * @Refactored
+	 */
+	public List<SignatureInfo> getSignaturesOfAProposal(ObjectId id,
 			boolean irbApprovalRequired) throws ParseException {
-		Datastore ds = getDatastore();
+
 		List<SignatureInfo> signatures = new ArrayList<SignatureInfo>();
 		List<CollegeDepartmentInfo> investigators = new ArrayList<CollegeDepartmentInfo>();
-		Query<Proposal> q1 = ds
+
+		Query<Proposal> q1 = getDatastore()
 				.createQuery(Proposal.class)
 				.field("_id")
 				.equal(id)
 				.retrievedFields(true, "_id", "investigator info",
 						"signature info", "chair approval",
 						"business manager approval", "dean approval");
+
 		Proposal proposal = q1.get();
-		// Adding PI
-		SignatureInfo piSign = new SignatureInfo();
-		InvestigatorRefAndPosition PI = proposal.getInvestigatorInfo().getPi();
-		boolean piAlreadySigned = false;
 		final List<SignatureInfo> proposalSignatures = proposal
 				.getSignatureInfo();
-		for (SignatureInfo signature : proposalSignatures) {
-			if (PI.getUserProfileId().equals(signature.getUserProfileId())
-					&& !PI.getUserRef().isDeleted()
-					&& signature.getPositionTitle().equals("PI")) {
-				piSign.setUserProfileId(signature.getUserProfileId());
-				piSign.setFullName(signature.getFullName());
-				piSign.setSignature(signature.getSignature());
-				piSign.setSignedDate(signature.getSignedDate());
-				piSign.setNote(signature.getNote());
-				piSign.setPositionTitle(signature.getPositionTitle());
-				piSign.setDelegated(signature.isDelegated());
-				boolean piAlreadyExist = false;
-				for (SignatureInfo sign : signatures) {
-					if (sign.getUserProfileId().equalsIgnoreCase(
-							piSign.getUserProfileId())) {
-						piAlreadyExist = true;
-						break;
-					}
-				}
-				if (!piAlreadyExist) {
-					signatures.add(piSign);
-				}
-				piAlreadySigned = true;
-			}
-		}
-		if (!piAlreadySigned && !PI.getUserRef().isDeleted()) {
-			piSign.setUserProfileId(PI.getUserProfileId().toString());
-			piSign.setFullName(PI.getUserRef().getFullName());
-			piSign.setSignature("");
-			piSign.setNote("");
-			piSign.setPositionTitle("PI");
-			piSign.setDelegated(false);
-			boolean piAlreadyExist = false;
-			for (SignatureInfo sign : signatures) {
-				if (sign.getUserProfileId().equalsIgnoreCase(
-						piSign.getUserProfileId())) {
-					piAlreadyExist = true;
-					break;
-				}
-			}
-			if (!piAlreadyExist) {
-				signatures.add(piSign);
-			}
-		}
-		CollegeDepartmentInfo investRef = new CollegeDepartmentInfo();
-		if (!PI.getUserRef().isDeleted()) {
-			investRef.setCollege(PI.getCollege());
-			investRef.setDepartment(PI.getDepartment());
-			investigators.add(investRef);
-		}
-		for (InvestigatorRefAndPosition coPIs : proposal.getInvestigatorInfo()
+
+		InvestigatorRefAndPosition PI = proposal.getInvestigatorInfo().getPi();
+		addPIAndCoPISignaturesToSignatureList(signatures, investigators,
+				proposalSignatures, PI, "PI");
+		for (InvestigatorRefAndPosition coPI : proposal.getInvestigatorInfo()
 				.getCo_pi()) {
-			// Adding Co-PIs
-			SignatureInfo coPISign = new SignatureInfo();
-			boolean coPIAlreadySigned = false;
-			for (SignatureInfo signature : proposalSignatures) {
-				if (coPIs.getUserProfileId().toString()
-						.equals(signature.getUserProfileId())
-						&& !coPIs.getUserRef().isDeleted()
-						&& signature.getPositionTitle().equals("Co-PI")) {
-					coPISign.setUserProfileId(signature.getUserProfileId());
-					coPISign.setFullName(signature.getFullName());
-					coPISign.setSignature(signature.getSignature());
-					coPISign.setSignedDate(signature.getSignedDate());
-					coPISign.setNote(signature.getNote());
-					coPISign.setPositionTitle(signature.getPositionTitle());
-					coPISign.setDelegated(signature.isDelegated());
-					boolean coPIAlreadyExist = false;
-					for (SignatureInfo sign : signatures) {
-						if (sign.getUserProfileId().equalsIgnoreCase(
-								coPISign.getUserProfileId())) {
-							coPIAlreadyExist = true;
-							break;
-						}
-					}
-					if (!coPIAlreadyExist) {
-						signatures.add(coPISign);
-					}
-					coPIAlreadySigned = true;
-				}
-			}
-			if (!coPIAlreadySigned && !coPIs.getUserRef().isDeleted()) {
-				coPISign.setUserProfileId(coPIs.getUserProfileId().toString());
-				coPISign.setFullName(coPIs.getUserRef().getFullName());
-				coPISign.setSignature("");
-				coPISign.setNote("");
-				coPISign.setPositionTitle("Co-PI");
-				coPISign.setDelegated(false);
-				boolean coPIAlreadyExist = false;
-				for (SignatureInfo sign : signatures) {
-					if (sign.getUserProfileId().equalsIgnoreCase(
-							coPISign.getUserProfileId())) {
-						coPIAlreadyExist = true;
-						break;
-					}
-				}
-				if (!coPIAlreadyExist) {
-					signatures.add(coPISign);
-				}
-			}
-			if (!coPIs.getUserRef().isDeleted()) {
-				investRef = new CollegeDepartmentInfo();
-				investRef.setCollege(coPIs.getCollege());
-				investRef.setDepartment(coPIs.getDepartment());
-				if (!investigators.contains(investRef)) {
-					investigators.add(investRef);
-				}
-			}
+			addPIAndCoPISignaturesToSignatureList(signatures, investigators,
+					proposalSignatures, coPI, "Co-PI");
 		}
+
 		List<String> positions = new ArrayList<String>();
 		positions.add("Department Chair");
-		// positions.add("Associate Chair");
 		positions.add("Business Manager");
-		// positions.add("Department Administrative Assistant");
 		positions.add("Dean");
-		// positions.add("Associate Dean");
 		positions.add("University Research Administrator");
 		positions.add("University Research Director");
+
 		if (irbApprovalRequired) {
 			positions.add("IRB");
 		}
+
 		Query<UserProfile> profileQuery = ds.createQuery(UserProfile.class)
 				.retrievedFields(true, "_id", "first name", "middle name",
 						"last name", "details");
@@ -1498,515 +1266,297 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 		for (UserProfile user : userProfile) {
 			for (PositionDetails posDetails : user.getDetails()) {
 				for (CollegeDepartmentInfo colDeptInfo : investigators) {
-					if (posDetails.getCollege().equalsIgnoreCase(
-							colDeptInfo.getCollege())
-							&& posDetails.getDepartment().equalsIgnoreCase(
-									colDeptInfo.getDepartment())
-							&& posDetails.getPositionTitle().equalsIgnoreCase(
-									"Department Chair")) {
-						SignatureInfo signDeptChair = new SignatureInfo();
-						boolean departmentChairAlreadySigned = false;
-						for (SignatureInfo signature : proposalSignatures) {
-							if (user.getId().toString()
-									.equals(signature.getUserProfileId())
-									&& signature.getPositionTitle().equals(
-											"Department Chair")) {
-								signDeptChair.setUserProfileId(signature
-										.getUserProfileId());
-								signDeptChair.setFullName(signature
-										.getFullName());
-								signDeptChair.setSignature(signature
-										.getSignature());
-								signDeptChair.setSignedDate(signature
-										.getSignedDate());
-								signDeptChair.setNote(signature.getNote());
-								signDeptChair.setPositionTitle(signature
-										.getPositionTitle());
-								signDeptChair.setDelegated(signature
-										.isDelegated());
-								if (!signatures.contains(signDeptChair)) {
-									signatures.add(signDeptChair);
-								}
-								departmentChairAlreadySigned = true;
-							} else if (signature.getPositionTitle().equals(
-									"Department Chair")
-									&& proposal.getChairApproval() == ApprovalType.APPROVED) {
-								signDeptChair.setUserProfileId(signature
-										.getUserProfileId());
-								signDeptChair.setFullName(signature
-										.getFullName());
-								signDeptChair.setSignature(signature
-										.getSignature());
-								signDeptChair.setSignedDate(signature
-										.getSignedDate());
-								signDeptChair.setNote(signature.getNote());
-								signDeptChair.setPositionTitle(signature
-										.getPositionTitle());
-								signDeptChair.setDelegated(signature
-										.isDelegated());
-								if (!signatures.contains(signDeptChair)) {
-									signatures.add(signDeptChair);
-								}
-								departmentChairAlreadySigned = true;
-							}
-						}
-						if (!departmentChairAlreadySigned) {
-							if (!isDelegator(user.getId().toString(),
-									posDetails)
-									&& proposal.getChairApproval() == ApprovalType.READYFORAPPROVAL) {
-								signDeptChair.setUserProfileId(user.getId()
-										.toString());
-								signDeptChair.setFullName(user.getFullName());
-								signDeptChair.setSignature("");
-								signDeptChair.setNote("");
-								signDeptChair
-										.setPositionTitle("Department Chair");
-								signDeptChair.setDelegated(false);
-								if (!signatures.contains(signDeptChair)) {
-									signatures.add(signDeptChair);
-								}
-							} else if (isDelegator(user.getId().toString(),
-									posDetails)) {
-								// here we used Transfer mode of Delegation
-								List<SignatureInfo> delegatedChair = findDelegatedUsersForAUser(
-										user.getId(), id.toString(),
-										posDetails.getCollege(),
-										posDetails.getDepartment(),
-										posDetails.getPositionType(),
-										"Department Chair");
-								boolean delegatedDepartmentChairAlreadySigned = false;
-								for (SignatureInfo delegateeInfo : delegatedChair) {
-									delegatedDepartmentChairAlreadySigned = false;
-									for (SignatureInfo signature : proposalSignatures) {
-										if (delegateeInfo.getUserProfileId()
-												.equals(signature
-														.getUserProfileId())
-												&& signature
-														.getPositionTitle()
-														.equals("Department Chair")) {
-											delegateeInfo
-													.setUserProfileId(signature
-															.getUserProfileId());
-											delegateeInfo.setFullName(signature
-													.getFullName());
-											delegateeInfo
-													.setSignature(signature
-															.getSignature());
-											delegateeInfo
-													.setSignedDate(signature
-															.getSignedDate());
-											delegateeInfo.setNote(signature
-													.getNote());
-											delegateeInfo
-													.setPositionTitle(signature
-															.getPositionTitle());
-											delegateeInfo
-													.setDelegated(signature
-															.isDelegated());
-											if (!signatures
-													.contains(delegateeInfo)) {
-												signatures.add(delegateeInfo);
-											}
-											delegatedDepartmentChairAlreadySigned = true;
-										}
-									}
-									if (!delegatedDepartmentChairAlreadySigned) {
-										if (!signatures.contains(delegateeInfo)) {
-											signatures.add(delegateeInfo);
-										}
-									}
-								}
-							} else {
-								signDeptChair.setUserProfileId(user.getId()
-										.toString());
-								signDeptChair.setFullName(user.getFullName());
-								signDeptChair.setSignature("");
-								signDeptChair.setNote("");
-								signDeptChair
-										.setPositionTitle("Department Chair");
-								signDeptChair.setDelegated(false);
-								if (!signatures.contains(signDeptChair)) {
-									signatures.add(signDeptChair);
-								}
-							}
-						}
-					} else if (posDetails.getCollege().equalsIgnoreCase(
-							colDeptInfo.getCollege())
-							&& posDetails.getDepartment().equalsIgnoreCase(
-									colDeptInfo.getDepartment())
-							&& posDetails.getPositionTitle().equalsIgnoreCase(
-									"Business Manager")) {
-						SignatureInfo signBusinessMgr = new SignatureInfo();
-						boolean businessManagerAlreadySigned = false;
-						for (SignatureInfo signature : proposalSignatures) {
-							if (user.getId().toString()
-									.equals(signature.getUserProfileId())
-									&& signature.getPositionTitle().equals(
-											"Business Manager")) {
-								signBusinessMgr.setUserProfileId(signature
-										.getUserProfileId());
-								signBusinessMgr.setFullName(signature
-										.getFullName());
-								signBusinessMgr.setSignature(signature
-										.getSignature());
-								signBusinessMgr.setSignedDate(signature
-										.getSignedDate());
-								signBusinessMgr.setNote(signature.getNote());
-								signBusinessMgr.setPositionTitle(signature
-										.getPositionTitle());
-								signBusinessMgr.setDelegated(signature
-										.isDelegated());
-								if (!signatures.contains(signBusinessMgr)) {
-									signatures.add(signBusinessMgr);
-								}
-								businessManagerAlreadySigned = true;
-							} else if (signature.getPositionTitle().equals(
-									"Business Manager")
-									&& proposal.getBusinessManagerApproval() == ApprovalType.APPROVED) {
-								signBusinessMgr.setUserProfileId(signature
-										.getUserProfileId());
-								signBusinessMgr.setFullName(signature
-										.getFullName());
-								signBusinessMgr.setSignature(signature
-										.getSignature());
-								signBusinessMgr.setSignedDate(signature
-										.getSignedDate());
-								signBusinessMgr.setNote(signature.getNote());
-								signBusinessMgr.setPositionTitle(signature
-										.getPositionTitle());
-								signBusinessMgr.setDelegated(signature
-										.isDelegated());
-								if (!signatures.contains(signBusinessMgr)) {
-									signatures.add(signBusinessMgr);
-								}
-								businessManagerAlreadySigned = true;
-							}
-						}
-						if (!businessManagerAlreadySigned) {
-							if (!isDelegator(user.getId().toString(),
-									posDetails)
-									&& proposal.getBusinessManagerApproval() == ApprovalType.READYFORAPPROVAL) {
-								signBusinessMgr.setUserProfileId(user.getId()
-										.toString());
-								signBusinessMgr.setFullName(user.getFullName());
-								signBusinessMgr.setSignature("");
-								signBusinessMgr.setNote("");
-								signBusinessMgr
-										.setPositionTitle("Business Manager");
-								signBusinessMgr.setDelegated(false);
-								if (!signatures.contains(signBusinessMgr)) {
-									signatures.add(signBusinessMgr);
-								}
-							} else if (isDelegator(user.getId().toString(),
-									posDetails)) {
-								List<SignatureInfo> delegatedBusinessManager = findDelegatedUsersForAUser(
-										user.getId(), id.toString(),
-										posDetails.getCollege(),
-										posDetails.getDepartment(),
-										posDetails.getPositionType(),
-										"Business Manager");
-								boolean delegatedBusinessManagerAlreadySigned = false;
-								for (SignatureInfo delegateeInfo : delegatedBusinessManager) {
-									for (SignatureInfo signature : proposalSignatures) {
-										if (delegateeInfo.getUserProfileId()
-												.equals(signature
-														.getUserProfileId())
-												&& signature
-														.getPositionTitle()
-														.equals("Business Manager")) {
-											delegateeInfo
-													.setUserProfileId(signature
-															.getUserProfileId());
-											delegateeInfo.setFullName(signature
-													.getFullName());
-											delegateeInfo
-													.setSignature(signature
-															.getSignature());
-											delegateeInfo
-													.setSignedDate(signature
-															.getSignedDate());
-											delegateeInfo.setNote(signature
-													.getNote());
-											delegateeInfo
-													.setPositionTitle(signature
-															.getPositionTitle());
-											delegateeInfo
-													.setDelegated(signature
-															.isDelegated());
-											if (!signatures
-													.contains(delegateeInfo)) {
-												signatures.add(delegateeInfo);
-											}
-											delegatedBusinessManagerAlreadySigned = true;
-										}
-									}
-									if (!delegatedBusinessManagerAlreadySigned) {
-										if (!signatures.contains(delegateeInfo)) {
-											signatures.add(delegateeInfo);
-										}
-									}
-								}
-							} else {
-								signBusinessMgr.setUserProfileId(user.getId()
-										.toString());
-								signBusinessMgr.setFullName(user.getFullName());
-								signBusinessMgr.setSignature("");
-								signBusinessMgr.setNote("");
-								signBusinessMgr
-										.setPositionTitle("Business Manager");
-								signBusinessMgr.setDelegated(false);
-								if (!signatures.contains(signBusinessMgr)) {
-									signatures.add(signBusinessMgr);
-								}
-							}
-						}
-					} else if (posDetails.getCollege().equalsIgnoreCase(
-							colDeptInfo.getCollege())
-							&& posDetails.getDepartment().equalsIgnoreCase(
-									colDeptInfo.getDepartment())
-							&& posDetails.getPositionTitle().equalsIgnoreCase(
-									"Dean")) {
-						SignatureInfo signDean = new SignatureInfo();
-
-						boolean deanAlreadySigned = false;
-						for (SignatureInfo signature : proposalSignatures) {
-							if (user.getId().toString()
-									.equals(signature.getUserProfileId())
-									&& signature.getPositionTitle().equals(
-											"Dean")) {
-								signDean.setUserProfileId(signature
-										.getUserProfileId());
-								signDean.setFullName(signature.getFullName());
-								signDean.setSignature(signature.getSignature());
-								signDean.setSignedDate(signature
-										.getSignedDate());
-								signDean.setNote(signature.getNote());
-								signDean.setPositionTitle(signature
-										.getPositionTitle());
-								signDean.setDelegated(signature.isDelegated());
-								if (!signatures.contains(signDean)) {
-									signatures.add(signDean);
-								}
-								deanAlreadySigned = true;
-							} else if (signature.getPositionTitle().equals(
-									"Dean")
-									&& proposal.getDeanApproval() == ApprovalType.APPROVED) {
-								signDean.setUserProfileId(signature
-										.getUserProfileId());
-								signDean.setFullName(signature.getFullName());
-								signDean.setSignature(signature.getSignature());
-								signDean.setSignedDate(signature
-										.getSignedDate());
-								signDean.setNote(signature.getNote());
-								signDean.setPositionTitle(signature
-										.getPositionTitle());
-								signDean.setDelegated(signature.isDelegated());
-								if (!signatures.contains(signDean)) {
-									signatures.add(signDean);
-								}
-								deanAlreadySigned = true;
-							}
-						}
-						if (!deanAlreadySigned) {
-							if (!isDelegator(user.getId().toString(),
-									posDetails)
-									&& proposal.getDeanApproval() == ApprovalType.READYFORAPPROVAL) {
-								signDean.setUserProfileId(user.getId()
-										.toString());
-								signDean.setFullName(user.getFullName());
-								signDean.setSignature("");
-								signDean.setNote("");
-								signDean.setPositionTitle("Dean");
-								signDean.setDelegated(false);
-								if (!signatures.contains(signDean)) {
-									signatures.add(signDean);
-								}
-							} else if (isDelegator(user.getId().toString(),
-									posDetails)) {
-								List<SignatureInfo> delegatedDean = findDelegatedUsersForAUser(
-										user.getId(), id.toString(),
-										posDetails.getCollege(),
-										posDetails.getDepartment(),
-										posDetails.getPositionType(), "Dean");
-
-								boolean delegatedDeanAlreadySigned = false;
-								for (SignatureInfo delegateeInfo : delegatedDean) {
-									for (SignatureInfo signature : proposalSignatures) {
-										if (delegateeInfo.getUserProfileId()
-												.equals(signature
-														.getUserProfileId())
-												&& signature.getPositionTitle()
-														.equals("Dean")) {
-											delegateeInfo
-													.setUserProfileId(signature
-															.getUserProfileId());
-											delegateeInfo.setFullName(signature
-													.getFullName());
-											delegateeInfo
-													.setSignature(signature
-															.getSignature());
-											delegateeInfo
-													.setSignedDate(signature
-															.getSignedDate());
-											delegateeInfo.setNote(signature
-													.getNote());
-											delegateeInfo
-													.setPositionTitle(signature
-															.getPositionTitle());
-											delegateeInfo
-													.setDelegated(signature
-															.isDelegated());
-											if (!signatures
-													.contains(delegateeInfo)) {
-												signatures.add(delegateeInfo);
-											}
-											delegatedDeanAlreadySigned = true;
-										}
-									}
-									if (!delegatedDeanAlreadySigned) {
-										if (!signatures.contains(delegateeInfo)) {
-											signatures.add(delegateeInfo);
-										}
-									}
-								}
-							} else {
-								signDean.setUserProfileId(user.getId()
-										.toString());
-								signDean.setFullName(user.getFullName());
-								signDean.setSignature("");
-								signDean.setNote("");
-								signDean.setPositionTitle("Dean");
-								signDean.setDelegated(false);
-								if (!signatures.contains(signDean)) {
-									signatures.add(signDean);
-								}
-							}
-						}
-					}
+					addUserSignaturesWithPotentialDelegation(id, signatures,
+							proposal, proposalSignatures, user, posDetails,
+							colDeptInfo);
 				}
 				if (posDetails.getPositionTitle().equalsIgnoreCase("IRB")
 						&& irbApprovalRequired) {
-					SignatureInfo signBusinessMgr = new SignatureInfo();
-
-					boolean irbAlreadySigned = false;
-					for (SignatureInfo signature : proposalSignatures) {
-						if (user.getId().toString()
-								.equals(signature.getUserProfileId())
-								&& signature.getPositionTitle().equals("IRB")) {
-							signBusinessMgr.setUserProfileId(signature
-									.getUserProfileId());
-							signBusinessMgr
-									.setFullName(signature.getFullName());
-							signBusinessMgr.setSignature(signature
-									.getSignature());
-							signBusinessMgr.setSignedDate(signature
-									.getSignedDate());
-							signBusinessMgr.setNote(signature.getNote());
-							signBusinessMgr.setPositionTitle(signature
-									.getPositionTitle());
-							signBusinessMgr.setDelegated(signature
-									.isDelegated());
-							if (!signatures.contains(signBusinessMgr)) {
-								signatures.add(signBusinessMgr);
-							}
-							irbAlreadySigned = true;
-						}
-					}
-					if (!irbAlreadySigned) {
-						signBusinessMgr.setUserProfileId(user.getId()
-								.toString());
-						signBusinessMgr.setFullName(user.getFullName());
-						signBusinessMgr.setSignature("");
-						signBusinessMgr.setNote("");
-						signBusinessMgr.setPositionTitle("IRB");
-						signBusinessMgr.setDelegated(false);
-						if (!signatures.contains(signBusinessMgr)) {
-							signatures.add(signBusinessMgr);
-						}
-					}
+					addAdminSignaturesWithoutDelegation(signatures,
+							proposalSignatures, user, "IRB");
 				} else if (posDetails.getPositionTitle().equalsIgnoreCase(
 						"University Research Administrator")) {
-					SignatureInfo signAdmin = new SignatureInfo();
-
-					boolean adminAlreadySigned = false;
-					for (SignatureInfo signature : proposalSignatures) {
-						if (user.getId().toString()
-								.equals(signature.getUserProfileId())
-								&& signature.getPositionTitle().equals(
-										"University Research Administrator")) {
-							signAdmin.setUserProfileId(signature
-									.getUserProfileId());
-							signAdmin.setFullName(user.getFullName());
-							signAdmin.setSignature(signature.getSignature());
-							signAdmin.setSignedDate(signature.getSignedDate());
-							signAdmin.setNote(signature.getNote());
-							signAdmin
-									.setPositionTitle("University Research Administrator");
-							signAdmin.setDelegated(signature.isDelegated());
-							if (!signatures.contains(signAdmin)) {
-								signatures.add(signAdmin);
-							}
-							adminAlreadySigned = true;
-						}
-					}
-					if (!adminAlreadySigned) {
-						signAdmin.setUserProfileId(user.getId().toString());
-						signAdmin.setFullName(user.getFullName());
-						signAdmin.setSignature("");
-						signAdmin.setNote("");
-						signAdmin
-								.setPositionTitle("University Research Administrator");
-						signAdmin.setDelegated(false);
-						if (!signatures.contains(signAdmin)) {
-							signatures.add(signAdmin);
-						}
-					}
+					addAdminSignaturesWithoutDelegation(signatures,
+							proposalSignatures, user,
+							"University Research Administrator");
 				} else if (posDetails.getPositionTitle().equalsIgnoreCase(
 						"University Research Director")) {
-					SignatureInfo signDirector = new SignatureInfo();
-
-					boolean directorAlreadySigned = false;
-					for (SignatureInfo signature : proposalSignatures) {
-						if (user.getId().toString()
-								.equals(signature.getUserProfileId())
-								&& signature.getPositionTitle().equals(
-										"University Research Director")) {
-							signDirector.setUserProfileId(signature
-									.getUserProfileId());
-							signDirector.setFullName(signature.getFullName());
-							signDirector.setSignature(signature.getSignature());
-							signDirector.setSignedDate(signature
-									.getSignedDate());
-							signDirector.setNote(signature.getNote());
-							signDirector
-									.setPositionTitle("University Research Director");
-							signDirector.setDelegated(signature.isDelegated());
-							if (!signatures.contains(signDirector)) {
-								signatures.add(signDirector);
-							}
-							directorAlreadySigned = true;
-						}
-					}
-					if (!directorAlreadySigned) {
-						signDirector.setUserProfileId(user.getId().toString());
-						signDirector.setFullName(user.getFullName());
-						signDirector.setSignature("");
-						signDirector.setNote("");
-						signDirector
-								.setPositionTitle("University Research Director");
-						signDirector.setDelegated(false);
-						if (!signatures.contains(signDirector)) {
-							signatures.add(signDirector);
-						}
-					}
+					addAdminSignaturesWithoutDelegation(signatures,
+							proposalSignatures, user,
+							"University Research Administrator");
 				}
 			}
 		}
 		return signatures;
 	}
 
+	/**
+	 * @param signatures
+	 * @param proposalSignatures
+	 * @param user
+	 * @param string
+	 */
+	private void addAdminSignaturesWithoutDelegation(
+			List<SignatureInfo> signatures,
+			final List<SignatureInfo> proposalSignatures, UserProfile user,
+			String adminType) {
+		SignatureInfo signatureInfo = new SignatureInfo();
+
+		boolean isAlreadySigned = false;
+		for (SignatureInfo signature : proposalSignatures) {
+			if (user.getId().toString().equals(signature.getUserProfileId())
+					&& signature.getPositionTitle().equals(adminType)) {
+				signatureInfo = getUserSignatureInfo(
+						signature.getUserProfileId(), signature.getFullName(),
+						signature.getSignature(), signature.getSignedDate(),
+						signature.getNote(), signature.getPositionTitle(),
+						signature.isDelegated());
+
+				if (!signatures.contains(signatureInfo)) {
+					signatures.add(signatureInfo);
+				}
+				isAlreadySigned = true;
+			}
+		}
+		if (!isAlreadySigned) {
+			signatureInfo = getUserSignatureInfo(user.getId().toString(),
+					user.getFullName(), "", null, "", adminType, false);
+
+			if (!signatures.contains(signatureInfo)) {
+				signatures.add(signatureInfo);
+			}
+		}
+	}
+
+	/**
+	 * @param id
+	 * @param signatures
+	 * @param proposal
+	 * @param proposalSignatures
+	 * @param user
+	 * @param posDetails
+	 * @param colDeptInfo
+	 */
+	private void addUserSignaturesWithPotentialDelegation(ObjectId id,
+			List<SignatureInfo> signatures, Proposal proposal,
+			final List<SignatureInfo> proposalSignatures, UserProfile user,
+			PositionDetails posDetails, CollegeDepartmentInfo colDeptInfo) {
+		if (posDetails.getCollege().equalsIgnoreCase(colDeptInfo.getCollege())
+				&& posDetails.getDepartment().equalsIgnoreCase(
+						colDeptInfo.getDepartment())
+				&& posDetails.getPositionTitle().equalsIgnoreCase(
+						"Department Chair")) {
+			addAdminUsersSignaturesToSignatureList(id, signatures, proposal,
+					proposalSignatures, user, posDetails, "Department Chair");
+		} else if (posDetails.getCollege().equalsIgnoreCase(
+				colDeptInfo.getCollege())
+				&& posDetails.getDepartment().equalsIgnoreCase(
+						colDeptInfo.getDepartment())
+				&& posDetails.getPositionTitle().equalsIgnoreCase(
+						"Business Manager")) {
+			addAdminUsersSignaturesToSignatureList(id, signatures, proposal,
+					proposalSignatures, user, posDetails, "Business Manager");
+		} else if (posDetails.getCollege().equalsIgnoreCase(
+				colDeptInfo.getCollege())
+				&& posDetails.getDepartment().equalsIgnoreCase(
+						colDeptInfo.getDepartment())
+				&& posDetails.getPositionTitle().equalsIgnoreCase("Dean")) {
+			addAdminUsersSignaturesToSignatureList(id, signatures, proposal,
+					proposalSignatures, user, posDetails, "Dean");
+		}
+	}
+
+	/**
+	 * @param id
+	 * @param signatures
+	 * @param proposal
+	 * @param proposalSignatures
+	 * @param user
+	 * @param posDetails
+	 * @param adminType
+	 */
+	private void addAdminUsersSignaturesToSignatureList(ObjectId id,
+			List<SignatureInfo> signatures, Proposal proposal,
+			final List<SignatureInfo> proposalSignatures, UserProfile user,
+			PositionDetails posDetails, String adminType) {
+		ApprovalType userApproval = null;
+
+		if (adminType.equals("Department Chair")) {
+			userApproval = proposal.getChairApproval();
+		} else if (adminType.equals("Dean")) {
+			userApproval = proposal.getDeanApproval();
+		} else if (adminType.equals("Business Manager")) {
+			userApproval = proposal.getBusinessManagerApproval();
+		}
+
+		SignatureInfo signUserInfo = new SignatureInfo();
+		boolean isAlreadySigned = false;
+
+		for (SignatureInfo signature : proposalSignatures) {
+			if ((user.getId().toString().equals(signature.getUserProfileId()) && signature
+					.getPositionTitle().equals(adminType))
+					|| (signature.getPositionTitle().equals(adminType) && userApproval == ApprovalType.APPROVED)) {
+				signUserInfo = getUserSignatureInfo(
+						signature.getUserProfileId(), signature.getFullName(),
+						signature.getSignature(), signature.getSignedDate(),
+						signature.getNote(), signature.getPositionTitle(),
+						signature.isDelegated());
+				if (!signatures.contains(signUserInfo)) {
+					signatures.add(signUserInfo);
+				}
+				isAlreadySigned = true;
+			}
+		}
+
+		if (!isAlreadySigned) {
+			if (!isDelegator(user.getId().toString(), posDetails)
+					&& userApproval == ApprovalType.READYFORAPPROVAL) {
+				signUserInfo = getUserSignatureInfo(user.getId().toString(),
+						user.getFullName(), "", null, "", adminType, false);
+				if (!signatures.contains(signUserInfo)) {
+					signatures.add(signUserInfo);
+				}
+			} else if (isDelegator(user.getId().toString(), posDetails)) {
+				addDelegatedUserSignatures(id, signatures, proposalSignatures,
+						user, posDetails, adminType);
+			} else {
+				signUserInfo = getUserSignatureInfo(user.getId().toString(),
+						user.getFullName(), "", null, "", adminType, false);
+
+				if (!signatures.contains(signUserInfo)) {
+					signatures.add(signUserInfo);
+				}
+			}
+		}
+	}
+
+	/**
+	 * @param id
+	 * @param signatures
+	 * @param proposalSignatures
+	 * @param user
+	 * @param posDetails
+	 * @param adminType
+	 */
+	private void addDelegatedUserSignatures(ObjectId id,
+			List<SignatureInfo> signatures,
+			final List<SignatureInfo> proposalSignatures, UserProfile user,
+			PositionDetails posDetails, String adminType) {
+		// here we used Transfer mode of Delegation
+		List<SignatureInfo> delegatedChair = findDelegatedUsersForAUser(
+				user.getId(), id.toString(), posDetails.getCollege(),
+				posDetails.getDepartment(), posDetails.getPositionType(),
+				adminType);
+		boolean delegatedUserAlreadySigned = false;
+		for (SignatureInfo delegateeInfo : delegatedChair) {
+			delegatedUserAlreadySigned = false;
+			for (SignatureInfo signature : proposalSignatures) {
+				if (delegateeInfo.getUserProfileId().equals(
+						signature.getUserProfileId())
+						&& signature.getPositionTitle().equals(adminType)) {
+					delegateeInfo = getUserSignatureInfo(
+							signature.getUserProfileId(),
+							signature.getFullName(), signature.getSignature(),
+							signature.getSignedDate(), signature.getNote(),
+							signature.getPositionTitle(),
+							signature.isDelegated());
+					if (!signatures.contains(delegateeInfo)) {
+						signatures.add(delegateeInfo);
+					}
+					delegatedUserAlreadySigned = true;
+				}
+			}
+			if (!delegatedUserAlreadySigned) {
+				if (!signatures.contains(delegateeInfo)) {
+					signatures.add(delegateeInfo);
+				}
+			}
+		}
+	}
+
+	/**
+	 * @param signatures
+	 * @param investigators
+	 * @param proposalSignatures
+	 * @param investigatorRefPosition
+	 */
+	private void addPIAndCoPISignaturesToSignatureList(
+			List<SignatureInfo> signatures,
+			List<CollegeDepartmentInfo> investigators,
+			final List<SignatureInfo> proposalSignatures,
+			InvestigatorRefAndPosition investigatorRefPosition,
+			String investigatorType) {
+		boolean isAlreadySigned = false;
+		boolean isAlreadyExist = false;
+
+		SignatureInfo signatureInfo = new SignatureInfo();
+		for (SignatureInfo signature : proposalSignatures) {
+			if (investigatorRefPosition.getUserProfileId().equals(
+					signature.getUserProfileId())
+					&& !investigatorRefPosition.getUserRef().isDeleted()
+					&& signature.getPositionTitle().equals(investigatorType)) {
+				signatureInfo = getUserSignatureInfo(
+						signature.getUserProfileId(), signature.getFullName(),
+						signature.getSignature(), signature.getSignedDate(),
+						signature.getNote(), signature.getPositionTitle(),
+						signature.isDelegated());
+
+				for (SignatureInfo sign : signatures) {
+					if (sign.getUserProfileId().equalsIgnoreCase(
+							signatureInfo.getUserProfileId())) {
+						isAlreadyExist = true;
+						break;
+					}
+				}
+				if (!isAlreadyExist) {
+					signatures.add(signatureInfo);
+				}
+				isAlreadySigned = true;
+			}
+		}
+		if (!isAlreadySigned
+				&& !investigatorRefPosition.getUserRef().isDeleted()) {
+
+			for (SignatureInfo sign : signatures) {
+				if (sign.getUserProfileId().equalsIgnoreCase(
+						signatureInfo.getUserProfileId())) {
+					isAlreadyExist = true;
+					break;
+				}
+			}
+			if (!isAlreadyExist) {
+				signatures.add(getUserSignatureInfo(investigatorRefPosition
+						.getUserProfileId().toString(), investigatorRefPosition
+						.getUserRef().getFullName(), "", null, "",
+						investigatorType, false));
+			}
+		}
+
+		CollegeDepartmentInfo investRef = new CollegeDepartmentInfo();
+		if (!investigatorRefPosition.getUserRef().isDeleted()) {
+			investRef.setCollege(investigatorRefPosition.getCollege());
+			investRef.setDepartment(investigatorRefPosition.getDepartment());
+			investigators.add(investRef);
+		}
+	}
+
+	private SignatureInfo getUserSignatureInfo(String userProfileId,
+			String fullName, String signature, Date date, String note,
+			String positionTitle, boolean delegated) {
+
+		SignatureInfo signatureInfo = new SignatureInfo();
+		signatureInfo.setUserProfileId(userProfileId);
+		signatureInfo.setFullName(fullName);
+		signatureInfo.setSignature(signature);
+		signatureInfo.setSignedDate(date);
+		signatureInfo.setNote(note);
+		signatureInfo.setPositionTitle(positionTitle);
+		signatureInfo.setDelegated(delegated);
+		return signatureInfo;
+	}
+
 	private boolean isDelegator(String delegatorId, PositionDetails posDetails) {
-		long delegationCount = ds.createQuery(Delegation.class)
+		long delegationCount = getDatastore().createQuery(Delegation.class)
 				.field("revoked").equal(false).field("delegator user id")
 				.equal(delegatorId).field("delegated college")
 				.equal(posDetails.getCollege()).field("delegated department")
@@ -2025,14 +1575,12 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 			String proposalId, String positionCollege,
 			String positionDeptartment, String positionType,
 			String positionTitle) {
-		Datastore ds = getDatastore();
 		List<SignatureInfo> signatures = new ArrayList<SignatureInfo>();
-
-		Query<Delegation> delegationQuery = ds.createQuery(Delegation.class);
-
-		Query<UserProfile> profileQuery = ds.createQuery(UserProfile.class)
-				.field("_id").equal(userId).field("deleted").equal(false)
-				.retrievedFields(true, "_id");
+		Query<Delegation> delegationQuery = getDatastore().createQuery(
+				Delegation.class);
+		Query<UserProfile> profileQuery = getDatastore()
+				.createQuery(UserProfile.class).field("_id").equal(userId)
+				.field("deleted").equal(false).retrievedFields(true, "_id");
 		delegationQuery.or(
 				delegationQuery.criteria("delegator user profile")
 						.in(profileQuery.asKeyList()).criteria("revoked")
@@ -2061,14 +1609,9 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 						.greaterThanOrEq(new Date()));
 		List<Delegation> delegates = delegationQuery.asList();
 		for (Delegation delegation : delegates) {
-			SignatureInfo signature = new SignatureInfo();
-			signature.setUserProfileId(delegation.getDelegateeId());
-			signature.setFullName(delegation.getDelegatee());
-			signature.setPositionTitle(positionTitle);
-			signature.setSignature("");
-			signature.setNote("");
-			signature.setDelegated(true);
-			signature.setDelegatedAs(positionTitle);
+			SignatureInfo signature = getUserSignatureInfo(
+					delegation.getDelegateeId(), delegation.getDelegatee(), "",
+					null, "", positionTitle, true);
 			if (!signatures.contains(signature)) {
 				signatures.add(signature);
 			}
@@ -2077,9 +1620,7 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	}
 
 	public List<SignatureUserInfo> findDelegatedUsersInfoForAUser(
-			ObjectId userId, String proposalId, String positionCollege,
-			String positionDeptartment, String positionType,
-			String positionTitle) {
+			ObjectId userId, String proposalId, PositionDetails posDetails) {
 		Datastore ds = getDatastore();
 		List<SignatureUserInfo> signatures = new ArrayList<SignatureUserInfo>();
 		Query<Delegation> delegationQuery = ds.createQuery(Delegation.class);
@@ -2092,16 +1633,20 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 								delegationQuery.criteria("revoked")
 										.equal(false),
 								delegationQuery.criteria("delegatee college")
-										.equalIgnoreCase(positionCollege),
+										.equalIgnoreCase(
+												posDetails.getCollege()),
 								delegationQuery
 										.criteria("delegatee department")
-										.equalIgnoreCase(positionDeptartment),
+										.equalIgnoreCase(
+												posDetails.getDepartment()),
 								delegationQuery.criteria(
 										"delegatee position type")
-										.equalIgnoreCase(positionType),
+										.equalIgnoreCase(
+												posDetails.getPositionType()),
 								delegationQuery.criteria(
 										"delegated position title")
-										.equalIgnoreCase(positionTitle),
+										.equalIgnoreCase(
+												posDetails.getPositionTitle()),
 								delegationQuery.criteria("proposal id").equal(
 										"")).criteria("from")
 						.lessThanOrEq(new Date()).criteria("to")
@@ -2112,16 +1657,20 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 								delegationQuery.criteria("revoked")
 										.equal(false),
 								delegationQuery.criteria("delegatee college")
-										.equalIgnoreCase(positionCollege),
+										.equalIgnoreCase(
+												posDetails.getCollege()),
 								delegationQuery
 										.criteria("delegatee department")
-										.equalIgnoreCase(positionDeptartment),
+										.equalIgnoreCase(
+												posDetails.getDepartment()),
 								delegationQuery.criteria(
 										"delegatee position type")
-										.equalIgnoreCase(positionType),
+										.equalIgnoreCase(
+												posDetails.getPositionType()),
 								delegationQuery.criteria(
 										"delegated position title")
-										.equalIgnoreCase(positionTitle),
+										.equalIgnoreCase(
+												posDetails.getPositionTitle()),
 								delegationQuery.criteria("proposal id")
 										.containsIgnoreCase(proposalId))
 						.criteria("from").lessThanOrEq(new Date())
@@ -2130,28 +1679,14 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 		for (Delegation delegation : delegates) {
 			ObjectId delegateeUserProfileId = new ObjectId(
 					delegation.getDelegateeId());
-			UserProfile userQuery = ds
+			UserProfile user = ds
 					.createQuery(UserProfile.class)
 					.field("_id")
 					.equal(delegateeUserProfileId)
 					.retrievedFields(true, "_id", "first name", "middle name",
 							"last name", "work email", "user id").get();
-			SignatureUserInfo signature = new SignatureUserInfo();
-			signature.setUserProfileId(userQuery.getId().toString());
-			signature.setFullName(userQuery.getFullName());
-			signature.setUserName(userQuery.getUserAccount().getUserName());
-			signature.setEmail(userQuery.getWorkEmails().get(0));
-			signature.setCollege(positionCollege);
-			signature.setDepartment(positionDeptartment);
-			signature.setPositionType(positionType);
-			signature.setPositionTitle(positionTitle);
-			signature.setDelegatedAs(positionTitle);
-			signature.setSignature("");
-			signature.setNote("");
-			signature.setDelegated(true);
-			if (!signatures.contains(signature)) {
-				signatures.add(signature);
-			}
+			addSignaturesExceptInvestigator(signatures, user, posDetails,
+					posDetails.getPositionTitle(), true);
 		}
 		return signatures;
 	}
@@ -2160,7 +1695,6 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 			ObjectId id, Boolean irbApprovalRequired) {
 		Datastore ds = getDatastore();
 		List<SignatureUserInfo> signatures = new ArrayList<SignatureUserInfo>();
-		List<CollegeDepartmentInfo> investigators = new ArrayList<CollegeDepartmentInfo>();
 		Query<Proposal> q1 = ds
 				.createQuery(Proposal.class)
 				.field("_id")
@@ -2168,6 +1702,119 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 				.retrievedFields(true, "_id", "investigator info",
 						"signature info");
 		Proposal proposal = q1.get();
+		List<CollegeDepartmentInfo> investigators = addInvestigatorsInfo(proposal);
+		List<UserProfile> userProfile = findAdminUsersForAProposal(
+				irbApprovalRequired, ds);
+		for (UserProfile user : userProfile) {
+			for (PositionDetails posDetails : user.getDetails()) {
+				for (CollegeDepartmentInfo colDeptInfo : investigators) {
+					addSignaturesWithPotentialDelegation(id, signatures, user,
+							posDetails, colDeptInfo);
+				}
+				if (posDetails.getPositionTitle().equalsIgnoreCase("IRB")
+						&& irbApprovalRequired) {
+					addSignaturesExceptInvestigator(signatures, user,
+							posDetails, "IRB", false);
+				} else if (posDetails.getPositionTitle().equalsIgnoreCase(
+						"University Research Administrator")) {
+					addSignaturesExceptInvestigator(signatures, user,
+							posDetails, "University Research Administrator",
+							false);
+				} else if (posDetails.getPositionTitle().equalsIgnoreCase(
+						"University Research Director")) {
+					addSignaturesExceptInvestigator(signatures, user,
+							posDetails, "University Research Director", false);
+				}
+			}
+		}
+		return signatures;
+	}
+
+	/**
+	 * @param id
+	 * @param signatures
+	 * @param user
+	 * @param posDetails
+	 * @param colDeptInfo
+	 */
+	private void addSignaturesWithPotentialDelegation(ObjectId id,
+			List<SignatureUserInfo> signatures, UserProfile user,
+			PositionDetails posDetails, CollegeDepartmentInfo colDeptInfo) {
+		if (posDetails.getCollege().equalsIgnoreCase(colDeptInfo.getCollege())
+				&& posDetails.getDepartment().equalsIgnoreCase(
+						colDeptInfo.getDepartment())
+				&& posDetails.getPositionTitle().equalsIgnoreCase(
+						"Department Chair")) {
+			if (!isDelegator(user.getId().toString(), posDetails)) {
+				addSignaturesExceptInvestigator(signatures, user, posDetails,
+						"Department Chair", false);
+			} else {
+				posDetails.setPositionTitle("Department Chair");
+				addSignaturesOfDelegatee(id, signatures, user, posDetails,
+						"Department Chair");
+			}
+		} else if (posDetails.getCollege().equalsIgnoreCase(
+				colDeptInfo.getCollege())
+				&& posDetails.getDepartment().equalsIgnoreCase(
+						colDeptInfo.getDepartment())
+				&& posDetails.getPositionTitle().equalsIgnoreCase(
+						"Business Manager")) {
+			if (!isDelegator(user.getId().toString(), posDetails)) {
+				addSignaturesExceptInvestigator(signatures, user, posDetails,
+						"Business Manager", false);
+			} else {
+				posDetails.setPositionTitle("Business Manager");
+				addSignaturesOfDelegatee(id, signatures, user, posDetails,
+						"Business Manager");
+			}
+		} else if (posDetails.getCollege().equalsIgnoreCase(
+				colDeptInfo.getCollege())
+				&& posDetails.getDepartment().equalsIgnoreCase(
+						colDeptInfo.getDepartment())
+				&& posDetails.getPositionTitle().equalsIgnoreCase("Dean")) {
+			if (!isDelegator(user.getId().toString(), posDetails)) {
+				addSignaturesExceptInvestigator(signatures, user, posDetails,
+						"Dean", false);
+			} else {
+				posDetails.setPositionTitle("Dean");
+				addSignaturesOfDelegatee(id, signatures, user, posDetails,
+						"Dean");
+			}
+		}
+	}
+
+	/**
+	 * @param irbApprovalRequired
+	 * @param ds
+	 * @return
+	 */
+	private List<UserProfile> findAdminUsersForAProposal(
+			Boolean irbApprovalRequired, Datastore ds) {
+		List<String> positions = new ArrayList<String>();
+		positions.add("Department Chair");
+		positions.add("Business Manager");
+		positions.add("Dean");
+		positions.add("University Research Administrator");
+		positions.add("University Research Director");
+		if (irbApprovalRequired) {
+			positions.add("IRB");
+		}
+		Query<UserProfile> profileQuery = ds.createQuery(UserProfile.class)
+				.retrievedFields(true, "_id", "first name", "middle name",
+						"last name", "details", "work email");
+		profileQuery.and(profileQuery.criteria("deleted").equal(false),
+				profileQuery.criteria("details.position title").in(positions));
+		List<UserProfile> userProfile = profileQuery.asList();
+		return userProfile;
+	}
+
+	/**
+	 * @param investigators
+	 * @param proposal
+	 * @return
+	 */
+	private List<CollegeDepartmentInfo> addInvestigatorsInfo(Proposal proposal) {
+		List<CollegeDepartmentInfo> investigators = new ArrayList<CollegeDepartmentInfo>();
 		// Adding PI
 		InvestigatorRefAndPosition PI = proposal.getInvestigatorInfo().getPi();
 		CollegeDepartmentInfo investRef = new CollegeDepartmentInfo();
@@ -2188,208 +1835,55 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 				}
 			}
 		}
-		List<String> positions = new ArrayList<String>();
-		positions.add("Department Chair");
-		positions.add("Business Manager");
-		positions.add("Dean");
-		positions.add("University Research Administrator");
-		positions.add("University Research Director");
-		if (irbApprovalRequired) {
-			positions.add("IRB");
-		}
-		Query<UserProfile> profileQuery = ds.createQuery(UserProfile.class)
-				.retrievedFields(true, "_id", "first name", "middle name",
-						"last name", "details", "work email");
-		profileQuery.and(profileQuery.criteria("deleted").equal(false),
-				profileQuery.criteria("details.position title").in(positions));
-		List<UserProfile> userProfile = profileQuery.asList();
-		for (UserProfile user : userProfile) {
-			for (PositionDetails posDetails : user.getDetails()) {
-				for (CollegeDepartmentInfo colDeptInfo : investigators) {
-					if (posDetails.getCollege().equalsIgnoreCase(
-							colDeptInfo.getCollege())
-							&& posDetails.getDepartment().equalsIgnoreCase(
-									colDeptInfo.getDepartment())
-							&& posDetails.getPositionTitle().equalsIgnoreCase(
-									"Department Chair")) {
-						SignatureUserInfo signDeptChair = new SignatureUserInfo();
-						if (!isDelegator(user.getId().toString(), posDetails)) {
-							signDeptChair.setUserProfileId(user.getId()
-									.toString());
-							signDeptChair.setFullName(user.getFullName());
-							signDeptChair.setUserName(user.getUserAccount()
-									.getUserName());
-							signDeptChair.setEmail(user.getWorkEmails().get(0));
-							signDeptChair.setCollege(posDetails.getCollege());
-							signDeptChair.setDepartment(posDetails
-									.getDepartment());
-							signDeptChair.setPositionType(posDetails
-									.getPositionType());
-							signDeptChair.setPositionTitle(posDetails
-									.getPositionTitle());
-							signDeptChair.setSignature("");
-							signDeptChair.setNote("");
-							signDeptChair.setPositionTitle("Department Chair");
-							signDeptChair.setDelegated(false);
-							if (!signatures.contains(signDeptChair)) {
-								signatures.add(signDeptChair);
-							}
-						} else {
-							List<SignatureUserInfo> delegatedChair = findDelegatedUsersInfoForAUser(
-									user.getId(), id.toString(),
-									posDetails.getCollege(),
-									posDetails.getDepartment(),
-									posDetails.getPositionType(),
-									"Department Chair");
-							for (SignatureUserInfo delegateeInfo : delegatedChair) {
-								if (!signatures.contains(delegateeInfo)) {
-									signatures.add(delegateeInfo);
-								}
-							}
-						}
-					} else if (posDetails.getCollege().equalsIgnoreCase(
-							colDeptInfo.getCollege())
-							&& posDetails.getDepartment().equalsIgnoreCase(
-									colDeptInfo.getDepartment())
-							&& posDetails.getPositionTitle().equalsIgnoreCase(
-									"Business Manager")) {
-						SignatureUserInfo signBusinessMgr = new SignatureUserInfo();
-						if (!isDelegator(user.getId().toString(), posDetails)) {
-							signBusinessMgr.setUserProfileId(user.getId()
-									.toString());
-							signBusinessMgr.setFullName(user.getFullName());
-							signBusinessMgr.setUserName(user.getUserAccount()
-									.getUserName());
-							signBusinessMgr.setEmail(user.getWorkEmails()
-									.get(0));
-							signBusinessMgr.setCollege(posDetails.getCollege());
-							signBusinessMgr.setDepartment(posDetails
-									.getDepartment());
-							signBusinessMgr.setPositionType(posDetails
-									.getPositionType());
-							signBusinessMgr.setPositionTitle(posDetails
-									.getPositionTitle());
-							signBusinessMgr.setSignature("");
-							signBusinessMgr.setNote("");
-							signBusinessMgr
-									.setPositionTitle("Business Manager");
-							signBusinessMgr.setDelegated(false);
-							if (!signatures.contains(signBusinessMgr)) {
-								signatures.add(signBusinessMgr);
-							}
-						} else {
-							List<SignatureUserInfo> delegatedBusinessManager = findDelegatedUsersInfoForAUser(
-									user.getId(), id.toString(),
-									posDetails.getCollege(),
-									posDetails.getDepartment(),
-									posDetails.getPositionType(),
-									"Business Manager");
-							for (SignatureUserInfo delegateeInfo : delegatedBusinessManager) {
-								if (!signatures.contains(delegateeInfo)) {
-									signatures.add(delegateeInfo);
-								}
-							}
-						}
-					} else if (posDetails.getCollege().equalsIgnoreCase(
-							colDeptInfo.getCollege())
-							&& posDetails.getDepartment().equalsIgnoreCase(
-									colDeptInfo.getDepartment())
-							&& posDetails.getPositionTitle().equalsIgnoreCase(
-									"Dean")) {
-						SignatureUserInfo signDean = new SignatureUserInfo();
-						if (!isDelegator(user.getId().toString(), posDetails)) {
-							signDean.setUserProfileId(user.getId().toString());
-							signDean.setFullName(user.getFullName());
-							signDean.setUserName(user.getUserAccount()
-									.getUserName());
-							signDean.setEmail(user.getWorkEmails().get(0));
-							signDean.setCollege(posDetails.getCollege());
-							signDean.setDepartment(posDetails.getDepartment());
-							signDean.setPositionType(posDetails
-									.getPositionType());
-							signDean.setPositionTitle(posDetails
-									.getPositionTitle());
-							signDean.setSignature("");
-							signDean.setNote("");
-							signDean.setPositionTitle("Dean");
-							signDean.setDelegated(false);
-							if (!signatures.contains(signDean)) {
-								signatures.add(signDean);
-							}
-						} else {
-							List<SignatureUserInfo> delegatedDean = findDelegatedUsersInfoForAUser(
-									user.getId(), id.toString(),
-									posDetails.getCollege(),
-									posDetails.getDepartment(),
-									posDetails.getPositionType(), "Dean");
-							for (SignatureUserInfo delegateeInfo : delegatedDean) {
-								if (!signatures.contains(delegateeInfo)) {
-									signatures.add(delegateeInfo);
-								}
-							}
-						}
-					}
-				}
-				if (posDetails.getPositionTitle().equalsIgnoreCase("IRB")
-						&& irbApprovalRequired) {
-					SignatureUserInfo signBusinessMgr = new SignatureUserInfo();
-					signBusinessMgr.setUserProfileId(user.getId().toString());
-					signBusinessMgr.setFullName(user.getFullName());
-					signBusinessMgr.setUserName(user.getUserAccount()
-							.getUserName());
-					signBusinessMgr.setEmail(user.getWorkEmails().get(0));
-					signBusinessMgr.setPositionType(posDetails
-							.getPositionType());
-					signBusinessMgr.setPositionTitle(posDetails
-							.getPositionTitle());
-					signBusinessMgr.setSignature("");
-					signBusinessMgr.setNote("");
-					signBusinessMgr.setPositionTitle("IRB");
-					signBusinessMgr.setDelegated(false);
-					if (!signatures.contains(signBusinessMgr)) {
-						signatures.add(signBusinessMgr);
-					}
-				} else if (posDetails.getPositionTitle().equalsIgnoreCase(
-						"University Research Administrator")) {
-					SignatureUserInfo signAdmin = new SignatureUserInfo();
-					signAdmin.setUserProfileId(user.getId().toString());
-					signAdmin.setFullName(user.getFullName());
-					signAdmin.setUserName(user.getUserAccount().getUserName());
-					signAdmin.setEmail(user.getWorkEmails().get(0));
-					signAdmin.setPositionType(posDetails.getPositionType());
-					signAdmin.setPositionTitle(posDetails.getPositionTitle());
-					signAdmin.setSignature("");
-					signAdmin.setNote("");
-					signAdmin
-							.setPositionTitle("University Research Administrator");
-					signAdmin.setDelegated(false);
-					if (!signatures.contains(signAdmin)) {
-						signatures.add(signAdmin);
-					}
-				} else if (posDetails.getPositionTitle().equalsIgnoreCase(
-						"University Research Director")) {
-					SignatureUserInfo signDirector = new SignatureUserInfo();
-					signDirector.setUserProfileId(user.getId().toString());
-					signDirector.setFullName(user.getFullName());
-					signDirector.setUserName(user.getUserAccount()
-							.getUserName());
-					signDirector.setEmail(user.getWorkEmails().get(0));
-					signDirector.setPositionType(posDetails.getPositionType());
-					signDirector
-							.setPositionTitle(posDetails.getPositionTitle());
-					signDirector.setSignature("");
-					signDirector.setNote("");
-					signDirector
-							.setPositionTitle("University Research Director");
-					signDirector.setDelegated(false);
-					if (!signatures.contains(signDirector)) {
-						signatures.add(signDirector);
-					}
-				}
+		return investigators;
+	}
+
+	/**
+	 * @param id
+	 * @param signatures
+	 * @param user
+	 * @param posDetails
+	 */
+	private void addSignaturesOfDelegatee(ObjectId id,
+			List<SignatureUserInfo> signatures, UserProfile user,
+			PositionDetails posDetails, String adminType) {
+		List<SignatureUserInfo> delegatee = findDelegatedUsersInfoForAUser(
+				user.getId(), id.toString(), posDetails);
+		for (SignatureUserInfo delegateeInfo : delegatee) {
+			if (!signatures.contains(delegateeInfo)) {
+				signatures.add(delegateeInfo);
 			}
 		}
-		return signatures;
 	}
+
+	/**
+	 * @param signatures
+	 * @param user
+	 * @param posDetails
+	 * @param signDeptChair
+	 */
+	private void addSignaturesExceptInvestigator(
+			List<SignatureUserInfo> signatures, UserProfile user,
+			PositionDetails posDetails, String adminType, boolean isDelegated) {
+		SignatureUserInfo signatureInfo = new SignatureUserInfo();
+		signatureInfo.setUserProfileId(user.getId().toString());
+		signatureInfo.setFullName(user.getFullName());
+		signatureInfo.setUserName(user.getUserAccount().getUserName());
+		signatureInfo.setEmail(user.getWorkEmails().get(0));
+		signatureInfo.setCollege(posDetails.getCollege());
+		signatureInfo.setDepartment(posDetails.getDepartment());
+		signatureInfo.setPositionType(posDetails.getPositionType());
+		signatureInfo.setPositionTitle(posDetails.getPositionTitle());
+		signatureInfo.setSignature("");
+		signatureInfo.setNote("");
+		signatureInfo.setPositionTitle(adminType);
+		signatureInfo.setDelegated(isDelegated);
+		if (!signatures.contains(signatureInfo)) {
+			signatures.add(signatureInfo);
+		}
+	}
+
+	// ////////////////////////////////////////////////////////////////////////////////////
 
 	public List<SignatureUserInfo> findUsersExceptInvestigatorForAproposal(
 			ObjectId id, Boolean needPI, Boolean needCoPI, Boolean needSenior,
@@ -2688,13 +2182,10 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 					.equals(signature.getUserProfileId())
 					&& !PI.getUserRef().isDeleted()
 					&& signature.getPositionTitle().equals("PI")) {
-				piSign.setUserProfileId(signature.getUserProfileId());
-				piSign.setFullName(signature.getFullName());
-				piSign.setSignature(signature.getSignature());
-				piSign.setSignedDate(signature.getSignedDate());
-				piSign.setNote(signature.getNote());
-				piSign.setPositionTitle(signature.getPositionTitle());
-				piSign.setDelegated(signature.isDelegated());
+				piSign = getUserSignatureInfo(signature.getUserProfileId(),
+						signature.getFullName(), signature.getSignature(),
+						signature.getSignedDate(), signature.getNote(),
+						signature.getPositionTitle(), signature.isDelegated());
 				boolean piAlreadyExist = false;
 				for (SignatureInfo sign : signatures) {
 					if (sign.getUserProfileId().equalsIgnoreCase(
@@ -2744,13 +2235,12 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 						.equals(signature.getUserProfileId())
 						&& !coPIs.getUserRef().isDeleted()
 						&& signature.getPositionTitle().equals("Co-PI")) {
-					coPISign.setUserProfileId(signature.getUserProfileId());
-					coPISign.setFullName(signature.getFullName());
-					coPISign.setSignature(signature.getSignature());
-					coPISign.setSignedDate(signature.getSignedDate());
-					coPISign.setNote(signature.getNote());
-					coPISign.setPositionTitle(signature.getPositionTitle());
-					coPISign.setDelegated(signature.isDelegated());
+					coPISign = getUserSignatureInfo(
+							signature.getUserProfileId(),
+							signature.getFullName(), signature.getSignature(),
+							signature.getSignedDate(), signature.getNote(),
+							signature.getPositionTitle(),
+							signature.isDelegated());
 					boolean coPIAlreadyExist = false;
 					for (SignatureInfo sign : signatures) {
 						if (sign.getUserProfileId().equalsIgnoreCase(
@@ -2793,70 +2283,6 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 				}
 			}
 		}
-		for (InvestigatorRefAndPosition seniors : proposal
-				.getInvestigatorInfo().getSeniorPersonnel()) {
-			// Adding Seniors
-			SignatureInfo seniorSign = new SignatureInfo();
-			boolean seniorAlreadySigned = false;
-			for (SignatureInfo signature : proposal.getSignatureInfo()) {
-				if (seniors.getUserProfileId().toString()
-						.equals(signature.getUserProfileId())
-						&& !seniors.getUserRef().isDeleted()
-						&& signature.getPositionTitle().equals(
-								"Senior Personnel")) {
-					seniorSign.setUserProfileId(signature.getUserProfileId());
-					seniorSign.setFullName(signature.getFullName());
-					seniorSign.setSignature(signature.getSignature());
-					seniorSign.setSignedDate(signature.getSignedDate());
-					seniorSign.setNote(signature.getNote());
-					seniorSign.setPositionTitle(signature.getPositionTitle());
-					seniorSign.setDelegated(signature.isDelegated());
-					if (!signatures.contains(seniorSign)) {
-						signatures.add(seniorSign);
-					}
-					boolean seniorAlreadyExist = false;
-					for (SignatureInfo sign : signatures) {
-						if (sign.getUserProfileId().equalsIgnoreCase(
-								seniorSign.getUserProfileId())) {
-							seniorAlreadyExist = true;
-							break;
-						}
-					}
-					if (!seniorAlreadyExist) {
-						signatures.add(seniorSign);
-					}
-					seniorAlreadySigned = true;
-				}
-			}
-			if (!seniorAlreadySigned && !seniors.getUserRef().isDeleted()) {
-				seniorSign.setUserProfileId(seniors.getUserProfileId()
-						.toString());
-				seniorSign.setFullName(seniors.getUserRef().getFullName());
-				seniorSign.setSignature("");
-				seniorSign.setNote("");
-				seniorSign.setPositionTitle("Senior Personnel");
-				seniorSign.setDelegated(false);
-				boolean seniorAlreadyExist = false;
-				for (SignatureInfo sign : signatures) {
-					if (sign.getUserProfileId().equalsIgnoreCase(
-							seniorSign.getUserProfileId())) {
-						seniorAlreadyExist = true;
-						break;
-					}
-				}
-				if (!seniorAlreadyExist) {
-					signatures.add(seniorSign);
-				}
-			}
-			if (!seniors.getUserRef().isDeleted()) {
-				investRef = new CollegeDepartmentInfo();
-				investRef.setCollege(seniors.getCollege());
-				investRef.setDepartment(seniors.getDepartment());
-				if (!investigators.contains(investRef)) {
-					investigators.add(investRef);
-				}
-			}
-		}
 		List<String> positions = new ArrayList<String>();
 		positions.add("Department Chair");
 		positions.add("Business Manager");
@@ -2889,19 +2315,14 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 									.equals(signature.getUserProfileId())
 									&& signature.getPositionTitle().equals(
 											"Department Chair")) {
-								signDeptChair.setUserProfileId(signature
-										.getUserProfileId());
-								signDeptChair.setFullName(signature
-										.getFullName());
-								signDeptChair.setSignature(signature
-										.getSignature());
-								signDeptChair.setSignedDate(signature
-										.getSignedDate());
-								signDeptChair.setNote(signature.getNote());
-								signDeptChair.setPositionTitle(signature
-										.getPositionTitle());
-								signDeptChair.setDelegated(signature
-										.isDelegated());
+								signDeptChair = getUserSignatureInfo(
+										signature.getUserProfileId(),
+										signature.getFullName(),
+										signature.getSignature(),
+										signature.getSignedDate(),
+										signature.getNote(),
+										signature.getPositionTitle(),
+										signature.isDelegated());
 								if (!signatures.contains(signDeptChair)) {
 									signatures.add(signDeptChair);
 								}
@@ -2935,19 +2356,14 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 									.equals(signature.getUserProfileId())
 									&& signature.getPositionTitle().equals(
 											"Business Manager")) {
-								signBusinessMgr.setUserProfileId(signature
-										.getUserProfileId());
-								signBusinessMgr.setFullName(signature
-										.getFullName());
-								signBusinessMgr.setSignature(signature
-										.getSignature());
-								signBusinessMgr.setSignedDate(signature
-										.getSignedDate());
-								signBusinessMgr.setNote(signature.getNote());
-								signBusinessMgr.setPositionTitle(signature
-										.getPositionTitle());
-								signBusinessMgr.setDelegated(signature
-										.isDelegated());
+								signBusinessMgr = getUserSignatureInfo(
+										signature.getUserProfileId(),
+										signature.getFullName(),
+										signature.getSignature(),
+										signature.getSignedDate(),
+										signature.getNote(),
+										signature.getPositionTitle(),
+										signature.isDelegated());
 								if (!signatures.contains(signBusinessMgr)) {
 									signatures.add(signBusinessMgr);
 								}
@@ -2982,16 +2398,14 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 									.equals(signature.getUserProfileId())
 									&& signature.getPositionTitle().equals(
 											"Dean")) {
-								signDean.setUserProfileId(signature
-										.getUserProfileId());
-								signDean.setFullName(signature.getFullName());
-								signDean.setSignature(signature.getSignature());
-								signDean.setSignedDate(signature
-										.getSignedDate());
-								signDean.setNote(signature.getNote());
-								signDean.setPositionTitle(signature
-										.getPositionTitle());
-								signDean.setDelegated(signature.isDelegated());
+								signDean = getUserSignatureInfo(
+										signature.getUserProfileId(),
+										signature.getFullName(),
+										signature.getSignature(),
+										signature.getSignedDate(),
+										signature.getNote(),
+										signature.getPositionTitle(),
+										signature.isDelegated());
 								if (!signatures.contains(signDean)) {
 									signatures.add(signDean);
 								}
@@ -3015,7 +2429,7 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 									colDeptInfo.getDepartment())
 							&& posDetails.getPositionTitle().equalsIgnoreCase(
 									"IRB") && irbApprovalRequired) {
-						SignatureInfo signBusinessMgr = new SignatureInfo();
+						SignatureInfo signIRB = new SignatureInfo();
 
 						boolean irbAlreadySigned = false;
 						for (SignatureInfo signature : proposal
@@ -3024,35 +2438,29 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 									.equals(signature.getUserProfileId())
 									&& signature.getPositionTitle().equals(
 											"IRB")) {
-								signBusinessMgr.setUserProfileId(signature
-										.getUserProfileId());
-								signBusinessMgr.setFullName(signature
-										.getFullName());
-								signBusinessMgr.setSignature(signature
-										.getSignature());
-								signBusinessMgr.setSignedDate(signature
-										.getSignedDate());
-								signBusinessMgr.setNote(signature.getNote());
-								signBusinessMgr.setPositionTitle(signature
-										.getPositionTitle());
-								signBusinessMgr.setDelegated(signature
-										.isDelegated());
-								if (!signatures.contains(signBusinessMgr)) {
-									signatures.add(signBusinessMgr);
+								signIRB = getUserSignatureInfo(
+										signature.getUserProfileId(),
+										signature.getFullName(),
+										signature.getSignature(),
+										signature.getSignedDate(),
+										signature.getNote(),
+										signature.getPositionTitle(),
+										signature.isDelegated());
+								if (!signatures.contains(signIRB)) {
+									signatures.add(signIRB);
 								}
 								irbAlreadySigned = true;
 							}
 						}
 						if (!irbAlreadySigned) {
-							signBusinessMgr.setUserProfileId(user.getId()
-									.toString());
-							signBusinessMgr.setFullName(user.getFullName());
-							signBusinessMgr.setSignature("");
-							signBusinessMgr.setNote("");
-							signBusinessMgr.setPositionTitle("IRB");
-							signBusinessMgr.setDelegated(false);
-							if (!signatures.contains(signBusinessMgr)) {
-								signatures.add(signBusinessMgr);
+							signIRB.setUserProfileId(user.getId().toString());
+							signIRB.setFullName(user.getFullName());
+							signIRB.setSignature("");
+							signIRB.setNote("");
+							signIRB.setPositionTitle("IRB");
+							signIRB.setDelegated(false);
+							if (!signatures.contains(signIRB)) {
+								signatures.add(signIRB);
 							}
 						}
 					} else if (posDetails.getCollege().equalsIgnoreCase(
@@ -3217,7 +2625,7 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 		if (projectInfo != null && projectInfo.has("ProjectType")) {
 			ProjectType projectType = new ProjectType();
 			switch (projectInfo.get("ProjectType").textValue()) {
-			case "1":
+			case "1": 
 				projectType.setResearchBasic(true);
 				break;
 			case "2":
