@@ -301,7 +301,7 @@ public class ProposalService {
 				userInfo = new GPMSCommonInfo(commonObj);
 			}
 			proposals = proposalDAO
-					.findAllUserProposals(proposalInfo, userInfo);
+					.findAllUserProposalsForExport(proposalInfo, userInfo);
 			String filename = new String();
 			if (proposals.size() > 0) {
 				filename = proposalDAO.exportToExcelFile(proposals, null);
@@ -695,7 +695,7 @@ public class ProposalService {
 				auditLogInfo = new AuditLogCommonInfo(auditLogBindObj);
 			}
 			ObjectId id = new ObjectId(proposalId);
-			proposalAuditLogs = proposalDAO.findAllUserProposalAuditLogs(id,
+			proposalAuditLogs = proposalDAO.findAllUserProposalAuditLogsForExport(id,
 					auditLogInfo);
 			String filename = new String();
 			if (proposalAuditLogs.size() > 0) {
@@ -801,7 +801,7 @@ public class ProposalService {
 			}
 			ObjectId id = new ObjectId(proposalId);
 			List<SignatureInfo> signatures = proposalDAO
-					.findAllSignatureForAProposal(id, irbApprovalRequired);
+					.getSignaturesOfAProposal(id, irbApprovalRequired);
 			return Response
 					.status(Response.Status.OK)
 					.entity(mapper.writerWithDefaultPrettyPrinter()
