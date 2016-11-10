@@ -190,7 +190,7 @@ public class DelegationDAO extends BasicDAO<Delegation, String> {
 		return delegation;
 	}
 
-	public List<DelegationInfo> findAllUserDelegations(
+	public List<DelegationInfo> findAllUserDelegationsForGrid(
 			DelegationCommonInfo delegationInfo, GPMSCommonInfo userInfo)
 			throws ParseException {
 		Datastore ds = getDatastore();
@@ -261,21 +261,34 @@ public class DelegationDAO extends BasicDAO<Delegation, String> {
 		return ds.createQuery(Delegation.class).field("_id").equal(id).get();
 	}
 
-	public List<AuditLogInfo> findAllForDelegationAuditLogGrid(int offset,
+	/***
+	 * Finds All Logs in a AuditLog Grid for a Delegation
+	 * 
+	 * @param offset
+	 * @param limit
+	 * @param id
+	 * @param auditLogInfo
+	 * @return
+	 * @throws ParseException
+	 */
+	public List<AuditLogInfo> findAllDelegationAuditLogForGrid(int offset,
 			int limit, ObjectId id, AuditLogCommonInfo auditLogInfo)
 			throws ParseException {
-		Datastore ds = getDatastore();
-		Query<Delegation> delegationQuery = ds.createQuery(Delegation.class);
-		Delegation q = delegationQuery.field("_id").equal(id).get();
-		List<AuditLogInfo> allAuditLogs = new ArrayList<AuditLogInfo>();
+		return getAuditListBasedOnPaging(offset, limit,
+				getSortedAuditLogResults(auditLogInfo, id));
+	}
+
+	/***
+	 * Gets Audit Logs list based On User provided Paging size
+	 * 
+	 * @param offset
+	 * @param limit
+	 * @param allAuditLogs
+	 * @return
+	 */
+	private List<AuditLogInfo> getAuditListBasedOnPaging(int offset, int limit,
+			List<AuditLogInfo> allAuditLogs) {
 		int rowTotal = 0;
-		if (q.getAuditLog() != null && q.getAuditLog().size() != 0) {
-			for (AuditLog delegationAudit : q.getAuditLog()) {
-				getDelegationAuditLogInfo(auditLogInfo, allAuditLogs,
-						delegationAudit);
-			}
-		}
-		Collections.sort(allAuditLogs);
 		rowTotal = allAuditLogs.size();
 		if (rowTotal > 0) {
 			for (AuditLogInfo t : allAuditLogs) {
@@ -289,109 +302,151 @@ public class DelegationDAO extends BasicDAO<Delegation, String> {
 		}
 	}
 
-	/**
-	 * Gets Delegation Audit Log Info
+	/***
+	 * Gets Sorted Audit Logs List
 	 * 
-	 * @param action
-	 * @param auditedBy
-	 * @param activityOnFrom
-	 * @param activityOnTo
-	 * @param allAuditLogs
-	 * @param delegationAudit
+	 * @param auditLogInfo
+	 * @param id
+	 * @return
 	 * @throws ParseException
 	 */
-	private void getDelegationAuditLogInfo(AuditLogCommonInfo auditLogInfo,
-			List<AuditLogInfo> allAuditLogs, AuditLog delegationAudit)
-			throws ParseException {
-		AuditLogInfo delegationAuditLog = new AuditLogInfo();
-		String action = auditLogInfo.getAction();
-		String auditedBy = auditLogInfo.getAuditedBy();
-		String activityOnFrom = auditLogInfo.getActivityOnFrom();
-		String activityOnTo = auditLogInfo.getActivityOnTo();
-		boolean isActionMatch = false;
-		boolean isAuditedByMatch = false;
-		boolean isActivityDateFromMatch = false;
-		boolean isActivityDateToMatch = false;
-		if (action != null) {
-			if (delegationAudit.getAction().toLowerCase()
-					.contains(action.toLowerCase())) {
-				isActionMatch = true;
-			}
-		} else {
-			isActionMatch = true;
-		}
-		if (auditedBy != null) {
-			if (delegationAudit.getUserProfile().getUserAccount().getUserName()
-					.toLowerCase().contains(auditedBy.toLowerCase())) {
-				isAuditedByMatch = true;
-			} else if (delegationAudit.getUserProfile().getFirstName()
-					.toLowerCase().contains(auditedBy.toLowerCase())) {
-				isAuditedByMatch = true;
-			} else if (delegationAudit.getUserProfile().getMiddleName()
-					.toLowerCase().contains(auditedBy.toLowerCase())) {
-				isAuditedByMatch = true;
-			} else if (delegationAudit.getUserProfile().getLastName()
-					.toLowerCase().contains(auditedBy.toLowerCase())) {
-				isAuditedByMatch = true;
-			}
-		} else {
-			isAuditedByMatch = true;
-		}
-		if (activityOnFrom != null) {
-			Date activityDateFrom = formatter.parse(activityOnFrom);
-			if (delegationAudit.getActivityDate().compareTo(activityDateFrom) > 0) {
-				isActivityDateFromMatch = true;
-			} else if (delegationAudit.getActivityDate().compareTo(
-					activityDateFrom) < 0) {
-				isActivityDateFromMatch = false;
-			} else if (delegationAudit.getActivityDate().compareTo(
-					activityDateFrom) == 0) {
-				isActivityDateFromMatch = true;
-			}
-		} else {
-			isActivityDateFromMatch = true;
-		}
-		if (activityOnTo != null) {
-			Date activityDateTo = formatter.parse(activityOnTo);
-			if (delegationAudit.getActivityDate().compareTo(activityDateTo) > 0) {
-				isActivityDateToMatch = false;
-			} else if (delegationAudit.getActivityDate().compareTo(
-					activityDateTo) < 0) {
-				isActivityDateToMatch = true;
-			} else if (delegationAudit.getActivityDate().compareTo(
-					activityDateTo) == 0) {
-				isActivityDateToMatch = true;
-			}
-		} else {
-			isActivityDateToMatch = true;
-		}
-		if (isActionMatch && isAuditedByMatch && isActivityDateFromMatch
-				&& isActivityDateToMatch) {
-			delegationAuditLog.setUserName(delegationAudit.getUserProfile()
-					.getUserAccount().getUserName());
-			delegationAuditLog.setUserFullName(delegationAudit.getUserProfile()
-					.getFullName());
-			delegationAuditLog.setAction(delegationAudit.getAction());
-			delegationAuditLog.setActivityDate(delegationAudit
-					.getActivityDate());
-			allAuditLogs.add(delegationAuditLog);
-		}
-	}
-
-	public List<AuditLogInfo> findAllUserDelegationAuditLogs(ObjectId id,
-			AuditLogCommonInfo auditLogInfo) throws ParseException {
+	public List<AuditLogInfo> getSortedAuditLogResults(
+			AuditLogCommonInfo auditLogInfo, ObjectId id) throws ParseException {
 		Datastore ds = getDatastore();
 		Query<Delegation> delegationQuery = ds.createQuery(Delegation.class);
 		Delegation q = delegationQuery.field("_id").equal(id).get();
+
 		List<AuditLogInfo> allAuditLogs = new ArrayList<AuditLogInfo>();
 		if (q.getAuditLog() != null && q.getAuditLog().size() != 0) {
 			for (AuditLog delegationAudit : q.getAuditLog()) {
-				getDelegationAuditLogInfo(auditLogInfo, allAuditLogs,
-						delegationAudit);
+				AuditLogInfo delegationAuditLog = new AuditLogInfo();
+				boolean isActionMatch = isAuditLogActionFieldProvided(
+						auditLogInfo.getAction(), delegationAudit);
+				boolean isAuditedByMatch = isAuditLogAuditedByFieldProvided(
+						auditLogInfo.getAuditedBy(), delegationAudit);
+				boolean isActivityDateFromMatch = isAuditLogActivityDateFromProvided(
+						auditLogInfo.getActivityOnFrom(), delegationAudit);
+				boolean isActivityDateToMatch = isAuditLogActivityDateToProvided(
+						auditLogInfo.getActivityOnTo(), delegationAudit);
+
+				if (isActionMatch && isAuditedByMatch
+						&& isActivityDateFromMatch && isActivityDateToMatch) {
+					delegationAuditLog.setUserName(delegationAudit
+							.getUserProfile().getUserAccount().getUserName());
+					delegationAuditLog.setUserFullName(delegationAudit
+							.getUserProfile().getFullName());
+					delegationAuditLog.setAction(delegationAudit.getAction());
+					delegationAuditLog.setActivityDate(delegationAudit
+							.getActivityDate());
+					allAuditLogs.add(delegationAuditLog);
+				}
 			}
 		}
 		Collections.sort(allAuditLogs);
 		return allAuditLogs;
+	}
+
+	/***
+	 * Is Audit Log Activity Date To Provided
+	 * 
+	 * @param activityOnTo
+	 * @param delegationAudit
+	 * @return
+	 * @throws ParseException
+	 */
+	private boolean isAuditLogActivityDateToProvided(String activityOnTo,
+			AuditLog delegationAudit) throws ParseException {
+		if (activityOnTo != null) {
+			Date activityDateTo = formatter.parse(activityOnTo);
+			if (delegationAudit.getActivityDate().compareTo(activityDateTo) > 0) {
+				return false;
+			} else if (delegationAudit.getActivityDate().compareTo(
+					activityDateTo) < 0) {
+				return true;
+			} else if (delegationAudit.getActivityDate().compareTo(
+					activityDateTo) == 0) {
+				return true;
+			}
+		} else {
+			return true;
+		}
+		return false;
+	}
+
+	/***
+	 * Is Audit Log Activity Date From Provided
+	 * 
+	 * @param activityOnFrom
+	 * @param delegationAudit
+	 * @return
+	 * @throws ParseException
+	 */
+	private boolean isAuditLogActivityDateFromProvided(String activityOnFrom,
+			AuditLog delegationAudit) throws ParseException {
+		if (activityOnFrom != null) {
+			Date activityDateFrom = formatter.parse(activityOnFrom);
+			if (delegationAudit.getActivityDate().compareTo(activityDateFrom) > 0) {
+				return true;
+			} else if (delegationAudit.getActivityDate().compareTo(
+					activityDateFrom) < 0) {
+				return false;
+			} else if (delegationAudit.getActivityDate().compareTo(
+					activityDateFrom) == 0) {
+				return true;
+			}
+		} else {
+			return true;
+		}
+		return false;
+	}
+
+	/***
+	 * Is Audit Log Audited By Provided
+	 * 
+	 * @param auditedBy
+	 * @param delegationAudit
+	 * @return
+	 */
+	private boolean isAuditLogAuditedByFieldProvided(String auditedBy,
+			AuditLog delegationAudit) {
+		if (auditedBy != null) {
+			if (delegationAudit.getUserProfile().getUserAccount().getUserName()
+					.toLowerCase().contains(auditedBy.toLowerCase())) {
+				return true;
+			} else if (delegationAudit.getUserProfile().getFirstName()
+					.toLowerCase().contains(auditedBy.toLowerCase())) {
+				return true;
+			} else if (delegationAudit.getUserProfile().getMiddleName()
+					.toLowerCase().contains(auditedBy.toLowerCase())) {
+				return true;
+			} else if (delegationAudit.getUserProfile().getLastName()
+					.toLowerCase().contains(auditedBy.toLowerCase())) {
+				return true;
+			}
+		} else {
+			return true;
+		}
+		return false;
+	}
+
+	/***
+	 * Is Audit Log Action Provided
+	 * 
+	 * @param action
+	 * @param delegationAudit
+	 * @return
+	 */
+	private boolean isAuditLogActionFieldProvided(String action,
+			AuditLog delegationAudit) {
+		if (action != null) {
+			if (delegationAudit.getAction().toLowerCase()
+					.contains(action.toLowerCase())) {
+				return true;
+			}
+		} else {
+			return true;
+		}
+		return false;
 	}
 
 	public void saveDelegation(Delegation newDelegation,

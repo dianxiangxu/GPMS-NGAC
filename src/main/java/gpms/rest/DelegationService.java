@@ -179,7 +179,7 @@ public class DelegationService {
 				JsonNode commonObj = root.get("gpmsCommonObj");
 				userInfo = new GPMSCommonInfo(commonObj);
 			}
-			delegations = delegationDAO.findAllUserDelegations(delegationInfo,
+			delegations = delegationDAO.findAllUserDelegationsForGrid(delegationInfo,
 					userInfo);
 			String filename = new String();
 			if (delegations.size() > 0) {
@@ -229,7 +229,7 @@ public class DelegationService {
 			}
 			ObjectId id = new ObjectId(delegationId);
 			delegationAuditLogs = delegationDAO
-					.findAllForDelegationAuditLogGrid(offset, limit, id,
+					.findAllDelegationAuditLogForGrid(offset, limit, id,
 							auditLogInfo);
 			return Response
 					.status(Response.Status.OK)
@@ -267,8 +267,8 @@ public class DelegationService {
 				auditLogInfo = new AuditLogCommonInfo(auditLogBindObj);
 			}
 			ObjectId id = new ObjectId(delegationId);
-			delegationAuditLogs = delegationDAO.findAllUserDelegationAuditLogs(
-					id, auditLogInfo);
+			delegationAuditLogs = delegationDAO.getSortedAuditLogResults(
+					auditLogInfo, id);
 			String filename = new String();
 			if (delegationAuditLogs.size() > 0) {
 				filename = delegationDAO.exportToExcelFile(null,

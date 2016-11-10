@@ -179,7 +179,7 @@ public class ProposalService {
 				JsonNode proposalObj = root.get("proposalBindObj");
 				proposalInfo = new ProposalCommonInfo(proposalObj);
 			}
-			proposals = proposalDAO.findAllForProposalGrid(offset, limit,
+			proposals = proposalDAO.findAllProposalsForGrid(offset, limit,
 					proposalInfo);
 			return Response
 					.status(Response.Status.OK)
@@ -404,7 +404,7 @@ public class ProposalService {
 					Proposal existingProposal = proposalDAO
 							.findProposalByProposalID(id);
 					List<SignatureUserInfo> signatures = proposalDAO
-							.findSignaturesExceptInvestigator(id,
+							.findAllUsersToBeNotified(id,
 									existingProposal.isIrbApprovalRequired());
 					ObjectId authorId = new ObjectId(
 							userInfo.getUserProfileID());
@@ -657,7 +657,7 @@ public class ProposalService {
 				auditLogInfo = new AuditLogCommonInfo(auditLogBindObj);
 			}
 			ObjectId id = new ObjectId(proposalId);
-			proposalAuditLogs = proposalDAO.findAllForProposalAuditLogGrid(
+			proposalAuditLogs = proposalDAO.findAllProposalAuditLogForGrid(
 					offset, limit, id, auditLogInfo);
 			return Response
 					.status(Response.Status.OK)
@@ -695,8 +695,8 @@ public class ProposalService {
 				auditLogInfo = new AuditLogCommonInfo(auditLogBindObj);
 			}
 			ObjectId id = new ObjectId(proposalId);
-			proposalAuditLogs = proposalDAO
-					.findAllUserProposalAuditLogsForExport(id, auditLogInfo);
+			proposalAuditLogs = proposalDAO.getSortedAuditLogResults(
+					auditLogInfo, id);
 			String filename = new String();
 			if (proposalAuditLogs.size() > 0) {
 				filename = proposalDAO.exportToExcelFile(null,
@@ -854,7 +854,7 @@ public class ProposalService {
 					Proposal existingProposal = proposalDAO
 							.findProposalByProposalID(id);
 					List<SignatureUserInfo> signatures = proposalDAO
-							.findSignaturesExceptInvestigator(id,
+							.findAllUsersToBeNotified(id,
 									existingProposal.isIrbApprovalRequired());
 					ObjectId authorId = new ObjectId(
 							userInfo.getUserProfileID());
@@ -1201,7 +1201,7 @@ public class ProposalService {
 			Boolean needSenior, Boolean needChair, Boolean needManager,
 			Boolean needDean, Boolean needIrb, Boolean needResearchadmin,
 			Boolean needDirector) {
-		ObjectId id = new ObjectId(proposalID);
+
 		List<SignatureUserInfo> signatures = proposalDAO
 				.findUsersExceptInvestigatorForAproposal(id, needPI, needCoPI,
 						needSenior, needChair, needManager, needDean, needIrb,
@@ -1240,9 +1240,10 @@ public class ProposalService {
 	 * @param id
 	 * @param existingProposal
 	 * @param authorUserName
+	 * @throws ParseException
 	 */
 	public void sendNotification(ObjectId id, Proposal existingProposal,
-			String authorUserName) {
+			String authorUserName) throws ParseException {
 		EmailUtil emailUtil = new EmailUtil();
 		String emailSubject = new String();
 		String emailBody = new String();
@@ -1250,27 +1251,19 @@ public class ProposalService {
 		List<String> emaillist = new ArrayList<String>();
 		emailSubject = "The proposal has been deleted by: " + authorUserName;
 		emailBody = "Hello User,<br/><br/>The proposal has been deleted by Admin.<br/><br/>Thank you, <br/> GPMS Team";
-		piEmail = existingProposal.getInvestigatorInfo().getPi().getUserRef()
-				.getWorkEmails().get(0);
-		for (InvestigatorRefAndPosition copis : existingProposal
-				.getInvestigatorInfo().getCo_pi()) {
-			emaillist.add(copis.getUserRef().getWorkEmails().get(0));
-		}
-		for (InvestigatorRefAndPosition seniors : existingProposal
-				.getInvestigatorInfo().getSeniorPersonnel()) {
-			emaillist.add(seniors.getUserRef().getWorkEmails().get(0));
-		}
 		List<SignatureUserInfo> signatures = proposalDAO
-				.findSignaturesExceptInvestigator(id,
+				.findAllUsersToBeNotified(id,
 						existingProposal.isIrbApprovalRequired());
 		for (SignatureUserInfo signatureInfo : signatures) {
 			emaillist.add(signatureInfo.getEmail());
 		}
 		emailUtil.sendMailMultipleUsersWithoutAuth(piEmail, emaillist,
 				emailSubject, emailBody);
+
 		String projectTitle = existingProposal.getProjectInfo()
 				.getProjectTitle();
 		String notificationMessage = "Deleted by " + authorUserName + ".";
+
 		broadCastNotification(existingProposal.getId().toString(),
 				projectTitle, notificationMessage, "Proposal", true, true,
 				true, true, true, true, true, true, true, true);

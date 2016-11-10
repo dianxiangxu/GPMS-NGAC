@@ -178,7 +178,7 @@ public class UserService {
 				JsonNode userObj = root.get("userBindObj");
 				userInfo = GPMSCommonInfo.getUserBindInfo(userObj);
 			}
-			users = userProfileDAO.findAllForUserGrid(offset, limit, userInfo);
+			users = userProfileDAO.findAllUsersForGrid(offset, limit, userInfo);
 			return Response
 					.status(Response.Status.OK)
 					.entity(mapper.writerWithDefaultPrettyPrinter()
@@ -434,8 +434,8 @@ public class UserService {
 				auditLogInfo = new AuditLogCommonInfo(auditLogBindObj);
 			}
 			ObjectId userId = new ObjectId(profileId);
-			userAuditLogs = userProfileDAO.findAllForUserAuditLogGrid(offset,
-					limit, userId, auditLogInfo);
+			userAuditLogs = userProfileDAO.findAllProposalAuditLogForGrid(
+					offset, limit, userId, auditLogInfo);
 			return Response
 					.status(Response.Status.OK)
 					.entity(mapper.writerWithDefaultPrettyPrinter()

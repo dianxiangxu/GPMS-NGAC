@@ -172,44 +172,42 @@ public class UserProfileDAO extends BasicDAO<UserProfile, String> {
 	 * @return
 	 * @throws UnknownHostException
 	 */
-	public List<UserInfo> findAllForUserGrid(int offset, int limit,
+	public List<UserInfo> findAllUsersForGrid(int offset, int limit,
 			GPMSCommonInfo userInfo) throws UnknownHostException {
-		String userName = userInfo.getUserName();
-		String college = userInfo.getUserCollege();
-		String department = userInfo.getUserDepartment();
-		String positionType = userInfo.getUserPositionType();
-		String positionTitle = userInfo.getUserPositionTitle();
 		Boolean isActive = userInfo.getUserIsActive();
 		Datastore ds = getDatastore();
 		List<UserInfo> users = new ArrayList<UserInfo>();
 		Query<UserProfile> profileQuery = ds.createQuery(UserProfile.class);
 		Query<UserAccount> accountQuery = ds.createQuery(UserAccount.class);
-		if (userName != null) {
-			accountQuery.criteria("username").containsIgnoreCase(userName);
+		if (userInfo.getUserName() != null) {
+			accountQuery.criteria("username").containsIgnoreCase(
+					userInfo.getUserName());
 		}
 		if (isActive != null) {
 			accountQuery.criteria("active").equal(isActive);
 		}
-
 		profileQuery.criteria("user id").in(accountQuery.asKeyList());
 
-		if (college != null) {
-			profileQuery.criteria("details.college").equal(college);
+		if (userInfo.getUserCollege() != null) {
+			profileQuery.criteria("details.college").equal(
+					userInfo.getUserCollege());
 		}
-		if (department != null) {
-			profileQuery.criteria("details.department").equal(department);
+		if (userInfo.getUserDepartment() != null) {
+			profileQuery.criteria("details.department").equal(
+					userInfo.getUserDepartment());
 		}
-		if (positionType != null) {
-			profileQuery.criteria("details.position type").equal(positionType);
+		if (userInfo.getUserPositionType() != null) {
+			profileQuery.criteria("details.position type").equal(
+					userInfo.getUserPositionType());
 		} else {
 			List<String> positionTypes = new ArrayList<String>();
 			positionTypes.add("University administrator");
 			profileQuery.criteria("details.position type").hasNoneOf(
 					positionTypes);
 		}
-		if (positionTitle != null) {
-			profileQuery.criteria("details.position title")
-					.equal(positionTitle);
+		if (userInfo.getUserPositionTitle() != null) {
+			profileQuery.criteria("details.position title").equal(
+					userInfo.getUserPositionTitle());
 		} else {
 			List<String> positionTitles = new ArrayList<String>();
 			positionTitles.add("IRB");
@@ -232,14 +230,13 @@ public class UserProfileDAO extends BasicDAO<UserProfile, String> {
 	public List<UserInfo> findAllForAdminUserGrid(int offset, int limit,
 			GPMSCommonInfo userInfo) {
 		Datastore ds = getDatastore();
-		String userName = userInfo.getUserName();
-		String positionTitle = userInfo.getUserPositionTitle();
 		Boolean isActive = userInfo.getUserIsActive();
 		List<UserInfo> users = new ArrayList<UserInfo>();
 		Query<UserProfile> profileQuery = ds.createQuery(UserProfile.class);
 		Query<UserAccount> accountQuery = ds.createQuery(UserAccount.class);
-		if (userName != null) {
-			accountQuery.criteria("username").containsIgnoreCase(userName);
+		if (userInfo.getUserName() != null) {
+			accountQuery.criteria("username").containsIgnoreCase(
+					userInfo.getUserName());
 		}
 		if (isActive != null) {
 			accountQuery.criteria("active").equal(isActive);
@@ -248,9 +245,9 @@ public class UserProfileDAO extends BasicDAO<UserProfile, String> {
 		List<String> positionTypes = new ArrayList<String>();
 		positionTypes.add("University administrator");
 		profileQuery.criteria("details.position type").in(positionTypes);
-		if (positionTitle != null) {
-			profileQuery.criteria("details.position title")
-					.equal(positionTitle);
+		if (userInfo.getUserPositionTitle() != null) {
+			profileQuery.criteria("details.position title").equal(
+					userInfo.getUserPositionTitle());
 		} else {
 			List<String> positionTitles = new ArrayList<String>();
 			positionTitles.add("IRB");
@@ -434,6 +431,21 @@ public class UserProfileDAO extends BasicDAO<UserProfile, String> {
 		// user.setNoOfCoPIedProposal(countCoPIProposal(userProfile));
 		// user.setNoOfSenioredProposal(countSeniorPersonnel(userProfile));
 		user.setAddedOn(userProfile.getUserAccount().getAddedOn());
+		user.setDeleted(userProfile.getUserAccount().isDeleted());
+		user.setActivated(userProfile.getUserAccount().isActive());
+		user.setAdminUser(userProfile.getUserAccount().isAdmin());
+		return getRecentUserProfileAuditLog(userProfile, user);
+	}
+
+	/**
+	 * Gets the Recent User Profile AuditLog
+	 * 
+	 * @param userProfile
+	 * @param user
+	 * @return
+	 */
+	private UserInfo getRecentUserProfileAuditLog(UserProfile userProfile,
+			UserInfo user) {
 		Date lastAudited = null;
 		String lastAuditedBy = new String();
 		String lastAuditAction = new String();
@@ -448,26 +460,37 @@ public class UserProfileDAO extends BasicDAO<UserProfile, String> {
 		user.setLastAudited(lastAudited);
 		user.setLastAuditedBy(lastAuditedBy);
 		user.setLastAuditAction(lastAuditAction);
-		user.setDeleted(userProfile.getUserAccount().isDeleted());
-		user.setActivated(userProfile.getUserAccount().isActive());
-		user.setAdminUser(userProfile.getUserAccount().isAdmin());
 		return user;
 	}
 
-	public List<AuditLogInfo> findAllForUserAuditLogGrid(int offset, int limit,
-			ObjectId userId, AuditLogCommonInfo auditLogInfo)
-			throws ParseException, UnknownHostException {
-		Datastore ds = getDatastore();
-		Query<UserProfile> profileQuery = ds.createQuery(UserProfile.class);
-		UserProfile q = profileQuery.field("_id").equal(userId).get();
-		List<AuditLogInfo> allAuditLogs = new ArrayList<AuditLogInfo>();
+	/***
+	 * Finds All Logs in a AuditLog Grid for a User
+	 * 
+	 * @param offset
+	 * @param limit
+	 * @param id
+	 * @param auditLogInfo
+	 * @return
+	 * @throws ParseException
+	 */
+	public List<AuditLogInfo> findAllProposalAuditLogForGrid(int offset,
+			int limit, ObjectId id, AuditLogCommonInfo auditLogInfo)
+			throws ParseException {
+		return getAuditListBasedOnPaging(offset, limit,
+				getSortedAuditLogResults(auditLogInfo, id));
+	}
+
+	/***
+	 * Gets Audit Logs list based On User provided Paging size
+	 * 
+	 * @param offset
+	 * @param limit
+	 * @param allAuditLogs
+	 * @return
+	 */
+	private List<AuditLogInfo> getAuditListBasedOnPaging(int offset, int limit,
+			List<AuditLogInfo> allAuditLogs) {
 		int rowTotal = 0;
-		if (q.getAuditLog() != null && q.getAuditLog().size() != 0) {
-			for (AuditLog userProfileAudit : q.getAuditLog()) {
-				getUserAuditLogs(auditLogInfo, allAuditLogs, userProfileAudit);
-			}
-		}
-		Collections.sort(allAuditLogs);
 		rowTotal = allAuditLogs.size();
 		if (rowTotal > 0) {
 			for (AuditLogInfo t : allAuditLogs) {
@@ -481,94 +504,151 @@ public class UserProfileDAO extends BasicDAO<UserProfile, String> {
 		}
 	}
 
-	/**
-	 * Gets User Audit Logs
+	/***
+	 * Gets Sorted Audit Logs List
 	 * 
-	 * @param action
-	 * @param auditedBy
-	 * @param activityOnFrom
-	 * @param activityOnTo
-	 * @param allAuditLogs
-	 * @param userProfileAudit
+	 * @param auditLogInfo
+	 * @param id
+	 * @return
 	 * @throws ParseException
 	 */
-	private void getUserAuditLogs(AuditLogCommonInfo auditLogInfo,
-			List<AuditLogInfo> allAuditLogs, AuditLog userProfileAudit)
-			throws ParseException {
-		AuditLogInfo userAuditLog = new AuditLogInfo();
-		String action = auditLogInfo.getAction();
-		String auditedBy = auditLogInfo.getAuditedBy();
-		String activityOnFrom = auditLogInfo.getActivityOnFrom();
-		String activityOnTo = auditLogInfo.getActivityOnTo();
-		boolean isActionMatch = false;
-		boolean isAuditedByMatch = false;
-		boolean isActivityDateFromMatch = false;
-		boolean isActivityDateToMatch = false;
-		if (action != null) {
-			if (userProfileAudit.getAction().toLowerCase()
-					.contains(action.toLowerCase())) {
-				isActionMatch = true;
+	public List<AuditLogInfo> getSortedAuditLogResults(
+			AuditLogCommonInfo auditLogInfo, ObjectId id) throws ParseException {
+		Datastore ds = getDatastore();
+		Query<UserProfile> profileQuery = ds.createQuery(UserProfile.class);
+		UserProfile q = profileQuery.field("_id").equal(id).get();
+		List<AuditLogInfo> allAuditLogs = new ArrayList<AuditLogInfo>();
+		if (q.getAuditLog() != null && q.getAuditLog().size() != 0) {
+			for (AuditLog userProfileAudit : q.getAuditLog()) {
+				AuditLogInfo proposalAuditLog = new AuditLogInfo();
+				boolean isActionMatch = isAuditLogActionFieldProvided(
+						auditLogInfo.getAction(), userProfileAudit);
+				boolean isAuditedByMatch = isAuditLogAuditedByFieldProvided(
+						auditLogInfo.getAuditedBy(), userProfileAudit);
+				boolean isActivityDateFromMatch = isAuditLogActivityDateFromProvided(
+						auditLogInfo.getActivityOnFrom(), userProfileAudit);
+				boolean isActivityDateToMatch = isAuditLogActivityDateToProvided(
+						auditLogInfo.getActivityOnTo(), userProfileAudit);
+
+				if (isActionMatch && isAuditedByMatch
+						&& isActivityDateFromMatch && isActivityDateToMatch) {
+					proposalAuditLog.setUserName(userProfileAudit
+							.getUserProfile().getUserAccount().getUserName());
+					proposalAuditLog.setUserFullName(userProfileAudit
+							.getUserProfile().getFullName());
+					proposalAuditLog.setAction(userProfileAudit.getAction());
+					proposalAuditLog.setActivityDate(userProfileAudit
+							.getActivityDate());
+					allAuditLogs.add(proposalAuditLog);
+				}
+			}
+		}
+		Collections.sort(allAuditLogs);
+		return allAuditLogs;
+	}
+
+	/***
+	 * Is Audit Log Activity Date To Provided
+	 * 
+	 * @param activityOnTo
+	 * @param userProfileAudit
+	 * @return
+	 * @throws ParseException
+	 */
+	private boolean isAuditLogActivityDateToProvided(String activityOnTo,
+			AuditLog userProfileAudit) throws ParseException {
+		if (activityOnTo != null) {
+			Date activityDateTo = formatter.parse(activityOnTo);
+			if (userProfileAudit.getActivityDate().compareTo(activityDateTo) > 0) {
+				return false;
+			} else if (userProfileAudit.getActivityDate().compareTo(
+					activityDateTo) < 0) {
+				return true;
+			} else if (userProfileAudit.getActivityDate().compareTo(
+					activityDateTo) == 0) {
+				return true;
 			}
 		} else {
-			isActionMatch = true;
+			return true;
 		}
+		return false;
+	}
+
+	/***
+	 * Is Audit Log Activity Date From Provided
+	 * 
+	 * @param activityOnFrom
+	 * @param userProfileAudit
+	 * @return
+	 * @throws ParseException
+	 */
+	private boolean isAuditLogActivityDateFromProvided(String activityOnFrom,
+			AuditLog userProfileAudit) throws ParseException {
+		if (activityOnFrom != null) {
+			Date activityDateFrom = formatter.parse(activityOnFrom);
+			if (userProfileAudit.getActivityDate().compareTo(activityDateFrom) > 0) {
+				return true;
+			} else if (userProfileAudit.getActivityDate().compareTo(
+					activityDateFrom) < 0) {
+				return false;
+			} else if (userProfileAudit.getActivityDate().compareTo(
+					activityDateFrom) == 0) {
+				return true;
+			}
+		} else {
+			return true;
+		}
+		return false;
+	}
+
+	/***
+	 * Is Audit Log Audited By Provided
+	 * 
+	 * @param auditedBy
+	 * @param userProfileAudit
+	 * @return
+	 */
+	private boolean isAuditLogAuditedByFieldProvided(String auditedBy,
+			AuditLog userProfileAudit) {
 		if (auditedBy != null) {
 			if (userProfileAudit.getUserProfile().getUserAccount()
 					.getUserName().toLowerCase()
 					.contains(auditedBy.toLowerCase())) {
-				isAuditedByMatch = true;
+				return true;
 			} else if (userProfileAudit.getUserProfile().getFirstName()
 					.toLowerCase().contains(auditedBy.toLowerCase())) {
-				isAuditedByMatch = true;
+				return true;
 			} else if (userProfileAudit.getUserProfile().getMiddleName()
 					.toLowerCase().contains(auditedBy.toLowerCase())) {
-				isAuditedByMatch = true;
+				return true;
 			} else if (userProfileAudit.getUserProfile().getLastName()
 					.toLowerCase().contains(auditedBy.toLowerCase())) {
-				isAuditedByMatch = true;
+				return true;
 			}
 		} else {
-			isAuditedByMatch = true;
+			return true;
 		}
-		DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-		if (activityOnFrom != null) {
-			Date activityDateFrom = formatter.parse(activityOnFrom);
-			if (userProfileAudit.getActivityDate().compareTo(activityDateFrom) > 0) {
-				isActivityDateFromMatch = true;
-			} else if (userProfileAudit.getActivityDate().compareTo(
-					activityDateFrom) < 0) {
-				isActivityDateFromMatch = false;
-			} else if (userProfileAudit.getActivityDate().compareTo(
-					activityDateFrom) == 0) {
-				isActivityDateFromMatch = true;
+		return false;
+	}
+
+	/***
+	 * Is Audit Log Action Provided
+	 * 
+	 * @param action
+	 * @param userProfileAudit
+	 * @return
+	 */
+	private boolean isAuditLogActionFieldProvided(String action,
+			AuditLog userProfileAudit) {
+		if (action != null) {
+			if (userProfileAudit.getAction().toLowerCase()
+					.contains(action.toLowerCase())) {
+				return true;
 			}
 		} else {
-			isActivityDateFromMatch = true;
+			return true;
 		}
-		if (activityOnTo != null) {
-			Date activityDateTo = formatter.parse(activityOnTo);
-			if (userProfileAudit.getActivityDate().compareTo(activityDateTo) > 0) {
-				isActivityDateToMatch = false;
-			} else if (userProfileAudit.getActivityDate().compareTo(
-					activityDateTo) < 0) {
-				isActivityDateToMatch = true;
-			} else if (userProfileAudit.getActivityDate().compareTo(
-					activityDateTo) == 0) {
-				isActivityDateToMatch = true;
-			}
-		} else {
-			isActivityDateToMatch = true;
-		}
-		if (isActionMatch && isAuditedByMatch && isActivityDateFromMatch
-				&& isActivityDateToMatch) {
-			userAuditLog.setUserName(userProfileAudit.getUserProfile()
-					.getUserAccount().getUserName());
-			userAuditLog.setUserFullName(userProfileAudit.getUserProfile()
-					.getFullName());
-			userAuditLog.setAction(userProfileAudit.getAction());
-			userAuditLog.setActivityDate(userProfileAudit.getActivityDate());
-			allAuditLogs.add(userAuditLog);
-		}
+		return false;
 	}
 
 	@SuppressWarnings("unused")
