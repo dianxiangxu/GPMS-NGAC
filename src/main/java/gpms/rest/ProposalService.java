@@ -1028,7 +1028,6 @@ public class ProposalService {
 			ObjectId authorId = new ObjectId(userInfo.getUserProfileID());
 			UserProfile authorProfile = userProfileDAO
 					.findUserDetailsByProfileID(authorId);
-			String authorFullName = authorProfile.getFullName();
 			String proposalId = new String();
 			Proposal existingProposal = new Proposal();
 			Proposal oldProposal = new Proposal();
@@ -1061,13 +1060,12 @@ public class ProposalService {
 						HashMap<String, Multimap<String, String>> attrMap = proposalDAO
 								.generateAttributes(policyInfo);
 						List<SignatureUserInfo> signatures = new ArrayList<SignatureUserInfo>();
-						RequiredSignaturesInfo signByAllUsersInfo = new RequiredSignaturesInfo();
+						RequiredSignaturesInfo requiredSignatures = new RequiredSignaturesInfo();
 						signatures = proposalDAO
 								.generateProposalContentProfile(authorProfile,
-										authorFullName, proposalId,
-										existingProposal, signedByCurrentUser,
-										contentProfile, irbApprovalRequired,
-										signByAllUsersInfo);
+										proposalId, existingProposal,
+										signedByCurrentUser, contentProfile,
+										irbApprovalRequired, requiredSignatures);
 						Set<AbstractResult> set = ac
 								.getXACMLdecisionWithObligations(attrMap,
 										contentProfile);
@@ -1094,7 +1092,7 @@ public class ProposalService {
 										proposalId, existingProposal,
 										oldProposal, authorProfile, false,
 										signatures, irbApprovalRequired,
-										signByAllUsersInfo, emailDetails);
+										requiredSignatures, emailDetails);
 							} else {
 								return Response
 										.status(403)
@@ -1918,7 +1916,7 @@ public class ProposalService {
 	 * @param isAdminUser
 	 * @param signatures
 	 * @param irbApprovalRequired
-	 * @param signByAllUsersInfo
+	 * @param requiredSignatures
 	 * @param emailDetails
 	 * @return
 	 * @throws JsonProcessingException
@@ -1927,7 +1925,7 @@ public class ProposalService {
 			String proposalId, Proposal existingProposal, Proposal oldProposal,
 			UserProfile authorProfile, boolean isAdminUser,
 			List<SignatureUserInfo> signatures, Boolean irbApprovalRequired,
-			RequiredSignaturesInfo signByAllUsersInfo,
+			RequiredSignaturesInfo requiredSignatures,
 			EmailCommonInfo emailDetails) throws JsonProcessingException {
 		ObjectMapper mapper = new ObjectMapper();
 		String emailSubject = emailDetails.getEmailSubject();
@@ -1944,7 +1942,7 @@ public class ProposalService {
 			} else {
 				proposalIsChanged = saveProposal(message, existingProposal,
 						oldProposal, authorProfile, isAdminUser, proposalId,
-						signatures, irbApprovalRequired, signByAllUsersInfo);
+						signatures, irbApprovalRequired, requiredSignatures);
 			}
 		} catch (Exception e) {
 			return Response.status(403).type(MediaType.APPLICATION_JSON)
@@ -1974,7 +1972,7 @@ public class ProposalService {
 			Proposal oldProposal, UserProfile authorProfile,
 			boolean isAdminUser, String proposalID,
 			List<SignatureUserInfo> signatures, boolean irbApprovalRequired,
-			RequiredSignaturesInfo signByAllUsersInfo)
+			RequiredSignaturesInfo requiredSignatures)
 			throws UnknownHostException, Exception, ParseException,
 			IOException, JsonParseException, JsonMappingException {
 		String authorUserName = authorProfile.getFullName();
@@ -2018,7 +2016,7 @@ public class ProposalService {
 				proposalIsChanged = notifyUsersProposalStatusUpdate(
 						existingProposal, oldProposal, authorProfile,
 						proposalID, signatures, irbApprovalRequired,
-						signByAllUsersInfo, authorUserName, root,
+						requiredSignatures, authorUserName, root,
 						proposalUserTitle);
 			} else {
 				proposalIsChanged = notifyUsersProposalStatusUpdate(

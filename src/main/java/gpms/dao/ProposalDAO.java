@@ -3770,15 +3770,15 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * 
 	 * @param existingProposal
 	 * @param proposalID
-	 * @param signByAllUsersInfo
-	 * @param signByAllUsersInfo
+	 * @param requiredSignatures
+	 * @param requiredSignatures
 	 * @param authorUserName
 	 * @param notificationMessage
 	 * @param currentProposalRoles
 	 * @return
 	 */
 	public String updateForProposalSave(Proposal existingProposal,
-			String proposalID, RequiredSignaturesInfo signByAllUsersInfo,
+			String proposalID, RequiredSignaturesInfo requiredSignatures,
 			String authorUserName, String notificationMessage,
 			List<String> currentProposalRoles) {
 		// Change status to ready to submitted by PI
@@ -3795,8 +3795,8 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 					.contains("Co-PI") && !existingProposal
 					.isReadyForSubmissionByPI()))
 					&& existingProposal.getSubmittedByPI() == SubmitType.NOTSUBMITTED) {
-				if (signByAllUsersInfo.isSignedByPI()
-						&& signByAllUsersInfo.isSignedByAllCoPIs()) {
+				if (requiredSignatures.isSignedByPI()
+						&& requiredSignatures.isSignedByAllCoPIs()) {
 					existingProposal.setReadyForSubmissionByPI(true);
 					existingProposal.getProposalStatus().clear();
 					existingProposal.getProposalStatus().add(
@@ -4488,15 +4488,14 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param signatures
 	 * @return
 	 */
-	public RequiredSignaturesInfo generateContentProfileForAllUsers(
-			Proposal existingProposal, StringBuffer contentProfile,
-			List<SignatureUserInfo> signatures) {
-		RequiredSignaturesInfo requiredSigns = new RequiredSignaturesInfo();
+	public void generateContentProfileForAllUsers(Proposal existingProposal,
+			StringBuffer contentProfile, List<SignatureUserInfo> signatures,
+			RequiredSignaturesInfo requiredSignatures) {
 		if (!existingProposal.getInvestigatorInfo().getPi().getUserRef()
 				.isDeleted()) {
 			generatePIContentProfile(contentProfile, existingProposal
 					.getInvestigatorInfo().getPi());
-			requiredSigns.getRequiredPISign().add(
+			requiredSignatures.getRequiredPISign().add(
 					existingProposal.getInvestigatorInfo().getPi()
 							.getUserProfileId());
 		}
@@ -4504,7 +4503,7 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 				.getInvestigatorInfo().getCo_pi()) {
 			if (!copis.getUserRef().isDeleted()) {
 				generateCoPIContentProfile(contentProfile, copis);
-				requiredSigns.getRequiredCoPISigns().add(
+				requiredSignatures.getRequiredCoPISigns().add(
 						copis.getUserProfileId());
 			}
 		}
@@ -4518,40 +4517,39 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 			switch (signatureInfo.getPositionTitle()) {
 			case "Department Chair":
 				generateChairContentProfile(contentProfile, signatureInfo);
-				requiredSigns.getRequiredChairSigns().add(
+				requiredSignatures.getRequiredChairSigns().add(
 						signatureInfo.getUserProfileId());
 				break;
 			case "Business Manager":
 				generateManagerContentProfile(contentProfile, signatureInfo);
-				requiredSigns.getRequiredBusinessManagerSigns().add(
+				requiredSignatures.getRequiredBusinessManagerSigns().add(
 						signatureInfo.getUserProfileId());
 				break;
 			case "Dean":
 				generateDeanContentProfile(contentProfile, signatureInfo);
-				requiredSigns.getRequiredDeanSigns().add(
+				requiredSignatures.getRequiredDeanSigns().add(
 						signatureInfo.getUserProfileId());
 				break;
 			case "IRB":
 				generateIRBContentProfile(contentProfile, signatureInfo);
-				requiredSigns.getRequiredIRBSigns().add(
+				requiredSignatures.getRequiredIRBSigns().add(
 						signatureInfo.getUserProfileId());
 				break;
 			case "University Research Administrator":
 				generateResearchAdminContentProfile(contentProfile,
 						signatureInfo);
-				requiredSigns.getRequiredResearchAdminSigns().add(
+				requiredSignatures.getRequiredResearchAdminSigns().add(
 						signatureInfo.getUserProfileId());
 				break;
 			case "University Research Director":
 				generateDirectorContentProfile(contentProfile, signatureInfo);
-				requiredSigns.getRequiredResearchDirectorSigns().add(
+				requiredSignatures.getRequiredResearchDirectorSigns().add(
 						signatureInfo.getUserProfileId());
 				break;
 			default:
 				break;
 			}
 		}
-		return requiredSigns;
 	}
 
 	/***
@@ -4566,10 +4564,11 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param signatures
 	 * @param signByAllUsersInfo
 	 */
-	public RequiredSignaturesInfo generateUsersInProposalContentProfile(
+	public void generateUsersInProposalContentProfile(
 			UserProfile authorProfile, String proposalId,
 			Proposal existingProposal, boolean signedByCurrentUser,
-			StringBuffer contentProfile, List<SignatureUserInfo> signatures) {
+			StringBuffer contentProfile, List<SignatureUserInfo> signatures,
+			RequiredSignaturesInfo requiredSignatures) {
 		contentProfile.append("<Content>");
 		contentProfile.append("<ak:record xmlns:ak=\"http://akpower.org\">");
 		genearteProposalInfoContentProfile(proposalId, existingProposal,
@@ -4580,8 +4579,8 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 		contentProfile.append(dateFormat.format(new Date()));
 		contentProfile.append("</ak:currentdatetime>");
 
-		RequiredSignaturesInfo requiredSignatures = generateContentProfileForAllUsers(
-				existingProposal, contentProfile, signatures);
+		generateContentProfileForAllUsers(existingProposal, contentProfile,
+				signatures, requiredSignatures);
 
 		getExistingSignaturesForProposal(contentProfile, existingProposal,
 				requiredSignatures, signedByCurrentUser);
@@ -4590,7 +4589,6 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 		contentProfile.append("</ak:proposal>");
 		contentProfile.append("</ak:record>");
 		contentProfile.append("</Content>");
-		return requiredSignatures;
 	}
 
 	/***
@@ -4608,18 +4606,18 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @return
 	 */
 	public List<SignatureUserInfo> generateProposalContentProfile(
-			UserProfile authorProfile, String proposalId, String proposalId2,
+			UserProfile authorProfile, String proposalId,
 			Proposal existingProposal, boolean signedByCurrentUser,
 			StringBuffer contentProfile, Boolean irbApprovalRequired,
-			RequiredSignaturesInfo signByAllUsersInfo) {
+			RequiredSignaturesInfo requiredSignatures) {
 		List<SignatureUserInfo> signatures = new ArrayList<SignatureUserInfo>();
 		if (!proposalId.equals("0")) {
 			ObjectId id = new ObjectId(proposalId);
 			signatures = findSignaturesExceptInvestigator(id,
 					irbApprovalRequired);
-			signByAllUsersInfo = generateUsersInProposalContentProfile(
-					authorProfile, proposalId, existingProposal,
-					signedByCurrentUser, contentProfile, signatures);
+			generateUsersInProposalContentProfile(authorProfile, proposalId,
+					existingProposal, signedByCurrentUser, contentProfile,
+					signatures, requiredSignatures);
 		} else {
 			generateDefaultProposalContentProfile(authorProfile, proposalId,
 					existingProposal, signedByCurrentUser, contentProfile);
