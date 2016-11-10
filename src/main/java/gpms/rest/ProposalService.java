@@ -20,7 +20,7 @@ import gpms.model.Proposal;
 import gpms.model.ProposalCommonInfo;
 import gpms.model.ProposalInfo;
 import gpms.model.ProposalStatusInfo;
-import gpms.model.SignatureByAllUsers;
+import gpms.model.RequiredSignaturesInfo;
 import gpms.model.SignatureInfo;
 import gpms.model.SignatureUserInfo;
 import gpms.model.Status;
@@ -300,8 +300,8 @@ public class ProposalService {
 				JsonNode commonObj = root.get("gpmsCommonObj");
 				userInfo = new GPMSCommonInfo(commonObj);
 			}
-			proposals = proposalDAO
-					.findAllUserProposalsForExport(proposalInfo, userInfo);
+			proposals = proposalDAO.findAllUserProposalsForExport(proposalInfo,
+					userInfo);
 			String filename = new String();
 			if (proposals.size() > 0) {
 				filename = proposalDAO.exportToExcelFile(proposals, null);
@@ -695,8 +695,8 @@ public class ProposalService {
 				auditLogInfo = new AuditLogCommonInfo(auditLogBindObj);
 			}
 			ObjectId id = new ObjectId(proposalId);
-			proposalAuditLogs = proposalDAO.findAllUserProposalAuditLogsForExport(id,
-					auditLogInfo);
+			proposalAuditLogs = proposalDAO
+					.findAllUserProposalAuditLogsForExport(id, auditLogInfo);
 			String filename = new String();
 			if (proposalAuditLogs.size() > 0) {
 				filename = proposalDAO.exportToExcelFile(null,
@@ -987,6 +987,7 @@ public class ProposalService {
 						.saveProposalWithoutObligations(message, proposalId,
 								existingProposal, oldProposal, authorProfile,
 								irbApprovalRequired);
+
 				return sendSaveUpdateNotification(message, proposalId,
 						existingProposal, oldProposal, authorProfile, true,
 						null, irbApprovalRequired, null, emailDetails);
@@ -1031,7 +1032,6 @@ public class ProposalService {
 			String proposalId = new String();
 			Proposal existingProposal = new Proposal();
 			Proposal oldProposal = new Proposal();
-			boolean signedByCurrentUser = false;
 			StringBuffer contentProfile = new StringBuffer();
 			BalanaConnector ac = new BalanaConnector();
 			if (root != null && root.has("proposalInfo")) {
@@ -1052,9 +1052,8 @@ public class ProposalService {
 						oldProposal, proposalInfo);
 				Boolean irbApprovalRequired = proposalDAO.getComplianceDetails(
 						proposalId, existingProposal, proposalInfo);
-				signedByCurrentUser = proposalDAO.getSignatureDetails(userInfo,
-						proposalId, existingProposal, signedByCurrentUser,
-						proposalInfo);
+				boolean signedByCurrentUser = proposalDAO.getSignatureDetails(
+						userInfo, proposalId, existingProposal, proposalInfo);
 				if (root != null && root.has("policyInfo")) {
 					JsonNode policyInfo = root.get("policyInfo");
 					if (policyInfo != null && policyInfo.isArray()
@@ -1062,13 +1061,13 @@ public class ProposalService {
 						HashMap<String, Multimap<String, String>> attrMap = proposalDAO
 								.generateAttributes(policyInfo);
 						List<SignatureUserInfo> signatures = new ArrayList<SignatureUserInfo>();
-						SignatureByAllUsers signByAllUsersInfo = new SignatureByAllUsers();
+						RequiredSignaturesInfo signByAllUsersInfo = new RequiredSignaturesInfo();
 						signatures = proposalDAO
 								.generateProposalContentProfile(authorProfile,
 										authorFullName, proposalId,
 										existingProposal, signedByCurrentUser,
 										contentProfile, irbApprovalRequired,
-										signatures, signByAllUsersInfo);
+										signByAllUsersInfo);
 						Set<AbstractResult> set = ac
 								.getXACMLdecisionWithObligations(attrMap,
 										contentProfile);
@@ -1363,7 +1362,7 @@ public class ProposalService {
 	public boolean notifyUsersProposalStatusUpdate(Proposal existingProposal,
 			Proposal oldProposal, UserProfile authorProfile, String proposalID,
 			List<SignatureUserInfo> signatures, boolean irbApprovalRequired,
-			SignatureByAllUsers signByAllUsersInfo, String authorUserName,
+			RequiredSignaturesInfo signByAllUsersInfo, String authorUserName,
 			JsonNode root, JsonNode proposalUserTitle) {
 		String notificationMessage = new String();
 		boolean isCritical = false;
@@ -1840,7 +1839,7 @@ public class ProposalService {
 	public String updateForProposalApprove(Proposal existingProposal,
 			String proposalID, List<SignatureUserInfo> signatures,
 			boolean irbApprovalRequired,
-			SignatureByAllUsers signByAllUsersInfo, String authorUserName,
+			RequiredSignaturesInfo signByAllUsersInfo, String authorUserName,
 			JsonNode proposalUserTitle, String notificationMessage,
 			List<String> currentProposalRoles) {
 		if (!proposalID.equals("0") && currentProposalRoles != null) {
@@ -1928,8 +1927,8 @@ public class ProposalService {
 			String proposalId, Proposal existingProposal, Proposal oldProposal,
 			UserProfile authorProfile, boolean isAdminUser,
 			List<SignatureUserInfo> signatures, Boolean irbApprovalRequired,
-			SignatureByAllUsers signByAllUsersInfo, EmailCommonInfo emailDetails)
-			throws JsonProcessingException {
+			RequiredSignaturesInfo signByAllUsersInfo,
+			EmailCommonInfo emailDetails) throws JsonProcessingException {
 		ObjectMapper mapper = new ObjectMapper();
 		String emailSubject = emailDetails.getEmailSubject();
 		String emailBody = emailDetails.getEmailBody();
@@ -1975,7 +1974,7 @@ public class ProposalService {
 			Proposal oldProposal, UserProfile authorProfile,
 			boolean isAdminUser, String proposalID,
 			List<SignatureUserInfo> signatures, boolean irbApprovalRequired,
-			SignatureByAllUsers signByAllUsersInfo)
+			RequiredSignaturesInfo signByAllUsersInfo)
 			throws UnknownHostException, Exception, ParseException,
 			IOException, JsonParseException, JsonMappingException {
 		String authorUserName = authorProfile.getFullName();
@@ -2084,7 +2083,7 @@ public class ProposalService {
 	 */
 	public String updateForProposalSubmit(Proposal existingProposal,
 			String proposalID, List<SignatureUserInfo> signatures,
-			SignatureByAllUsers signByAllUsersInfo, String authorUserName,
+			RequiredSignaturesInfo signByAllUsersInfo, String authorUserName,
 			JsonNode proposalUserTitle, List<String> currentProposalRoles) {
 		String notificationMessage;
 		if (!proposalID.equals("0") && currentProposalRoles != null) {

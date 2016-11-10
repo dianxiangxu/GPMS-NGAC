@@ -34,7 +34,7 @@ import gpms.model.Proposal;
 import gpms.model.ProposalCommonInfo;
 import gpms.model.ProposalInfo;
 import gpms.model.Recovery;
-import gpms.model.SignatureByAllUsers;
+import gpms.model.RequiredSignaturesInfo;
 import gpms.model.SignatureInfo;
 import gpms.model.SignatureUserInfo;
 import gpms.model.SponsorAndBudgetInfo;
@@ -1283,7 +1283,7 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 						"University Research Director")) {
 					addAdminSignaturesWithoutDelegation(signatures,
 							proposalSignatures, user,
-							"University Research Administrator");
+							"University Research Director");
 				}
 			}
 		}
@@ -1488,7 +1488,6 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 			String investigatorType) {
 		boolean isAlreadySigned = false;
 		boolean isAlreadyExist = false;
-
 		SignatureInfo signatureInfo = new SignatureInfo();
 		for (SignatureInfo signature : proposalSignatures) {
 			if (investigatorRefPosition.getUserProfileId().equals(
@@ -1500,7 +1499,6 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 						signature.getSignature(), signature.getSignedDate(),
 						signature.getNote(), signature.getPositionTitle(),
 						signature.isDelegated());
-
 				for (SignatureInfo sign : signatures) {
 					if (sign.getUserProfileId().equalsIgnoreCase(
 							signatureInfo.getUserProfileId())) {
@@ -1516,7 +1514,6 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 		}
 		if (!isAlreadySigned
 				&& !investigatorRefPosition.getUserRef().isDeleted()) {
-
 			for (SignatureInfo sign : signatures) {
 				if (sign.getUserProfileId().equalsIgnoreCase(
 						signatureInfo.getUserProfileId())) {
@@ -2625,7 +2622,7 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 		if (projectInfo != null && projectInfo.has("ProjectType")) {
 			ProjectType projectType = new ProjectType();
 			switch (projectInfo.get("ProjectType").textValue()) {
-			case "1": 
+			case "1":
 				projectType.setResearchBasic(true);
 				break;
 			case "2":
@@ -3768,9 +3765,12 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 		}
 	}
 
-	/**
+	/***
+	 * Updates Proposal
+	 * 
 	 * @param existingProposal
 	 * @param proposalID
+	 * @param signByAllUsersInfo
 	 * @param signByAllUsersInfo
 	 * @param authorUserName
 	 * @param notificationMessage
@@ -3778,7 +3778,7 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @return
 	 */
 	public String updateForProposalSave(Proposal existingProposal,
-			String proposalID, SignatureByAllUsers signByAllUsersInfo,
+			String proposalID, RequiredSignaturesInfo signByAllUsersInfo,
 			String authorUserName, String notificationMessage,
 			List<String> currentProposalRoles) {
 		// Change status to ready to submitted by PI
@@ -3795,22 +3795,18 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 					.contains("Co-PI") && !existingProposal
 					.isReadyForSubmissionByPI()))
 					&& existingProposal.getSubmittedByPI() == SubmitType.NOTSUBMITTED) {
-
 				if (signByAllUsersInfo.isSignedByPI()
 						&& signByAllUsersInfo.isSignedByAllCoPIs()) {
 					existingProposal.setReadyForSubmissionByPI(true);
-
 					existingProposal.getProposalStatus().clear();
 					existingProposal.getProposalStatus().add(
 							Status.READYFORSUBMITBYPI);
 				} else {
 					existingProposal.setReadyForSubmissionByPI(false);
-
 					existingProposal.getProposalStatus().clear();
 					existingProposal.getProposalStatus().add(
 							Status.NOTSUBMITTEDBYPI);
 				}
-
 				notificationMessage = "Updated by " + authorUserName + ".";
 			}
 		}
@@ -4045,8 +4041,7 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @throws ParseException
 	 */
 	public boolean getSignatureDetails(GPMSCommonInfo userInfo,
-			String proposalId, Proposal existingProposal,
-			boolean signedByCurrentUser, JsonNode proposalInfo)
+			String proposalId, Proposal existingProposal, JsonNode proposalInfo)
 			throws ParseException {
 		if (proposalInfo != null && proposalInfo.has("SignatureInfo")) {
 			String[] rows = proposalInfo.get("SignatureInfo").textValue()
@@ -4120,12 +4115,11 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 			for (SignatureInfo sign : existingProposal.getSignatureInfo()) {
 				if (sign.getUserProfileId().equals(userInfo.getUserProfileID())
 						&& !sign.getSignature().trim().equals("")) {
-					signedByCurrentUser = true;
-					break;
+					return true;
 				}
 			}
 		}
-		return signedByCurrentUser;
+		return false;
 	}
 
 	/**
@@ -4368,73 +4362,69 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param existingResearchDirectorSigns
 	 */
 	public void checkForSignedByAllUsers(StringBuffer contentProfile,
-			List<String> requiredPISign, List<String> requiredCoPISigns,
-			List<String> requiredChairSigns,
-			List<String> requiredBusinessManagerSigns,
-			List<String> requiredDeanSigns, List<String> requiredIRBSigns,
-			List<String> requiredResearchAdminSigns,
-			List<String> requiredResearchDirectorSigns,
-			boolean signedByCurrentUser,
-			SignatureByAllUsers signByAllUsersInfo,
-			List<String> existingPISign, List<String> existingCoPISigns,
-			List<String> existingChairSigns,
-			List<String> existingBusinessManagerSigns,
-			List<String> existingDeanSigns, List<String> existingIRBSigns,
-			List<String> existingResearchAdminSigns,
-			List<String> existingResearchDirectorSigns) {
-		boolean signedByPI = false;
-		boolean signedByAllCoPIs = false;
-		boolean signedByAllChairs = false;
-		boolean signedByAllBusinessManagers = false;
-		boolean signedByAllDeans = false;
-		boolean signedByAllIRBs = false;
-		boolean signedByAllResearchAdmins = false;
-		boolean signedByAllResearchDirectors = false;
-		signedByPI = existingPISign.containsAll(requiredPISign);
-		signedByAllCoPIs = existingCoPISigns.containsAll(requiredCoPISigns);
-		signedByAllChairs = existingChairSigns.containsAll(requiredChairSigns);
-		signedByAllBusinessManagers = existingBusinessManagerSigns
-				.containsAll(requiredBusinessManagerSigns);
-		signedByAllDeans = existingDeanSigns.containsAll(requiredDeanSigns);
-		signedByAllIRBs = existingIRBSigns.containsAll(requiredIRBSigns);
-		signedByAllResearchAdmins = existingResearchAdminSigns
-				.containsAll(requiredResearchAdminSigns);
-		signedByAllResearchDirectors = existingResearchDirectorSigns
-				.containsAll(requiredResearchDirectorSigns);
+			RequiredSignaturesInfo requiredSigns, boolean signedByCurrentUser) {
+		boolean signedByPI = requiredSigns.getExistingPISign().containsAll(
+				requiredSigns.getRequiredPISign());
+		requiredSigns.setSignedByPI(signedByPI);
+		boolean signedByAllCoPIs = requiredSigns.getExistingCoPISigns()
+				.containsAll(requiredSigns.getRequiredCoPISigns());
+		requiredSigns.setSignedByAllCoPIs(signedByAllCoPIs);
+		boolean signedByAllChairs = requiredSigns.getExistingChairSigns()
+				.containsAll(requiredSigns.getRequiredChairSigns());
+		requiredSigns.setSignedByAllChairs(signedByAllChairs);
+		boolean signedByAllBusinessManagers = requiredSigns
+				.getExistingBusinessManagerSigns().containsAll(
+						requiredSigns.getRequiredBusinessManagerSigns());
+		requiredSigns
+				.setSignedByAllBusinessManagers(signedByAllBusinessManagers);
+		boolean signedByAllDeans = requiredSigns.getExistingDeanSigns()
+				.containsAll(requiredSigns.getRequiredDeanSigns());
+		requiredSigns.setSignedByAllDeans(signedByAllDeans);
+		boolean signedByAllIRBs = requiredSigns.getExistingIRBSigns()
+				.containsAll(requiredSigns.getRequiredIRBSigns());
+		requiredSigns.setSignedByAllIRBs(signedByAllIRBs);
+		boolean signedByAllResearchAdmins = requiredSigns
+				.getExistingResearchAdminSigns().containsAll(
+						requiredSigns.getRequiredResearchAdminSigns());
+		requiredSigns.setSignedByAllResearchAdmins(signedByAllResearchAdmins);
+		boolean signedByAllResearchDirectors = requiredSigns
+				.getExistingResearchDirectorSigns().containsAll(
+						requiredSigns.getRequiredResearchDirectorSigns());
+		requiredSigns
+				.setSignedByAllResearchDirectors(signedByAllResearchDirectors);
 		contentProfile.append("<ak:signedByCurrentUser>");
 		contentProfile.append(signedByCurrentUser);
 		contentProfile.append("</ak:signedByCurrentUser>");
-		signByAllUsersInfo.setSignedByPI(signedByPI);
+		requiredSigns.setSignedByPI(signedByPI);
 		contentProfile.append("<ak:signedByPI>");
 		contentProfile.append(signedByPI);
 		contentProfile.append("</ak:signedByPI>");
-		signByAllUsersInfo.setSignedByAllCoPIs(signedByAllCoPIs);
+		requiredSigns.setSignedByAllCoPIs(signedByAllCoPIs);
 		contentProfile.append("<ak:signedByAllCoPIs>");
 		contentProfile.append(signedByAllCoPIs);
 		contentProfile.append("</ak:signedByAllCoPIs>");
-		signByAllUsersInfo.setSignedByAllChairs(signedByAllChairs);
+		requiredSigns.setSignedByAllChairs(signedByAllChairs);
 		contentProfile.append("<ak:signedByAllChairs>");
 		contentProfile.append(signedByAllChairs);
 		contentProfile.append("</ak:signedByAllChairs>");
-		signByAllUsersInfo
+		requiredSigns
 				.setSignedByAllBusinessManagers(signedByAllBusinessManagers);
 		contentProfile.append("<ak:signedByAllBusinessManagers>");
 		contentProfile.append(signedByAllBusinessManagers);
 		contentProfile.append("</ak:signedByAllBusinessManagers>");
-		signByAllUsersInfo.setSignedByAllDeans(signedByAllDeans);
+		requiredSigns.setSignedByAllDeans(signedByAllDeans);
 		contentProfile.append("<ak:signedByAllDeans>");
 		contentProfile.append(signedByAllDeans);
 		contentProfile.append("</ak:signedByAllDeans>");
-		signByAllUsersInfo.setSignedByAllIRBs(signedByAllIRBs);
+		requiredSigns.setSignedByAllIRBs(signedByAllIRBs);
 		contentProfile.append("<ak:signedByAllIRBs>");
 		contentProfile.append(signedByAllIRBs);
 		contentProfile.append("</ak:signedByAllIRBs>");
-		signByAllUsersInfo
-				.setSignedByAllResearchAdmins(signedByAllResearchAdmins);
+		requiredSigns.setSignedByAllResearchAdmins(signedByAllResearchAdmins);
 		contentProfile.append("<ak:signedByAllResearchAdmins>");
 		contentProfile.append(signedByAllResearchAdmins);
 		contentProfile.append("</ak:signedByAllResearchAdmins>");
-		signByAllUsersInfo
+		requiredSigns
 				.setSignedByAllResearchDirectors(signedByAllResearchDirectors);
 		contentProfile.append("<ak:signedByAllResearchDirectors>");
 		contentProfile.append(signedByAllResearchDirectors);
@@ -4457,86 +4447,65 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param signByAllUsersInfo
 	 */
 	public void getExistingSignaturesForProposal(StringBuffer contentProfile,
-			Proposal existingProposal, List<String> requiredPISign,
-			List<String> requiredCoPISigns, List<String> requiredChairSigns,
-			List<String> requiredBusinessManagerSigns,
-			List<String> requiredDeanSigns, List<String> requiredIRBSigns,
-			List<String> requiredResearchAdminSigns,
-			List<String> requiredResearchDirectorSigns,
-			boolean signedByCurrentUser, SignatureByAllUsers signByAllUsersInfo) {
-		List<String> existingPISign = new ArrayList<String>();
-		List<String> existingCoPISigns = new ArrayList<String>();
-		List<String> existingChairSigns = new ArrayList<String>();
-		List<String> existingBusinessManagerSigns = new ArrayList<String>();
-		List<String> existingDeanSigns = new ArrayList<String>();
-		List<String> existingIRBSigns = new ArrayList<String>();
-		List<String> existingResearchAdminSigns = new ArrayList<String>();
-		List<String> existingResearchDirectorSigns = new ArrayList<String>();
+			Proposal existingProposal, RequiredSignaturesInfo requiredSigns,
+			boolean signedByCurrentUser) {
+
 		for (SignatureInfo sign : existingProposal.getSignatureInfo()) {
 			if (sign.getPositionTitle().equals("PI")) {
-				existingPISign.add(sign.getUserProfileId());
+				requiredSigns.getExistingPISign().add(sign.getUserProfileId());
 			} else if (sign.getPositionTitle().equals("Co-PI")) {
-				existingCoPISigns.add(sign.getUserProfileId());
+				requiredSigns.getExistingCoPISigns().add(
+						sign.getUserProfileId());
 			} else if (sign.getPositionTitle().equals("Department Chair")) {
-				existingChairSigns.add(sign.getUserProfileId());
+				requiredSigns.getExistingChairSigns().add(
+						sign.getUserProfileId());
 			} else if (sign.getPositionTitle().equals("Business Manager")) {
-				existingBusinessManagerSigns.add(sign.getUserProfileId());
+				requiredSigns.getExistingBusinessManagerSigns().add(
+						sign.getUserProfileId());
 			} else if (sign.getPositionTitle().equals("Dean")) {
-				existingDeanSigns.add(sign.getUserProfileId());
+				requiredSigns.getExistingDeanSigns().add(
+						sign.getUserProfileId());
 			} else if (sign.getPositionTitle().equals("IRB")) {
-				existingIRBSigns.add(sign.getUserProfileId());
+				requiredSigns.getExistingIRBSigns()
+						.add(sign.getUserProfileId());
 			} else if (sign.getPositionTitle().equals(
 					"University Research Administrator")) {
-				existingResearchAdminSigns.add(sign.getUserProfileId());
+				requiredSigns.getExistingResearchAdminSigns().add(
+						sign.getUserProfileId());
 			} else if (sign.getPositionTitle().equals(
 					"University Research Director")) {
-				existingResearchDirectorSigns.add(sign.getUserProfileId());
+				requiredSigns.getExistingResearchDirectorSigns().add(
+						sign.getUserProfileId());
 			}
 		}
-
-		checkForSignedByAllUsers(contentProfile, requiredPISign,
-				requiredCoPISigns, requiredChairSigns,
-				requiredBusinessManagerSigns, requiredDeanSigns,
-				requiredIRBSigns, requiredResearchAdminSigns,
-				requiredResearchDirectorSigns, signedByCurrentUser,
-				signByAllUsersInfo, existingPISign, existingCoPISigns,
-				existingChairSigns, existingBusinessManagerSigns,
-				existingDeanSigns, existingIRBSigns,
-				existingResearchAdminSigns, existingResearchDirectorSigns);
 	}
 
-	/**
+	/***
+	 * Generates Content Profile For All Users
+	 * 
 	 * @param existingProposal
 	 * @param contentProfile
 	 * @param signatures
-	 * @param requiredPISign
-	 * @param requiredCoPISigns
-	 * @param requiredChairSigns
-	 * @param requiredBusinessManagerSigns
-	 * @param requiredDeanSigns
-	 * @param requiredIRBSigns
-	 * @param requiredResearchAdminSigns
-	 * @param requiredResearchDirectorSigns
+	 * @return
 	 */
-	public void generateContentProfileForAllUsers(Proposal existingProposal,
-			StringBuffer contentProfile, List<SignatureUserInfo> signatures,
-			List<String> requiredPISign, List<String> requiredCoPISigns,
-			List<String> requiredChairSigns,
-			List<String> requiredBusinessManagerSigns,
-			List<String> requiredDeanSigns, List<String> requiredIRBSigns,
-			List<String> requiredResearchAdminSigns,
-			List<String> requiredResearchDirectorSigns) {
+	public RequiredSignaturesInfo generateContentProfileForAllUsers(
+			Proposal existingProposal, StringBuffer contentProfile,
+			List<SignatureUserInfo> signatures) {
+		RequiredSignaturesInfo requiredSigns = new RequiredSignaturesInfo();
 		if (!existingProposal.getInvestigatorInfo().getPi().getUserRef()
 				.isDeleted()) {
-			generatePIContentProfile(existingProposal, contentProfile);
-			requiredPISign.add(existingProposal.getInvestigatorInfo().getPi()
-					.getUserProfileId());
+			generatePIContentProfile(contentProfile, existingProposal
+					.getInvestigatorInfo().getPi());
+			requiredSigns.getRequiredPISign().add(
+					existingProposal.getInvestigatorInfo().getPi()
+							.getUserProfileId());
 		}
 		for (InvestigatorRefAndPosition copis : existingProposal
 				.getInvestigatorInfo().getCo_pi()) {
 			if (!copis.getUserRef().isDeleted()) {
 				generateCoPIContentProfile(contentProfile, copis);
-				requiredCoPISigns.add(copis.getUserProfileId());
+				requiredSigns.getRequiredCoPISigns().add(
+						copis.getUserProfileId());
 			}
 		}
 		for (InvestigatorRefAndPosition seniors : existingProposal
@@ -4549,39 +4518,45 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 			switch (signatureInfo.getPositionTitle()) {
 			case "Department Chair":
 				generateChairContentProfile(contentProfile, signatureInfo);
-				requiredChairSigns.add(signatureInfo.getUserProfileId());
+				requiredSigns.getRequiredChairSigns().add(
+						signatureInfo.getUserProfileId());
 				break;
 			case "Business Manager":
 				generateManagerContentProfile(contentProfile, signatureInfo);
-				requiredBusinessManagerSigns.add(signatureInfo
-						.getUserProfileId());
+				requiredSigns.getRequiredBusinessManagerSigns().add(
+						signatureInfo.getUserProfileId());
 				break;
 			case "Dean":
 				generateDeanContentProfile(contentProfile, signatureInfo);
-				requiredDeanSigns.add(signatureInfo.getUserProfileId());
+				requiredSigns.getRequiredDeanSigns().add(
+						signatureInfo.getUserProfileId());
 				break;
 			case "IRB":
 				generateIRBContentProfile(contentProfile, signatureInfo);
-				requiredIRBSigns.add(signatureInfo.getUserProfileId());
+				requiredSigns.getRequiredIRBSigns().add(
+						signatureInfo.getUserProfileId());
 				break;
 			case "University Research Administrator":
 				generateResearchAdminContentProfile(contentProfile,
 						signatureInfo);
-				requiredResearchAdminSigns
-						.add(signatureInfo.getUserProfileId());
+				requiredSigns.getRequiredResearchAdminSigns().add(
+						signatureInfo.getUserProfileId());
 				break;
 			case "University Research Director":
 				generateDirectorContentProfile(contentProfile, signatureInfo);
-				requiredResearchDirectorSigns.add(signatureInfo
-						.getUserProfileId());
+				requiredSigns.getRequiredResearchDirectorSigns().add(
+						signatureInfo.getUserProfileId());
 				break;
 			default:
 				break;
 			}
 		}
+		return requiredSigns;
 	}
 
-	/**
+	/***
+	 * Generates Users In Proposal Content Profile
+	 * 
 	 * @param authorProfile
 	 * @param authorFullName
 	 * @param proposalId
@@ -4591,49 +4566,39 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param signatures
 	 * @param signByAllUsersInfo
 	 */
-	public void generateProposalContentProfile(UserProfile authorProfile,
-			String authorFullName, String proposalId,
+	public RequiredSignaturesInfo generateUsersInProposalContentProfile(
+			UserProfile authorProfile, String proposalId,
 			Proposal existingProposal, boolean signedByCurrentUser,
-			StringBuffer contentProfile, List<SignatureUserInfo> signatures,
-			SignatureByAllUsers signByAllUsersInfo) {
+			StringBuffer contentProfile, List<SignatureUserInfo> signatures) {
 		contentProfile.append("<Content>");
 		contentProfile.append("<ak:record xmlns:ak=\"http://akpower.org\">");
 		genearteProposalInfoContentProfile(proposalId, existingProposal,
 				contentProfile);
-		generateAuthorContentProfile(contentProfile, authorProfile,
-				authorFullName);
+		generateAuthorContentProfile(contentProfile, authorProfile);
 		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX");
 		contentProfile.append("<ak:currentdatetime>");
 		contentProfile.append(dateFormat.format(new Date()));
 		contentProfile.append("</ak:currentdatetime>");
-		List<String> requiredPISign = new ArrayList<String>();
-		List<String> requiredCoPISigns = new ArrayList<String>();
-		List<String> requiredChairSigns = new ArrayList<String>();
-		List<String> requiredBusinessManagerSigns = new ArrayList<String>();
-		List<String> requiredDeanSigns = new ArrayList<String>();
-		List<String> requiredIRBSigns = new ArrayList<String>();
-		List<String> requiredResearchAdminSigns = new ArrayList<String>();
-		List<String> requiredResearchDirectorSigns = new ArrayList<String>();
-		generateContentProfileForAllUsers(existingProposal, contentProfile,
-				signatures, requiredPISign, requiredCoPISigns,
-				requiredChairSigns, requiredBusinessManagerSigns,
-				requiredDeanSigns, requiredIRBSigns,
-				requiredResearchAdminSigns, requiredResearchDirectorSigns);
+
+		RequiredSignaturesInfo requiredSignatures = generateContentProfileForAllUsers(
+				existingProposal, contentProfile, signatures);
+
 		getExistingSignaturesForProposal(contentProfile, existingProposal,
-				requiredPISign, requiredCoPISigns, requiredChairSigns,
-				requiredBusinessManagerSigns, requiredDeanSigns,
-				requiredIRBSigns, requiredResearchAdminSigns,
-				requiredResearchDirectorSigns, signedByCurrentUser,
-				signByAllUsersInfo);
+				requiredSignatures, signedByCurrentUser);
+		checkForSignedByAllUsers(contentProfile, requiredSignatures,
+				signedByCurrentUser);
 		contentProfile.append("</ak:proposal>");
 		contentProfile.append("</ak:record>");
 		contentProfile.append("</Content>");
+		return requiredSignatures;
 	}
 
-	/**
+	/***
+	 * Generates Proposal Content Profile
+	 * 
 	 * @param authorProfile
-	 * @param authorFullName
 	 * @param proposalId
+	 * @param proposalId2
 	 * @param existingProposal
 	 * @param signedByCurrentUser
 	 * @param contentProfile
@@ -4643,22 +4608,21 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @return
 	 */
 	public List<SignatureUserInfo> generateProposalContentProfile(
-			UserProfile authorProfile, String authorFullName,
-			String proposalId, Proposal existingProposal,
-			boolean signedByCurrentUser, StringBuffer contentProfile,
-			Boolean irbApprovalRequired, List<SignatureUserInfo> signatures,
-			SignatureByAllUsers signByAllUsersInfo) {
+			UserProfile authorProfile, String proposalId, String proposalId2,
+			Proposal existingProposal, boolean signedByCurrentUser,
+			StringBuffer contentProfile, Boolean irbApprovalRequired,
+			RequiredSignaturesInfo signByAllUsersInfo) {
+		List<SignatureUserInfo> signatures = new ArrayList<SignatureUserInfo>();
 		if (!proposalId.equals("0")) {
 			ObjectId id = new ObjectId(proposalId);
 			signatures = findSignaturesExceptInvestigator(id,
 					irbApprovalRequired);
-			generateProposalContentProfile(authorProfile, authorFullName,
-					proposalId, existingProposal, signedByCurrentUser,
-					contentProfile, signatures, signByAllUsersInfo);
+			signByAllUsersInfo = generateUsersInProposalContentProfile(
+					authorProfile, proposalId, existingProposal,
+					signedByCurrentUser, contentProfile, signatures);
 		} else {
-			generateDefaultProposalContentProfile(authorProfile,
-					authorFullName, proposalId, existingProposal,
-					signedByCurrentUser, contentProfile);
+			generateDefaultProposalContentProfile(authorProfile, proposalId,
+					existingProposal, signedByCurrentUser, contentProfile);
 		}
 		contentProfile
 				.append("<Attribute AttributeId=\"urn:oasis:names:tc:xacml:3.0:content-selector\" IncludeInResult=\"false\">");
@@ -4739,7 +4703,7 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 		return isStatusUpdated;
 	}
 
-	/**
+	/***
 	 * Gets Obligations Details with all Email Information
 	 * 
 	 * @param obligations
@@ -4940,7 +4904,9 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 		return filename;
 	}
 
-	/**
+	/***
+	 * Generates MDP Decision For available Actions For a User
+	 * 
 	 * @param attrMap
 	 * @param actionMap
 	 * @param contentProfile
@@ -4973,18 +4939,17 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 		return actions;
 	}
 
-	/**
+	/***
 	 * Generates Author Content Profile
 	 * 
 	 * @param contentProfile
 	 * @param authorProfile
-	 * @param authorFullName
 	 */
 	public void generateAuthorContentProfile(StringBuffer contentProfile,
-			UserProfile authorProfile, String authorFullName) {
+			UserProfile authorProfile) {
 		contentProfile.append("<ak:authorprofile>");
 		contentProfile.append("<ak:fullname>");
-		contentProfile.append(authorFullName);
+		contentProfile.append(authorProfile.getFullName());
 		contentProfile.append("</ak:fullname>");
 		contentProfile.append("<ak:userid>");
 		contentProfile.append(authorProfile.getId().toString());
@@ -4992,7 +4957,9 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 		contentProfile.append("</ak:authorprofile>");
 	}
 
-	/**
+	/***
+	 * Generates University Research Director Content Profile
+	 * 
 	 * @param contentProfile
 	 * @param signatureInfo
 	 */
@@ -5011,7 +4978,9 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 		contentProfile.append("</ak:director>");
 	}
 
-	/**
+	/***
+	 * Generates University Research Administrator Content Profile
+	 * 
 	 * @param contentProfile
 	 * @param signatureInfo
 	 */
@@ -5030,7 +4999,9 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 		contentProfile.append("</ak:administrator>");
 	}
 
-	/**
+	/***
+	 * Generates IRB Content Profile
+	 * 
 	 * @param contentProfile
 	 * @param signatureInfo
 	 */
@@ -5049,7 +5020,9 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 		contentProfile.append("</ak:irb>");
 	}
 
-	/**
+	/***
+	 * Generates Dean Content Profile
+	 * 
 	 * @param contentProfile
 	 * @param signatureInfo
 	 */
@@ -5068,7 +5041,9 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 		contentProfile.append("</ak:dean>");
 	}
 
-	/**
+	/***
+	 * Generates Business Manager Content Profile
+	 * 
 	 * @param contentProfile
 	 * @param signatureInfo
 	 */
@@ -5087,7 +5062,9 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 		contentProfile.append("</ak:manager>");
 	}
 
-	/**
+	/***
+	 * Generates Department Chair Content Profile
+	 * 
 	 * @param contentProfile
 	 * @param signatureInfo
 	 */
@@ -5106,67 +5083,70 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 		contentProfile.append("</ak:chair>");
 	}
 
-	/**
+	/***
+	 * Generates Senior Content Profile
+	 * 
 	 * @param contentProfile
-	 * @param seniors
+	 * @param senior
 	 */
 	public void generateSeniorContentProfile(StringBuffer contentProfile,
-			InvestigatorRefAndPosition seniors) {
+			InvestigatorRefAndPosition senior) {
 		contentProfile.append("<ak:senior>");
 		contentProfile.append("<ak:fullname>");
-		contentProfile.append(seniors.getUserRef().getFullName());
+		contentProfile.append(senior.getUserRef().getFullName());
 		contentProfile.append("</ak:fullname>");
 		contentProfile.append("<ak:workemail>");
-		contentProfile.append(seniors.getUserRef().getWorkEmails().get(0));
+		contentProfile.append(senior.getUserRef().getWorkEmails().get(0));
 		contentProfile.append("</ak:workemail>");
 		contentProfile.append("<ak:userid>");
-		contentProfile.append(seniors.getUserProfileId());
+		contentProfile.append(senior.getUserProfileId());
 		contentProfile.append("</ak:userid>");
 		contentProfile.append("</ak:senior>");
 	}
 
-	/**
+	/***
+	 * Generates Co-PI Content Profile
+	 * 
 	 * @param contentProfile
-	 * @param copis
+	 * @param copi
 	 */
 	public void generateCoPIContentProfile(StringBuffer contentProfile,
-			InvestigatorRefAndPosition copis) {
+			InvestigatorRefAndPosition copi) {
 		contentProfile.append("<ak:copi>");
 		contentProfile.append("<ak:fullname>");
-		contentProfile.append(copis.getUserRef().getFullName());
+		contentProfile.append(copi.getUserRef().getFullName());
 		contentProfile.append("</ak:fullname>");
 		contentProfile.append("<ak:workemail>");
-		contentProfile.append(copis.getUserRef().getWorkEmails().get(0));
+		contentProfile.append(copi.getUserRef().getWorkEmails().get(0));
 		contentProfile.append("</ak:workemail>");
 		contentProfile.append("<ak:userid>");
-		contentProfile.append(copis.getUserProfileId());
+		contentProfile.append(copi.getUserProfileId());
 		contentProfile.append("</ak:userid>");
 		contentProfile.append("</ak:copi>");
 	}
 
-	/**
-	 * @param existingProposal
+	/***
+	 * Generates PI Content Profile
+	 * 
 	 * @param contentProfile
+	 * @param pi
 	 */
-	public void generatePIContentProfile(Proposal existingProposal,
-			StringBuffer contentProfile) {
+	public void generatePIContentProfile(StringBuffer contentProfile,
+			InvestigatorRefAndPosition pi) {
 		contentProfile.append("<ak:pi>");
 		contentProfile.append("<ak:fullname>");
-		contentProfile.append(existingProposal.getInvestigatorInfo().getPi()
-				.getUserRef().getFullName());
+		contentProfile.append(pi.getUserRef().getFullName());
 		contentProfile.append("</ak:fullname>");
 		contentProfile.append("<ak:workemail>");
-		contentProfile.append(existingProposal.getInvestigatorInfo().getPi()
-				.getUserRef().getWorkEmails().get(0));
+		contentProfile.append(pi.getUserRef().getWorkEmails().get(0));
 		contentProfile.append("</ak:workemail>");
 		contentProfile.append("<ak:userid>");
-		contentProfile.append(existingProposal.getInvestigatorInfo().getPi()
-				.getUserProfileId());
+		contentProfile.append(pi.getUserProfileId());
 		contentProfile.append("</ak:userid>");
 		contentProfile.append("</ak:pi>");
 	}
 
-	/**
+	/***
 	 * Generates Signature Content Profile of a Proposal
 	 * 
 	 * @param contentProfile
@@ -5198,7 +5178,7 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 		}
 	}
 
-	/**
+	/***
 	 * Generates Investigator Content Profile
 	 * 
 	 * @param existingProposal
@@ -5206,18 +5186,19 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 */
 	public void generateInvestigatorContentProfile(Proposal existingProposal,
 			StringBuffer contentProfile) {
-		generatePIContentProfile(existingProposal, contentProfile);
-		for (InvestigatorRefAndPosition copis : existingProposal
+		generatePIContentProfile(contentProfile, existingProposal
+				.getInvestigatorInfo().getPi());
+		for (InvestigatorRefAndPosition copi : existingProposal
 				.getInvestigatorInfo().getCo_pi()) {
-			generateCoPIContentProfile(contentProfile, copis);
+			generateCoPIContentProfile(contentProfile, copi);
 		}
-		for (InvestigatorRefAndPosition seniors : existingProposal
+		for (InvestigatorRefAndPosition senior : existingProposal
 				.getInvestigatorInfo().getSeniorPersonnel()) {
-			generateSeniorContentProfile(contentProfile, seniors);
+			generateSeniorContentProfile(contentProfile, senior);
 		}
 	}
 
-	/**
+	/***
 	 * Geneartes Proposal Info Content Profile
 	 * 
 	 * @param proposalId
@@ -5290,7 +5271,7 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 		contentProfile.append("</ak:archivedbyuniversityresearchdirector>");
 	}
 
-	/**
+	/***
 	 * Generates Proposal Content Profile with Current Datetime
 	 * 
 	 * @param proposalId
@@ -5325,7 +5306,9 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 		return contentProfile;
 	}
 
-	/**
+	/***
+	 * Generates Default Proposal Content Profile
+	 * 
 	 * @param authorProfile
 	 * @param authorFullName
 	 * @param proposalId
@@ -5334,9 +5317,9 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param contentProfile
 	 */
 	public void generateDefaultProposalContentProfile(
-			UserProfile authorProfile, String authorFullName,
-			String proposalId, Proposal existingProposal,
-			boolean signedByCurrentUser, StringBuffer contentProfile) {
+			UserProfile authorProfile, String proposalId,
+			Proposal existingProposal, boolean signedByCurrentUser,
+			StringBuffer contentProfile) {
 		contentProfile.append("<Content>");
 		contentProfile.append("<ak:record xmlns:ak=\"http://akpower.org\">");
 		contentProfile.append("<ak:proposal>");
@@ -5350,8 +5333,7 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 		contentProfile.append("<ak:irbApprovalRequired>");
 		contentProfile.append(existingProposal.isIrbApprovalRequired());
 		contentProfile.append("</ak:irbApprovalRequired>");
-		generateAuthorContentProfile(contentProfile, authorProfile,
-				authorFullName);
+		generateAuthorContentProfile(contentProfile, authorProfile);
 		generateInvestigatorContentProfile(existingProposal, contentProfile);
 		contentProfile.append("<ak:signedByCurrentUser>");
 		contentProfile.append(signedByCurrentUser);
@@ -5374,13 +5356,11 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 			Proposal existingProposal, List<SignatureUserInfo> signatures,
 			UserProfile authorProfile) {
 		StringBuffer contentProfile = new StringBuffer();
-		String authorFullName = authorProfile.getFullName();
 		contentProfile.append("<Content>");
 		contentProfile.append("<ak:record xmlns:ak=\"http://akpower.org\">");
 		genearteProposalInfoContentProfile(proposalId, existingProposal,
 				contentProfile);
-		generateAuthorContentProfile(contentProfile, authorProfile,
-				authorFullName);
+		generateAuthorContentProfile(contentProfile, authorProfile);
 		generateInvestigatorContentProfile(existingProposal, contentProfile);
 		for (SignatureUserInfo signatureInfo : signatures) {
 			generateSignatureContentProfile(contentProfile, signatureInfo);
@@ -5396,7 +5376,7 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 		return contentProfile;
 	}
 
-	/**
+	/***
 	 * Generates Attributes based on policy info
 	 * 
 	 * @param policyInfo
@@ -5437,7 +5417,7 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 		return attrMap;
 	}
 
-	/**
+	/***
 	 * Categorizes different Obligation Types
 	 * 
 	 * @param preObligations
