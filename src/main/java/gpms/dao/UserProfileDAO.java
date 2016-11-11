@@ -86,6 +86,108 @@ public class UserProfileDAO extends BasicDAO<UserProfile, String> {
 		super(mongo, morphia, dbName);
 	}
 
+	public List<UserProfile> findAll() throws UnknownHostException {
+		Datastore ds = getDatastore();
+		return ds.createQuery(UserProfile.class).asList();
+	}
+
+	public List<UserInfo> findAllUsers(GPMSCommonInfo userInfo)
+			throws UnknownHostException {
+		Datastore ds = getDatastore();
+		String userName = userInfo.getUserName();
+		String college = userInfo.getUserCollege();
+		String department = userInfo.getUserDepartment();
+		String positionType = userInfo.getUserPositionType();
+		String positionTitle = userInfo.getUserPositionTitle();
+		Boolean isActive = userInfo.getUserIsActive();
+		List<UserInfo> users = new ArrayList<UserInfo>();
+		Query<UserProfile> profileQuery = ds.createQuery(UserProfile.class);
+		Query<UserAccount> accountQuery = ds.createQuery(UserAccount.class);
+		if (userName != null) {
+			accountQuery.criteria("username").containsIgnoreCase(userName);
+		}
+		if (isActive != null) {
+			accountQuery.criteria("active").equal(isActive);
+		}
+		profileQuery.criteria("user id").in(accountQuery.asKeyList());
+		if (college != null) {
+			profileQuery.criteria("details.college").equal(college);
+		}
+		if (department != null) {
+			profileQuery.criteria("details.department").equal(department);
+		}
+		if (positionType != null) {
+			profileQuery.criteria("details.position type").equal(positionType);
+		}
+		if (positionTitle != null) {
+			profileQuery.criteria("details.position title")
+					.equal(positionTitle);
+		}
+		List<UserProfile> userProfiles = profileQuery.order(
+				"-audit log.activity on").asList();
+		for (UserProfile userProfile : userProfiles) {
+			UserInfo user = generateUserInfo(0, userProfile);
+			users.add(user);
+		}
+		return users;
+	}
+
+	public List<UserProfile> findAllActiveUsers() throws UnknownHostException {
+		Datastore ds = getDatastore();
+
+		Query<UserProfile> profileQuery = ds.createQuery(UserProfile.class);
+		Query<UserAccount> accountQuery = ds.createQuery(UserAccount.class);
+
+		accountQuery.and(accountQuery.criteria("deleted").equal(false),
+				accountQuery.criteria("active").equal(true));
+		profileQuery.and(
+				profileQuery.criteria("details").notEqual(null),
+				profileQuery.and(profileQuery.criteria("user id").in(
+						accountQuery.asKeyList())),
+				profileQuery.criteria("deleted").equal(false));
+
+		return profileQuery.retrievedFields(true, "_id", "first name",
+				"middle name", "last name").asList();
+	}
+
+	public List<UserInfo> findAllAdminUsers(GPMSCommonInfo userInfo)
+			throws UnknownHostException {
+		Datastore ds = getDatastore();
+		String userName = userInfo.getUserName();
+		String positionTitle = userInfo.getUserPositionTitle();
+		Boolean isActive = userInfo.getUserIsActive();
+		List<UserInfo> users = new ArrayList<UserInfo>();
+		Query<UserProfile> profileQuery = ds.createQuery(UserProfile.class);
+		Query<UserAccount> accountQuery = ds.createQuery(UserAccount.class);
+		if (userName != null) {
+			accountQuery.criteria("username").containsIgnoreCase(userName);
+		}
+		if (isActive != null) {
+			accountQuery.criteria("active").equal(isActive);
+		}
+		profileQuery.criteria("user id").in(accountQuery.asKeyList());
+		List<String> positionTypes = new ArrayList<String>();
+		positionTypes.add("University administrator");
+		profileQuery.criteria("details.position type").in(positionTypes);
+		if (positionTitle != null) {
+			profileQuery.criteria("details.position title")
+					.equal(positionTitle);
+		} else {
+			List<String> positionTitles = new ArrayList<String>();
+			positionTitles.add("IRB");
+			positionTitles.add("University Research Administrator");
+			positionTitles.add("University Research Director");
+			profileQuery.criteria("details.position title").in(positionTitles);
+		}
+		List<UserProfile> userProfiles = profileQuery.order(
+				"-audit log.activity on").asList();
+		for (UserProfile userProfile : userProfiles) {
+			UserInfo user = generateUserInfo(0, userProfile);
+			users.add(user);
+		}
+		return users;
+	}
+
 	/**
 	 * 
 	 * @return list of all users with position details to get as PI, Co-PI and
@@ -115,11 +217,6 @@ public class UserProfileDAO extends BasicDAO<UserProfile, String> {
 		return profileQuery.asList();
 	}
 
-	public List<UserProfile> findAll() throws UnknownHostException {
-		Datastore ds = getDatastore();
-		return ds.createQuery(UserProfile.class).asList();
-	}
-
 	public List<UserProfile> findAllUsersWithPosition()
 			throws UnknownHostException {
 		Datastore ds = getDatastore();
@@ -141,24 +238,6 @@ public class UserProfileDAO extends BasicDAO<UserProfile, String> {
 												"details.position type")
 												.equalIgnoreCase(
 														"Teaching faculty")));
-		return profileQuery.retrievedFields(true, "_id", "first name",
-				"middle name", "last name").asList();
-	}
-
-	public List<UserProfile> findAllActiveUsers() throws UnknownHostException {
-		Datastore ds = getDatastore();
-
-		Query<UserProfile> profileQuery = ds.createQuery(UserProfile.class);
-		Query<UserAccount> accountQuery = ds.createQuery(UserAccount.class);
-
-		accountQuery.and(accountQuery.criteria("deleted").equal(false),
-				accountQuery.criteria("active").equal(true));
-		profileQuery.and(
-				profileQuery.criteria("details").notEqual(null),
-				profileQuery.and(profileQuery.criteria("user id").in(
-						accountQuery.asKeyList())),
-				profileQuery.criteria("deleted").equal(false));
-
 		return profileQuery.retrievedFields(true, "_id", "first name",
 				"middle name", "last name").asList();
 	}
@@ -265,47 +344,6 @@ public class UserProfileDAO extends BasicDAO<UserProfile, String> {
 		return users;
 	}
 
-	public List<UserInfo> findAllUsers(GPMSCommonInfo userInfo)
-			throws UnknownHostException {
-		Datastore ds = getDatastore();
-		String userName = userInfo.getUserName();
-		String college = userInfo.getUserCollege();
-		String department = userInfo.getUserDepartment();
-		String positionType = userInfo.getUserPositionType();
-		String positionTitle = userInfo.getUserPositionTitle();
-		Boolean isActive = userInfo.getUserIsActive();
-		List<UserInfo> users = new ArrayList<UserInfo>();
-		Query<UserProfile> profileQuery = ds.createQuery(UserProfile.class);
-		Query<UserAccount> accountQuery = ds.createQuery(UserAccount.class);
-		if (userName != null) {
-			accountQuery.criteria("username").containsIgnoreCase(userName);
-		}
-		if (isActive != null) {
-			accountQuery.criteria("active").equal(isActive);
-		}
-		profileQuery.criteria("user id").in(accountQuery.asKeyList());
-		if (college != null) {
-			profileQuery.criteria("details.college").equal(college);
-		}
-		if (department != null) {
-			profileQuery.criteria("details.department").equal(department);
-		}
-		if (positionType != null) {
-			profileQuery.criteria("details.position type").equal(positionType);
-		}
-		if (positionTitle != null) {
-			profileQuery.criteria("details.position title")
-					.equal(positionTitle);
-		}
-		List<UserProfile> userProfiles = profileQuery.order(
-				"-audit log.activity on").asList();
-		for (UserProfile userProfile : userProfiles) {
-			UserInfo user = generateUserInfo(0, userProfile);
-			users.add(user);
-		}
-		return users;
-	}
-
 	public List<UserDetail> findAllUsersForDelegation(ObjectId id,
 			String userCollege, String userDepartment)
 			throws UnknownHostException {
@@ -376,44 +414,6 @@ public class UserProfileDAO extends BasicDAO<UserProfile, String> {
 		return false;
 	}
 
-	public List<UserInfo> findAllAdminUsers(GPMSCommonInfo userInfo)
-			throws UnknownHostException {
-		Datastore ds = getDatastore();
-		String userName = userInfo.getUserName();
-		String positionTitle = userInfo.getUserPositionTitle();
-		Boolean isActive = userInfo.getUserIsActive();
-		List<UserInfo> users = new ArrayList<UserInfo>();
-		Query<UserProfile> profileQuery = ds.createQuery(UserProfile.class);
-		Query<UserAccount> accountQuery = ds.createQuery(UserAccount.class);
-		if (userName != null) {
-			accountQuery.criteria("username").containsIgnoreCase(userName);
-		}
-		if (isActive != null) {
-			accountQuery.criteria("active").equal(isActive);
-		}
-		profileQuery.criteria("user id").in(accountQuery.asKeyList());
-		List<String> positionTypes = new ArrayList<String>();
-		positionTypes.add("University administrator");
-		profileQuery.criteria("details.position type").in(positionTypes);
-		if (positionTitle != null) {
-			profileQuery.criteria("details.position title")
-					.equal(positionTitle);
-		} else {
-			List<String> positionTitles = new ArrayList<String>();
-			positionTitles.add("IRB");
-			positionTitles.add("University Research Administrator");
-			positionTitles.add("University Research Director");
-			profileQuery.criteria("details.position title").in(positionTitles);
-		}
-		List<UserProfile> userProfiles = profileQuery.order(
-				"-audit log.activity on").asList();
-		for (UserProfile userProfile : userProfiles) {
-			UserInfo user = generateUserInfo(0, userProfile);
-			users.add(user);
-		}
-		return users;
-	}
-
 	/**
 	 * Generates User Info
 	 * 
@@ -435,220 +435,6 @@ public class UserProfileDAO extends BasicDAO<UserProfile, String> {
 		user.setActivated(userProfile.getUserAccount().isActive());
 		user.setAdminUser(userProfile.getUserAccount().isAdmin());
 		return getRecentUserProfileAuditLog(userProfile, user);
-	}
-
-	/**
-	 * Gets the Recent User Profile AuditLog
-	 * 
-	 * @param userProfile
-	 * @param user
-	 * @return
-	 */
-	private UserInfo getRecentUserProfileAuditLog(UserProfile userProfile,
-			UserInfo user) {
-		Date lastAudited = null;
-		String lastAuditedBy = new String();
-		String lastAuditAction = new String();
-		int auditLogCount = userProfile.getAuditLog().size();
-		if (userProfile.getAuditLog() != null && auditLogCount != 0) {
-			AuditLog auditLog = userProfile.getAuditLog()
-					.get(auditLogCount - 1);
-			lastAudited = auditLog.getActivityDate();
-			lastAuditedBy = auditLog.getUserProfile().getFullName();
-			lastAuditAction = auditLog.getAction();
-		}
-		user.setLastAudited(lastAudited);
-		user.setLastAuditedBy(lastAuditedBy);
-		user.setLastAuditAction(lastAuditAction);
-		return user;
-	}
-
-	/***
-	 * Finds All Logs in a AuditLog Grid for a User
-	 * 
-	 * @param offset
-	 * @param limit
-	 * @param id
-	 * @param auditLogInfo
-	 * @return
-	 * @throws ParseException
-	 */
-	public List<AuditLogInfo> findAllProposalAuditLogForGrid(int offset,
-			int limit, ObjectId id, AuditLogCommonInfo auditLogInfo)
-			throws ParseException {
-		return getAuditListBasedOnPaging(offset, limit,
-				getSortedAuditLogResults(auditLogInfo, id));
-	}
-
-	/***
-	 * Gets Audit Logs list based On User provided Paging size
-	 * 
-	 * @param offset
-	 * @param limit
-	 * @param allAuditLogs
-	 * @return
-	 */
-	private List<AuditLogInfo> getAuditListBasedOnPaging(int offset, int limit,
-			List<AuditLogInfo> allAuditLogs) {
-		int rowTotal = 0;
-		rowTotal = allAuditLogs.size();
-		if (rowTotal > 0) {
-			for (AuditLogInfo t : allAuditLogs) {
-				t.setRowTotal(rowTotal);
-			}
-		}
-		if (rowTotal >= (offset + limit - 1)) {
-			return allAuditLogs.subList(offset - 1, offset + limit - 1);
-		} else {
-			return allAuditLogs.subList(offset - 1, rowTotal);
-		}
-	}
-
-	/***
-	 * Gets Sorted Audit Logs List
-	 * 
-	 * @param auditLogInfo
-	 * @param id
-	 * @return
-	 * @throws ParseException
-	 */
-	public List<AuditLogInfo> getSortedAuditLogResults(
-			AuditLogCommonInfo auditLogInfo, ObjectId id) throws ParseException {
-		Datastore ds = getDatastore();
-		Query<UserProfile> profileQuery = ds.createQuery(UserProfile.class);
-		UserProfile q = profileQuery.field("_id").equal(id).get();
-		List<AuditLogInfo> allAuditLogs = new ArrayList<AuditLogInfo>();
-		if (q.getAuditLog() != null && q.getAuditLog().size() != 0) {
-			for (AuditLog userProfileAudit : q.getAuditLog()) {
-				AuditLogInfo proposalAuditLog = new AuditLogInfo();
-				boolean isActionMatch = isAuditLogActionFieldProvided(
-						auditLogInfo.getAction(), userProfileAudit);
-				boolean isAuditedByMatch = isAuditLogAuditedByFieldProvided(
-						auditLogInfo.getAuditedBy(), userProfileAudit);
-				boolean isActivityDateFromMatch = isAuditLogActivityDateFromProvided(
-						auditLogInfo.getActivityOnFrom(), userProfileAudit);
-				boolean isActivityDateToMatch = isAuditLogActivityDateToProvided(
-						auditLogInfo.getActivityOnTo(), userProfileAudit);
-
-				if (isActionMatch && isAuditedByMatch
-						&& isActivityDateFromMatch && isActivityDateToMatch) {
-					proposalAuditLog.setUserName(userProfileAudit
-							.getUserProfile().getUserAccount().getUserName());
-					proposalAuditLog.setUserFullName(userProfileAudit
-							.getUserProfile().getFullName());
-					proposalAuditLog.setAction(userProfileAudit.getAction());
-					proposalAuditLog.setActivityDate(userProfileAudit
-							.getActivityDate());
-					allAuditLogs.add(proposalAuditLog);
-				}
-			}
-		}
-		Collections.sort(allAuditLogs);
-		return allAuditLogs;
-	}
-
-	/***
-	 * Is Audit Log Activity Date To Provided
-	 * 
-	 * @param activityOnTo
-	 * @param userProfileAudit
-	 * @return
-	 * @throws ParseException
-	 */
-	private boolean isAuditLogActivityDateToProvided(String activityOnTo,
-			AuditLog userProfileAudit) throws ParseException {
-		if (activityOnTo != null) {
-			Date activityDateTo = formatter.parse(activityOnTo);
-			if (userProfileAudit.getActivityDate().compareTo(activityDateTo) > 0) {
-				return false;
-			} else if (userProfileAudit.getActivityDate().compareTo(
-					activityDateTo) < 0) {
-				return true;
-			} else if (userProfileAudit.getActivityDate().compareTo(
-					activityDateTo) == 0) {
-				return true;
-			}
-		} else {
-			return true;
-		}
-		return false;
-	}
-
-	/***
-	 * Is Audit Log Activity Date From Provided
-	 * 
-	 * @param activityOnFrom
-	 * @param userProfileAudit
-	 * @return
-	 * @throws ParseException
-	 */
-	private boolean isAuditLogActivityDateFromProvided(String activityOnFrom,
-			AuditLog userProfileAudit) throws ParseException {
-		if (activityOnFrom != null) {
-			Date activityDateFrom = formatter.parse(activityOnFrom);
-			if (userProfileAudit.getActivityDate().compareTo(activityDateFrom) > 0) {
-				return true;
-			} else if (userProfileAudit.getActivityDate().compareTo(
-					activityDateFrom) < 0) {
-				return false;
-			} else if (userProfileAudit.getActivityDate().compareTo(
-					activityDateFrom) == 0) {
-				return true;
-			}
-		} else {
-			return true;
-		}
-		return false;
-	}
-
-	/***
-	 * Is Audit Log Audited By Provided
-	 * 
-	 * @param auditedBy
-	 * @param userProfileAudit
-	 * @return
-	 */
-	private boolean isAuditLogAuditedByFieldProvided(String auditedBy,
-			AuditLog userProfileAudit) {
-		if (auditedBy != null) {
-			if (userProfileAudit.getUserProfile().getUserAccount()
-					.getUserName().toLowerCase()
-					.contains(auditedBy.toLowerCase())) {
-				return true;
-			} else if (userProfileAudit.getUserProfile().getFirstName()
-					.toLowerCase().contains(auditedBy.toLowerCase())) {
-				return true;
-			} else if (userProfileAudit.getUserProfile().getMiddleName()
-					.toLowerCase().contains(auditedBy.toLowerCase())) {
-				return true;
-			} else if (userProfileAudit.getUserProfile().getLastName()
-					.toLowerCase().contains(auditedBy.toLowerCase())) {
-				return true;
-			}
-		} else {
-			return true;
-		}
-		return false;
-	}
-
-	/***
-	 * Is Audit Log Action Provided
-	 * 
-	 * @param action
-	 * @param userProfileAudit
-	 * @return
-	 */
-	private boolean isAuditLogActionFieldProvided(String action,
-			AuditLog userProfileAudit) {
-		if (action != null) {
-			if (userProfileAudit.getAction().toLowerCase()
-					.contains(action.toLowerCase())) {
-				return true;
-			}
-		} else {
-			return true;
-		}
-		return false;
 	}
 
 	@SuppressWarnings("unused")
@@ -707,6 +493,72 @@ public class UserProfileDAO extends BasicDAO<UserProfile, String> {
 		emailUtil.sendMailWithoutAuth(newProfile.getWorkEmails().get(0),
 				"Successfully created an account " + newProfile.getFullName(),
 				messageBody);
+	}
+
+	/**
+	 * Binds User Info From user Sign up from
+	 * 
+	 * @param newAccount
+	 * @param newProfile
+	 * @param userInfo
+	 * @throws ParseException
+	 */
+	public void bindUserInfo(UserAccount newAccount, UserProfile newProfile,
+			JsonNode userInfo) throws ParseException {
+		String userEmail = new String();
+		newAccount.setAddedOn(new Date());
+		if (userInfo != null && userInfo.has("UserName")) {
+			String loginUserName = userInfo.get("UserName").textValue();
+			newAccount.setUserName(loginUserName);
+		}
+		if (userInfo != null && userInfo.has("Password")) {
+			newAccount.setPassword(userInfo.get("Password").textValue());
+		}
+		newProfile.setUserAccount(newAccount);
+		if (userInfo != null && userInfo.has("FirstName")) {
+			newProfile.setFirstName(userInfo.get("FirstName").textValue());
+		}
+		if (userInfo != null && userInfo.has("MiddleName")) {
+			newProfile.setMiddleName(userInfo.get("MiddleName").textValue());
+		}
+		if (userInfo != null && userInfo.has("LastName")) {
+			newProfile.setLastName(userInfo.get("LastName").textValue());
+		}
+		if (userInfo != null && userInfo.has("DOB")) {
+			Date dob = formatter.parse(userInfo.get("DOB").textValue());
+			newProfile.setDateOfBirth(dob);
+		}
+		if (userInfo != null && userInfo.has("Gender")) {
+			newProfile.setGender(userInfo.get("Gender").textValue());
+		}
+		Address newAddress = new Address();
+		if (userInfo != null && userInfo.has("Street")) {
+			newAddress.setStreet(userInfo.get("Street").textValue());
+		}
+		if (userInfo != null && userInfo.has("Apt")) {
+			newAddress.setApt(userInfo.get("Apt").textValue());
+		}
+		if (userInfo != null && userInfo.has("City")) {
+			newAddress.setCity(userInfo.get("City").textValue());
+		}
+		if (userInfo != null && userInfo.has("State")) {
+			newAddress.setState(userInfo.get("State").textValue());
+		}
+		if (userInfo != null && userInfo.has("Zip")) {
+			newAddress.setZipcode(userInfo.get("Zip").textValue());
+		}
+		if (userInfo != null && userInfo.has("Country")) {
+			newAddress.setCountry(userInfo.get("Country").textValue());
+		}
+		newProfile.getAddresses().add(newAddress);
+		if (userInfo != null && userInfo.has("MobileNumber")) {
+			newProfile.getMobileNumbers().add(
+					userInfo.get("MobileNumber").textValue());
+		}
+		if (userInfo != null && userInfo.has("WorkEmail")) {
+			userEmail = userInfo.get("WorkEmail").textValue();
+			newProfile.getWorkEmails().add(userEmail);
+		}
 	}
 
 	public void saveUser(UserProfile newProfile, UserProfile authorProfile) {
@@ -1108,34 +960,45 @@ public class UserProfileDAO extends BasicDAO<UserProfile, String> {
 		return userProposalCount;
 	}
 
-	/***
-	 * Gets Supervisory Personnel For a Proposal
+	/**
+	 * Adds User Login Details
 	 * 
-	 * @param College
-	 * @param department
-	 * @param positionTitle
-	 * @param isAdmin
+	 * @param userID
+	 * @param newAccount
+	 * @param existingUserAccount
+	 * @param existingUserProfile
+	 * @param userInfo
 	 * @return
 	 */
-	public List<UserProfile> getSupervisoryPersonnels(String College,
-			String department, String positionTitle, boolean isAdmin) {
-		Datastore ds = getDatastore();
-		Query<UserProfile> profileQuery = ds.createQuery(UserProfile.class);
-		if (isAdmin) {
-			profileQuery.and(
-					profileQuery.criteria("details.college").equal(College),
-					profileQuery.criteria("details.position title").equal(
-							positionTitle));
-		} else {
-			profileQuery.and(
-					profileQuery.criteria("details.department").equal(
-							department),
-					profileQuery.criteria("details.position title").equal(
-							positionTitle),
-					profileQuery.criteria("details.college").equal(College));
+	public UserAccount addUserLoginDetails(String userID,
+			UserAccount newAccount, UserAccount existingUserAccount,
+			UserProfile existingUserProfile, JsonNode userInfo) {
+		if (userInfo != null && userInfo.has("UserName")) {
+			String userNameOf = userInfo.get("UserName").textValue();
+			if (!userID.equals("0") && existingUserProfile != null) {
+				existingUserAccount = existingUserProfile.getUserAccount();
+				if (!existingUserAccount.getUserName().equals(userNameOf)) {
+					existingUserAccount = null;
+				}
+			} else {
+				newAccount.setUserName(userNameOf);
+			}
 		}
-		return profileQuery.asList();
+		if (userInfo != null && userInfo.has("Password")) {
+			if (!userID.equals("0")) {
+				if (!existingUserAccount.getPassword().equals(
+						userInfo.get("Password").textValue())) {
+					existingUserAccount.setPassword(userInfo.get("Password")
+							.textValue());
+				}
+			} else {
+				newAccount.setPassword(userInfo.get("Password").textValue());
+			}
+		}
+		return existingUserAccount;
 	}
+
+	// Sessions
 
 	/**
 	 * Binds User Info From login user Session
@@ -1178,72 +1041,6 @@ public class UserProfileDAO extends BasicDAO<UserProfile, String> {
 		}
 
 		return userInfo;
-	}
-
-	/**
-	 * Binds User Info From user Sign up from
-	 * 
-	 * @param newAccount
-	 * @param newProfile
-	 * @param userInfo
-	 * @throws ParseException
-	 */
-	public void bindUserInfo(UserAccount newAccount, UserProfile newProfile,
-			JsonNode userInfo) throws ParseException {
-		String userEmail = new String();
-		newAccount.setAddedOn(new Date());
-		if (userInfo != null && userInfo.has("UserName")) {
-			String loginUserName = userInfo.get("UserName").textValue();
-			newAccount.setUserName(loginUserName);
-		}
-		if (userInfo != null && userInfo.has("Password")) {
-			newAccount.setPassword(userInfo.get("Password").textValue());
-		}
-		newProfile.setUserAccount(newAccount);
-		if (userInfo != null && userInfo.has("FirstName")) {
-			newProfile.setFirstName(userInfo.get("FirstName").textValue());
-		}
-		if (userInfo != null && userInfo.has("MiddleName")) {
-			newProfile.setMiddleName(userInfo.get("MiddleName").textValue());
-		}
-		if (userInfo != null && userInfo.has("LastName")) {
-			newProfile.setLastName(userInfo.get("LastName").textValue());
-		}
-		if (userInfo != null && userInfo.has("DOB")) {
-			Date dob = formatter.parse(userInfo.get("DOB").textValue());
-			newProfile.setDateOfBirth(dob);
-		}
-		if (userInfo != null && userInfo.has("Gender")) {
-			newProfile.setGender(userInfo.get("Gender").textValue());
-		}
-		Address newAddress = new Address();
-		if (userInfo != null && userInfo.has("Street")) {
-			newAddress.setStreet(userInfo.get("Street").textValue());
-		}
-		if (userInfo != null && userInfo.has("Apt")) {
-			newAddress.setApt(userInfo.get("Apt").textValue());
-		}
-		if (userInfo != null && userInfo.has("City")) {
-			newAddress.setCity(userInfo.get("City").textValue());
-		}
-		if (userInfo != null && userInfo.has("State")) {
-			newAddress.setState(userInfo.get("State").textValue());
-		}
-		if (userInfo != null && userInfo.has("Zip")) {
-			newAddress.setZipcode(userInfo.get("Zip").textValue());
-		}
-		if (userInfo != null && userInfo.has("Country")) {
-			newAddress.setCountry(userInfo.get("Country").textValue());
-		}
-		newProfile.getAddresses().add(newAddress);
-		if (userInfo != null && userInfo.has("MobileNumber")) {
-			newProfile.getMobileNumbers().add(
-					userInfo.get("MobileNumber").textValue());
-		}
-		if (userInfo != null && userInfo.has("WorkEmail")) {
-			userEmail = userInfo.get("WorkEmail").textValue();
-			newProfile.getWorkEmails().add(userEmail);
-		}
 	}
 
 	public void setUserCurrentSession(HttpServletRequest req, String userName,
@@ -1357,44 +1154,6 @@ public class UserProfileDAO extends BasicDAO<UserProfile, String> {
 			return (String) session.getAttribute("isAdmin");
 		}
 		return null;
-	}
-
-	/**
-	 * Adds User Login Details
-	 * 
-	 * @param userID
-	 * @param newAccount
-	 * @param existingUserAccount
-	 * @param existingUserProfile
-	 * @param userInfo
-	 * @return
-	 */
-	public UserAccount addUserLoginDetails(String userID,
-			UserAccount newAccount, UserAccount existingUserAccount,
-			UserProfile existingUserProfile, JsonNode userInfo) {
-		if (userInfo != null && userInfo.has("UserName")) {
-			String userNameOf = userInfo.get("UserName").textValue();
-			if (!userID.equals("0") && existingUserProfile != null) {
-				existingUserAccount = existingUserProfile.getUserAccount();
-				if (!existingUserAccount.getUserName().equals(userNameOf)) {
-					existingUserAccount = null;
-				}
-			} else {
-				newAccount.setUserName(userNameOf);
-			}
-		}
-		if (userInfo != null && userInfo.has("Password")) {
-			if (!userID.equals("0")) {
-				if (!existingUserAccount.getPassword().equals(
-						userInfo.get("Password").textValue())) {
-					existingUserAccount.setPassword(userInfo.get("Password")
-							.textValue());
-				}
-			} else {
-				newAccount.setPassword(userInfo.get("Password").textValue());
-			}
-		}
-		return existingUserAccount;
 	}
 
 	/**
@@ -1785,4 +1544,248 @@ public class UserProfileDAO extends BasicDAO<UserProfile, String> {
 		return filename;
 	}
 
+	/***
+	 * Gets Supervisory Personnel For a Proposal
+	 * 
+	 * @param College
+	 * @param department
+	 * @param positionTitle
+	 * @param isAdmin
+	 * @return
+	 */
+	public List<UserProfile> getSupervisoryPersonnels(String College,
+			String department, String positionTitle, boolean isAdmin) {
+		Datastore ds = getDatastore();
+		Query<UserProfile> profileQuery = ds.createQuery(UserProfile.class);
+		if (isAdmin) {
+			profileQuery.and(
+					profileQuery.criteria("details.college").equal(College),
+					profileQuery.criteria("details.position title").equal(
+							positionTitle));
+		} else {
+			profileQuery.and(
+					profileQuery.criteria("details.department").equal(
+							department),
+					profileQuery.criteria("details.position title").equal(
+							positionTitle),
+					profileQuery.criteria("details.college").equal(College));
+		}
+		return profileQuery.asList();
+	}
+
+	// Audit Log Functions
+
+	/**
+	 * Gets the Recent User Profile AuditLog
+	 * 
+	 * @param userProfile
+	 * @param user
+	 * @return
+	 */
+	private UserInfo getRecentUserProfileAuditLog(UserProfile userProfile,
+			UserInfo user) {
+		Date lastAudited = null;
+		String lastAuditedBy = new String();
+		String lastAuditAction = new String();
+		int auditLogCount = userProfile.getAuditLog().size();
+		if (userProfile.getAuditLog() != null && auditLogCount != 0) {
+			AuditLog auditLog = userProfile.getAuditLog()
+					.get(auditLogCount - 1);
+			lastAudited = auditLog.getActivityDate();
+			lastAuditedBy = auditLog.getUserProfile().getFullName();
+			lastAuditAction = auditLog.getAction();
+		}
+		user.setLastAudited(lastAudited);
+		user.setLastAuditedBy(lastAuditedBy);
+		user.setLastAuditAction(lastAuditAction);
+		return user;
+	}
+
+	/***
+	 * Finds All Logs in a AuditLog Grid for a User
+	 * 
+	 * @param offset
+	 * @param limit
+	 * @param id
+	 * @param auditLogInfo
+	 * @return
+	 * @throws ParseException
+	 */
+	public List<AuditLogInfo> findAllProposalAuditLogForGrid(int offset,
+			int limit, ObjectId id, AuditLogCommonInfo auditLogInfo)
+			throws ParseException {
+		return getAuditListBasedOnPaging(offset, limit,
+				getSortedAuditLogResults(auditLogInfo, id));
+	}
+
+	/***
+	 * Gets Audit Logs list based On User provided Paging size
+	 * 
+	 * @param offset
+	 * @param limit
+	 * @param allAuditLogs
+	 * @return
+	 */
+	private List<AuditLogInfo> getAuditListBasedOnPaging(int offset, int limit,
+			List<AuditLogInfo> allAuditLogs) {
+		int rowTotal = 0;
+		rowTotal = allAuditLogs.size();
+		if (rowTotal > 0) {
+			for (AuditLogInfo t : allAuditLogs) {
+				t.setRowTotal(rowTotal);
+			}
+		}
+		if (rowTotal >= (offset + limit - 1)) {
+			return allAuditLogs.subList(offset - 1, offset + limit - 1);
+		} else {
+			return allAuditLogs.subList(offset - 1, rowTotal);
+		}
+	}
+
+	/***
+	 * Gets Sorted Audit Logs List
+	 * 
+	 * @param auditLogInfo
+	 * @param id
+	 * @return
+	 * @throws ParseException
+	 */
+	public List<AuditLogInfo> getSortedAuditLogResults(
+			AuditLogCommonInfo auditLogInfo, ObjectId id) throws ParseException {
+		Datastore ds = getDatastore();
+		Query<UserProfile> profileQuery = ds.createQuery(UserProfile.class);
+		UserProfile q = profileQuery.field("_id").equal(id).get();
+		List<AuditLogInfo> allAuditLogs = new ArrayList<AuditLogInfo>();
+		if (q.getAuditLog() != null && q.getAuditLog().size() != 0) {
+			for (AuditLog userProfileAudit : q.getAuditLog()) {
+				AuditLogInfo proposalAuditLog = new AuditLogInfo();
+				boolean isActionMatch = isAuditLogActionFieldProvided(
+						auditLogInfo.getAction(), userProfileAudit);
+				boolean isAuditedByMatch = isAuditLogAuditedByFieldProvided(
+						auditLogInfo.getAuditedBy(), userProfileAudit);
+				boolean isActivityDateFromMatch = isAuditLogActivityDateFromProvided(
+						auditLogInfo.getActivityOnFrom(), userProfileAudit);
+				boolean isActivityDateToMatch = isAuditLogActivityDateToProvided(
+						auditLogInfo.getActivityOnTo(), userProfileAudit);
+
+				if (isActionMatch && isAuditedByMatch
+						&& isActivityDateFromMatch && isActivityDateToMatch) {
+					proposalAuditLog.setUserName(userProfileAudit
+							.getUserProfile().getUserAccount().getUserName());
+					proposalAuditLog.setUserFullName(userProfileAudit
+							.getUserProfile().getFullName());
+					proposalAuditLog.setAction(userProfileAudit.getAction());
+					proposalAuditLog.setActivityDate(userProfileAudit
+							.getActivityDate());
+					allAuditLogs.add(proposalAuditLog);
+				}
+			}
+		}
+		Collections.sort(allAuditLogs);
+		return allAuditLogs;
+	}
+
+	/***
+	 * Is Audit Log Activity Date To Provided
+	 * 
+	 * @param activityOnTo
+	 * @param userProfileAudit
+	 * @return
+	 * @throws ParseException
+	 */
+	private boolean isAuditLogActivityDateToProvided(String activityOnTo,
+			AuditLog userProfileAudit) throws ParseException {
+		if (activityOnTo != null) {
+			Date activityDateTo = formatter.parse(activityOnTo);
+			if (userProfileAudit.getActivityDate().compareTo(activityDateTo) > 0) {
+				return false;
+			} else if (userProfileAudit.getActivityDate().compareTo(
+					activityDateTo) < 0) {
+				return true;
+			} else if (userProfileAudit.getActivityDate().compareTo(
+					activityDateTo) == 0) {
+				return true;
+			}
+		} else {
+			return true;
+		}
+		return false;
+	}
+
+	/***
+	 * Is Audit Log Activity Date From Provided
+	 * 
+	 * @param activityOnFrom
+	 * @param userProfileAudit
+	 * @return
+	 * @throws ParseException
+	 */
+	private boolean isAuditLogActivityDateFromProvided(String activityOnFrom,
+			AuditLog userProfileAudit) throws ParseException {
+		if (activityOnFrom != null) {
+			Date activityDateFrom = formatter.parse(activityOnFrom);
+			if (userProfileAudit.getActivityDate().compareTo(activityDateFrom) > 0) {
+				return true;
+			} else if (userProfileAudit.getActivityDate().compareTo(
+					activityDateFrom) < 0) {
+				return false;
+			} else if (userProfileAudit.getActivityDate().compareTo(
+					activityDateFrom) == 0) {
+				return true;
+			}
+		} else {
+			return true;
+		}
+		return false;
+	}
+
+	/***
+	 * Is Audit Log Audited By Provided
+	 * 
+	 * @param auditedBy
+	 * @param userProfileAudit
+	 * @return
+	 */
+	private boolean isAuditLogAuditedByFieldProvided(String auditedBy,
+			AuditLog userProfileAudit) {
+		if (auditedBy != null) {
+			if (userProfileAudit.getUserProfile().getUserAccount()
+					.getUserName().toLowerCase()
+					.contains(auditedBy.toLowerCase())) {
+				return true;
+			} else if (userProfileAudit.getUserProfile().getFirstName()
+					.toLowerCase().contains(auditedBy.toLowerCase())) {
+				return true;
+			} else if (userProfileAudit.getUserProfile().getMiddleName()
+					.toLowerCase().contains(auditedBy.toLowerCase())) {
+				return true;
+			} else if (userProfileAudit.getUserProfile().getLastName()
+					.toLowerCase().contains(auditedBy.toLowerCase())) {
+				return true;
+			}
+		} else {
+			return true;
+		}
+		return false;
+	}
+
+	/***
+	 * Is Audit Log Action Provided
+	 * 
+	 * @param action
+	 * @param userProfileAudit
+	 * @return
+	 */
+	private boolean isAuditLogActionFieldProvided(String action,
+			AuditLog userProfileAudit) {
+		if (action != null) {
+			if (userProfileAudit.getAction().toLowerCase()
+					.contains(action.toLowerCase())) {
+				return true;
+			}
+		} else {
+			return true;
+		}
+		return false;
+	}
 }

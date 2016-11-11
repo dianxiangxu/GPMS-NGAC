@@ -98,7 +98,7 @@ public class NotificationService {
 			return Response
 					.status(Response.Status.OK)
 					.entity(Long.toString(notificationDAO
-							.findAllNotificationCountAUser(userInfo))).build();
+							.findAllNotificationCountForAUser(userInfo))).build();
 		} catch (Exception e) {
 			log.error("Could not find Notifications count error e=", e);
 		}
@@ -127,7 +127,7 @@ public class NotificationService {
 		GPMSCommonInfo userInfo = userProfileDAO
 				.bindUserInfoFromSession(session);
 		long notificationCount = notificationDAO
-				.findAllNotificationCountAUser(userInfo);
+				.findAllNotificationCountForAUser(userInfo);
 		OutboundEvent.Builder eventBuilder = new OutboundEvent.Builder();
 		eventBuilder.name("notification");
 		eventBuilder.data(String.class, Long.toString(notificationCount));
@@ -155,7 +155,7 @@ public class NotificationService {
 				userInfo = new GPMSCommonInfo(commonObj);
 			}
 			List<NotificationLog> notifications = notificationDAO
-					.findAllNotificationForAUser(userInfo);
+					.findAllNotificationInfoForAUser(userInfo);
 			return Response
 					.status(Response.Status.OK)
 					.entity(mapper.writerWithDefaultPrettyPrinter()

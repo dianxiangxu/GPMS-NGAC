@@ -1176,7 +1176,6 @@ public class UserService {
 			UserProfile newProfile, UserAccount existingUserAccount,
 			UserProfile existingUserProfile, UserProfile oldUserProfile,
 			boolean isActiveUser, UserProfile authorProfile) {
-		NotificationLog notification = new NotificationLog();
 		if (!userID.equals("0")) {
 			if (!oldUserProfile.equals(existingUserProfile)) {
 				if (!oldUserProfile.getUserAccount()
@@ -1184,57 +1183,28 @@ public class UserService {
 					userAccountDAO.save(existingUserAccount);
 				}
 				userProfileDAO.updateUser(existingUserProfile, authorProfile);
-				notification = new NotificationLog();
-				notification.setType("User");
+				String action = new String();
 				if (isActiveUser) {
-					notification.setAction("Account is activated.");
+					action = "Account is activated.";
 				} else {
-					notification.setAction("Account is updated.");
+					action = "Account is updated.";
 				}
-				notification.setUserProfileId(existingUserProfile.getId()
-						.toString());
-				notification.setUsername(existingUserProfile.getUserAccount()
-						.getUserName());
-				notification.setForAdmin(true);
-				notificationDAO.save(notification);
+				notificationDAO.notifyAdmin(existingUserProfile, "User",
+						action, true);
 				for (PositionDetails positions : existingUserProfile
 						.getDetails()) {
-					notification = new NotificationLog();
-					notification.setType("User");
-					notification.setAction("Account is updated.");
-					notification.setUserProfileId(existingUserProfile.getId()
-							.toString());
-					notification.setUsername(existingUserProfile
-							.getUserAccount().getUserName());
-					notification.setCollege(positions.getCollege());
-					notification.setDepartment(positions.getDepartment());
-					notification.setPositionType(positions.getPositionType());
-					notification.setPositionTitle(positions.getPositionTitle());
-					notificationDAO.save(notification);
+					notificationDAO.notifyInvestigators(existingUserProfile,
+							"User", "Account is updated.", false, positions);
 				}
 			}
 		} else {
 			userAccountDAO.save(newAccount);
 			userProfileDAO.saveUser(newProfile, authorProfile);
-			notification = new NotificationLog();
-			notification.setType("User");
-			notification.setAction("Account is created.");
-			notification.setUserProfileId(newProfile.getId().toString());
-			notification.setUsername(newProfile.getUserAccount().getUserName());
-			notification.setForAdmin(true);
-			notificationDAO.save(notification);
+			notificationDAO.notifyAdmin(newProfile, "User",
+					"Account is created.", true);
 			for (PositionDetails positions : newProfile.getDetails()) {
-				notification = new NotificationLog();
-				notification.setType("User");
-				notification.setAction("Account is created.");
-				notification.setUserProfileId(newProfile.getId().toString());
-				notification.setUsername(newProfile.getUserAccount()
-						.getUserName());
-				notification.setCollege(positions.getCollege());
-				notification.setDepartment(positions.getDepartment());
-				notification.setPositionType(positions.getPositionType());
-				notification.setPositionTitle(positions.getPositionTitle());
-				notificationDAO.save(notification);
+				notificationDAO.notifyInvestigators(newProfile, "User",
+						"Account is created.", false, positions);
 			}
 		}
 		OutboundEvent.Builder eventBuilder = new OutboundEvent.Builder();

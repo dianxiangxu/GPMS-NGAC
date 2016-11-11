@@ -23,6 +23,7 @@ import gpms.model.DeleteType;
 import gpms.model.EmailCommonInfo;
 import gpms.model.FundingSource;
 import gpms.model.GPMSCommonInfo;
+import gpms.model.InvestigatorInfo;
 import gpms.model.InvestigatorRefAndPosition;
 import gpms.model.OSPSectionInfo;
 import gpms.model.PositionDetails;
@@ -246,191 +247,6 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 		} else {
 			return false;
 		}
-	}
-
-	/***
-	 * Finds All Logs in a AuditLog Grid for a Proposal
-	 * 
-	 * @param offset
-	 * @param limit
-	 * @param id
-	 * @param auditLogInfo
-	 * @return
-	 * @throws ParseException
-	 */
-	public List<AuditLogInfo> findAllProposalAuditLogForGrid(int offset,
-			int limit, ObjectId id, AuditLogCommonInfo auditLogInfo)
-			throws ParseException {
-		return getAuditListBasedOnPaging(offset, limit,
-				getSortedAuditLogResults(auditLogInfo, id));
-	}
-
-	/***
-	 * Gets Audit Logs list based On User provided Paging size
-	 * 
-	 * @param offset
-	 * @param limit
-	 * @param allAuditLogs
-	 * @return
-	 */
-	private List<AuditLogInfo> getAuditListBasedOnPaging(int offset, int limit,
-			List<AuditLogInfo> allAuditLogs) {
-		int rowTotal = 0;
-		rowTotal = allAuditLogs.size();
-		if (rowTotal > 0) {
-			for (AuditLogInfo t : allAuditLogs) {
-				t.setRowTotal(rowTotal);
-			}
-		}
-		if (rowTotal >= (offset + limit - 1)) {
-			return allAuditLogs.subList(offset - 1, offset + limit - 1);
-		} else {
-			return allAuditLogs.subList(offset - 1, rowTotal);
-		}
-	}
-
-	/***
-	 * Gets Sorted Audit Logs List
-	 * 
-	 * @param auditLogInfo
-	 * @param id
-	 * @return
-	 * @throws ParseException
-	 */
-	public List<AuditLogInfo> getSortedAuditLogResults(
-			AuditLogCommonInfo auditLogInfo, ObjectId id) throws ParseException {
-		Datastore ds = getDatastore();
-		Query<Proposal> proposalQuery = ds.createQuery(Proposal.class);
-		Proposal q = proposalQuery.field("_id").equal(id).get();
-		List<AuditLogInfo> allAuditLogs = new ArrayList<AuditLogInfo>();
-		if (q.getAuditLog() != null && q.getAuditLog().size() != 0) {
-			for (AuditLog poposalAudit : q.getAuditLog()) {
-				AuditLogInfo proposalAuditLog = new AuditLogInfo();
-				boolean isActionMatch = isAuditLogActionFieldProvided(
-						auditLogInfo.getAction(), poposalAudit);
-				boolean isAuditedByMatch = isAuditLogAuditedByFieldProvided(
-						auditLogInfo.getAuditedBy(), poposalAudit);
-				boolean isActivityDateFromMatch = isAuditLogActivityDateFromProvided(
-						auditLogInfo.getActivityOnFrom(), poposalAudit);
-				boolean isActivityDateToMatch = isAuditLogActivityDateToProvided(
-						auditLogInfo.getActivityOnTo(), poposalAudit);
-
-				if (isActionMatch && isAuditedByMatch
-						&& isActivityDateFromMatch && isActivityDateToMatch) {
-					proposalAuditLog.setUserName(poposalAudit.getUserProfile()
-							.getUserAccount().getUserName());
-					proposalAuditLog.setUserFullName(poposalAudit
-							.getUserProfile().getFullName());
-					proposalAuditLog.setAction(poposalAudit.getAction());
-					proposalAuditLog.setActivityDate(poposalAudit
-							.getActivityDate());
-					allAuditLogs.add(proposalAuditLog);
-				}
-			}
-		}
-		Collections.sort(allAuditLogs);
-		return allAuditLogs;
-	}
-
-	/***
-	 * Is Audit Log Activity Date To Provided
-	 * 
-	 * @param activityOnTo
-	 * @param poposalAudit
-	 * @return
-	 * @throws ParseException
-	 */
-	private boolean isAuditLogActivityDateToProvided(String activityOnTo,
-			AuditLog poposalAudit) throws ParseException {
-		if (activityOnTo != null) {
-			Date activityDateTo = formatter.parse(activityOnTo);
-			if (poposalAudit.getActivityDate().compareTo(activityDateTo) > 0) {
-				return false;
-			} else if (poposalAudit.getActivityDate().compareTo(activityDateTo) < 0) {
-				return true;
-			} else if (poposalAudit.getActivityDate().compareTo(activityDateTo) == 0) {
-				return true;
-			}
-		} else {
-			return true;
-		}
-		return false;
-	}
-
-	/***
-	 * Is Audit Log Activity Date From Provided
-	 * 
-	 * @param activityOnFrom
-	 * @param poposalAudit
-	 * @return
-	 * @throws ParseException
-	 */
-	private boolean isAuditLogActivityDateFromProvided(String activityOnFrom,
-			AuditLog poposalAudit) throws ParseException {
-		if (activityOnFrom != null) {
-			Date activityDateFrom = formatter.parse(activityOnFrom);
-			if (poposalAudit.getActivityDate().compareTo(activityDateFrom) > 0) {
-				return true;
-			} else if (poposalAudit.getActivityDate().compareTo(
-					activityDateFrom) < 0) {
-				return false;
-			} else if (poposalAudit.getActivityDate().compareTo(
-					activityDateFrom) == 0) {
-				return true;
-			}
-		} else {
-			return true;
-		}
-		return false;
-	}
-
-	/***
-	 * Is Audit Log Audited By Provided
-	 * 
-	 * @param auditedBy
-	 * @param poposalAudit
-	 * @return
-	 */
-	private boolean isAuditLogAuditedByFieldProvided(String auditedBy,
-			AuditLog poposalAudit) {
-		if (auditedBy != null) {
-			if (poposalAudit.getUserProfile().getUserAccount().getUserName()
-					.toLowerCase().contains(auditedBy.toLowerCase())) {
-				return true;
-			} else if (poposalAudit.getUserProfile().getFirstName()
-					.toLowerCase().contains(auditedBy.toLowerCase())) {
-				return true;
-			} else if (poposalAudit.getUserProfile().getMiddleName()
-					.toLowerCase().contains(auditedBy.toLowerCase())) {
-				return true;
-			} else if (poposalAudit.getUserProfile().getLastName()
-					.toLowerCase().contains(auditedBy.toLowerCase())) {
-				return true;
-			}
-		} else {
-			return true;
-		}
-		return false;
-	}
-
-	/***
-	 * Is Audit Log Action Provided
-	 * 
-	 * @param action
-	 * @param poposalAudit
-	 * @return
-	 */
-	private boolean isAuditLogActionFieldProvided(String action,
-			AuditLog poposalAudit) {
-		if (action != null) {
-			if (poposalAudit.getAction().toLowerCase()
-					.contains(action.toLowerCase())) {
-				return true;
-			}
-		} else {
-			return true;
-		}
-		return false;
 	}
 
 	/***
@@ -679,77 +495,6 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	}
 
 	/***
-	 * Sets Proposal Sponsor And Budget Info
-	 * 
-	 * @param userProposal
-	 * @param proposalGridInfo
-	 */
-	private void setProposalSponsorAndBudgetInfo(Proposal userProposal,
-			ProposalInfo proposalGridInfo) {
-		proposalGridInfo.setGrantingAgencies(userProposal
-				.getSponsorAndBudgetInfo().getGrantingAgency());
-		proposalGridInfo.setDirectCosts(userProposal.getSponsorAndBudgetInfo()
-				.getDirectCosts());
-		proposalGridInfo.setFaCosts(userProposal.getSponsorAndBudgetInfo()
-				.getFaCosts());
-		proposalGridInfo.setTotalCosts(userProposal.getSponsorAndBudgetInfo()
-				.getTotalCosts());
-		proposalGridInfo.setFaRate(userProposal.getSponsorAndBudgetInfo()
-				.getFaRate());
-		proposalGridInfo.setDateCreated(userProposal.getDateCreated());
-		proposalGridInfo.setDateSubmitted(userProposal.getDateSubmitted());
-		proposalGridInfo.setDueDate(userProposal.getProjectInfo().getDueDate());
-		proposalGridInfo.setProjectPeriodFrom(userProposal.getProjectInfo()
-				.getProjectPeriod().getFrom());
-		proposalGridInfo.setProjectPeriodTo(userProposal.getProjectInfo()
-				.getProjectPeriod().getTo());
-	}
-
-	/***
-	 * Sets Proposal Project Info
-	 * 
-	 * @param userProposal
-	 * @param proposalGridInfo
-	 */
-	private void setProposalProjectInfo(Proposal userProposal,
-			ProposalInfo proposalGridInfo) {
-		proposalGridInfo.setProjectTitle(userProposal.getProjectInfo()
-				.getProjectTitle());
-		ProjectType projectPropsalType = userProposal.getProjectInfo()
-				.getProjectType();
-		if (projectPropsalType.isResearchBasic()) {
-			proposalGridInfo.setProjectType("Research-basic");
-		} else if (projectPropsalType.isResearchApplied()) {
-			proposalGridInfo.setProjectType("Research-applied");
-		} else if (projectPropsalType.isResearchDevelopment()) {
-			proposalGridInfo.setProjectType("Research-development");
-		} else if (projectPropsalType.isInstruction()) {
-			proposalGridInfo.setProjectType("Instruction");
-		} else if (projectPropsalType.isOtherSponsoredActivity()) {
-			proposalGridInfo.setProjectType("Other sponsored activity");
-		}
-
-		TypeOfRequest typeOfRequest = userProposal.getProjectInfo()
-				.getTypeOfRequest();
-		if (typeOfRequest.isPreProposal()) {
-			proposalGridInfo.getTypeOfRequest().add("Pre-proposal");
-		} else if (typeOfRequest.isNewProposal()) {
-			proposalGridInfo.getTypeOfRequest().add("New proposal");
-		} else if (typeOfRequest.isContinuation()) {
-			proposalGridInfo.getTypeOfRequest().add("Continuation");
-		} else if (typeOfRequest.isSupplement()) {
-			proposalGridInfo.getTypeOfRequest().add("Supplement");
-		}
-
-		ProjectLocation pl = userProposal.getProjectInfo().getProjectLocation();
-		if (pl.isOffCampus()) {
-			proposalGridInfo.setProjectLocation("Off-campus");
-		} else if (pl.isOnCampus()) {
-			proposalGridInfo.setProjectLocation("On-campus");
-		}
-	}
-
-	/***
 	 * Finds All Proposals For Grid Binding
 	 * 
 	 * @param proposalInfo
@@ -825,82 +570,74 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	}
 
 	/***
-	 * Builds Query based on Search Criteria
+	 * Sets Proposal Sponsor And Budget Info
 	 * 
-	 * @param proposalInfo
-	 * @param userInfo
-	 * @return
-	 * @throws ParseException
+	 * @param userProposal
+	 * @param proposalGridInfo
 	 */
-	private Query<Proposal> buildSearchQuery(ProposalCommonInfo proposalInfo,
-			GPMSCommonInfo userInfo) throws ParseException {
-		Datastore ds = getDatastore();
-		Query<Proposal> proposalQuery = ds.createQuery(Proposal.class);
-		Query<UserProfile> profileQuery = ds.createQuery(UserProfile.class);
-		if (proposalInfo.getProjectTitle() != null) {
-			proposalQuery.field("project info.project title")
-					.containsIgnoreCase(proposalInfo.getProjectTitle());
+	private void setProposalSponsorAndBudgetInfo(Proposal userProposal,
+			ProposalInfo proposalGridInfo) {
+		proposalGridInfo.setGrantingAgencies(userProposal
+				.getSponsorAndBudgetInfo().getGrantingAgency());
+		proposalGridInfo.setDirectCosts(userProposal.getSponsorAndBudgetInfo()
+				.getDirectCosts());
+		proposalGridInfo.setFaCosts(userProposal.getSponsorAndBudgetInfo()
+				.getFaCosts());
+		proposalGridInfo.setTotalCosts(userProposal.getSponsorAndBudgetInfo()
+				.getTotalCosts());
+		proposalGridInfo.setFaRate(userProposal.getSponsorAndBudgetInfo()
+				.getFaRate());
+		proposalGridInfo.setDateCreated(userProposal.getDateCreated());
+		proposalGridInfo.setDateSubmitted(userProposal.getDateSubmitted());
+		proposalGridInfo.setDueDate(userProposal.getProjectInfo().getDueDate());
+		proposalGridInfo.setProjectPeriodFrom(userProposal.getProjectInfo()
+				.getProjectPeriod().getFrom());
+		proposalGridInfo.setProjectPeriodTo(userProposal.getProjectInfo()
+				.getProjectPeriod().getTo());
+	}
+
+	/***
+	 * Sets Proposal Project Info
+	 * 
+	 * @param userProposal
+	 * @param proposalGridInfo
+	 */
+	private void setProposalProjectInfo(Proposal userProposal,
+			ProposalInfo proposalGridInfo) {
+		proposalGridInfo.setProjectTitle(userProposal.getProjectInfo()
+				.getProjectTitle());
+		ProjectType projectPropsalType = userProposal.getProjectInfo()
+				.getProjectType();
+		if (projectPropsalType.isResearchBasic()) {
+			proposalGridInfo.setProjectType("Research-basic");
+		} else if (projectPropsalType.isResearchApplied()) {
+			proposalGridInfo.setProjectType("Research-applied");
+		} else if (projectPropsalType.isResearchDevelopment()) {
+			proposalGridInfo.setProjectType("Research-development");
+		} else if (projectPropsalType.isInstruction()) {
+			proposalGridInfo.setProjectType("Instruction");
+		} else if (projectPropsalType.isOtherSponsoredActivity()) {
+			proposalGridInfo.setProjectType("Other sponsored activity");
 		}
-		if (proposalInfo.getSubmittedOnFrom() != null
-				&& !proposalInfo.getSubmittedOnFrom().isEmpty()) {
-			Date receivedOnF = formatter.parse(proposalInfo
-					.getSubmittedOnFrom());
-			proposalQuery.field("date submitted").greaterThanOrEq(receivedOnF);
+
+		TypeOfRequest typeOfRequest = userProposal.getProjectInfo()
+				.getTypeOfRequest();
+		if (typeOfRequest.isPreProposal()) {
+			proposalGridInfo.getTypeOfRequest().add("Pre-proposal");
+		} else if (typeOfRequest.isNewProposal()) {
+			proposalGridInfo.getTypeOfRequest().add("New proposal");
+		} else if (typeOfRequest.isContinuation()) {
+			proposalGridInfo.getTypeOfRequest().add("Continuation");
+		} else if (typeOfRequest.isSupplement()) {
+			proposalGridInfo.getTypeOfRequest().add("Supplement");
 		}
-		if (proposalInfo.getSubmittedOnTo() != null
-				&& !proposalInfo.getSubmittedOnTo().isEmpty()) {
-			Date receivedOnT = formatter.parse(proposalInfo.getSubmittedOnTo());
-			proposalQuery.field("date submitted").lessThanOrEq(receivedOnT);
+
+		ProjectLocation pl = userProposal.getProjectInfo().getProjectLocation();
+		if (pl.isOffCampus()) {
+			proposalGridInfo.setProjectLocation("Off-campus");
+		} else if (pl.isOnCampus()) {
+			proposalGridInfo.setProjectLocation("On-campus");
 		}
-		if (proposalInfo.getTotalCostsFrom() != null
-				&& proposalInfo.getTotalCostsFrom() != 0.0) {
-			proposalQuery.field("sponsor and budget info.total costs")
-					.greaterThanOrEq(proposalInfo.getTotalCostsFrom());
-		}
-		if (proposalInfo.getTotalCostsTo() != null
-				&& proposalInfo.getTotalCostsTo() != 0.0) {
-			proposalQuery.field("sponsor and budget info.total costs")
-					.lessThanOrEq(proposalInfo.getTotalCostsTo());
-		}
-		if (proposalInfo.getProposalStatus() != null) {
-			proposalQuery.field("proposal status").contains(
-					proposalInfo.getProposalStatus());
-		}
-		if (!userInfo.getUserPositionTitle().equals("IRB")
-				&& !userInfo.getUserPositionTitle().equals(
-						"University Research Administrator")
-				&& !userInfo.getUserPositionTitle().equals(
-						"University Research Director")) {
-			if (userInfo.getUserPositionTitle().equals("Dean")
-					|| userInfo.getUserPositionTitle().equals("Associate Dean")) {
-				buildQueryForCollege(userInfo.getUserCollege(), proposalQuery);
-			} else if (userInfo.getUserPositionTitle().equals(
-					"Business Manager")
-					|| userInfo.getUserPositionTitle().equals(
-							"Department Administrative Assistant")
-					|| userInfo.getUserPositionTitle().equals(
-							"Department Chair")
-					|| userInfo.getUserPositionTitle()
-							.equals("Associate Chair")) {
-				buildQueryForCollegeAndDepartment(userInfo.getUserCollege(),
-						userInfo.getUserDepartment(), proposalQuery);
-			} else {
-				buildQueryForCollegeDepartmentAndPosition(
-						userInfo.getUserProfileID(), userInfo.getUserCollege(),
-						userInfo.getUserDepartment(),
-						userInfo.getUserPositionType(),
-						userInfo.getUserPositionTitle(), proposalQuery);
-			}
-		}
-		if (proposalInfo.getUsernameBy() != null) {
-			buildQueryForUserNameBy(proposalInfo.getUsernameBy(),
-					proposalInfo.getUserRole(), proposalQuery, profileQuery);
-		} else if (proposalInfo.getUsernameBy() == null
-				&& proposalInfo.getUserRole() != null) {
-			buildQueryForUserProposalRole(proposalInfo.getUserRole(),
-					userInfo.getUserProfileID(), proposalQuery);
-		}
-		return proposalQuery;
 	}
 
 	/***
@@ -1007,6 +744,85 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 				&& piUserPositionTitle.equals(positionTitle)) {
 			proposal.getCurrentuserProposalRoles().add("PI");
 		}
+	}
+
+	/***
+	 * Builds Query based on Search Criteria
+	 * 
+	 * @param proposalInfo
+	 * @param userInfo
+	 * @return
+	 * @throws ParseException
+	 */
+	private Query<Proposal> buildSearchQuery(ProposalCommonInfo proposalInfo,
+			GPMSCommonInfo userInfo) throws ParseException {
+		Datastore ds = getDatastore();
+		Query<Proposal> proposalQuery = ds.createQuery(Proposal.class);
+		Query<UserProfile> profileQuery = ds.createQuery(UserProfile.class);
+		if (proposalInfo.getProjectTitle() != null) {
+			proposalQuery.field("project info.project title")
+					.containsIgnoreCase(proposalInfo.getProjectTitle());
+		}
+		if (proposalInfo.getSubmittedOnFrom() != null
+				&& !proposalInfo.getSubmittedOnFrom().isEmpty()) {
+			Date receivedOnF = formatter.parse(proposalInfo
+					.getSubmittedOnFrom());
+			proposalQuery.field("date submitted").greaterThanOrEq(receivedOnF);
+		}
+		if (proposalInfo.getSubmittedOnTo() != null
+				&& !proposalInfo.getSubmittedOnTo().isEmpty()) {
+			Date receivedOnT = formatter.parse(proposalInfo.getSubmittedOnTo());
+			proposalQuery.field("date submitted").lessThanOrEq(receivedOnT);
+		}
+		if (proposalInfo.getTotalCostsFrom() != null
+				&& proposalInfo.getTotalCostsFrom() != 0.0) {
+			proposalQuery.field("sponsor and budget info.total costs")
+					.greaterThanOrEq(proposalInfo.getTotalCostsFrom());
+		}
+		if (proposalInfo.getTotalCostsTo() != null
+				&& proposalInfo.getTotalCostsTo() != 0.0) {
+			proposalQuery.field("sponsor and budget info.total costs")
+					.lessThanOrEq(proposalInfo.getTotalCostsTo());
+		}
+		if (proposalInfo.getProposalStatus() != null) {
+			proposalQuery.field("proposal status").contains(
+					proposalInfo.getProposalStatus());
+		}
+		if (!userInfo.getUserPositionTitle().equals("IRB")
+				&& !userInfo.getUserPositionTitle().equals(
+						"University Research Administrator")
+				&& !userInfo.getUserPositionTitle().equals(
+						"University Research Director")) {
+			if (userInfo.getUserPositionTitle().equals("Dean")
+					|| userInfo.getUserPositionTitle().equals("Associate Dean")) {
+				buildQueryForCollege(userInfo.getUserCollege(), proposalQuery);
+			} else if (userInfo.getUserPositionTitle().equals(
+					"Business Manager")
+					|| userInfo.getUserPositionTitle().equals(
+							"Department Administrative Assistant")
+					|| userInfo.getUserPositionTitle().equals(
+							"Department Chair")
+					|| userInfo.getUserPositionTitle()
+							.equals("Associate Chair")) {
+				buildQueryForCollegeAndDepartment(userInfo.getUserCollege(),
+						userInfo.getUserDepartment(), proposalQuery);
+			} else {
+				buildQueryForCollegeDepartmentAndPosition(
+						userInfo.getUserProfileID(), userInfo.getUserCollege(),
+						userInfo.getUserDepartment(),
+						userInfo.getUserPositionType(),
+						userInfo.getUserPositionTitle(), proposalQuery);
+			}
+		}
+		if (proposalInfo.getUsernameBy() != null) {
+			buildQueryForUserNameBy(proposalInfo.getUsernameBy(),
+					proposalInfo.getUserRole(), proposalQuery, profileQuery);
+		} else if (proposalInfo.getUsernameBy() == null
+				&& proposalInfo.getUserRole() != null) {
+			buildQueryForUserProposalRole(proposalInfo.getUserRole(),
+					userInfo.getUserProfileID(), proposalQuery);
+		}
+		return proposalQuery;
 	}
 
 	/***
@@ -1815,6 +1631,33 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	}
 
 	/***
+	 * Finds all Admin Users For A Proposal
+	 * 
+	 * @param irbApprovalRequired
+	 * @param ds
+	 * @return
+	 */
+	private List<UserProfile> findAdminUsersForAProposal(
+			Boolean irbApprovalRequired, Datastore ds) {
+		List<String> positions = new ArrayList<String>();
+		positions.add("Department Chair");
+		positions.add("Business Manager");
+		positions.add("Dean");
+		positions.add("University Research Administrator");
+		positions.add("University Research Director");
+		if (irbApprovalRequired) {
+			positions.add("IRB");
+		}
+		Query<UserProfile> profileQuery = ds.createQuery(UserProfile.class)
+				.retrievedFields(true, "_id", "first name", "middle name",
+						"last name", "details", "work email");
+		profileQuery.and(profileQuery.criteria("deleted").equal(false),
+				profileQuery.criteria("details.position title").in(positions));
+		List<UserProfile> userProfile = profileQuery.asList();
+		return userProfile;
+	}
+
+	/***
 	 * Finds All Users needed to be Notified
 	 * 
 	 * @param id
@@ -1969,33 +1812,6 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	}
 
 	/***
-	 * Finds all Admin Users For A Proposal
-	 * 
-	 * @param irbApprovalRequired
-	 * @param ds
-	 * @return
-	 */
-	private List<UserProfile> findAdminUsersForAProposal(
-			Boolean irbApprovalRequired, Datastore ds) {
-		List<String> positions = new ArrayList<String>();
-		positions.add("Department Chair");
-		positions.add("Business Manager");
-		positions.add("Dean");
-		positions.add("University Research Administrator");
-		positions.add("University Research Director");
-		if (irbApprovalRequired) {
-			positions.add("IRB");
-		}
-		Query<UserProfile> profileQuery = ds.createQuery(UserProfile.class)
-				.retrievedFields(true, "_id", "first name", "middle name",
-						"last name", "details", "work email");
-		profileQuery.and(profileQuery.criteria("deleted").equal(false),
-				profileQuery.criteria("details.position title").in(positions));
-		List<UserProfile> userProfile = profileQuery.asList();
-		return userProfile;
-	}
-
-	/***
 	 * Adds Signature details of Delegatee Users
 	 * 
 	 * @param id
@@ -2044,6 +1860,8 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 			signatures.add(signatureInfo);
 		}
 	}
+
+	// Proposal Details Info
 
 	/***
 	 * Gets Proposal Title
@@ -4004,153 +3822,6 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	}
 
 	/***
-	 * Generates Content Profile For All Users
-	 * 
-	 * @param existingProposal
-	 * @param contentProfile
-	 * @param signatures
-	 * @param requiredSignatures
-	 */
-	public void generateContentProfileForAllUsers(Proposal existingProposal,
-			StringBuffer contentProfile, List<SignatureUserInfo> signatures,
-			RequiredSignaturesInfo requiredSignatures) {
-		if (!existingProposal.getInvestigatorInfo().getPi().getUserRef()
-				.isDeleted()) {
-			generatePIContentProfile(contentProfile, existingProposal
-					.getInvestigatorInfo().getPi());
-			requiredSignatures.getRequiredPISign().add(
-					existingProposal.getInvestigatorInfo().getPi()
-							.getUserProfileId());
-		}
-		for (InvestigatorRefAndPosition copis : existingProposal
-				.getInvestigatorInfo().getCo_pi()) {
-			if (!copis.getUserRef().isDeleted()) {
-				generateCoPIContentProfile(contentProfile, copis);
-				requiredSignatures.getRequiredCoPISigns().add(
-						copis.getUserProfileId());
-			}
-		}
-		for (InvestigatorRefAndPosition seniors : existingProposal
-				.getInvestigatorInfo().getSeniorPersonnel()) {
-			if (!seniors.getUserRef().isDeleted()) {
-				generateSeniorContentProfile(contentProfile, seniors);
-			}
-		}
-		for (SignatureUserInfo signatureInfo : signatures) {
-			switch (signatureInfo.getPositionTitle()) {
-			case "Department Chair":
-				generateChairContentProfile(contentProfile, signatureInfo);
-				requiredSignatures.getRequiredChairSigns().add(
-						signatureInfo.getUserProfileId());
-				break;
-			case "Business Manager":
-				generateManagerContentProfile(contentProfile, signatureInfo);
-				requiredSignatures.getRequiredBusinessManagerSigns().add(
-						signatureInfo.getUserProfileId());
-				break;
-			case "Dean":
-				generateDeanContentProfile(contentProfile, signatureInfo);
-				requiredSignatures.getRequiredDeanSigns().add(
-						signatureInfo.getUserProfileId());
-				break;
-			case "IRB":
-				generateIRBContentProfile(contentProfile, signatureInfo);
-				requiredSignatures.getRequiredIRBSigns().add(
-						signatureInfo.getUserProfileId());
-				break;
-			case "University Research Administrator":
-				generateResearchAdminContentProfile(contentProfile,
-						signatureInfo);
-				requiredSignatures.getRequiredResearchAdminSigns().add(
-						signatureInfo.getUserProfileId());
-				break;
-			case "University Research Director":
-				generateDirectorContentProfile(contentProfile, signatureInfo);
-				requiredSignatures.getRequiredResearchDirectorSigns().add(
-						signatureInfo.getUserProfileId());
-				break;
-			default:
-				break;
-			}
-		}
-	}
-
-	/***
-	 * Generates Users In Proposal Content Profile
-	 * 
-	 * @param authorProfile
-	 * @param proposalId
-	 * @param existingProposal
-	 * @param signedByCurrentUser
-	 * @param contentProfile
-	 * @param signatures
-	 * @param requiredSignatures
-	 */
-	public void generateUsersInProposalContentProfile(
-			UserProfile authorProfile, String proposalId,
-			Proposal existingProposal, boolean signedByCurrentUser,
-			StringBuffer contentProfile, List<SignatureUserInfo> signatures,
-			RequiredSignaturesInfo requiredSignatures) {
-		contentProfile.append("<Content>");
-		contentProfile.append("<ak:record xmlns:ak=\"http://akpower.org\">");
-		genearteProposalInfoContentProfile(proposalId, existingProposal,
-				contentProfile);
-		generateAuthorContentProfile(contentProfile, authorProfile);
-		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX");
-		contentProfile.append("<ak:currentdatetime>");
-		contentProfile.append(dateFormat.format(new Date()));
-		contentProfile.append("</ak:currentdatetime>");
-
-		generateContentProfileForAllUsers(existingProposal, contentProfile,
-				signatures, requiredSignatures);
-
-		getExistingSignaturesForProposal(contentProfile, existingProposal,
-				requiredSignatures, signedByCurrentUser);
-		checkForSignedByAllUsers(contentProfile, requiredSignatures,
-				signedByCurrentUser);
-		contentProfile.append("</ak:proposal>");
-		contentProfile.append("</ak:record>");
-		contentProfile.append("</Content>");
-	}
-
-	/***
-	 * Generates Proposal Content Profile
-	 * 
-	 * @param authorProfile
-	 * @param proposalId
-	 * @param existingProposal
-	 * @param signedByCurrentUser
-	 * @param contentProfile
-	 * @param irbApprovalRequired
-	 * @param requiredSignatures
-	 * @return
-	 */
-	public List<SignatureUserInfo> generateProposalContentProfile(
-			UserProfile authorProfile, String proposalId,
-			Proposal existingProposal, boolean signedByCurrentUser,
-			StringBuffer contentProfile, Boolean irbApprovalRequired,
-			RequiredSignaturesInfo requiredSignatures) {
-		List<SignatureUserInfo> signatures = new ArrayList<SignatureUserInfo>();
-		if (!proposalId.equals("0")) {
-			ObjectId id = new ObjectId(proposalId);
-			signatures = findSignaturesExceptInvestigator(id,
-					irbApprovalRequired);
-			generateUsersInProposalContentProfile(authorProfile, proposalId,
-					existingProposal, signedByCurrentUser, contentProfile,
-					signatures, requiredSignatures);
-		} else {
-			generateDefaultProposalContentProfile(authorProfile, proposalId,
-					existingProposal, signedByCurrentUser, contentProfile);
-		}
-		contentProfile
-				.append("<Attribute AttributeId=\"urn:oasis:names:tc:xacml:3.0:content-selector\" IncludeInResult=\"false\">");
-		contentProfile
-				.append("<AttributeValue XPathCategory=\"urn:oasis:names:tc:xacml:3.0:attribute-category:resource\" DataType=\"urn:oasis:names:tc:xacml:3.0:data-type:xpathExpression\">//ak:record/ak:proposal</AttributeValue>");
-		contentProfile.append("</Attribute>");
-		return signatures;
-	}
-
-	/***
 	 * Updates Withdrawn Status for a Proposal
 	 * 
 	 * @param proposalId
@@ -4328,6 +3999,43 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	}
 
 	/***
+	 * Categorizes different Obligation Types
+	 * 
+	 * @param preObligations
+	 * @param postObligations
+	 * @param ongoingObligations
+	 * @param obligation
+	 */
+	public void categorizeObligationTypes(
+			List<ObligationResult> preObligations,
+			List<ObligationResult> postObligations,
+			List<ObligationResult> ongoingObligations,
+			ObligationResult obligation) {
+		if (obligation instanceof org.wso2.balana.xacml3.Obligation) {
+			List<AttributeAssignment> assignments = ((org.wso2.balana.xacml3.Obligation) obligation)
+					.getAssignments();
+			String obligationType = "postobligation";
+			for (AttributeAssignment assignment : assignments) {
+				if (assignment.getAttributeId().toString()
+						.equalsIgnoreCase("obligationType")) {
+					obligationType = assignment.getContent();
+					break;
+				}
+			}
+			if (obligationType.equals("preobligation")) {
+				preObligations.add(obligation);
+				System.out.println(obligationType + " is FOUND");
+			} else if (obligationType.equals("postobligation")) {
+				postObligations.add(obligation);
+				System.out.println(obligationType + " is FOUND");
+			} else {
+				ongoingObligations.add(obligation);
+				System.out.println(obligationType + " is FOUND");
+			}
+		}
+	}
+
+	/***
 	 * Updates Proposal Status With Obligations
 	 * 
 	 * @param proposalId
@@ -4383,6 +4091,82 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	}
 
 	/***
+	 * Deletes Proposal With Obligations
+	 * 
+	 * @param proposalRoles
+	 * @param proposalUserTitle
+	 * @param existingProposal
+	 * @param authorProfile
+	 * @param authorUserName
+	 * @param obligations
+	 * @return
+	 * @throws JsonProcessingException
+	 */
+	public boolean deleteProposalWithObligations(String proposalRoles,
+			String proposalUserTitle, Proposal existingProposal,
+			UserProfile authorProfile, String authorUserName,
+			List<ObligationResult> obligations) throws JsonProcessingException {
+		EmailCommonInfo emailDetails = new EmailCommonInfo();
+		getObligationsDetails(obligations, emailDetails);
+		boolean isDeleted = deleteProposal(existingProposal, proposalRoles,
+				proposalUserTitle, authorProfile);
+		if (isDeleted) {
+			String emailSubject = emailDetails.getEmailSubject();
+			String emailBody = emailDetails.getEmailBody();
+			String authorName = emailDetails.getAuthorName();
+			String piEmail = emailDetails.getPiEmail();
+			List<String> emaillist = emailDetails.getEmaillist();
+			if (!emailSubject.equals("")) {
+				EmailUtil emailUtil = new EmailUtil();
+				emailUtil.sendMailMultipleUsersWithoutAuth(piEmail, emaillist,
+						emailSubject + authorName, emailBody);
+			}
+		}
+		return isDeleted;
+	}
+
+	/***
+	 * Generates Attributes based on policy info
+	 * 
+	 * @param policyInfo
+	 * @return
+	 */
+	public HashMap<String, Multimap<String, String>> generateAttributes(
+			JsonNode policyInfo) {
+		HashMap<String, Multimap<String, String>> attrMap = new HashMap<String, Multimap<String, String>>();
+		Multimap<String, String> subjectMap = ArrayListMultimap.create();
+		Multimap<String, String> resourceMap = ArrayListMultimap.create();
+		Multimap<String, String> actionMap = ArrayListMultimap.create();
+		Multimap<String, String> environmentMap = ArrayListMultimap.create();
+		for (JsonNode node : policyInfo) {
+			String attributeName = node.path("attributeName").asText();
+			String attributeValue = node.path("attributeValue").asText();
+			String attributeType = node.path("attributeType").asText();
+			switch (attributeType) {
+			case "Subject":
+				subjectMap.put(attributeName, attributeValue);
+				attrMap.put("Subject", subjectMap);
+				break;
+			case "Resource":
+				resourceMap.put(attributeName, attributeValue);
+				attrMap.put("Resource", resourceMap);
+				break;
+			case "Action":
+				actionMap.put(attributeName, attributeValue);
+				attrMap.put("Action", actionMap);
+				break;
+			case "Environment":
+				environmentMap.put(attributeName, attributeValue);
+				attrMap.put("Environment", environmentMap);
+				break;
+			default:
+				break;
+			}
+		}
+		return attrMap;
+	}
+
+	/***
 	 * Exports to Excel File for Proposals and its Audit Logs
 	 * 
 	 * @param proposals
@@ -4420,6 +4204,155 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 		filename = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(
 				fileName);
 		return filename;
+	}
+
+	// Content Profiles
+
+	/***
+	 * Generates Content Profile For All Users
+	 * 
+	 * @param existingProposal
+	 * @param contentProfile
+	 * @param signatures
+	 * @param requiredSignatures
+	 */
+	public void generateContentProfileForAllUsers(Proposal existingProposal,
+			StringBuffer contentProfile, List<SignatureUserInfo> signatures,
+			RequiredSignaturesInfo requiredSignatures) {
+		if (!existingProposal.getInvestigatorInfo().getPi().getUserRef()
+				.isDeleted()) {
+			generatePIContentProfile(contentProfile, existingProposal
+					.getInvestigatorInfo().getPi());
+			requiredSignatures.getRequiredPISign().add(
+					existingProposal.getInvestigatorInfo().getPi()
+							.getUserProfileId());
+		}
+		for (InvestigatorRefAndPosition copis : existingProposal
+				.getInvestigatorInfo().getCo_pi()) {
+			if (!copis.getUserRef().isDeleted()) {
+				generateCoPIContentProfile(contentProfile, copis);
+				requiredSignatures.getRequiredCoPISigns().add(
+						copis.getUserProfileId());
+			}
+		}
+		for (InvestigatorRefAndPosition seniors : existingProposal
+				.getInvestigatorInfo().getSeniorPersonnel()) {
+			if (!seniors.getUserRef().isDeleted()) {
+				generateSeniorContentProfile(contentProfile, seniors);
+			}
+		}
+		for (SignatureUserInfo signatureInfo : signatures) {
+			switch (signatureInfo.getPositionTitle()) {
+			case "Department Chair":
+				generateChairContentProfile(contentProfile, signatureInfo);
+				requiredSignatures.getRequiredChairSigns().add(
+						signatureInfo.getUserProfileId());
+				break;
+			case "Business Manager":
+				generateManagerContentProfile(contentProfile, signatureInfo);
+				requiredSignatures.getRequiredBusinessManagerSigns().add(
+						signatureInfo.getUserProfileId());
+				break;
+			case "Dean":
+				generateDeanContentProfile(contentProfile, signatureInfo);
+				requiredSignatures.getRequiredDeanSigns().add(
+						signatureInfo.getUserProfileId());
+				break;
+			case "IRB":
+				generateIRBContentProfile(contentProfile, signatureInfo);
+				requiredSignatures.getRequiredIRBSigns().add(
+						signatureInfo.getUserProfileId());
+				break;
+			case "University Research Administrator":
+				generateResearchAdminContentProfile(contentProfile,
+						signatureInfo);
+				requiredSignatures.getRequiredResearchAdminSigns().add(
+						signatureInfo.getUserProfileId());
+				break;
+			case "University Research Director":
+				generateDirectorContentProfile(contentProfile, signatureInfo);
+				requiredSignatures.getRequiredResearchDirectorSigns().add(
+						signatureInfo.getUserProfileId());
+				break;
+			default:
+				break;
+			}
+		}
+	}
+
+	/***
+	 * Generates Users In Proposal Content Profile
+	 * 
+	 * @param authorProfile
+	 * @param proposalId
+	 * @param existingProposal
+	 * @param signedByCurrentUser
+	 * @param contentProfile
+	 * @param signatures
+	 * @param requiredSignatures
+	 */
+	public void generateUsersInProposalContentProfile(
+			UserProfile authorProfile, String proposalId,
+			Proposal existingProposal, boolean signedByCurrentUser,
+			StringBuffer contentProfile, List<SignatureUserInfo> signatures,
+			RequiredSignaturesInfo requiredSignatures) {
+		contentProfile.append("<Content>");
+		contentProfile.append("<ak:record xmlns:ak=\"http://akpower.org\">");
+		genearteProposalInfoContentProfile(proposalId, existingProposal,
+				contentProfile);
+		generateAuthorContentProfile(contentProfile, authorProfile);
+		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX");
+		contentProfile.append("<ak:currentdatetime>");
+		contentProfile.append(dateFormat.format(new Date()));
+		contentProfile.append("</ak:currentdatetime>");
+
+		generateContentProfileForAllUsers(existingProposal, contentProfile,
+				signatures, requiredSignatures);
+
+		getExistingSignaturesForProposal(contentProfile, existingProposal,
+				requiredSignatures, signedByCurrentUser);
+		checkForSignedByAllUsers(contentProfile, requiredSignatures,
+				signedByCurrentUser);
+		contentProfile.append("</ak:proposal>");
+		contentProfile.append("</ak:record>");
+		contentProfile.append("</Content>");
+	}
+
+	/***
+	 * Generates Proposal Content Profile
+	 * 
+	 * @param authorProfile
+	 * @param proposalId
+	 * @param existingProposal
+	 * @param signedByCurrentUser
+	 * @param contentProfile
+	 * @param irbApprovalRequired
+	 * @param requiredSignatures
+	 * @return
+	 */
+	public List<SignatureUserInfo> generateProposalContentProfile(
+			UserProfile authorProfile, String proposalId,
+			Proposal existingProposal, boolean signedByCurrentUser,
+			StringBuffer contentProfile, Boolean irbApprovalRequired,
+			RequiredSignaturesInfo requiredSignatures) {
+		List<SignatureUserInfo> signatures = new ArrayList<SignatureUserInfo>();
+		if (!proposalId.equals("0")) {
+			ObjectId id = new ObjectId(proposalId);
+			signatures = findSignaturesExceptInvestigator(id,
+					irbApprovalRequired);
+			generateUsersInProposalContentProfile(authorProfile, proposalId,
+					existingProposal, signedByCurrentUser, contentProfile,
+					signatures, requiredSignatures);
+		} else {
+			generateDefaultProposalContentProfile(authorProfile, proposalId,
+					existingProposal, signedByCurrentUser, contentProfile);
+		}
+		contentProfile
+				.append("<Attribute AttributeId=\"urn:oasis:names:tc:xacml:3.0:content-selector\" IncludeInResult=\"false\">");
+		contentProfile
+				.append("<AttributeValue XPathCategory=\"urn:oasis:names:tc:xacml:3.0:attribute-category:resource\" DataType=\"urn:oasis:names:tc:xacml:3.0:data-type:xpathExpression\">//ak:record/ak:proposal</AttributeValue>");
+		contentProfile.append("</Attribute>");
+		return signatures;
 	}
 
 	/***
@@ -4717,7 +4650,7 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	}
 
 	/***
-	 * Geneartes Proposal Info Content Profile
+	 * Generates Proposal Info Content Profile
 	 * 
 	 * @param proposalId
 	 * @param existingProposal
@@ -4893,117 +4826,239 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 		return contentProfile;
 	}
 
-	/***
-	 * Generates Attributes based on policy info
+	/**
+	 * Updates Proposal's Investigator List
 	 * 
-	 * @param policyInfo
-	 * @return
+	 * @param existingProposal
+	 * @param oldProposal
+	 * @param addedInvestigators
+	 * @param deletedInvestigators
 	 */
-	public HashMap<String, Multimap<String, String>> generateAttributes(
-			JsonNode policyInfo) {
-		HashMap<String, Multimap<String, String>> attrMap = new HashMap<String, Multimap<String, String>>();
-		Multimap<String, String> subjectMap = ArrayListMultimap.create();
-		Multimap<String, String> resourceMap = ArrayListMultimap.create();
-		Multimap<String, String> actionMap = ArrayListMultimap.create();
-		Multimap<String, String> environmentMap = ArrayListMultimap.create();
-		for (JsonNode node : policyInfo) {
-			String attributeName = node.path("attributeName").asText();
-			String attributeValue = node.path("attributeValue").asText();
-			String attributeType = node.path("attributeType").asText();
-			switch (attributeType) {
-			case "Subject":
-				subjectMap.put(attributeName, attributeValue);
-				attrMap.put("Subject", subjectMap);
-				break;
-			case "Resource":
-				resourceMap.put(attributeName, attributeValue);
-				attrMap.put("Resource", resourceMap);
-				break;
-			case "Action":
-				actionMap.put(attributeName, attributeValue);
-				attrMap.put("Action", actionMap);
-				break;
-			case "Environment":
-				environmentMap.put(attributeName, attributeValue);
-				attrMap.put("Environment", environmentMap);
-				break;
-			default:
-				break;
+	public void updateInvestigatorList(Proposal existingProposal,
+			Proposal oldProposal, InvestigatorInfo addedInvestigators,
+			InvestigatorInfo deletedInvestigators) {
+		InvestigatorInfo existingInvestigators = new InvestigatorInfo();
+		existingInvestigators = oldProposal.getInvestigatorInfo();
+		for (InvestigatorRefAndPosition coPI : existingInvestigators.getCo_pi()) {
+			if (!existingProposal.getInvestigatorInfo().getCo_pi()
+					.contains(coPI)) {
+				if (!deletedInvestigators.getCo_pi().contains(coPI)) {
+					deletedInvestigators.getCo_pi().add(coPI);
+					existingProposal.getInvestigatorInfo().getCo_pi()
+							.remove(coPI);
+				}
+			} else {
+				addedInvestigators.getCo_pi().remove(coPI);
 			}
 		}
-		return attrMap;
-	}
-
-	/***
-	 * Categorizes different Obligation Types
-	 * 
-	 * @param preObligations
-	 * @param postObligations
-	 * @param ongoingObligations
-	 * @param obligation
-	 */
-	public void categorizeObligationTypes(
-			List<ObligationResult> preObligations,
-			List<ObligationResult> postObligations,
-			List<ObligationResult> ongoingObligations,
-			ObligationResult obligation) {
-		if (obligation instanceof org.wso2.balana.xacml3.Obligation) {
-			List<AttributeAssignment> assignments = ((org.wso2.balana.xacml3.Obligation) obligation)
-					.getAssignments();
-			String obligationType = "postobligation";
-			for (AttributeAssignment assignment : assignments) {
-				if (assignment.getAttributeId().toString()
-						.equalsIgnoreCase("obligationType")) {
-					obligationType = assignment.getContent();
-					break;
+		for (InvestigatorRefAndPosition senior : existingInvestigators
+				.getSeniorPersonnel()) {
+			if (!existingProposal.getInvestigatorInfo().getSeniorPersonnel()
+					.contains(senior)) {
+				if (!deletedInvestigators.getSeniorPersonnel().contains(senior)) {
+					deletedInvestigators.getSeniorPersonnel().add(senior);
+					existingProposal.getInvestigatorInfo().getSeniorPersonnel()
+							.remove(senior);
+				}
+			} else {
+				addedInvestigators.getSeniorPersonnel().remove(senior);
+			}
+		}
+		// Remove Signatures FOR Deleted Investigators
+		for (InvestigatorRefAndPosition coPI : deletedInvestigators.getCo_pi()) {
+			for (SignatureInfo sign : oldProposal.getSignatureInfo()) {
+				if (coPI.getUserProfileId().equalsIgnoreCase(
+						sign.getUserProfileId())) {
+					existingProposal.getSignatureInfo().remove(sign);
 				}
 			}
-			if (obligationType.equals("preobligation")) {
-				preObligations.add(obligation);
-				System.out.println(obligationType + " is FOUND");
-			} else if (obligationType.equals("postobligation")) {
-				postObligations.add(obligation);
-				System.out.println(obligationType + " is FOUND");
-			} else {
-				ongoingObligations.add(obligation);
-				System.out.println(obligationType + " is FOUND");
+		}
+	}
+
+	// AuditLog Functions
+
+	/***
+	 * Finds All Logs in a AuditLog Grid for a Proposal
+	 * 
+	 * @param offset
+	 * @param limit
+	 * @param id
+	 * @param auditLogInfo
+	 * @return
+	 * @throws ParseException
+	 */
+	public List<AuditLogInfo> findAllProposalAuditLogForGrid(int offset,
+			int limit, ObjectId id, AuditLogCommonInfo auditLogInfo)
+			throws ParseException {
+		return getAuditListBasedOnPaging(offset, limit,
+				getSortedAuditLogResults(auditLogInfo, id));
+	}
+
+	/***
+	 * Gets Audit Logs list based On User provided Paging size
+	 * 
+	 * @param offset
+	 * @param limit
+	 * @param allAuditLogs
+	 * @return
+	 */
+	private List<AuditLogInfo> getAuditListBasedOnPaging(int offset, int limit,
+			List<AuditLogInfo> allAuditLogs) {
+		int rowTotal = 0;
+		rowTotal = allAuditLogs.size();
+		if (rowTotal > 0) {
+			for (AuditLogInfo t : allAuditLogs) {
+				t.setRowTotal(rowTotal);
 			}
+		}
+		if (rowTotal >= (offset + limit - 1)) {
+			return allAuditLogs.subList(offset - 1, offset + limit - 1);
+		} else {
+			return allAuditLogs.subList(offset - 1, rowTotal);
 		}
 	}
 
 	/***
-	 * Deletes Proposal With Obligations
+	 * Gets Sorted Audit Logs List
 	 * 
-	 * @param proposalRoles
-	 * @param proposalUserTitle
-	 * @param existingProposal
-	 * @param authorProfile
-	 * @param authorUserName
-	 * @param obligations
+	 * @param auditLogInfo
+	 * @param id
 	 * @return
-	 * @throws JsonProcessingException
+	 * @throws ParseException
 	 */
-	public boolean deleteProposalWithObligations(String proposalRoles,
-			String proposalUserTitle, Proposal existingProposal,
-			UserProfile authorProfile, String authorUserName,
-			List<ObligationResult> obligations) throws JsonProcessingException {
-		EmailCommonInfo emailDetails = new EmailCommonInfo();
-		getObligationsDetails(obligations, emailDetails);
-		boolean isDeleted = deleteProposal(existingProposal, proposalRoles,
-				proposalUserTitle, authorProfile);
-		if (isDeleted) {
-			String emailSubject = emailDetails.getEmailSubject();
-			String emailBody = emailDetails.getEmailBody();
-			String authorName = emailDetails.getAuthorName();
-			String piEmail = emailDetails.getPiEmail();
-			List<String> emaillist = emailDetails.getEmaillist();
-			if (!emailSubject.equals("")) {
-				EmailUtil emailUtil = new EmailUtil();
-				emailUtil.sendMailMultipleUsersWithoutAuth(piEmail, emaillist,
-						emailSubject + authorName, emailBody);
+	public List<AuditLogInfo> getSortedAuditLogResults(
+			AuditLogCommonInfo auditLogInfo, ObjectId id) throws ParseException {
+		Datastore ds = getDatastore();
+		Query<Proposal> proposalQuery = ds.createQuery(Proposal.class);
+		Proposal q = proposalQuery.field("_id").equal(id).get();
+		List<AuditLogInfo> allAuditLogs = new ArrayList<AuditLogInfo>();
+		if (q.getAuditLog() != null && q.getAuditLog().size() != 0) {
+			for (AuditLog poposalAudit : q.getAuditLog()) {
+				AuditLogInfo proposalAuditLog = new AuditLogInfo();
+				boolean isActionMatch = isAuditLogActionFieldProvided(
+						auditLogInfo.getAction(), poposalAudit);
+				boolean isAuditedByMatch = isAuditLogAuditedByFieldProvided(
+						auditLogInfo.getAuditedBy(), poposalAudit);
+				boolean isActivityDateFromMatch = isAuditLogActivityDateFromProvided(
+						auditLogInfo.getActivityOnFrom(), poposalAudit);
+				boolean isActivityDateToMatch = isAuditLogActivityDateToProvided(
+						auditLogInfo.getActivityOnTo(), poposalAudit);
+
+				if (isActionMatch && isAuditedByMatch
+						&& isActivityDateFromMatch && isActivityDateToMatch) {
+					proposalAuditLog.setUserName(poposalAudit.getUserProfile()
+							.getUserAccount().getUserName());
+					proposalAuditLog.setUserFullName(poposalAudit
+							.getUserProfile().getFullName());
+					proposalAuditLog.setAction(poposalAudit.getAction());
+					proposalAuditLog.setActivityDate(poposalAudit
+							.getActivityDate());
+					allAuditLogs.add(proposalAuditLog);
+				}
 			}
 		}
-		return isDeleted;
+		Collections.sort(allAuditLogs);
+		return allAuditLogs;
 	}
 
+	/***
+	 * Is Audit Log Activity Date To Provided
+	 * 
+	 * @param activityOnTo
+	 * @param poposalAudit
+	 * @return
+	 * @throws ParseException
+	 */
+	private boolean isAuditLogActivityDateToProvided(String activityOnTo,
+			AuditLog poposalAudit) throws ParseException {
+		if (activityOnTo != null) {
+			Date activityDateTo = formatter.parse(activityOnTo);
+			if (poposalAudit.getActivityDate().compareTo(activityDateTo) > 0) {
+				return false;
+			} else if (poposalAudit.getActivityDate().compareTo(activityDateTo) < 0) {
+				return true;
+			} else if (poposalAudit.getActivityDate().compareTo(activityDateTo) == 0) {
+				return true;
+			}
+		} else {
+			return true;
+		}
+		return false;
+	}
+
+	/***
+	 * Is Audit Log Activity Date From Provided
+	 * 
+	 * @param activityOnFrom
+	 * @param poposalAudit
+	 * @return
+	 * @throws ParseException
+	 */
+	private boolean isAuditLogActivityDateFromProvided(String activityOnFrom,
+			AuditLog poposalAudit) throws ParseException {
+		if (activityOnFrom != null) {
+			Date activityDateFrom = formatter.parse(activityOnFrom);
+			if (poposalAudit.getActivityDate().compareTo(activityDateFrom) > 0) {
+				return true;
+			} else if (poposalAudit.getActivityDate().compareTo(
+					activityDateFrom) < 0) {
+				return false;
+			} else if (poposalAudit.getActivityDate().compareTo(
+					activityDateFrom) == 0) {
+				return true;
+			}
+		} else {
+			return true;
+		}
+		return false;
+	}
+
+	/***
+	 * Is Audit Log Audited By Provided
+	 * 
+	 * @param auditedBy
+	 * @param poposalAudit
+	 * @return
+	 */
+	private boolean isAuditLogAuditedByFieldProvided(String auditedBy,
+			AuditLog poposalAudit) {
+		if (auditedBy != null) {
+			if (poposalAudit.getUserProfile().getUserAccount().getUserName()
+					.toLowerCase().contains(auditedBy.toLowerCase())) {
+				return true;
+			} else if (poposalAudit.getUserProfile().getFirstName()
+					.toLowerCase().contains(auditedBy.toLowerCase())) {
+				return true;
+			} else if (poposalAudit.getUserProfile().getMiddleName()
+					.toLowerCase().contains(auditedBy.toLowerCase())) {
+				return true;
+			} else if (poposalAudit.getUserProfile().getLastName()
+					.toLowerCase().contains(auditedBy.toLowerCase())) {
+				return true;
+			}
+		} else {
+			return true;
+		}
+		return false;
+	}
+
+	/***
+	 * Is Audit Log Action Provided
+	 * 
+	 * @param action
+	 * @param poposalAudit
+	 * @return
+	 */
+	private boolean isAuditLogActionFieldProvided(String action,
+			AuditLog poposalAudit) {
+		if (action != null) {
+			if (poposalAudit.getAction().toLowerCase()
+					.contains(action.toLowerCase())) {
+				return true;
+			}
+		} else {
+			return true;
+		}
+		return false;
+	}
 }

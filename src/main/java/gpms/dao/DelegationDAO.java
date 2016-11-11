@@ -32,7 +32,6 @@ import org.mongodb.morphia.Datastore;
 import org.mongodb.morphia.Morphia;
 import org.mongodb.morphia.dao.BasicDAO;
 import org.mongodb.morphia.query.Query;
-import org.mongodb.morphia.query.UpdateOperations;
 import org.wso2.balana.ctx.AbstractResult;
 import org.wso2.balana.ctx.AttributeAssignment;
 import org.wso2.balana.xacml3.Advice;
@@ -83,7 +82,7 @@ public class DelegationDAO extends BasicDAO<Delegation, String> {
 		super(mongo, morphia, dbName);
 	}
 
-	public List<DelegationInfo> findAllForUserDelegationGrid(int offset,
+	public List<DelegationInfo> findAllUserDelegationsForGrid(int offset,
 			int limit, DelegationCommonInfo delegationInfo,
 			GPMSCommonInfo userInfo) throws ParseException {
 		Datastore ds = getDatastore();
@@ -190,7 +189,7 @@ public class DelegationDAO extends BasicDAO<Delegation, String> {
 		return delegation;
 	}
 
-	public List<DelegationInfo> findAllUserDelegationsForGrid(
+	public List<DelegationInfo> findAllUserDelegationsForExport(
 			DelegationCommonInfo delegationInfo, GPMSCommonInfo userInfo)
 			throws ParseException {
 		Datastore ds = getDatastore();
@@ -261,403 +260,6 @@ public class DelegationDAO extends BasicDAO<Delegation, String> {
 		return ds.createQuery(Delegation.class).field("_id").equal(id).get();
 	}
 
-	/***
-	 * Finds All Logs in a AuditLog Grid for a Delegation
-	 * 
-	 * @param offset
-	 * @param limit
-	 * @param id
-	 * @param auditLogInfo
-	 * @return
-	 * @throws ParseException
-	 */
-	public List<AuditLogInfo> findAllDelegationAuditLogForGrid(int offset,
-			int limit, ObjectId id, AuditLogCommonInfo auditLogInfo)
-			throws ParseException {
-		return getAuditListBasedOnPaging(offset, limit,
-				getSortedAuditLogResults(auditLogInfo, id));
-	}
-
-	/***
-	 * Gets Audit Logs list based On User provided Paging size
-	 * 
-	 * @param offset
-	 * @param limit
-	 * @param allAuditLogs
-	 * @return
-	 */
-	private List<AuditLogInfo> getAuditListBasedOnPaging(int offset, int limit,
-			List<AuditLogInfo> allAuditLogs) {
-		int rowTotal = 0;
-		rowTotal = allAuditLogs.size();
-		if (rowTotal > 0) {
-			for (AuditLogInfo t : allAuditLogs) {
-				t.setRowTotal(rowTotal);
-			}
-		}
-		if (rowTotal >= (offset + limit - 1)) {
-			return allAuditLogs.subList(offset - 1, offset + limit - 1);
-		} else {
-			return allAuditLogs.subList(offset - 1, rowTotal);
-		}
-	}
-
-	/***
-	 * Gets Sorted Audit Logs List
-	 * 
-	 * @param auditLogInfo
-	 * @param id
-	 * @return
-	 * @throws ParseException
-	 */
-	public List<AuditLogInfo> getSortedAuditLogResults(
-			AuditLogCommonInfo auditLogInfo, ObjectId id) throws ParseException {
-		Datastore ds = getDatastore();
-		Query<Delegation> delegationQuery = ds.createQuery(Delegation.class);
-		Delegation q = delegationQuery.field("_id").equal(id).get();
-
-		List<AuditLogInfo> allAuditLogs = new ArrayList<AuditLogInfo>();
-		if (q.getAuditLog() != null && q.getAuditLog().size() != 0) {
-			for (AuditLog delegationAudit : q.getAuditLog()) {
-				AuditLogInfo delegationAuditLog = new AuditLogInfo();
-				boolean isActionMatch = isAuditLogActionFieldProvided(
-						auditLogInfo.getAction(), delegationAudit);
-				boolean isAuditedByMatch = isAuditLogAuditedByFieldProvided(
-						auditLogInfo.getAuditedBy(), delegationAudit);
-				boolean isActivityDateFromMatch = isAuditLogActivityDateFromProvided(
-						auditLogInfo.getActivityOnFrom(), delegationAudit);
-				boolean isActivityDateToMatch = isAuditLogActivityDateToProvided(
-						auditLogInfo.getActivityOnTo(), delegationAudit);
-
-				if (isActionMatch && isAuditedByMatch
-						&& isActivityDateFromMatch && isActivityDateToMatch) {
-					delegationAuditLog.setUserName(delegationAudit
-							.getUserProfile().getUserAccount().getUserName());
-					delegationAuditLog.setUserFullName(delegationAudit
-							.getUserProfile().getFullName());
-					delegationAuditLog.setAction(delegationAudit.getAction());
-					delegationAuditLog.setActivityDate(delegationAudit
-							.getActivityDate());
-					allAuditLogs.add(delegationAuditLog);
-				}
-			}
-		}
-		Collections.sort(allAuditLogs);
-		return allAuditLogs;
-	}
-
-	/***
-	 * Is Audit Log Activity Date To Provided
-	 * 
-	 * @param activityOnTo
-	 * @param delegationAudit
-	 * @return
-	 * @throws ParseException
-	 */
-	private boolean isAuditLogActivityDateToProvided(String activityOnTo,
-			AuditLog delegationAudit) throws ParseException {
-		if (activityOnTo != null) {
-			Date activityDateTo = formatter.parse(activityOnTo);
-			if (delegationAudit.getActivityDate().compareTo(activityDateTo) > 0) {
-				return false;
-			} else if (delegationAudit.getActivityDate().compareTo(
-					activityDateTo) < 0) {
-				return true;
-			} else if (delegationAudit.getActivityDate().compareTo(
-					activityDateTo) == 0) {
-				return true;
-			}
-		} else {
-			return true;
-		}
-		return false;
-	}
-
-	/***
-	 * Is Audit Log Activity Date From Provided
-	 * 
-	 * @param activityOnFrom
-	 * @param delegationAudit
-	 * @return
-	 * @throws ParseException
-	 */
-	private boolean isAuditLogActivityDateFromProvided(String activityOnFrom,
-			AuditLog delegationAudit) throws ParseException {
-		if (activityOnFrom != null) {
-			Date activityDateFrom = formatter.parse(activityOnFrom);
-			if (delegationAudit.getActivityDate().compareTo(activityDateFrom) > 0) {
-				return true;
-			} else if (delegationAudit.getActivityDate().compareTo(
-					activityDateFrom) < 0) {
-				return false;
-			} else if (delegationAudit.getActivityDate().compareTo(
-					activityDateFrom) == 0) {
-				return true;
-			}
-		} else {
-			return true;
-		}
-		return false;
-	}
-
-	/***
-	 * Is Audit Log Audited By Provided
-	 * 
-	 * @param auditedBy
-	 * @param delegationAudit
-	 * @return
-	 */
-	private boolean isAuditLogAuditedByFieldProvided(String auditedBy,
-			AuditLog delegationAudit) {
-		if (auditedBy != null) {
-			if (delegationAudit.getUserProfile().getUserAccount().getUserName()
-					.toLowerCase().contains(auditedBy.toLowerCase())) {
-				return true;
-			} else if (delegationAudit.getUserProfile().getFirstName()
-					.toLowerCase().contains(auditedBy.toLowerCase())) {
-				return true;
-			} else if (delegationAudit.getUserProfile().getMiddleName()
-					.toLowerCase().contains(auditedBy.toLowerCase())) {
-				return true;
-			} else if (delegationAudit.getUserProfile().getLastName()
-					.toLowerCase().contains(auditedBy.toLowerCase())) {
-				return true;
-			}
-		} else {
-			return true;
-		}
-		return false;
-	}
-
-	/***
-	 * Is Audit Log Action Provided
-	 * 
-	 * @param action
-	 * @param delegationAudit
-	 * @return
-	 */
-	private boolean isAuditLogActionFieldProvided(String action,
-			AuditLog delegationAudit) {
-		if (action != null) {
-			if (delegationAudit.getAction().toLowerCase()
-					.contains(action.toLowerCase())) {
-				return true;
-			}
-		} else {
-			return true;
-		}
-		return false;
-	}
-
-	public void saveDelegation(Delegation newDelegation,
-			UserProfile authorProfile) {
-		Datastore ds = getDatastore();
-		audit = new AuditLog(authorProfile, "Created delegation by "
-				+ authorProfile.getUserAccount().getUserName(), new Date());
-		newDelegation.getAuditLog().add(audit);
-		ds.save(newDelegation);
-	}
-
-	public void updateDelegation(Delegation existingDelegation,
-			UserProfile authorProfile) {
-		try {
-			Datastore ds = getDatastore();
-			audit = new AuditLog(authorProfile, "Updated delegation by "
-					+ authorProfile.getUserAccount().getUserName(), new Date());
-			existingDelegation.getAuditLog().add(audit);
-			ds.save(existingDelegation);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
-	public void updateDelegation(ObjectId delegationID,
-			Date delegationFromDate, Date delegationToDate,
-			String delegationReason, String policyFileName,
-			UserProfile authorProfile) {
-		try {
-			Datastore ds = getDatastore();
-			audit = new AuditLog(authorProfile, "Updated delegation by "
-					+ authorProfile.getUserAccount().getUserName(), new Date());
-
-			Query<Delegation> query = ds.createQuery(Delegation.class)
-					.field("_id").equal(delegationID);
-			UpdateOperations<Delegation> ops = ds
-					.createUpdateOperations(Delegation.class)
-					.set("from", delegationFromDate)
-					.set("to", delegationToDate)
-					.set("delegation reason", delegationReason)
-					.set("delegation file name", policyFileName)
-					.add("audit log", audit);
-			ds.update(query, ops);
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
-	public boolean revokeDelegation(Delegation existingDelegation,
-			UserProfile authorProfile) {
-		try {
-			Datastore ds = getDatastore();
-			audit = new AuditLog(authorProfile, "Revoked delegation by "
-					+ authorProfile.getUserAccount().getUserName(), new Date());
-			existingDelegation.getAuditLog().add(audit);
-			existingDelegation.setRevoked(true);
-			ds.save(existingDelegation);
-			return true;
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return false;
-	}
-
-	/***
-	 * Exports to Excel File for Delegation and its Audit Logs
-	 * 
-	 * @param delegations
-	 * @param delegationAuditLogs
-	 * @return
-	 * @throws URISyntaxException
-	 * @throws JsonProcessingException
-	 */
-	public String exportToExcelFile(List<DelegationInfo> delegations,
-			List<AuditLogInfo> delegationAuditLogs) throws URISyntaxException,
-			JsonProcessingException {
-		ObjectMapper mapper = new ObjectMapper();
-		String filename = new String();
-		Xcelite xcelite = new Xcelite();
-		if (delegations != null) {
-			XceliteSheet sheet = xcelite.createSheet("Delegations");
-			SheetWriter<DelegationInfo> writer = sheet
-					.getBeanWriter(DelegationInfo.class);
-			writer.write(delegations);
-		} else {
-			XceliteSheet sheet = xcelite.createSheet("AuditLogs");
-			SheetWriter<AuditLogInfo> writer = sheet
-					.getBeanWriter(AuditLogInfo.class);
-			writer.write(delegationAuditLogs);
-		}
-
-		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy_MM_dd");
-		Date date = new Date();
-		String fileName = String.format(
-				"%s.%s",
-				RandomStringUtils.randomAlphanumeric(8) + "_"
-						+ dateFormat.format(date), "xlsx");
-		String downloadLocation = this.getClass().getResource("/uploads")
-				.toURI().getPath();
-		xcelite.write(new File(downloadLocation + fileName));
-		filename = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(
-				fileName);
-		return filename;
-	}
-
-	/**
-	 * Gets Delegable User Details From Advice response
-	 * 
-	 * @param userDetails
-	 *            UserDetail
-	 * @param result
-	 */
-	public void getDelegableUserDetailsFromAdvice(List<UserDetail> userDetails,
-			AbstractResult result) {
-		List<Advice> advices = result.getAdvices();
-		for (Advice advice : advices) {
-			if (advice instanceof org.wso2.balana.xacml3.Advice) {
-				UserDetail userDeatil = new UserDetail();
-				List<AttributeAssignment> assignments = ((org.wso2.balana.xacml3.Advice) advice)
-						.getAssignments();
-				for (AttributeAssignment assignment : assignments) {
-					switch (assignment.getAttributeId().toString()) {
-					case "userId":
-						userDeatil.setUserProfileId(assignment.getContent());
-						break;
-					case "userfullName":
-						userDeatil.setFullName(assignment.getContent());
-						break;
-					case "userName":
-						userDeatil.setUserName(assignment.getContent());
-						break;
-					case "userEmail":
-						userDeatil.setEmail(assignment.getContent());
-						break;
-					case "userCollege":
-						userDeatil.setCollege(assignment.getContent());
-						break;
-					case "userDepartment":
-						userDeatil.setDepartment(assignment.getContent());
-						break;
-					case "userPositionType":
-						userDeatil.setPositionType(assignment.getContent());
-						break;
-					case "userPositionTitle":
-						userDeatil.setPositionTitle(assignment.getContent());
-						break;
-					default:
-						break;
-					}
-				}
-				userDetails.add(userDeatil);
-			}
-		}
-	}
-
-	/**
-	 * Generates Content Profile for Admin Users
-	 * 
-	 * @param userProfileID
-	 *            User Profile Id
-	 * @param userCollege
-	 *            User's College
-	 * @param userDepartment
-	 *            User's Department
-	 * @return
-	 * @throws UnknownHostException
-	 */
-	public StringBuffer generateContentProfile(List<UserDetail> delegableUsers)
-			throws UnknownHostException {
-		StringBuffer contentProfile = new StringBuffer();
-		contentProfile.append("<Content>");
-		contentProfile.append("<ak:record xmlns:ak=\"http://akpower.org\">");
-		for (UserDetail userDetail : delegableUsers) {
-			contentProfile.append("<ak:user>");
-			contentProfile.append("<ak:userid>");
-			contentProfile.append(userDetail.getUserProfileId());
-			contentProfile.append("</ak:userid>");
-			contentProfile.append("<ak:fullname>");
-			contentProfile.append(userDetail.getFullName());
-			contentProfile.append("</ak:fullname>");
-			contentProfile.append("<ak:username>");
-			contentProfile.append(userDetail.getUserName());
-			contentProfile.append("</ak:username>");
-			contentProfile.append("<ak:email>");
-			contentProfile.append(userDetail.getEmail());
-			contentProfile.append("</ak:email>");
-			contentProfile.append("<ak:college>");
-			contentProfile.append(userDetail.getCollege());
-			contentProfile.append("</ak:college>");
-			contentProfile.append("<ak:department>");
-			contentProfile.append(userDetail.getDepartment());
-			contentProfile.append("</ak:department>");
-			contentProfile.append("<ak:positionType>");
-			contentProfile.append(userDetail.getPositionType());
-			contentProfile.append("</ak:positionType>");
-			contentProfile.append("<ak:positiontitle>");
-			contentProfile.append(userDetail.getPositionTitle());
-			contentProfile.append("</ak:positiontitle>");
-			contentProfile.append("</ak:user>");
-		}
-		contentProfile.append("</ak:record>");
-		contentProfile.append("</Content>");
-		contentProfile
-				.append("<Attribute AttributeId=\"urn:oasis:names:tc:xacml:3.0:profile:multiple:content-selector\" IncludeInResult=\"false\">");
-		contentProfile
-				.append("<AttributeValue DataType=\"urn:oasis:names:tc:xacml:3.0:data-type:xpathExpression\" XPathCategory=\"urn:oasis:names:tc:xacml:3.0:attribute-category:resource\">//ak:record//ak:user</AttributeValue>");
-		contentProfile.append("</Attribute>");
-		return contentProfile;
-	}
-
 	/**
 	 * Saves Delegation
 	 * 
@@ -681,6 +283,15 @@ public class DelegationDAO extends BasicDAO<Delegation, String> {
 		saveDelegation(newDelegation, authorProfile);
 	}
 
+	public void saveDelegation(Delegation newDelegation,
+			UserProfile authorProfile) {
+		Datastore ds = getDatastore();
+		audit = new AuditLog(authorProfile, "Created delegation by "
+				+ authorProfile.getUserAccount().getUserName(), new Date());
+		newDelegation.getAuditLog().add(audit);
+		ds.save(newDelegation);
+	}
+
 	/**
 	 * Updates Delegation
 	 * 
@@ -700,6 +311,35 @@ public class DelegationDAO extends BasicDAO<Delegation, String> {
 				existingDelegation);
 		existingDelegation.setDelegationPolicyId(policyId);
 		updateDelegation(existingDelegation, authorProfile);
+	}
+
+	public void updateDelegation(Delegation existingDelegation,
+			UserProfile authorProfile) {
+		try {
+			Datastore ds = getDatastore();
+			audit = new AuditLog(authorProfile, "Updated delegation by "
+					+ authorProfile.getUserAccount().getUserName(), new Date());
+			existingDelegation.getAuditLog().add(audit);
+			ds.save(existingDelegation);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public boolean revokeDelegation(Delegation existingDelegation,
+			UserProfile authorProfile) {
+		try {
+			Datastore ds = getDatastore();
+			audit = new AuditLog(authorProfile, "Revoked delegation by "
+					+ authorProfile.getUserAccount().getUserName(), new Date());
+			existingDelegation.getAuditLog().add(audit);
+			existingDelegation.setRevoked(true);
+			ds.save(existingDelegation);
+			return true;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return false;
 	}
 
 	/**
@@ -916,6 +556,14 @@ public class DelegationDAO extends BasicDAO<Delegation, String> {
 		}
 	}
 
+	public boolean validateNotEmptyValue(String value) {
+		if (!value.equalsIgnoreCase("")) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
 	public String createDynamicPolicy(String delegatorId, String delegatorName,
 			String policyLocation, Delegation existingDelegation)
 			throws SAXException, IOException {
@@ -923,12 +571,109 @@ public class DelegationDAO extends BasicDAO<Delegation, String> {
 				policyLocation, existingDelegation);
 	}
 
-	public boolean validateNotEmptyValue(String value) {
-		if (!value.equalsIgnoreCase("")) {
-			return true;
-		} else {
-			return false;
+	/**
+	 * Gets Delegable User Details From Advice response
+	 * 
+	 * @param userDetails
+	 *            UserDetail
+	 * @param result
+	 */
+	public void getDelegableUserDetailsFromAdvice(List<UserDetail> userDetails,
+			AbstractResult result) {
+		List<Advice> advices = result.getAdvices();
+		for (Advice advice : advices) {
+			if (advice instanceof org.wso2.balana.xacml3.Advice) {
+				UserDetail userDeatil = new UserDetail();
+				List<AttributeAssignment> assignments = ((org.wso2.balana.xacml3.Advice) advice)
+						.getAssignments();
+				for (AttributeAssignment assignment : assignments) {
+					switch (assignment.getAttributeId().toString()) {
+					case "userId":
+						userDeatil.setUserProfileId(assignment.getContent());
+						break;
+					case "userfullName":
+						userDeatil.setFullName(assignment.getContent());
+						break;
+					case "userName":
+						userDeatil.setUserName(assignment.getContent());
+						break;
+					case "userEmail":
+						userDeatil.setEmail(assignment.getContent());
+						break;
+					case "userCollege":
+						userDeatil.setCollege(assignment.getContent());
+						break;
+					case "userDepartment":
+						userDeatil.setDepartment(assignment.getContent());
+						break;
+					case "userPositionType":
+						userDeatil.setPositionType(assignment.getContent());
+						break;
+					case "userPositionTitle":
+						userDeatil.setPositionTitle(assignment.getContent());
+						break;
+					default:
+						break;
+					}
+				}
+				userDetails.add(userDeatil);
+			}
 		}
+	}
+
+	/**
+	 * Generates Content Profile for Admin Users
+	 * 
+	 * @param userProfileID
+	 *            User Profile Id
+	 * @param userCollege
+	 *            User's College
+	 * @param userDepartment
+	 *            User's Department
+	 * @return
+	 * @throws UnknownHostException
+	 */
+	public StringBuffer generateContentProfile(List<UserDetail> delegableUsers)
+			throws UnknownHostException {
+		StringBuffer contentProfile = new StringBuffer();
+		contentProfile.append("<Content>");
+		contentProfile.append("<ak:record xmlns:ak=\"http://akpower.org\">");
+		for (UserDetail userDetail : delegableUsers) {
+			contentProfile.append("<ak:user>");
+			contentProfile.append("<ak:userid>");
+			contentProfile.append(userDetail.getUserProfileId());
+			contentProfile.append("</ak:userid>");
+			contentProfile.append("<ak:fullname>");
+			contentProfile.append(userDetail.getFullName());
+			contentProfile.append("</ak:fullname>");
+			contentProfile.append("<ak:username>");
+			contentProfile.append(userDetail.getUserName());
+			contentProfile.append("</ak:username>");
+			contentProfile.append("<ak:email>");
+			contentProfile.append(userDetail.getEmail());
+			contentProfile.append("</ak:email>");
+			contentProfile.append("<ak:college>");
+			contentProfile.append(userDetail.getCollege());
+			contentProfile.append("</ak:college>");
+			contentProfile.append("<ak:department>");
+			contentProfile.append(userDetail.getDepartment());
+			contentProfile.append("</ak:department>");
+			contentProfile.append("<ak:positionType>");
+			contentProfile.append(userDetail.getPositionType());
+			contentProfile.append("</ak:positionType>");
+			contentProfile.append("<ak:positiontitle>");
+			contentProfile.append(userDetail.getPositionTitle());
+			contentProfile.append("</ak:positiontitle>");
+			contentProfile.append("</ak:user>");
+		}
+		contentProfile.append("</ak:record>");
+		contentProfile.append("</Content>");
+		contentProfile
+				.append("<Attribute AttributeId=\"urn:oasis:names:tc:xacml:3.0:profile:multiple:content-selector\" IncludeInResult=\"false\">");
+		contentProfile
+				.append("<AttributeValue DataType=\"urn:oasis:names:tc:xacml:3.0:data-type:xpathExpression\" XPathCategory=\"urn:oasis:names:tc:xacml:3.0:attribute-category:resource\">//ak:record//ak:user</AttributeValue>");
+		contentProfile.append("</Attribute>");
+		return contentProfile;
 	}
 
 	/**
@@ -989,4 +734,234 @@ public class DelegationDAO extends BasicDAO<Delegation, String> {
 		return contentProfile;
 	}
 
+	/***
+	 * Exports to Excel File for Delegation and its Audit Logs
+	 * 
+	 * @param delegations
+	 * @param delegationAuditLogs
+	 * @return
+	 * @throws URISyntaxException
+	 * @throws JsonProcessingException
+	 */
+	public String exportToExcelFile(List<DelegationInfo> delegations,
+			List<AuditLogInfo> delegationAuditLogs) throws URISyntaxException,
+			JsonProcessingException {
+		ObjectMapper mapper = new ObjectMapper();
+		String filename = new String();
+		Xcelite xcelite = new Xcelite();
+		if (delegations != null) {
+			XceliteSheet sheet = xcelite.createSheet("Delegations");
+			SheetWriter<DelegationInfo> writer = sheet
+					.getBeanWriter(DelegationInfo.class);
+			writer.write(delegations);
+		} else {
+			XceliteSheet sheet = xcelite.createSheet("AuditLogs");
+			SheetWriter<AuditLogInfo> writer = sheet
+					.getBeanWriter(AuditLogInfo.class);
+			writer.write(delegationAuditLogs);
+		}
+
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy_MM_dd");
+		Date date = new Date();
+		String fileName = String.format(
+				"%s.%s",
+				RandomStringUtils.randomAlphanumeric(8) + "_"
+						+ dateFormat.format(date), "xlsx");
+		String downloadLocation = this.getClass().getResource("/uploads")
+				.toURI().getPath();
+		xcelite.write(new File(downloadLocation + fileName));
+		filename = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(
+				fileName);
+		return filename;
+	}
+
+	// AuditLog Functions
+
+	/***
+	 * Finds All Logs in a AuditLog Grid for a Delegation
+	 * 
+	 * @param offset
+	 * @param limit
+	 * @param id
+	 * @param auditLogInfo
+	 * @return
+	 * @throws ParseException
+	 */
+	public List<AuditLogInfo> findAllDelegationAuditLogForGrid(int offset,
+			int limit, ObjectId id, AuditLogCommonInfo auditLogInfo)
+			throws ParseException {
+		return getAuditListBasedOnPaging(offset, limit,
+				getSortedAuditLogResults(auditLogInfo, id));
+	}
+
+	/***
+	 * Gets Audit Logs list based On User provided Paging size
+	 * 
+	 * @param offset
+	 * @param limit
+	 * @param allAuditLogs
+	 * @return
+	 */
+	private List<AuditLogInfo> getAuditListBasedOnPaging(int offset, int limit,
+			List<AuditLogInfo> allAuditLogs) {
+		int rowTotal = 0;
+		rowTotal = allAuditLogs.size();
+		if (rowTotal > 0) {
+			for (AuditLogInfo t : allAuditLogs) {
+				t.setRowTotal(rowTotal);
+			}
+		}
+		if (rowTotal >= (offset + limit - 1)) {
+			return allAuditLogs.subList(offset - 1, offset + limit - 1);
+		} else {
+			return allAuditLogs.subList(offset - 1, rowTotal);
+		}
+	}
+
+	/***
+	 * Gets Sorted Audit Logs List
+	 * 
+	 * @param auditLogInfo
+	 * @param id
+	 * @return
+	 * @throws ParseException
+	 */
+	public List<AuditLogInfo> getSortedAuditLogResults(
+			AuditLogCommonInfo auditLogInfo, ObjectId id) throws ParseException {
+		Datastore ds = getDatastore();
+		Query<Delegation> delegationQuery = ds.createQuery(Delegation.class);
+		Delegation q = delegationQuery.field("_id").equal(id).get();
+
+		List<AuditLogInfo> allAuditLogs = new ArrayList<AuditLogInfo>();
+		if (q.getAuditLog() != null && q.getAuditLog().size() != 0) {
+			for (AuditLog delegationAudit : q.getAuditLog()) {
+				AuditLogInfo delegationAuditLog = new AuditLogInfo();
+				boolean isActionMatch = isAuditLogActionFieldProvided(
+						auditLogInfo.getAction(), delegationAudit);
+				boolean isAuditedByMatch = isAuditLogAuditedByFieldProvided(
+						auditLogInfo.getAuditedBy(), delegationAudit);
+				boolean isActivityDateFromMatch = isAuditLogActivityDateFromProvided(
+						auditLogInfo.getActivityOnFrom(), delegationAudit);
+				boolean isActivityDateToMatch = isAuditLogActivityDateToProvided(
+						auditLogInfo.getActivityOnTo(), delegationAudit);
+
+				if (isActionMatch && isAuditedByMatch
+						&& isActivityDateFromMatch && isActivityDateToMatch) {
+					delegationAuditLog.setUserName(delegationAudit
+							.getUserProfile().getUserAccount().getUserName());
+					delegationAuditLog.setUserFullName(delegationAudit
+							.getUserProfile().getFullName());
+					delegationAuditLog.setAction(delegationAudit.getAction());
+					delegationAuditLog.setActivityDate(delegationAudit
+							.getActivityDate());
+					allAuditLogs.add(delegationAuditLog);
+				}
+			}
+		}
+		Collections.sort(allAuditLogs);
+		return allAuditLogs;
+	}
+
+	/***
+	 * Is Audit Log Activity Date To Provided
+	 * 
+	 * @param activityOnTo
+	 * @param delegationAudit
+	 * @return
+	 * @throws ParseException
+	 */
+	private boolean isAuditLogActivityDateToProvided(String activityOnTo,
+			AuditLog delegationAudit) throws ParseException {
+		if (activityOnTo != null) {
+			Date activityDateTo = formatter.parse(activityOnTo);
+			if (delegationAudit.getActivityDate().compareTo(activityDateTo) > 0) {
+				return false;
+			} else if (delegationAudit.getActivityDate().compareTo(
+					activityDateTo) < 0) {
+				return true;
+			} else if (delegationAudit.getActivityDate().compareTo(
+					activityDateTo) == 0) {
+				return true;
+			}
+		} else {
+			return true;
+		}
+		return false;
+	}
+
+	/***
+	 * Is Audit Log Activity Date From Provided
+	 * 
+	 * @param activityOnFrom
+	 * @param delegationAudit
+	 * @return
+	 * @throws ParseException
+	 */
+	private boolean isAuditLogActivityDateFromProvided(String activityOnFrom,
+			AuditLog delegationAudit) throws ParseException {
+		if (activityOnFrom != null) {
+			Date activityDateFrom = formatter.parse(activityOnFrom);
+			if (delegationAudit.getActivityDate().compareTo(activityDateFrom) > 0) {
+				return true;
+			} else if (delegationAudit.getActivityDate().compareTo(
+					activityDateFrom) < 0) {
+				return false;
+			} else if (delegationAudit.getActivityDate().compareTo(
+					activityDateFrom) == 0) {
+				return true;
+			}
+		} else {
+			return true;
+		}
+		return false;
+	}
+
+	/***
+	 * Is Audit Log Audited By Provided
+	 * 
+	 * @param auditedBy
+	 * @param delegationAudit
+	 * @return
+	 */
+	private boolean isAuditLogAuditedByFieldProvided(String auditedBy,
+			AuditLog delegationAudit) {
+		if (auditedBy != null) {
+			if (delegationAudit.getUserProfile().getUserAccount().getUserName()
+					.toLowerCase().contains(auditedBy.toLowerCase())) {
+				return true;
+			} else if (delegationAudit.getUserProfile().getFirstName()
+					.toLowerCase().contains(auditedBy.toLowerCase())) {
+				return true;
+			} else if (delegationAudit.getUserProfile().getMiddleName()
+					.toLowerCase().contains(auditedBy.toLowerCase())) {
+				return true;
+			} else if (delegationAudit.getUserProfile().getLastName()
+					.toLowerCase().contains(auditedBy.toLowerCase())) {
+				return true;
+			}
+		} else {
+			return true;
+		}
+		return false;
+	}
+
+	/***
+	 * Is Audit Log Action Provided
+	 * 
+	 * @param action
+	 * @param delegationAudit
+	 * @return
+	 */
+	private boolean isAuditLogActionFieldProvided(String action,
+			AuditLog delegationAudit) {
+		if (action != null) {
+			if (delegationAudit.getAction().toLowerCase()
+					.contains(action.toLowerCase())) {
+				return true;
+			}
+		} else {
+			return true;
+		}
+		return false;
+	}
 }

@@ -140,7 +140,7 @@ public class DelegationService {
 				JsonNode commonObj = root.get("gpmsCommonObj");
 				userInfo = new GPMSCommonInfo(commonObj);
 			}
-			delegations = delegationDAO.findAllForUserDelegationGrid(offset,
+			delegations = delegationDAO.findAllUserDelegationsForGrid(offset,
 					limit, delegationInfo, userInfo);
 			return Response
 					.status(Response.Status.OK)
@@ -179,8 +179,8 @@ public class DelegationService {
 				JsonNode commonObj = root.get("gpmsCommonObj");
 				userInfo = new GPMSCommonInfo(commonObj);
 			}
-			delegations = delegationDAO.findAllUserDelegationsForGrid(delegationInfo,
-					userInfo);
+			delegations = delegationDAO.findAllUserDelegationsForExport(
+					delegationInfo, userInfo);
 			String filename = new String();
 			if (delegations.size() > 0) {
 				filename = delegationDAO.exportToExcelFile(delegations, null);

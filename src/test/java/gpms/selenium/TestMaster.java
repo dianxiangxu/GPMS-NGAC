@@ -4,8 +4,8 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
 @RunWith(Suite.class)
-@Suite.SuiteClasses({ DelegationByChair.class,
-		SuccessfullProposalSubmition_IRB.class,
+@Suite.SuiteClasses({ SuccessfullProposalByComputerScienceFaculty.class,
+		DelegationByChair.class, SuccessfullProposalSubmition_IRB.class,
 		SuccessfullProposalSubmition_NoIRB.class,
 		SuccessfullProposalSubmitionIRB_twoFaculty.class,
 		ProposalAddFailure.class, ProposalAddSuccessByTenuredFaculty.class,
