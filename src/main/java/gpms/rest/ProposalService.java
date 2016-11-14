@@ -440,6 +440,35 @@ public class ProposalService {
 											existingProposal, authorProfile,
 											authorUserName, obligations);
 							if (isDeleted) {
+								if (proposalRoles.equals("PI")
+										&& !proposalUserTitle
+												.equals("University Research Director")) {
+									for (Iterator<SignatureUserInfo> iterator = signatures
+											.iterator(); iterator.hasNext();) {
+										SignatureUserInfo userToNotify = iterator
+												.next();
+										if (userToNotify
+												.getPositionTitle()
+												.equals("University Research Director")
+												|| userToNotify
+														.getPositionTitle()
+														.equals("University Research Administrator")
+												|| userToNotify
+														.getPositionTitle()
+														.equals("IRB")
+												|| userToNotify
+														.getPositionTitle()
+														.equals("Dean")
+												|| userToNotify
+														.getPositionTitle()
+														.equals("Business Manager")
+												|| userToNotify
+														.getPositionTitle()
+														.equals("Department Chair")) {
+											iterator.remove();
+										}
+									}
+								}
 								sendDeleteNotification(proposalRoles,
 										proposalUserTitle, existingProposal,
 										authorUserName, signatures);
@@ -893,10 +922,13 @@ public class ProposalService {
 							String notificationMessage = changeDone + " by "
 									+ authorUserName + ".";
 							if (changeDone.equals("Withdrawn")) {
-								for (SignatureUserInfo userToNotify : signatures) {
+								for (Iterator<SignatureUserInfo> iterator = signatures
+										.iterator(); iterator.hasNext();) {
+									SignatureUserInfo userToNotify = iterator
+											.next();
 									if (userToNotify.getPositionTitle().equals(
 											"University Research Director")) {
-										signatures.remove(userToNotify);
+										iterator.remove();
 									}
 								}
 								broadCastNotification(existingProposal.getId()
@@ -905,23 +937,6 @@ public class ProposalService {
 										notificationMessage, "Proposal",
 										signatures, true);
 							} else if (changeDone.equals("Archived")) {
-								for (SignatureUserInfo userToNotify : signatures) {
-									if (userToNotify.getPositionTitle().equals(
-											"University Research Director")
-											|| userToNotify
-													.getPositionTitle()
-													.equals("University Research Administrator")
-											|| userToNotify.getPositionTitle()
-													.equals("IRB")
-											|| userToNotify.getPositionTitle()
-													.equals("Dean")
-											|| userToNotify.getPositionTitle()
-													.equals("Business Manager")
-											|| userToNotify.getPositionTitle()
-													.equals("Department Chair")) {
-										signatures.remove(userToNotify);
-									}
-								}
 								broadCastNotification(existingProposal.getId()
 										.toString(), existingProposal
 										.getProjectInfo().getProjectTitle(),
@@ -1007,7 +1022,7 @@ public class ProposalService {
 
 				return sendSaveUpdateNotification(message, proposalId,
 						existingProposal, oldProposal, authorProfile, true,
-						null, irbApprovalRequired, null, emailDetails);
+						null, irbApprovalRequired, null, emailDetails, "");
 			} else {
 				return Response.status(Response.Status.BAD_REQUEST)
 						.type(MediaType.APPLICATION_JSON)
@@ -1076,6 +1091,21 @@ public class ProposalService {
 							&& policyInfo.size() > 0) {
 						HashMap<String, Multimap<String, String>> attrMap = proposalDAO
 								.generateAttributes(policyInfo);
+						String action = new String();
+						for (JsonNode node : policyInfo) {
+							String attributeValue = node.path("attributeValue")
+									.asText();
+							String attributeType = node.path("attributeType")
+									.asText();
+							switch (attributeType) {
+							case "Action":
+								action = attributeValue;
+								break;
+							default:
+								break;
+							}
+						}
+
 						List<SignatureUserInfo> signatures = new ArrayList<SignatureUserInfo>();
 						RequiredSignaturesInfo requiredSignatures = new RequiredSignaturesInfo();
 						signatures = proposalDAO
@@ -1105,11 +1135,13 @@ public class ProposalService {
 										.getObligations();
 								EmailCommonInfo emailDetails = proposalDAO
 										.saveProposalWithObligations(obligations);
+
 								return sendSaveUpdateNotification(message,
 										proposalId, existingProposal,
 										oldProposal, authorProfile, false,
 										signatures, irbApprovalRequired,
-										requiredSignatures, emailDetails);
+										requiredSignatures, emailDetails,
+										action);
 							} else {
 								return Response
 										.status(403)
@@ -1255,27 +1287,10 @@ public class ProposalService {
 			String authorUserName, List<SignatureUserInfo> signatures)
 			throws JsonProcessingException {
 		String notificationMessage = "Deleted by " + authorUserName + ".";
-		if (proposalRoles.equals("PI")
-				&& !proposalUserTitle.equals("University Research Director")) {
-			for (SignatureUserInfo userToNotify : signatures) {
-				if (userToNotify.getPositionTitle().equals(
-						"University Research Director")
-						|| userToNotify.getPositionTitle().equals(
-								"University Research Administrator")
-						|| userToNotify.getPositionTitle().equals("IRB")
-						|| userToNotify.getPositionTitle().equals("Dean")
-						|| userToNotify.getPositionTitle().equals(
-								"Business Manager")
-						|| userToNotify.getPositionTitle().equals(
-								"Department Chair")) {
-					signatures.remove(userToNotify);
-				}
-			}
-			broadCastNotification(existingProposal.getId().toString(),
-					existingProposal.getProjectInfo().getProjectTitle(),
-					notificationMessage, "Proposal", signatures, true);
-		} else if (!proposalRoles.equals("PI")
-				&& proposalUserTitle.equals("University Research Director")) {
+		if ((proposalRoles.equals("PI") && !proposalUserTitle
+				.equals("University Research Director"))
+				|| (!proposalRoles.equals("PI") && proposalUserTitle
+						.equals("University Research Director"))) {
 			broadCastNotification(existingProposal.getId().toString(),
 					existingProposal.getProjectInfo().getProjectTitle(),
 					notificationMessage, "Proposal", signatures, true);
@@ -1477,7 +1492,8 @@ public class ProposalService {
 			UserProfile authorProfile, boolean isAdminUser,
 			List<SignatureUserInfo> signatures, Boolean irbApprovalRequired,
 			RequiredSignaturesInfo requiredSignatures,
-			EmailCommonInfo emailDetails) throws JsonProcessingException {
+			EmailCommonInfo emailDetails, String action)
+			throws JsonProcessingException {
 		ObjectMapper mapper = new ObjectMapper();
 		String emailSubject = emailDetails.getEmailSubject();
 		String emailBody = emailDetails.getEmailBody();
@@ -1489,11 +1505,12 @@ public class ProposalService {
 			if (proposalId.equals("0")) {
 				proposalIsChanged = saveProposal(message, existingProposal,
 						null, authorProfile, isAdminUser, proposalId, null,
-						irbApprovalRequired, null);
+						irbApprovalRequired, null, action);
 			} else {
 				proposalIsChanged = saveProposal(message, existingProposal,
 						oldProposal, authorProfile, isAdminUser, proposalId,
-						signatures, irbApprovalRequired, requiredSignatures);
+						signatures, irbApprovalRequired, requiredSignatures,
+						action);
 			}
 		} catch (Exception e) {
 			return Response.status(403).type(MediaType.APPLICATION_JSON)
@@ -1523,7 +1540,7 @@ public class ProposalService {
 			Proposal oldProposal, UserProfile authorProfile,
 			boolean isAdminUser, String proposalID,
 			List<SignatureUserInfo> signatures, boolean irbApprovalRequired,
-			RequiredSignaturesInfo requiredSignatures)
+			RequiredSignaturesInfo requiredSignatures, String action)
 			throws UnknownHostException, Exception, ParseException,
 			IOException, JsonParseException, JsonMappingException {
 		String authorUserName = authorProfile.getFullName();
@@ -1555,7 +1572,8 @@ public class ProposalService {
 				if ((proposalUserTitle.textValue().equals(
 						"University Research Administrator") || proposalUserTitle
 						.textValue().equals("University Research Director"))
-						&& !proposalID.equals("0")) {
+						&& !proposalID.equals("0")
+						&& !action.equals("Disapprove")) {
 					proposalDAO.getOSPSectionInfo(existingProposal,
 							proposalInfo);
 				} else {

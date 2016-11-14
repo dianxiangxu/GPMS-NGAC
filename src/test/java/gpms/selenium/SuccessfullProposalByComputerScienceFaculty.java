@@ -577,325 +577,326 @@ public class SuccessfullProposalByComputerScienceFaculty {
 		driver.findElement(By.linkText("Log Out")).click();
 		Thread.sleep(1500);
 
-		// Research Administration approval
-		driver.get(baseUrl + "GPMS/");
-		driver.findElement(By.id("user_email")).clear();
-		driver.findElement(By.id("user_email")).sendKeys(
-				"racomputerscience@gmail.com");
-		driver.findElement(By.id("user_password")).clear();
-		driver.findElement(By.id("user_password")).sendKeys("gpmspassword");
-		Thread.sleep(200);
-		driver.findElement(By.name("commit")).click();
-		Thread.sleep(200);
-		driver.findElement(By.linkText("My Proposals")).click();
-		Thread.sleep(200);
+		// // Research Administration approval
+		// driver.get(baseUrl + "GPMS/");
+		// driver.findElement(By.id("user_email")).clear();
+		// driver.findElement(By.id("user_email")).sendKeys(
+		// "racomputerscience@gmail.com");
+		// driver.findElement(By.id("user_password")).clear();
+		// driver.findElement(By.id("user_password")).sendKeys("gpmspassword");
+		// Thread.sleep(200);
+		// driver.findElement(By.name("commit")).click();
+		// Thread.sleep(200);
+		// driver.findElement(By.linkText("My Proposals")).click();
+		// Thread.sleep(200);
+		//
+		// ((JavascriptExecutor) driver)
+		// .executeScript("var s=document.getElementById('edit0');s.click();");
+		// Thread.sleep(500);
+		// driver.findElement(By.id("ui-id-21")).click();
+		// Thread.sleep(500);
+		// driver.findElement(
+		// By.name("5745fcfdbcbb29192ce0d451University_Research_Administrator"))
+		// .clear();
+		// Thread.sleep(200);
+		// driver.findElement(
+		// By.name("5745fcfdbcbb29192ce0d451University_Research_Administrator"))
+		// .sendKeys("Research");
+		// Thread.sleep(200);
+		// driver.findElement(
+		// By.xpath("//table[@id='trSignAdministrator']/tbody/tr/td[3]"))
+		// .click();
+		// Thread.sleep(200);
+		// driver.findElement(
+		// By.name("proposalNotes5745fcfdbcbb29192ce0d451University_Research_Administrator"))
+		// .clear();
+		// Thread.sleep(200);
+		// driver.findElement(
+		// By.name("proposalNotes5745fcfdbcbb29192ce0d451University_Research_Administrator"))
+		// .sendKeys("Test");
+		// Thread.sleep(200);
+		// driver.findElement(By.id("btnApproveProposal")).click();
+		// Thread.sleep(500);
+		// driver.findElement(By.id("txtAgencyList")).clear();
+		// Thread.sleep(200);
+		//
+		// driver.findElement(By.id("txtAgencyList")).sendKeys("Some agency");
+		// Thread.sleep(200);
+		//
+		// driver.findElement(By.id("chkFederal")).click();
+		// Thread.sleep(200);
+		//
+		// driver.findElement(By.id("chkNonProfitOrganization")).click();
+		// Thread.sleep(200);
+		//
+		// driver.findElement(By.id("chkNonIdahoLocalEntity")).click();
+		// Thread.sleep(200);
+		//
+		// driver.findElement(By.id("txtCFDANo")).clear();
+		// Thread.sleep(200);
+		//
+		// driver.findElement(By.id("txtCFDANo")).sendKeys("55555555");
+		// Thread.sleep(200);
+		//
+		// driver.findElement(By.id("txtProgramNo")).click();
+		// Thread.sleep(200);
+		//
+		// driver.findElement(By.id("txtProgramNo")).clear();
+		// Thread.sleep(200);
+		// driver.findElement(By.id("txtProgramNo")).sendKeys("47");
+		// Thread.sleep(200);
+		// driver.findElement(By.id("txtProgramTitle")).click();
+		// Thread.sleep(200);
+		//
+		// driver.findElement(By.id("txtProgramTitle")).clear();
+		// Thread.sleep(200);
+		//
+		// driver.findElement(By.id("txtProgramTitle")).sendKeys("2");
+		// Thread.sleep(200);
+		//
+		// driver.findElement(By.id("chkNoRecoveryNormal")).click();
+		// Thread.sleep(200);
+		//
+		// driver.findElement(By.id("chkTC")).click();
+		// Thread.sleep(200);
+		//
+		// new Select(driver.findElement(By.id("ddlPISalaryIncluded")))
+		// .selectByVisibleText("Yes");
+		// Thread.sleep(200);
+		//
+		// driver.findElement(
+		// By.cssSelector("#ddlPISalaryIncluded > option[value=\"1\"]"))
+		// .click();
+		// Thread.sleep(200);
+		//
+		// driver.findElement(By.id("txtPISalary")).clear();
+		// Thread.sleep(200);
+		//
+		// driver.findElement(By.id("txtPISalary")).sendKeys("1000000");
+		// Thread.sleep(200);
+		//
+		// driver.findElement(By.id("txtPIFringe")).clear();
+		// Thread.sleep(200);
+		//
+		// driver.findElement(By.id("txtPIFringe")).sendKeys("1");
+		// Thread.sleep(200);
+		//
+		// driver.findElement(By.id("txtDepartmentID")).clear();
+		// Thread.sleep(200);
+		//
+		// driver.findElement(By.id("txtDepartmentID")).sendKeys("10");
+		// Thread.sleep(200);
+		//
+		// driver.findElement(
+		// By.xpath("//div[@id='ui-id-24']/table/tbody/tr[13]/td[2]"))
+		// .click();
+		// Thread.sleep(200);
+		//
+		// driver.findElement(By.id("ddlInstitutionalCostDocumented")).click();
+		// Thread.sleep(200);
+		//
+		// new
+		// Select(driver.findElement(By.id("ddlInstitutionalCostDocumented")))
+		// .selectByVisibleText("Yes");
+		// Thread.sleep(200);
+		//
+		// driver.findElement(
+		// By.cssSelector("#ddlInstitutionalCostDocumented > option[value=\"1\"]"))
+		// .click();
+		// Thread.sleep(200);
+		//
+		// driver.findElement(By.id("ddlThirdPartyCostDocumented")).click();
+		// Thread.sleep(200);
+		//
+		// new Select(driver.findElement(By.id("ddlThirdPartyCostDocumented")))
+		// .selectByVisibleText("Yes");
+		// Thread.sleep(200);
+		//
+		// driver.findElement(
+		// By.cssSelector("#ddlThirdPartyCostDocumented > option[value=\"1\"]"))
+		// .click();
+		// Thread.sleep(200);
+		//
+		// driver.findElement(By.id("ddlPIEligibilityWaiver")).click();
+		// Thread.sleep(200);
+		//
+		// new Select(driver.findElement(By.id("ddlPIEligibilityWaiver")))
+		// .selectByVisibleText("Yes");
+		// Thread.sleep(200);
+		//
+		// driver.findElement(
+		// By.cssSelector("#ddlPIEligibilityWaiver > option[value=\"1\"]"))
+		// .click();
+		// Thread.sleep(200);
+		//
+		// driver.findElement(By.id("ddlCOIForms")).click();
+		// Thread.sleep(200);
+		//
+		// new Select(driver.findElement(By.id("ddlCOIForms")))
+		// .selectByVisibleText("No");
+		// Thread.sleep(200);
+		//
+		// driver.findElement(By.cssSelector("#ddlCOIForms > option[value=\"2\"]"))
+		// .click();
+		// Thread.sleep(200);
+		//
+		// driver.findElement(By.id("ddlCOIForms")).click();
+		// Thread.sleep(200);
+		//
+		// new Select(driver.findElement(By.id("ddlCOIForms")))
+		// .selectByVisibleText("Yes");
+		// Thread.sleep(200);
+		// driver.findElement(By.cssSelector("#ddlCOIForms > option[value=\"1\"]"))
+		// .click();
+		// Thread.sleep(200);
+		//
+		// driver.findElement(By.id("ddlCheckedExcludedPartyList")).click();
+		// Thread.sleep(200);
+		//
+		// new Select(driver.findElement(By.id("ddlCheckedExcludedPartyList")))
+		// .selectByVisibleText("Yes");
+		// Thread.sleep(200);
+		//
+		// driver.findElement(
+		// By.cssSelector("#ddlCheckedExcludedPartyList > option[value=\"1\"]"))
+		// .click();
+		// Thread.sleep(200);
+		//
+		// driver.findElement(By.id("btnApproveProposal")).click();
+		// Thread.sleep(500);
+		// driver.findElement(By.id("BoxConfirmBtnOk")).click();
+		// Thread.sleep(200);
+		//
+		// assertTrue(driver.findElement(By.cssSelector("BODY")).getText()
+		// .matches("^[\\s\\S]*$"));
+		// Thread.sleep(200);
+		// driver.findElement(By.id("BoxAlertBtnOk")).click();
+		// Thread.sleep(200);
+		// driver.findElement(By.cssSelector("span.myProfile.icon-arrow-s"))
+		// .click();
+		// Thread.sleep(200);
+		// driver.findElement(By.linkText("Log Out")).click();
+		// Thread.sleep(1500);
 
-		((JavascriptExecutor) driver)
-				.executeScript("var s=document.getElementById('edit0');s.click();");
-		Thread.sleep(500);
-		driver.findElement(By.id("ui-id-21")).click();
-		Thread.sleep(500);
-		driver.findElement(
-				By.name("5745fcfdbcbb29192ce0d451University_Research_Administrator"))
-				.clear();
-		Thread.sleep(200);
-		driver.findElement(
-				By.name("5745fcfdbcbb29192ce0d451University_Research_Administrator"))
-				.sendKeys("Research");
-		Thread.sleep(200);
-		driver.findElement(
-				By.xpath("//table[@id='trSignAdministrator']/tbody/tr/td[3]"))
-				.click();
-		Thread.sleep(200);
-		driver.findElement(
-				By.name("proposalNotes5745fcfdbcbb29192ce0d451University_Research_Administrator"))
-				.clear();
-		Thread.sleep(200);
-		driver.findElement(
-				By.name("proposalNotes5745fcfdbcbb29192ce0d451University_Research_Administrator"))
-				.sendKeys("Test");
-		Thread.sleep(200);
-		driver.findElement(By.id("btnApproveProposal")).click();
-		Thread.sleep(500);
-		driver.findElement(By.id("txtAgencyList")).clear();
-		Thread.sleep(200);
+		// // Research Director Approval
+		// driver.get(baseUrl + "GPMS/");
+		// driver.findElement(By.id("user_email")).clear();
+		// driver.findElement(By.id("user_email")).sendKeys(
+		// "directorcomputerscience@gmail.com");
+		// driver.findElement(By.id("user_password")).clear();
+		// driver.findElement(By.id("user_password")).sendKeys("gpmspassword");
+		// Thread.sleep(200);
+		// driver.findElement(By.name("commit")).click();
+		// Thread.sleep(200);
+		// driver.findElement(By.linkText("My Proposals")).click();
+		// Thread.sleep(200);
+		//
+		// ((JavascriptExecutor) driver)
+		// .executeScript("var s=document.getElementById('edit0');s.click();");
+		// Thread.sleep(500);
+		// driver.findElement(By.id("ui-id-21")).click();
+		// Thread.sleep(500);
+		// driver.findElement(
+		// By.name("5745fd43bcbb29192ce0d459University_Research_Director"))
+		// .clear();
+		// Thread.sleep(200);
+		// driver.findElement(
+		// By.name("5745fd43bcbb29192ce0d459University_Research_Director"))
+		// .sendKeys("Director");
+		// Thread.sleep(200);
+		// driver.findElement(
+		// By.xpath("//table[@id='trSignDirector']/tbody/tr/td[3]"))
+		// .click();
+		//
+		// Thread.sleep(200);
+		// driver.findElement(
+		// By.name("proposalNotes5745fd43bcbb29192ce0d459University_Research_Director"))
+		// .clear();
+		// Thread.sleep(200);
+		// driver.findElement(
+		// By.name("proposalNotes5745fd43bcbb29192ce0d459University_Research_Director"))
+		// .sendKeys("Test");
+		// Thread.sleep(200);
+		//
+		// driver.findElement(By.id("btnApproveProposal")).click();
+		// Thread.sleep(500);
+		// driver.findElement(By.id("BoxConfirmBtnOk")).click();
+		// Thread.sleep(200);
+		//
+		// assertTrue(driver.findElement(By.cssSelector("BODY")).getText()
+		// .matches("^[\\s\\S]*$"));
+		// Thread.sleep(200);
+		// driver.findElement(By.id("BoxAlertBtnOk")).click();
+		// Thread.sleep(200);
+		// driver.findElement(By.cssSelector("span.myProfile.icon-arrow-s"))
+		// .click();
+		// Thread.sleep(200);
+		// driver.findElement(By.linkText("Log Out")).click();
+		// Thread.sleep(1500);
+		//
+		// // Research Administrator submission
+		// driver.get(baseUrl + "GPMS/");
+		// driver.findElement(By.id("user_email")).clear();
+		// driver.findElement(By.id("user_email")).sendKeys(
+		// "racomputerscience@gmail.com");
+		// driver.findElement(By.id("user_password")).clear();
+		// driver.findElement(By.id("user_password")).sendKeys("gpmspassword");
+		// Thread.sleep(200);
+		// driver.findElement(By.name("commit")).click();
+		// Thread.sleep(200);
+		// driver.findElement(By.linkText("My Proposals")).click();
+		// Thread.sleep(200);
+		//
+		// ((JavascriptExecutor) driver)
+		// .executeScript("var s=document.getElementById('edit0');s.click();");
+		// Thread.sleep(500);
+		// driver.findElement(By.id("btnSubmitProposal")).click();
+		// Thread.sleep(500);
+		// driver.findElement(By.id("BoxConfirmBtnOk")).click();
+		// Thread.sleep(200);
+		// assertTrue(driver.findElement(By.cssSelector("BODY")).getText()
+		// .matches("^[\\s\\S]*$"));
+		// Thread.sleep(200);
+		// driver.findElement(By.id("BoxAlertBtnOk")).click();
+		// Thread.sleep(200);
+		// driver.findElement(By.cssSelector("span.myProfile.icon-arrow-s"))
+		// .click();
+		// Thread.sleep(500);
+		// driver.findElement(By.linkText("Log Out")).click();
+		// Thread.sleep(1500);
 
-		driver.findElement(By.id("txtAgencyList")).sendKeys("Some agency");
-		Thread.sleep(200);
-
-		driver.findElement(By.id("chkFederal")).click();
-		Thread.sleep(200);
-
-		driver.findElement(By.id("chkNonProfitOrganization")).click();
-		Thread.sleep(200);
-
-		driver.findElement(By.id("chkNonIdahoLocalEntity")).click();
-		Thread.sleep(200);
-
-		driver.findElement(By.id("txtCFDANo")).clear();
-		Thread.sleep(200);
-
-		driver.findElement(By.id("txtCFDANo")).sendKeys("55555555");
-		Thread.sleep(200);
-
-		driver.findElement(By.id("txtProgramNo")).click();
-		Thread.sleep(200);
-
-		driver.findElement(By.id("txtProgramNo")).clear();
-		Thread.sleep(200);
-		driver.findElement(By.id("txtProgramNo")).sendKeys("47");
-		Thread.sleep(200);
-		driver.findElement(By.id("txtProgramTitle")).click();
-		Thread.sleep(200);
-
-		driver.findElement(By.id("txtProgramTitle")).clear();
-		Thread.sleep(200);
-
-		driver.findElement(By.id("txtProgramTitle")).sendKeys("2");
-		Thread.sleep(200);
-
-		driver.findElement(By.id("chkNoRecoveryNormal")).click();
-		Thread.sleep(200);
-
-		driver.findElement(By.id("chkTC")).click();
-		Thread.sleep(200);
-
-		new Select(driver.findElement(By.id("ddlPISalaryIncluded")))
-				.selectByVisibleText("Yes");
-		Thread.sleep(200);
-
-		driver.findElement(
-				By.cssSelector("#ddlPISalaryIncluded > option[value=\"1\"]"))
-				.click();
-		Thread.sleep(200);
-
-		driver.findElement(By.id("txtPISalary")).clear();
-		Thread.sleep(200);
-
-		driver.findElement(By.id("txtPISalary")).sendKeys("1000000");
-		Thread.sleep(200);
-
-		driver.findElement(By.id("txtPIFringe")).clear();
-		Thread.sleep(200);
-
-		driver.findElement(By.id("txtPIFringe")).sendKeys("1");
-		Thread.sleep(200);
-
-		driver.findElement(By.id("txtDepartmentID")).clear();
-		Thread.sleep(200);
-
-		driver.findElement(By.id("txtDepartmentID")).sendKeys("10");
-		Thread.sleep(200);
-
-		driver.findElement(
-				By.xpath("//div[@id='ui-id-24']/table/tbody/tr[13]/td[2]"))
-				.click();
-		Thread.sleep(200);
-
-		driver.findElement(By.id("ddlInstitutionalCostDocumented")).click();
-		Thread.sleep(200);
-
-		new Select(driver.findElement(By.id("ddlInstitutionalCostDocumented")))
-				.selectByVisibleText("Yes");
-		Thread.sleep(200);
-
-		driver.findElement(
-				By.cssSelector("#ddlInstitutionalCostDocumented > option[value=\"1\"]"))
-				.click();
-		Thread.sleep(200);
-
-		driver.findElement(By.id("ddlThirdPartyCostDocumented")).click();
-		Thread.sleep(200);
-
-		new Select(driver.findElement(By.id("ddlThirdPartyCostDocumented")))
-				.selectByVisibleText("Yes");
-		Thread.sleep(200);
-
-		driver.findElement(
-				By.cssSelector("#ddlThirdPartyCostDocumented > option[value=\"1\"]"))
-				.click();
-		Thread.sleep(200);
-
-		driver.findElement(By.id("ddlPIEligibilityWaiver")).click();
-		Thread.sleep(200);
-
-		new Select(driver.findElement(By.id("ddlPIEligibilityWaiver")))
-				.selectByVisibleText("Yes");
-		Thread.sleep(200);
-
-		driver.findElement(
-				By.cssSelector("#ddlPIEligibilityWaiver > option[value=\"1\"]"))
-				.click();
-		Thread.sleep(200);
-
-		driver.findElement(By.id("ddlCOIForms")).click();
-		Thread.sleep(200);
-
-		new Select(driver.findElement(By.id("ddlCOIForms")))
-				.selectByVisibleText("No");
-		Thread.sleep(200);
-
-		driver.findElement(By.cssSelector("#ddlCOIForms > option[value=\"2\"]"))
-				.click();
-		Thread.sleep(200);
-
-		driver.findElement(By.id("ddlCOIForms")).click();
-		Thread.sleep(200);
-
-		new Select(driver.findElement(By.id("ddlCOIForms")))
-				.selectByVisibleText("Yes");
-		Thread.sleep(200);
-		driver.findElement(By.cssSelector("#ddlCOIForms > option[value=\"1\"]"))
-				.click();
-		Thread.sleep(200);
-
-		driver.findElement(By.id("ddlCheckedExcludedPartyList")).click();
-		Thread.sleep(200);
-
-		new Select(driver.findElement(By.id("ddlCheckedExcludedPartyList")))
-				.selectByVisibleText("Yes");
-		Thread.sleep(200);
-
-		driver.findElement(
-				By.cssSelector("#ddlCheckedExcludedPartyList > option[value=\"1\"]"))
-				.click();
-		Thread.sleep(200);
-
-		driver.findElement(By.id("btnApproveProposal")).click();
-		Thread.sleep(500);
-		driver.findElement(By.id("BoxConfirmBtnOk")).click();
-		Thread.sleep(200);
-
-		assertTrue(driver.findElement(By.cssSelector("BODY")).getText()
-				.matches("^[\\s\\S]*$"));
-		Thread.sleep(200);
-		driver.findElement(By.id("BoxAlertBtnOk")).click();
-		Thread.sleep(200);
-		driver.findElement(By.cssSelector("span.myProfile.icon-arrow-s"))
-				.click();
-		Thread.sleep(200);
-		driver.findElement(By.linkText("Log Out")).click();
-		Thread.sleep(1500);
-
-		// Research Director Approval
-		driver.get(baseUrl + "GPMS/");
-		driver.findElement(By.id("user_email")).clear();
-		driver.findElement(By.id("user_email")).sendKeys(
-				"directorcomputerscience@gmail.com");
-		driver.findElement(By.id("user_password")).clear();
-		driver.findElement(By.id("user_password")).sendKeys("gpmspassword");
-		Thread.sleep(200);
-		driver.findElement(By.name("commit")).click();
-		Thread.sleep(200);
-		driver.findElement(By.linkText("My Proposals")).click();
-		Thread.sleep(200);
-
-		((JavascriptExecutor) driver)
-				.executeScript("var s=document.getElementById('edit0');s.click();");
-		Thread.sleep(500);
-		driver.findElement(By.id("ui-id-21")).click();
-		Thread.sleep(500);
-		driver.findElement(
-				By.name("5745fd43bcbb29192ce0d459University_Research_Director"))
-				.clear();
-		Thread.sleep(200);
-		driver.findElement(
-				By.name("5745fd43bcbb29192ce0d459University_Research_Director"))
-				.sendKeys("Director");
-		Thread.sleep(200);
-		driver.findElement(
-				By.xpath("//table[@id='trSignDirector']/tbody/tr/td[3]"))
-				.click();
-
-		Thread.sleep(200);
-		driver.findElement(
-				By.name("proposalNotes5745fd43bcbb29192ce0d459University_Research_Director"))
-				.clear();
-		Thread.sleep(200);
-		driver.findElement(
-				By.name("proposalNotes5745fd43bcbb29192ce0d459University_Research_Director"))
-				.sendKeys("Test");
-		Thread.sleep(200);
-
-		driver.findElement(By.id("btnApproveProposal")).click();
-		Thread.sleep(500);
-		driver.findElement(By.id("BoxConfirmBtnOk")).click();
-		Thread.sleep(200);
-
-		assertTrue(driver.findElement(By.cssSelector("BODY")).getText()
-				.matches("^[\\s\\S]*$"));
-		Thread.sleep(200);
-		driver.findElement(By.id("BoxAlertBtnOk")).click();
-		Thread.sleep(200);
-		driver.findElement(By.cssSelector("span.myProfile.icon-arrow-s"))
-				.click();
-		Thread.sleep(200);
-		driver.findElement(By.linkText("Log Out")).click();
-		Thread.sleep(1500);
-
-		// Research Administrator submission
-		driver.get(baseUrl + "GPMS/");
-		driver.findElement(By.id("user_email")).clear();
-		driver.findElement(By.id("user_email")).sendKeys(
-				"racomputerscience@gmail.com");
-		driver.findElement(By.id("user_password")).clear();
-		driver.findElement(By.id("user_password")).sendKeys("gpmspassword");
-		Thread.sleep(200);
-		driver.findElement(By.name("commit")).click();
-		Thread.sleep(200);
-		driver.findElement(By.linkText("My Proposals")).click();
-		Thread.sleep(200);
-
-		((JavascriptExecutor) driver)
-				.executeScript("var s=document.getElementById('edit0');s.click();");
-		Thread.sleep(500);
-		driver.findElement(By.id("btnSubmitProposal")).click();
-		Thread.sleep(500);
-		driver.findElement(By.id("BoxConfirmBtnOk")).click();
-		Thread.sleep(200);
-		assertTrue(driver.findElement(By.cssSelector("BODY")).getText()
-				.matches("^[\\s\\S]*$"));
-		Thread.sleep(200);
-		driver.findElement(By.id("BoxAlertBtnOk")).click();
-		Thread.sleep(200);
-		driver.findElement(By.cssSelector("span.myProfile.icon-arrow-s"))
-				.click();
-		Thread.sleep(500);
-		driver.findElement(By.linkText("Log Out")).click();
-		Thread.sleep(1500);
-
-		// Research Director Archive
-		driver.get(baseUrl + "GPMS/");
-		driver.findElement(By.id("user_email")).clear();
-		driver.findElement(By.id("user_email")).sendKeys(
-				"directorcomputerscience@gmail.com");
-		driver.findElement(By.id("user_password")).clear();
-		driver.findElement(By.id("user_password")).sendKeys("gpmspassword");
-		Thread.sleep(200);
-		driver.findElement(By.name("commit")).click();
-		Thread.sleep(200);
-		driver.findElement(By.linkText("My Proposals")).click();
-		Thread.sleep(200);
-
-		((JavascriptExecutor) driver)
-				.executeScript("var s=document.getElementById('edit0');s.click();");
-		Thread.sleep(500);
-
-		driver.findElement(By.id("btnArchiveProposal")).click();
-		Thread.sleep(500);
-		driver.findElement(By.id("BoxConfirmBtnOk")).click();
-		Thread.sleep(200);
-
-		assertTrue(driver.findElement(By.cssSelector("BODY")).getText()
-				.matches("^[\\s\\S]*$"));
-		Thread.sleep(200);
-		driver.findElement(By.id("BoxAlertBtnOk")).click();
-		Thread.sleep(200);
-		driver.findElement(By.cssSelector("span.myProfile.icon-arrow-s"))
-				.click();
-		Thread.sleep(200);
-		driver.findElement(By.linkText("Log Out")).click();
-		Thread.sleep(1500);
+		// // Research Director Archive
+		// driver.get(baseUrl + "GPMS/");
+		// driver.findElement(By.id("user_email")).clear();
+		// driver.findElement(By.id("user_email")).sendKeys(
+		// "directorcomputerscience@gmail.com");
+		// driver.findElement(By.id("user_password")).clear();
+		// driver.findElement(By.id("user_password")).sendKeys("gpmspassword");
+		// Thread.sleep(200);
+		// driver.findElement(By.name("commit")).click();
+		// Thread.sleep(200);
+		// driver.findElement(By.linkText("My Proposals")).click();
+		// Thread.sleep(200);
+		//
+		// ((JavascriptExecutor) driver)
+		// .executeScript("var s=document.getElementById('edit0');s.click();");
+		// Thread.sleep(500);
+		//
+		// driver.findElement(By.id("btnArchiveProposal")).click();
+		// Thread.sleep(500);
+		// driver.findElement(By.id("BoxConfirmBtnOk")).click();
+		// Thread.sleep(200);
+		//
+		// assertTrue(driver.findElement(By.cssSelector("BODY")).getText()
+		// .matches("^[\\s\\S]*$"));
+		// Thread.sleep(200);
+		// driver.findElement(By.id("BoxAlertBtnOk")).click();
+		// Thread.sleep(200);
+		// driver.findElement(By.cssSelector("span.myProfile.icon-arrow-s"))
+		// .click();
+		// Thread.sleep(200);
+		// driver.findElement(By.linkText("Log Out")).click();
+		// Thread.sleep(1500);
 	}
 
 	@After
