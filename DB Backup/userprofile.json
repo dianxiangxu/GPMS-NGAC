@@ -1558,7 +1558,7 @@
         ""
     ], 
     "user id" : DBRef("useraccount", ObjectId("57505b2d65dbb34d173fc6f8")), 
-    "deleted" : false, 
+    "deleted" : true, 
     "audit log" : [
         {
             "author info" : DBRef("userprofile", ObjectId("5745ed6fbcbb29192ce0d3c9")), 

@@ -262,8 +262,8 @@
     "_id" : ObjectId("57505b2d65dbb34d173fc6f8"), 
     "username" : "selena", 
     "password" : "1000:189b30fd3406d25d350944f65283e022e1e00e3c0352ff1e:c9ac246bf7ac293a2296f1d46a6d132f83d98929c6c398ae", 
-    "deleted" : false, 
-    "active" : true, 
+    "deleted" : true, 
+    "active" : false, 
     "admin" : false, 
     "added on" : ISODate("2016-06-02T16:13:33.932+0000"), 
     "version" : NumberLong(1)
