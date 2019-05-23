@@ -1,4 +1,4 @@
-package pds;
+package gpms.pds;
 
 import gov.nist.csd.pm.exceptions.PMException;
 import gov.nist.csd.pm.graph.Graph;
@@ -7,8 +7,8 @@ import gov.nist.csd.pm.graph.model.nodes.Node;
 import java.util.*;
 
 import static gov.nist.csd.pm.graph.model.nodes.NodeType.*;
-import static pds.PDS.getID;
-import static pds.PDS.getNodeID;
+import static gpms.pds.PDS.getID;
+import static gpms.pds.PDS.getNodeID;
 
 /**
  * This class is intended to mimic the functionality of obligations through manipulation of a graph.

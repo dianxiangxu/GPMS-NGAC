@@ -24,6 +24,7 @@ import gpms.model.SignatureUserInfo;
 import gpms.model.Status;
 import gpms.model.UserAccount;
 import gpms.model.UserProfile;
+import gpms.pds.PDSOperations;
 import gpms.utils.EmailUtil;
 import gpms.utils.SerializationHelper;
 import io.swagger.annotations.Api;
@@ -85,6 +86,7 @@ public class ProposalService {
 	public ProposalDAO proposalDAO = null;
 	DelegationDAO delegationDAO = null;
 	public NotificationDAO notificationDAO = null;
+	private PDSOperations pdsOperations;
 	public DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 	private static final Logger log = Logger.getLogger(ProposalService.class
 			.getName());
@@ -98,6 +100,7 @@ public class ProposalService {
 		proposalDAO = new ProposalDAO(mongoClient, morphia, dbName);
 		delegationDAO = new DelegationDAO(mongoClient, morphia, dbName);
 		notificationDAO = new NotificationDAO(mongoClient, morphia, dbName);
+		pdsOperations = new PDSOperations();
 	}
 
 	@GET
@@ -1183,33 +1186,74 @@ public class ProposalService {
 			log.info("ProposalService::checkUserPermissionForAProposal started");
 			ObjectMapper mapper = new ObjectMapper();
 			JsonNode root = mapper.readTree(message);
+			
+			String decision = "";
+			
+			GPMSCommonInfo userInfo = null;
+			if (root != null && root.has("gpmsCommonObj")) {
+				JsonNode commonObj = root.get("gpmsCommonObj");
+				log.info(commonObj);
+				userInfo = new GPMSCommonInfo(commonObj);
+				
+			}
+			
 			if (root != null && root.has("policyInfo")) {
 				JsonNode policyInfo = root.get("policyInfo");
 				if (policyInfo != null && policyInfo.isArray()
 						&& policyInfo.size() > 0) {
 					HashMap<String, Multimap<String, String>> attrMap = proposalDAO
 							.generateAttributes(policyInfo);
-					BalanaConnector ac = new BalanaConnector();
-					String decision = ac.getXACMLdecision(attrMap);
-					if (decision.equals("Permit")) {
+					HashMap<String, String> attrMapPm = proposalDAO.generateAttributesForPM(policyInfo);
+					log.info("Policy Info:"+policyInfo);
+					log.info("Attribute Map:"+attrMap);
+					log.info("Attribute Map PM:"+attrMapPm);
+					
+					boolean hasPermission = false;
+					if(pdsOperations.shouldCheckIfUserBelongsToTenure(attrMapPm))
+					{
+						hasPermission = pdsOperations.hasPermission(userInfo);
+						if(hasPermission)
+							return Response
+									.status(200)
+									.type(MediaType.APPLICATION_JSON)
+									.entity(mapper.writerWithDefaultPrettyPrinter()
+											.writeValueAsString(true)).build();
+						else {
+						    return Response.status(403)
+								.type(MediaType.APPLICATION_JSON)
+								.entity("Your permission is: " + "Deny")
+								.build();
+							}
+					}		
+					
+					else
+					{	
+						BalanaConnector ac = new BalanaConnector();
+						decision = ac.getXACMLdecision(attrMap);
+						
+						if (decision.equals("Permit")) {
 						return Response
 								.status(200)
 								.type(MediaType.APPLICATION_JSON)
 								.entity(mapper.writerWithDefaultPrettyPrinter()
 										.writeValueAsString(true)).build();
-					} else {
-						return Response.status(403)
+						}
+					     else {
+						    return Response.status(403)
 								.type(MediaType.APPLICATION_JSON)
 								.entity("Your permission is: " + decision)
 								.build();
 					}
-				} else {
-					return Response.status(403)
-							.type(MediaType.APPLICATION_JSON)
-							.entity("No User Permission Attributes are send!")
-							.build();
 				}
 			}
+				else 
+				{
+					return Response.status(403)
+							.type(MediaType.APPLICATION_JSON)
+							.entity("Your permission is: " + decision)
+							.build();
+					}
+				}
 		} catch (Exception e) {
 			log.error("Could not Check Permission for a Proposal error e=", e);
 		}

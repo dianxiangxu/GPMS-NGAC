@@ -1,4 +1,4 @@
-package pds;
+package gpms.pds;
 
 import gov.nist.csd.pm.decider.PReviewDecider;
 import gov.nist.csd.pm.exceptions.PMException;
@@ -8,7 +8,9 @@ import gov.nist.csd.pm.graph.MemGraph;
 import gov.nist.csd.pm.graph.model.nodes.Node;
 import gov.nist.csd.pm.graph.model.nodes.NodeType;
 
+import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Map;
@@ -18,17 +20,31 @@ import java.util.Set;
 import static gov.nist.csd.pm.graph.model.nodes.NodeType.O;
 import static gov.nist.csd.pm.graph.model.nodes.NodeType.OA;
 import static gov.nist.csd.pm.graph.model.nodes.NodeType.U;
+import static gov.nist.csd.pm.graph.model.nodes.NodeType.UA;
 
 public class PDS {
 
     public static Random rand = new Random();
+    
 
     public static void main(String[] args) throws IOException, PMException {
         // load the initial configuration from json
-        String json = new String(Files.readAllBytes(Paths.get("docs/pds.pm")));
+    	PDS main = new PDS();
+    	File file = main.getFileFromResources(main,"docs/pds.json");
+
+      //  printFile(file);
+    	
+        //String json = new String(Files.readAllBytes(Paths.get("/resources/docs/pds.json")));
+        String json = new String(Files.readAllBytes(Paths.get(file.getAbsolutePath())));
         Graph graph = GraphSerializer.fromJson(new MemGraph(), json);
 
-        printAccessState("Initial configuration", graph);
+       // boolean found = isChildrenFound("bob","tenure",graph);
+        
+        printAccessStateForUA("Initial configuration", graph);
+        
+    }
+        
+        /*printAccessState("Initial configuration", graph);
 
         // Step 1. Bob creates a PDS and assigns it to RBAC_PDSs
         Node pdsNode = graph.createNode(getID(), "PDSi", OA, null);
@@ -100,6 +116,33 @@ public class PDS {
         simulateAssignToEvent(graph, getNodeID(graph, "COAS_Dean", U, null), graph.getNode(coasDeanApproval), pdsNode);
 
         printAccessState("After the COAS Dean approves the PDS", graph);
+    }*/
+    
+    private static boolean isChildrenFound(String name,String parent, Graph graph) throws PMException
+    {
+    	boolean found = false;
+        // get all of the users in the graph
+        Set<Node> search = graph.search(parent, UA.toString(), null);
+        
+        System.out.println(search.size());
+        
+        for(Node userAttNode : search) {
+        	
+        	 Set<Long> childIds = graph.getChildren(userAttNode.getID());
+        	 System.out.println(childIds.size()+"|"+childIds);
+        	 
+        	 long tenureFacultyNode = getNodeID(graph, name, U, null);
+        	 
+        	 System.out.println(tenureFacultyNode);
+        	 
+        	 if(childIds.contains(tenureFacultyNode))
+        	 {	
+        		 found = true;
+        		 System.out.println("found");
+        	 }
+        }
+        return found;
+        
     }
 
     /**
@@ -117,9 +160,35 @@ public class PDS {
         Set<Node> search = graph.search(null, U.toString(), null);
         for(Node user : search) {
             // there is a super user that we'll ignore
-            /*if(user.getName().equals("super")) {
+            if(user.getName().equals("super")) {
                 continue;
-            }*/
+            }
+
+            System.out.println(user.getName());
+            // get all of the nodes accessible for the current user
+            Map<Long, Set<String>> accessibleNodes = decider.getAccessibleNodes(user.getID());
+            for(long objectID : accessibleNodes.keySet()) {
+                Node obj = graph.getNode(objectID);
+                System.out.println("\t" + obj.getName() + " -> " + accessibleNodes.get(objectID));
+            }
+        }
+        System.out.println("############### End Access state for " + step + "############");
+    }
+    
+    
+    private static void printAccessStateForUA(String step, Graph graph) throws PMException {
+        System.out.println("############### Access state for " + step + " ###############");
+
+        // initialize a PReviewDecider to make decisions
+        PReviewDecider decider = new PReviewDecider(graph);
+
+        // get all of the users in the graph
+        Set<Node> search = graph.search(null, UA.toString(), null);
+        for(Node user : search) {
+            // there is a super user that we'll ignore
+            if(user.getName().equals("super")) {
+                continue;
+            }
 
             System.out.println(user.getName());
             // get all of the nodes accessible for the current user
@@ -173,5 +242,17 @@ public class PDS {
 
     public static long getID() {
         return rand.nextLong();
+    }
+    
+    private static File getFileFromResources(PDS pds,String fileName) {
+        ClassLoader classLoader = pds.getClass().getClassLoader();
+
+        URL resource = classLoader.getResource(fileName);
+        if (resource == null) {
+            throw new IllegalArgumentException("file is not found!");
+        } else {
+            return new File(resource.getFile());
+        }
+
     }
 }

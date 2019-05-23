@@ -4124,6 +4124,29 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 		}
 		return isDeleted;
 	}
+	
+	/***
+	 * Generates Attributes based on policy info
+	 * 
+	 * @param policyInfo
+	 * @return
+	 */
+	public HashMap<String, String> generateAttributesForPM(
+			JsonNode policyInfo) {
+		HashMap<String, String> attrMap = new HashMap<String, String>();
+		Multimap<String, String> subjectMap = ArrayListMultimap.create();
+		Multimap<String, String> resourceMap = ArrayListMultimap.create();
+		Multimap<String, String> actionMap = ArrayListMultimap.create();
+		Multimap<String, String> environmentMap = ArrayListMultimap.create();
+		for (JsonNode node : policyInfo) {
+			String attributeName = node.path("attributeName").asText();
+			String attributeValue = node.path("attributeValue").asText();
+			String attributeType = node.path("attributeType").asText();
+			attrMap.put(attributeName,attributeValue);
+		}
+		
+		return attrMap;
+	}
 
 	/***
 	 * Generates Attributes based on policy info

@@ -15,6 +15,8 @@ import gpms.model.UserAccount;
 import gpms.model.UserInfo;
 import gpms.model.UserProfile;
 import gpms.model.UserProposalCount;
+import gpms.pds.InitialConfigurationLoader;
+import gpms.pds.PDSOperations;
 import gpms.utils.MultimapAdapter;
 import gpms.utils.PasswordHash;
 import gpms.utils.SerializationHelper;
@@ -77,6 +79,8 @@ public class UserService {
 	ProposalDAO proposalDAO = null;
 	NotificationDAO notificationDAO = null;
 	private DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+	private InitialConfigurationLoader initNGACPolicyLoader;
+	private PDSOperations pdsOperations;
 	private static final Logger log = Logger.getLogger(UserService.class
 			.getName());
 
@@ -88,6 +92,9 @@ public class UserService {
 		userProfileDAO = new UserProfileDAO(mongoClient, morphia, dbName);
 		proposalDAO = new ProposalDAO(mongoClient, morphia, dbName);
 		notificationDAO = new NotificationDAO(mongoClient, morphia, dbName);
+		initNGACPolicyLoader = new InitialConfigurationLoader();
+		initNGACPolicyLoader.init();
+		pdsOperations = new PDSOperations();
 	}
 
 	@GET

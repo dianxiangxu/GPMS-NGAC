@@ -546,6 +546,7 @@ $(function() {
 				attributeName : "proposal.action",
 				attributeValue : buttonType
 			});
+			
 
 			this.config.url = this.config.baseURL
 					+ "CheckPermissionForAProposal";
