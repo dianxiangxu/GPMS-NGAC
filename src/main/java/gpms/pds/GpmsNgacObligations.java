@@ -13,103 +13,108 @@ import static gpms.pds.PDS.getNodeID;
 /**
  * This class is intended to mimic the functionality of obligations through manipulation of a graph.
  */
-public class Obligations {
+public class GpmsNgacObligations {
 
     /**
      * Obligation to create a new PDS, the given user is the PI, the given node is the base node for the PDS.
-     * Some things are hard-coded in this example, so there will be errors with more than one PDS.
+     * Some things are hard-coded.
      * @param graph
      * @param userID
-     * @param iPdsNode
+     * @param pdsNode
      * @throws PMException
      */
-    public static void createPDS(Graph graph, long userID, Node iPdsNode) throws PMException {
-        // get the node for the user
-        Node userNode = graph.getNode(userID);
+	 public static void createPDS(Graph graph, long userID, Node iPdsNode) throws PMException {
+	        // get the node for the user
+	        Node userNode = graph.getNode(userID);
 
-        // create the object attribute hierarchy
+	        // create the object attribute hierarchy
 
-        // create the investigator info container and assign it to the PDS
-        Node investigatorInfoNode = graph.createNode(getID(), Constants.INVESTIGATOR_OA_UA_LBL, OA, null);
-        graph.assign(investigatorInfoNode.getID(), iPdsNode.getID());
+	        // create the investigator info container and assign it to the PDS
+	        Node investigatorInfoNode = graph.createNode(getID(), Constants.INVESTIGATOR_OA_UA_LBL, OA, null);
+	        graph.assign(investigatorInfoNode.getID(), iPdsNode.getID());
 
-        // create the PI container and assign it to InvestigatorInfo
-        Node piNode = graph.createNode(getID(), "PI", OA, null);
-        graph.assign(piNode.getID(), investigatorInfoNode.getID());
+	        // create the PI container and assign it to InvestigatorInfo
+	        Node piNode = graph.createNode(getID(), Constants.PI_OA_UA_LBL, OA, null);
+	        graph.assign(piNode.getID(), investigatorInfoNode.getID());
 
-        // create a node with the name of the user and assign it to the PI container
-        Node userObj = graph.createNode(getID(), userNode.getName(), O, null);
-        graph.assign(userObj.getID(), piNode.getID());
+	        // create a node with the name of the user and assign it to the PI container
+	        Node userObj = graph.createNode(getID(), userNode.getName(), O, null);
+	        graph.assign(userObj.getID(), piNode.getID());
 
-        // create the CoPI container and assign it to InvestigatorInfo
-        Node copiNode = graph.createNode(getID(), "CoPI", OA, null);
-        graph.assign(copiNode.getID(), investigatorInfoNode.getID());
+	        // create the CoPI container and assign it to InvestigatorInfo
+	        Node copiNode = graph.createNode(getID(), Constants.CO_PI_OA_UA_LBL, OA, null);
+	        graph.assign(copiNode.getID(), investigatorInfoNode.getID());
 
-        // create the SP container and assign it to InvestigatorInfo
-        Node spNode = graph.createNode(getID(), "SP", OA, null);
-        graph.assign(spNode.getID(), investigatorInfoNode.getID());
+	        // create the SP container and assign it to InvestigatorInfo
+	        Node spNode = graph.createNode(getID(), Constants.SENIOR_PERSON_OA_UA_LBL, OA, null);
+	        graph.assign(spNode.getID(), investigatorInfoNode.getID());
 
-        // create the ProjectInfo container and assign it to the PDS
-        Node projInfoNode = graph.createNode(getID(), "ProjectInfo", OA, null);
-        graph.assign(projInfoNode.getID(), iPdsNode.getID());
+	        // create the ProjectInfo container and assign it to the PDS
+	        Node projInfoNode = graph.createNode(getID(), Constants.PROJECT_INFO_OA_LBL, OA, null);
+	        graph.assign(projInfoNode.getID(), iPdsNode.getID());
 
-        // create the BudgetInfo container and assign it to the PDS
-        Node budgInfoNode = graph.createNode(getID(), "BudgetInfo", OA, null);
-        graph.assign(budgInfoNode.getID(), iPdsNode.getID());
+	        // create the BudgetInfo container and assign it to the PDS
+	        Node budgInfoNode = graph.createNode(getID(), Constants.BUDGET_INFO_OA_LBL, OA, null);
+	        graph.assign(budgInfoNode.getID(), iPdsNode.getID());
 
-        long pdssNode = getNodeID(graph, "PDSs", OA, null);
-        graph.assign(iPdsNode.getID(), pdssNode);
+	        long pdssNode = getNodeID(graph, Constants.PDSs_OA_UA_LBL, OA, null);
+	        graph.assign(iPdsNode.getID(), pdssNode);
 
-        // now create user attribute hierarchy
+	        // now create user attribute hierarchy
 
-        // create a base user attribute for the PDS, assign it to a user attribute in the PDS policy class
-        long pdsUA = getNodeID(graph, "PDSs", UA, null);
-        Node pdsiUA = graph.createNode(getID(), "PDSi", UA, null);
-        graph.assign(pdsiUA.getID(), pdsUA);
+	        // create a base user attribute for the PDS, assign it to a user attribute in the PDS policy class
+	        long pdsUA = getNodeID(graph, Constants.PDSs_OA_UA_LBL, UA, null);
+	        Node pdsiUA = graph.createNode(getID(), iPdsNode.getName(), UA, null);
+	        graph.assign(pdsiUA.getID(), pdsUA);
 
-        // create a user attribute for the PI and assign it to the PDSi base user attribute
-        Node piUA = graph.createNode(getID(), "PI", UA, null);
-        graph.assign(piUA.getID(), pdsiUA.getID());
+	        // create a user attribute for the PI and assign it to the PDSi base user attribute
+	        Node piUA = graph.createNode(getID(), Constants.PI_OA_UA_LBL, UA, null);
+	        graph.assign(piUA.getID(), pdsiUA.getID());
 
-        // create a user attribute for the CoPI and assign it to the PDSi base user attribute
-        Node copiUA = graph.createNode(getID(), "CoPI", UA, null);
-        graph.assign(copiUA.getID(), pdsiUA.getID());
+	        // create a user attribute for the CoPI and assign it to the PDSi base user attribute
+	        Node copiUA = graph.createNode(getID(), Constants.CO_PI_OA_UA_LBL, UA, null);
+	        graph.assign(copiUA.getID(), pdsiUA.getID());
 
-        // create a user attribute for the SP and assign it to the PDSi base user attribute
-        Node spUA = graph.createNode(getID(), "SP", UA, null);
-        graph.assign(spUA.getID(), pdsiUA.getID());
+	        // create a user attribute for the SP and assign it to the PDSi base user attribute
+	        Node spUA = graph.createNode(getID(), Constants.SENIOR_PERSON_OA_UA_LBL, UA, null);
+	        graph.assign(spUA.getID(), pdsiUA.getID());
 
-        // assign the current user to the PI user attribute
-        graph.assign(userNode.getID(), piUA.getID());
+	        // assign the current user to the PI user attribute
+	        graph.assign(userNode.getID(), piUA.getID());
 
-        // grant the PI permissions on the PDS
-        // grant PI permissions on the CoPI container
-        graph.associate(piUA.getID(), copiNode.getID(), new HashSet<>(Arrays.asList("write", "read", "assign to")));
-        // grant PI permissions on the ProjectInfo container
-        graph.associate(piUA.getID(), projInfoNode.getID(), new HashSet<>(Arrays.asList("write", "read", "assign to")));
-        // grant PI permissions on the BudgetInfo container
-        graph.associate(piUA.getID(), budgInfoNode.getID(), new HashSet<>(Arrays.asList("write", "read", "assign to")));
-        // grant PI permissions to assign the PDS
-        graph.associate(piUA.getID(), iPdsNode.getID(), new HashSet<>(Arrays.asList("assign")));
-        // grant PI permission to read the PI container
-        graph.associate(piUA.getID(), piNode.getID(), new HashSet<>(Arrays.asList("read")));
+	        // grant the PI permissions on the PDS
+	        // grant PI permissions on the CoPI container
+	        graph.associate(piUA.getID(), copiNode.getID(), new HashSet<>(Arrays.asList("write", "read", "assign to")));
+	        
+	        Node facultyUA = graph.createNode(getID(), Constants.FACULTY_UA_LBL, UA, null);
+	        graph.associate(piUA.getID(), facultyUA.getID(), new HashSet<>(Arrays.asList( "assign-u from")));
+	        graph.associate(piUA.getID(), copiUA.getID(), new HashSet<>(Arrays.asList( "assign-u to")));
+	        
+	        // grant PI permissions on the ProjectInfo container
+	        graph.associate(piUA.getID(), projInfoNode.getID(), new HashSet<>(Arrays.asList("write", "read", "assign to")));
+	        // grant PI permissions on the BudgetInfo container
+	        graph.associate(piUA.getID(), budgInfoNode.getID(), new HashSet<>(Arrays.asList("write", "read", "assign to")));
+	        // grant PI permissions to assign the PDS
+	        graph.associate(piUA.getID(), iPdsNode.getID(), new HashSet<>(Arrays.asList("assign")));
+	        // grant PI permission to read the PI container
+	        graph.associate(piUA.getID(), piNode.getID(), new HashSet<>(Arrays.asList("read")));
 
-        // grant CoPI permissions on the PDS
-        // grant CoPI permissions on the SP container
-        graph.associate(copiUA.getID(), spNode.getID(), new HashSet<>(Arrays.asList("write", "read", "assign to")));
-        // grant CoPI permissions on the ProjectInfo container
-        graph.associate(copiUA.getID(), projInfoNode.getID(), new HashSet<>(Arrays.asList("write", "read", "assign to")));
-        // grant CoPI permissions on the BudgetInfo container
-        graph.associate(copiUA.getID(), budgInfoNode.getID(), new HashSet<>(Arrays.asList("write", "read", "assign to")));
+	        // grant CoPI permissions on the PDS
+	        // grant CoPI permissions on the SP container
+	        graph.associate(copiUA.getID(), spNode.getID(), new HashSet<>(Arrays.asList("write", "read", "assign to")));
+	        // grant CoPI permissions on the ProjectInfo container
+	        graph.associate(copiUA.getID(), projInfoNode.getID(), new HashSet<>(Arrays.asList("write", "read", "assign to")));
+	        // grant CoPI permissions on the BudgetInfo container
+	        graph.associate(copiUA.getID(), budgInfoNode.getID(), new HashSet<>(Arrays.asList( "read")));
 
-        // grant SP permissions on the PDS
-        // grant SP permissions on the InvestigatorInfo container
-        graph.associate(spUA.getID(), investigatorInfoNode.getID(), new HashSet<>(Arrays.asList("read")));
-        // grant SP permissions on the ProjectInfo container
-        graph.associate(spUA.getID(), projInfoNode.getID(), new HashSet<>(Arrays.asList("read")));
-        // grant SP permissions on the BudgetInfo container
-        graph.associate(spUA.getID(), budgInfoNode.getID(), new HashSet<>(Arrays.asList("read")));
-    }
+	        // grant SP permissions on the PDS
+	        // grant SP permissions on the InvestigatorInfo container
+	        graph.associate(spUA.getID(), investigatorInfoNode.getID(), new HashSet<>(Arrays.asList("read")));
+	        // grant SP permissions on the ProjectInfo container
+	        graph.associate(spUA.getID(), projInfoNode.getID(), new HashSet<>(Arrays.asList("read")));
+	        // grant SP permissions on the BudgetInfo container
+	        graph.associate(spUA.getID(), budgInfoNode.getID(), new HashSet<>(Arrays.asList("read")));
+	    }
 
     /**
      * When an object is added to the CoPI container get the user with the same name and assign that user to the CoPI user attribute.

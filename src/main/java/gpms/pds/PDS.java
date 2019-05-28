@@ -42,9 +42,9 @@ public class PDS {
         
         printAccessStateForUA("Initial configuration", graph);
         
-    }
+    
         
-        /*printAccessState("Initial configuration", graph);
+        printAccessState("Initial configuration", graph);
 
         // Step 1. Bob creates a PDS and assigns it to RBAC_PDSs
         Node pdsNode = graph.createNode(getID(), "PDSi", OA, null);
@@ -57,7 +57,9 @@ public class PDS {
         simulateAssignToEvent(graph, bobID, graph.getNode(rbacPDSsID), pdsNode);
 
         printAccessState("After bob creates PDS", graph);
-
+    }
+    
+    /*
         // Step 2. Bob adds alice as a CoPI
         Node aliceObj = graph.createNode(getID(), "alice", O, null);
         long copiID = getNodeID(graph, "CoPI", OA, null);

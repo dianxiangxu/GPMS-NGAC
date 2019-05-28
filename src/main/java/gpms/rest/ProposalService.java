@@ -1209,15 +1209,18 @@ public class ProposalService {
 					log.info("Attribute Map PM:"+attrMapPm);
 					
 					boolean hasPermission = false;
-					if(pdsOperations.shouldCheckIfUserBelongsToTenure(attrMapPm))
+					if(pdsOperations.shouldCheckIfUserBelongsToCreateProposal(attrMapPm))
 					{
 						hasPermission = pdsOperations.hasPermission(userInfo);
 						if(hasPermission)
+						{	
+							long proposalId = pdsOperations.createAProposal(userInfo.getUserName());
 							return Response
 									.status(200)
 									.type(MediaType.APPLICATION_JSON)
 									.entity(mapper.writerWithDefaultPrettyPrinter()
 											.writeValueAsString(true)).build();
+						}
 						else {
 						    return Response.status(403)
 								.type(MediaType.APPLICATION_JSON)
