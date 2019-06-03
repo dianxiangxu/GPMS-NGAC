@@ -21,13 +21,13 @@ import org.apache.log4j.Logger;
  * 
  * This class is used to load NGAC base configuration from a JSON file
  */
-public class InitialConfigurationLoader {
+public class NGACPolicyConfigurationLoader {
 
 	public static Random rand = new Random();
 
 	//This graph holds NGAC policy
 	private static Graph graph;
-	private static final Logger log = Logger.getLogger(InitialConfigurationLoader.class.getName());
+	private static final Logger log = Logger.getLogger(NGACPolicyConfigurationLoader.class.getName());
 
 	public void init() {
 		if (graph == null) {

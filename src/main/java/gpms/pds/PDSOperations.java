@@ -45,11 +45,11 @@ public class PDSOperations {
 	
 	public PDSOperations()
 	{
-		this.graph = InitialConfigurationLoader.getGraph();
+		this.graph = NGACPolicyConfigurationLoader.getGraph();
 		gpmsNgacObligations = new GpmsNgacObligations();
 	}
 	
-	public boolean shouldCheckIfUserBelongsToCreateProposal(HashMap<String,String> attr)
+	public boolean doesPolicyBelongToNGAC(HashMap<String,String> attr)
 	{
 		if(attr.get("position.type") != null && 
 				attr.get("proposal.section").equalsIgnoreCase("Whole Proposal") &&
@@ -58,7 +58,7 @@ public class PDSOperations {
 		return false;
 	}
 	
-	public boolean hasPermission(GPMSCommonInfo userInfo)
+	public boolean hasPermissionToCreateAProposal(GPMSCommonInfo userInfo)
 	{
 		boolean ret = false;
 		try {
@@ -83,11 +83,11 @@ public class PDSOperations {
         	 Set<Long> childIds = graph.getChildren(userAttNode.getID());
         	 log.info("No of Children Assigned on "+parent+" :"+childIds.size()+"|"+childIds);
         	 
-        	 long tenureFacultyNode = this.getNodeID(graph, name, U, null);
+        	 long sourceNode = this.getNodeID(graph, name, U, null);
         	 
-        	 log.info("We are looking for:"+tenureFacultyNode);
+        	 log.info("We are looking for:"+sourceNode);
         	 
-        	 if(childIds.contains(tenureFacultyNode))
+        	 if(childIds.contains(sourceNode))
         	 {	
         		 found = true;
         		 log.info("found");

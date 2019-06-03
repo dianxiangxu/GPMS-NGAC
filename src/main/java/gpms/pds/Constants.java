@@ -13,5 +13,9 @@ public class Constants {
 	public static String BUDGET_INFO_OA_LBL = "BudgetInfo";
 	
 	public static String PDSs_OA_UA_LBL = "PDSs";
+	
+	public static String TASK_CODE_CREATE_PROPOSAL = "1001";
+	public static String TASK_NAME_CREATE_PROPOSAL = "Create Proposal";
+	
 
 }

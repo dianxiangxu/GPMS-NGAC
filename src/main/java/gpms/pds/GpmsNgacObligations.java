@@ -7,8 +7,8 @@ import gov.nist.csd.pm.graph.model.nodes.Node;
 import java.util.*;
 
 import static gov.nist.csd.pm.graph.model.nodes.NodeType.*;
-import static gpms.pds.PDS.getID;
-import static gpms.pds.PDS.getNodeID;
+import static gpms.dev.PDS.getID;
+import static gpms.dev.PDS.getNodeID;
 
 /**
  * This class is intended to mimic the functionality of obligations through manipulation of a graph.

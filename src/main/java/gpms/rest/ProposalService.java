@@ -1209,9 +1209,9 @@ public class ProposalService {
 					log.info("Attribute Map PM:"+attrMapPm);
 					
 					boolean hasPermission = false;
-					if(pdsOperations.shouldCheckIfUserBelongsToCreateProposal(attrMapPm))
+					if(pdsOperations.doesPolicyBelongToNGAC(attrMapPm))  // true if policy in defined in NGAC; will be removed when no policy will be needed from XACML 
 					{
-						hasPermission = pdsOperations.hasPermission(userInfo);
+						hasPermission = pdsOperations.hasPermissionToCreateAProposal(userInfo);
 						if(hasPermission)
 						{	
 							long proposalId = pdsOperations.createAProposal(userInfo.getUserName());
