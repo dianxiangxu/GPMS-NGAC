@@ -549,7 +549,7 @@ $(function() {
 			
 
 			this.config.url = this.config.baseURL
-					+ "CheckPermissionForAProposal";
+					+ "CheckPermissionForCreateProposal";
 			this.config.data = JSON2.stringify({
 				policyInfo : attributeArray,
 				gpmsCommonObj : gpmsCommonObj()

@@ -1,9 +1,11 @@
-package gpms.pds;
+package gpms.ngac.policy;
 
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -25,7 +27,8 @@ public class TaskConfigurationParser {
 		if (tasks == null) {
 			tasks = new ArrayList<TaskDefinition>();
 			try {
-				 Object obj = new JSONParser().parse(new FileReader("docs/defined_tasks.json")); 
+				File file = getFileFromResources("docs/defined_tasks.json");
+				 Object obj = new JSONParser().parse(new FileReader(file)); 
 		         JSONObject jo = (JSONObject) obj;
 		         
 		         JSONArray ja = (JSONArray) jo.get("tasks"); 
@@ -79,12 +82,14 @@ public class TaskConfigurationParser {
 	        	 log.info("IO error");	       
 	         } catch(ParseException pe) {
 	        	 log.info("Parser Exception");	       
-	         }	         
+	         }	  
+			
+			for(TaskDefinition task : tasks) {
+		       	 log.info(task.toString());
+		        }
 		}
 		
-		for(TaskDefinition task : tasks) {
-       	 log.info(task.toString());
-        }
+		
 	}
 
 	public static ArrayList<TaskDefinition> getTasks() {
@@ -93,6 +98,18 @@ public class TaskConfigurationParser {
 
 	public static void setTasks(ArrayList<TaskDefinition> tasks) {
 		TaskConfigurationParser.tasks = tasks;
+	}
+	
+	private File getFileFromResources(String fileName) {
+		ClassLoader classLoader = this.getClass().getClassLoader();
+
+		URL resource = classLoader.getResource(fileName);
+		if (resource == null) {
+			throw new IllegalArgumentException("file is not found!");
+		} else {
+			return new File(resource.getFile());
+		}
+
 	}
 	      
     

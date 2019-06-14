@@ -24,7 +24,9 @@ import gpms.model.SignatureUserInfo;
 import gpms.model.Status;
 import gpms.model.UserAccount;
 import gpms.model.UserProfile;
-import gpms.pds.PDSOperations;
+import gpms.ngac.policy.PDSOperations;
+import gpms.ngac.policy.UserTaskPermissionOperations;
+import gpms.ngac.policy.UserTaskPermissionRepo;
 import gpms.utils.EmailUtil;
 import gpms.utils.SerializationHelper;
 import io.swagger.annotations.Api;
@@ -1186,6 +1188,57 @@ public class ProposalService {
 			log.info("ProposalService::checkUserPermissionForAProposal started");
 			ObjectMapper mapper = new ObjectMapper();
 			JsonNode root = mapper.readTree(message);
+					
+			
+			if (root != null && root.has("policyInfo")) {
+				JsonNode policyInfo = root.get("policyInfo");
+				if (policyInfo != null && policyInfo.isArray()
+						&& policyInfo.size() > 0) {
+					HashMap<String, Multimap<String, String>> attrMap = proposalDAO
+							.generateAttributes(policyInfo);
+					BalanaConnector ac = new BalanaConnector();
+					String decision = ac.getXACMLdecision(attrMap);
+ 					if (decision.equals("Permit")) {
+						return Response
+								.status(200)
+								.type(MediaType.APPLICATION_JSON)
+								.entity(mapper.writerWithDefaultPrettyPrinter()
+										.writeValueAsString(true)).build();
+					} else {
+						return Response.status(403)
+								.type(MediaType.APPLICATION_JSON)
+								.entity("Your permission is: " + decision)
+								.build();
+					}
+				} else {
+					return Response.status(403)
+							.type(MediaType.APPLICATION_JSON)
+							.entity("No User Permission Attributes are send!")
+							.build();
+				}
+			}
+		} catch (Exception e) {
+			log.error("Could not Check Permission for a Proposal error e=", e);
+}
+		return Response
+				.status(403)
+				.entity("{\"error\": \"No User Permission Attributes are send!\", \"status\": \"FAIL\"}")
+				.build();
+	}
+	
+	@POST
+	@Path("/CheckPermissionForCreateProposal")
+	@Produces(MediaType.APPLICATION_JSON)
+	@ApiOperation(value = "Check permission for creating a Proposal", notes = "This API checks permission for creating A Proposal")
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, message = "Success: { True }"),
+			@ApiResponse(code = 403, message = "Failed: { \"error\":\"error description\", \"status\": \"FAIL\" }") })
+	public Response checkUserPermissionForCreateProposal(
+			@ApiParam(value = "Message", required = true, defaultValue = "", allowableValues = "", allowMultiple = false) String message) {
+		try {
+			log.info("ProposalService::checkUserPermissionForCreateProposal started");
+			ObjectMapper mapper = new ObjectMapper();
+			JsonNode root = mapper.readTree(message);
 			
 			String decision = "";
 			
@@ -1209,54 +1262,38 @@ public class ProposalService {
 					log.info("Attribute Map PM:"+attrMapPm);
 					
 					boolean hasPermission = false;
-					if(pdsOperations.doesPolicyBelongToNGAC(attrMapPm))  // true if policy in defined in NGAC; will be removed when no policy will be needed from XACML 
-					{
-						hasPermission = pdsOperations.hasPermissionToCreateAProposal(userInfo);
-						if(hasPermission)
-						{	
-							long proposalId = pdsOperations.createAProposal(userInfo.getUserName());
-							return Response
-									.status(200)
-									.type(MediaType.APPLICATION_JSON)
-									.entity(mapper.writerWithDefaultPrettyPrinter()
-											.writeValueAsString(true)).build();
-						}
-						else {
-						    return Response.status(403)
-								.type(MediaType.APPLICATION_JSON)
-								.entity("Your permission is: " + "Deny")
-								.build();
-							}
-					}		
-					
-					else
+					hasPermission = pdsOperations.hasPermissionToCreateAProposal(userInfo);
+					//hasPermission = UserTaskPermissionRepo.checkForPermission(userInfo.getUserName(),gpms.ngac.policy.Constants.TASK_NAME_CREATE_PROPOSAL);
+					if(hasPermission)
 					{	
-						BalanaConnector ac = new BalanaConnector();
-						decision = ac.getXACMLdecision(attrMap);
+						long proposalId = pdsOperations.createAProposal(userInfo.getUserName());
+						//log.info("ProposalService:"+userInfo.getUserName());
+						//UserTaskPermissionOperations.populateUsersApprovedTaskSet(userInfo.getUserName());
 						
-						if (decision.equals("Permit")) {
 						return Response
 								.status(200)
 								.type(MediaType.APPLICATION_JSON)
 								.entity(mapper.writerWithDefaultPrettyPrinter()
 										.writeValueAsString(true)).build();
-						}
-					     else {
-						    return Response.status(403)
-								.type(MediaType.APPLICATION_JSON)
-								.entity("Your permission is: " + decision)
-								.build();
 					}
+					else {
+					    return Response.status(403)
+							.type(MediaType.APPLICATION_JSON)
+							.entity("Your permission is: " + "Deny")
+							.build();
+						}
+					
+					
+					
+			}
+			else 
+			{
+				return Response.status(403)
+						.type(MediaType.APPLICATION_JSON)
+						.entity("Your permission is: " + decision)
+						.build();
 				}
 			}
-				else 
-				{
-					return Response.status(403)
-							.type(MediaType.APPLICATION_JSON)
-							.entity("Your permission is: " + decision)
-							.build();
-					}
-				}
 		} catch (Exception e) {
 			log.error("Could not Check Permission for a Proposal error e=", e);
 		}
@@ -1265,6 +1302,7 @@ public class ProposalService {
 				.entity("{\"error\": \"No User Permission Attributes are send!\", \"status\": \"FAIL\"}")
 				.build();
 	}
+
 
 	public void broadCastNotification(String proposalID, String projectTitle,
 			String notificationMessage, String notificationType,

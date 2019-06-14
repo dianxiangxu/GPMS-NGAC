@@ -1,0 +1,105 @@
+{
+ "nodes" : [
+	{
+      "id": 3936727074256890986,
+      "name": "super",
+      "type": "U",
+      "properties": {
+        "namespace": "super"
+      }
+    },
+	
+    {
+      "id": 6674456450717933892,
+      "name": "super_ua1",
+      "type": "UA",
+      "properties": {
+        "namespace": "super"
+      }
+    },
+    
+    {
+      "id": 1583996007694605398,
+      "name": "super_ua2",
+      "type": "UA",
+      "properties": {
+        "namespace": "super"
+      }
+    },
+	{
+      "id": -2622066349438857682,
+      "name": "super",
+      "type": "O",
+      "properties": {
+        "namespace": "super"
+      }
+    },
+	{
+      "id": -4583872117497234281,
+      "name": "super",
+      "type": "OA",
+      "properties": {
+        "namespace": "super"
+      }
+    },
+	    {
+      "id": -2625335362318056833,
+      "name": "super",
+      "type": "PC",
+      "properties": {
+        "namespace": "super"
+      }
+    }
+ ],
+ 
+	"assignments" :[
+	
+	{
+      "sourceID": 6674456450717933892, 
+      "targetID": -2625335362318056833 
+    },
+	
+	 {
+      "sourceID": 3936727074256890986, 
+      "targetID": 6674456450717933892  
+    },
+	 {
+      "sourceID": -2622066349438857682, 
+      "targetID": -4583872117497234281  
+    },
+	 {
+      "sourceID": 3936727074256890986,  
+      "targetID": 1583996007694605398   
+    },
+	{
+      "sourceID": -4583872117497234281, 
+      "targetID": -2625335362318056833  
+    },
+    {
+      "sourceID": 1583996007694605398,  
+      "targetID": -2625335362318056833  
+    }
+	
+	],
+	
+	"associations":
+	[
+	
+	{
+      "operations": [
+        "*"
+      ],
+      "sourceID": 6674456450717933892,  
+      "targetID": 1583996007694605398   
+    },
+	{
+      "operations": [
+        "*"
+      ],
+      "sourceID": 6674456450717933892,  
+      "targetID": -4583872117497234281  
+    }
+   
+	]
+
+}

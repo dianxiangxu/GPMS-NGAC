@@ -1,4 +1,4 @@
-package gpms.pds;
+package gpms.ngac.policy;
 
 import gov.nist.csd.pm.decider.PReviewDecider;
 import gov.nist.csd.pm.exceptions.PMException;
@@ -16,6 +16,8 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
@@ -35,87 +37,65 @@ import static gov.nist.csd.pm.graph.model.nodes.NodeType.UA;
  */
 public class PDSOperations {
 	
-	private Graph graph;
+	private Graph ngacPolicy;
 	public static Random rand = new Random();
 	
 	private GpmsNgacObligations  gpmsNgacObligations;
 	
-	private static final Logger log = Logger.getLogger(PDSOperations.class
-			.getName());
+	private static final Logger log = Logger.getLogger(PDSOperations.class.getName());
 	
 	public PDSOperations()
 	{
-		this.graph = NGACPolicyConfigurationLoader.getGraph();
+		this.ngacPolicy = NGACPolicyConfigurationLoader.getPolicy();
 		gpmsNgacObligations = new GpmsNgacObligations();
 	}
 	
-	public boolean doesPolicyBelongToNGAC(HashMap<String,String> attr)
-	{
-		if(attr.get("position.type") != null && 
-				attr.get("proposal.section").equalsIgnoreCase("Whole Proposal") &&
-				attr.get("proposal.action").equalsIgnoreCase("Add"))
-			return true;
-		return false;
-	}
 	
+	/**
+	 * This function checks whether a user has permission for a task
+	 * @param userInfo
+	 * @return true/false
+	 */
 	public boolean hasPermissionToCreateAProposal(GPMSCommonInfo userInfo)
 	{
-		boolean ret = false;
-		try {
-			ret = isChildrenFound(userInfo.getUserName(),Constants.PROPOSAL_CREATION_ABLE_UA) ;
-		} catch (PMException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return ret;
+		boolean hasPermission = true;		
+		
+		HashMap map = Task.CREATE_PROPOSAL.getPermissionsSets();
+		
+		Iterator<Map.Entry<Attribute, HashSet>> itr = map.entrySet().iterator(); 
+         
+        while(itr.hasNext()) 
+        { 
+             Map.Entry<Attribute, HashSet> entry = itr.next(); 
+             log.info("Container = " + entry.getKey() +  
+                                 ", permission set = " + entry.getValue()); 
+             hasPermission = UserPermissionChecker.checkPermission(ngacPolicy, userInfo.getUserName(), (Attribute)entry.getKey(), entry.getValue().toArray());
+        } 
+        
+		log.info("Create Proposal Permission : "+hasPermission);
+		
+		return hasPermission;
 	}
 	
-	private boolean isChildrenFound(String name,String parent) throws PMException
-    {
-    	boolean found = false;
-        // get all of the users in the graph
-        Set<Node> search = graph.search(parent, UA.toString(), null);
-        
-        System.out.println(search.size());
-        
-        for(Node userAttNode : search) {
-        	
-        	 Set<Long> childIds = graph.getChildren(userAttNode.getID());
-        	 log.info("No of Children Assigned on "+parent+" :"+childIds.size()+"|"+childIds);
-        	 
-        	 long sourceNode = this.getNodeID(graph, name, U, null);
-        	 
-        	 log.info("We are looking for:"+sourceNode);
-        	 
-        	 if(childIds.contains(sourceNode))
-        	 {	
-        		 found = true;
-        		 log.info("found");
-        	 }
-        	 else
-        	 {
-        		 log.info("not found");
-        	 }
-        }
-        return found;
-        
-    }
+	
 	
 	public long createAProposal(String userName) throws PMException
 	{
-		long proposalId = getID();
+		printAccessState("Before User creates PDS", ngacPolicy);
+		long randomId = getID();
 		//user creates a PDS and assigns it to Constants.PDS_ORIGINATING_OA
-        Node pdsNode = this.graph.createNode(getID(), createProposalId(proposalId), OA, null);
-        long pdsOriginationOAID = getNodeID(graph, Constants.PDS_ORIGINATING_OA, OA, null);
-        graph.assign(pdsNode.getID(), pdsOriginationOAID);
+        Node pdsNode = this.ngacPolicy.createNode(randomId, createProposalId(randomId), OA, null);
+        
+        long pdsOriginationOAID = getNodeID(ngacPolicy, Constants.PDS_ORIGINATING_OA, OA, null);
+        ngacPolicy.assign(pdsNode.getID(), pdsOriginationOAID);
        
         
-        long userID = getNodeID(graph, userName, U, null);
-        simulateAssignToEvent(graph, userID, graph.getNode(pdsOriginationOAID), pdsNode);
+        long userID = getNodeID(ngacPolicy, userName, U, null);
+        simulateAssignToEvent(ngacPolicy, userID, ngacPolicy.getNode(pdsOriginationOAID), pdsNode);
 
-        printAccessState("After User creates PDS", graph);
+        printAccessState("After User creates PDS", ngacPolicy);
         
-        return proposalId;
+        return randomId;
 	}
 	
 	private String createProposalId(long id)
@@ -170,7 +150,7 @@ public class PDSOperations {
         }
     }
 	
-	public long getNodeID(Graph graph, String name, NodeType type, Map<String, String> properties) throws PMException {
+	public static long getNodeID(Graph graph, String name, NodeType type, Map<String, String> properties) throws PMException {
         Set<Node> search = graph.search(name, type.toString(), properties);
         if(search.isEmpty()) {
             throw new PMException("no node with name " + name + ", type " + type + ", and properties " + properties);
@@ -182,6 +162,47 @@ public class PDSOperations {
 	public static long getID() {
         return rand.nextLong();
     }
+	
+	public boolean doesPolicyBelongToNGAC(HashMap<String,String> attr)
+	{
+		if(attr.get("position.type") != null && 
+				attr.get("proposal.section").equalsIgnoreCase("Whole Proposal") &&
+				attr.get("proposal.action").equalsIgnoreCase("Add"))
+			return true;
+		return false;
+	}
+	
+	private boolean isChildrenFound(String name,String parent) throws PMException
+    {
+    	boolean found = false;
+        // get all of the users in the graph
+        Set<Node> search = ngacPolicy.search(parent, UA.toString(), null);
+        
+        System.out.println(search.size());
+        
+        for(Node userAttNode : search) {
+        	
+        	 Set<Long> childIds = ngacPolicy.getChildren(userAttNode.getID());
+        	 log.info("No of Children Assigned on "+parent+" :"+childIds.size()+"|"+childIds);
+        	 
+        	 long sourceNode = this.getNodeID(ngacPolicy, name, U, null);
+        	 
+        	 log.info("We are looking for:"+sourceNode);
+        	 
+        	 if(childIds.contains(sourceNode))
+        	 {	
+        		 found = true;
+        		 log.info("found");
+        	 }
+        	 else
+        	 {
+        		 log.info("not found");
+        	 }
+        }
+        return found;
+        
+    }
+	
     
 
 

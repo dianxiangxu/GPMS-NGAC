@@ -30,33 +30,63 @@ public class PDS {
     public static void main(String[] args) throws IOException, PMException {
         // load the initial configuration from json
     	PDS main = new PDS();
-    	File file = main.getFileFromResources(main,"docs/pds.json");
+ //   	File file = main.getFileFromResources(main,"docs/ngac_config.json");
+    	
+    	File file = main.getFileFromResources(main,"docs/super_config.json");
+    	File file2 = main.getFileFromResources(main,"docs/RBAC_config.json");
+    	File file3 = main.getFileFromResources(main,"docs/PDS_config.json");
+    	File file4 = main.getFileFromResources(main,"docs/approval_config.json");
+    	File file5 = main.getFileFromResources(main,"docs/cross_policy.json");
 
       //  printFile(file);
     	
         //String json = new String(Files.readAllBytes(Paths.get("/resources/docs/pds.json")));
+     //   String json1 = new String(Files.readAllBytes(Paths.get(file.getAbsolutePath())));
+     //   String json2 = new String(Files.readAllBytes(Paths.get(file2.getAbsolutePath())));
         String json = new String(Files.readAllBytes(Paths.get(file.getAbsolutePath())));
+        String json2 = new String(Files.readAllBytes(Paths.get(file2.getAbsolutePath())));
+        String json3 = new String(Files.readAllBytes(Paths.get(file3.getAbsolutePath())));
+        String json4 = new String(Files.readAllBytes(Paths.get(file4.getAbsolutePath())));
+        String json5 = new String(Files.readAllBytes(Paths.get(file5.getAbsolutePath())));
+
+        
+        //System.out.println(json);
+    //    Graph graph = GraphSerializer.fromJson(new MemGraph(), json1);
+    //   graph = GraphSerializer.fromJson(graph, json2);
         Graph graph = GraphSerializer.fromJson(new MemGraph(), json);
+        graph = GraphSerializer.fromJson(graph, json2);
+        graph = GraphSerializer.fromJson(graph, json3);
+        graph = GraphSerializer.fromJson(graph, json4);
+        graph = GraphSerializer.fromJson(graph, json5);
+        System.out.println("Nodes:"+graph.getNodes().size());
+        
+        System.out.println(getID());
+        System.out.println(getID());
+        System.out.println(getID());
+        System.out.println(getID());
+        System.out.println(getID());
+        System.out.println(getID());
 
        // boolean found = isChildrenFound("bob","tenure",graph);
         
-        printAccessStateForUA("Initial configuration", graph);
+      // printAccessStateForUA("Initial configuration", graph);
         
     
         
-        printAccessState("Initial configuration", graph);
+      //  printAccessState("Initial configuration", graph);
 
-        // Step 1. Bob creates a PDS and assigns it to RBAC_PDSs
-        Node pdsNode = graph.createNode(getID(), "PDSi", OA, null);
-        long rbacPDSsID = getNodeID(graph, "RBAC_PDSs", OA, null);
-        graph.assign(pdsNode.getID(), rbacPDSsID);
-        // simulate an event
-        // normally the Event Processing Point will do this, so we'll just simulate it by
-        // calling the simulateAssignToEvent method
-        long bobID = getNodeID(graph, "bob", U, null);
-        simulateAssignToEvent(graph, bobID, graph.getNode(rbacPDSsID), pdsNode);
-
-        printAccessState("After bob creates PDS", graph);
+		/*
+		 * // Step 1. Bob creates a PDS and assigns it to RBAC_PDSs Node pdsNode =
+		 * graph.createNode(getID(), "PDSi", OA, null); long rbacPDSsID =
+		 * getNodeID(graph, "RBAC_PDSs", OA, null); graph.assign(pdsNode.getID(),
+		 * rbacPDSsID); // simulate an event // normally the Event Processing Point will
+		 * do this, so we'll just simulate it by // calling the simulateAssignToEvent
+		 * method long bobID = getNodeID(graph, "bob", U, null);
+		 * simulateAssignToEvent(graph, bobID, graph.getNode(rbacPDSsID), pdsNode);
+		 * 
+		 * p
+		 rintAccessState("After bob creates PDS", graph);
+		 */
     }
     
     /*

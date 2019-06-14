@@ -1,16 +1,31 @@
-package gpms.pds;
+package gpms.ngac.policy;
 
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * @author Md Nazmul Karim
+ *
+ *This class is the structure equivalent to json object
+ *				{
+					"attribute_name" : "PI",
+					"type" : "OA",
+					"access_right_set" : ["assign", "assign to"]
+				}
+	This json object represents a permission in docs/defined_task.json			
+ */
 public class AttributePermission {
 
 	private String attributeName;
 	
+	//this will hold attribute_name+ type and together will form a key
+	// e.g., PIOA
 	private String attributeNameKey;
 	
 	private String attributeType;
 	
+	// This variable will store set of access rights as string literals;
+	//e.g., "assign", "assign to"
 	private Set<String> accessRightsSet;
 	
 	public AttributePermission() {

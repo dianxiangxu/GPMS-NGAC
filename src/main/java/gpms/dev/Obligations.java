@@ -3,7 +3,7 @@ package gpms.dev;
 import gov.nist.csd.pm.exceptions.PMException;
 import gov.nist.csd.pm.graph.Graph;
 import gov.nist.csd.pm.graph.model.nodes.Node;
-import gpms.pds.Constants;
+import gpms.ngac.policy.Constants;
 
 import java.util.*;
 

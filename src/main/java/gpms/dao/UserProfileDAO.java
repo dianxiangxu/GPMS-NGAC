@@ -15,6 +15,7 @@ import gpms.model.UserDetail;
 import gpms.model.UserInfo;
 import gpms.model.UserProfile;
 import gpms.model.UserProposalCount;
+import gpms.ngac.policy.UserTaskPermissionOperations;
 import gpms.utils.EmailUtil;
 
 import java.io.File;
@@ -1124,7 +1125,11 @@ public class UserProfileDAO extends BasicDAO<UserProfile, String> {
 								userDetails.getCollege());
 					}
 				}
-			}
+			} 
+		//	UserTaskPermissionOperations.init();
+		//	UserTaskPermissionOperations.populateUsersApprovedTaskSet(existingUserProfile
+		//				.getUserAccount().getUserName());
+			
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
 		}
