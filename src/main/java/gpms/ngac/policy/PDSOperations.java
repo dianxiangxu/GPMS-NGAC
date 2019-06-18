@@ -50,6 +50,12 @@ public class PDSOperations {
 		gpmsNgacObligations = new GpmsNgacObligations();
 	}
 	
+	public PDSOperations(Graph gf)
+	{
+		this.ngacPolicy = gf;
+		gpmsNgacObligations = new GpmsNgacObligations();
+	}
+	
 	
 	/**
 	 * This function checks whether a user has permission for a task

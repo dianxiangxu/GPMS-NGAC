@@ -129,7 +129,7 @@
     },
 	{
       "id": 6725271236759789516,
-      "name": "RBAC",
+      "name": "ProposalCreation",
       "type": "PC",
       "properties": {
         "default_ua": "-2407171345681856418",
@@ -138,7 +138,7 @@
     },
 	{
       "id": -2407171345681856418,
-      "name": "RBAC",
+      "name": "PDS_creation",
       "type": "UA",
       "properties": {
         "namespace": "RBAC"
@@ -147,7 +147,7 @@
 	
 	{
       "id": 468830104550723231,
-      "name": "RBAC",
+      "name": "PDS_creation",
       "type": "OA",
       "properties": {
         "namespace": "RBAC"
@@ -346,7 +346,7 @@
 	
 	 {
       "id": 3058753408162110322,
-      "name": "RBAC_PDSs",
+      "name": "org_PDSs",
       "type": "OA",
       "properties": {}
     }

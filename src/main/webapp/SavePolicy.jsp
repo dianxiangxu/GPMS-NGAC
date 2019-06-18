@@ -7,8 +7,8 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Content-Script-Type" content="text/javascript">
 <meta http-equiv="Content-Style-Type" content="text/css">
-<meta content="Dashboard - GPMS" name="DESCRIPTION">
-<meta content="Dashboard - GPMS" name="KEYWORDS">
+<meta content="Settings" name="DESCRIPTION">
+<meta content="Settings" name="KEYWORDS">
 <meta content="@GPMS" name="COPYRIGHT">
 <meta content="GENERATOR" name="GENERATOR">
 <meta content="Author" name="AUTHOR">
@@ -30,7 +30,7 @@
 <!--[if lt IE 7]>
         <script type="text/javascript" src="js/core/IE8.js"></script>
     <![endif]-->
-<title>Admin Dashboard - GPMS</title>
+<title>Save ABAC Policy</title>
 
 <script src="js/jQuery/jquery-1.11.3.min.js" type="text/javascript"></script>
 
@@ -58,35 +58,63 @@
 	var gpmsServicePath = "REST/";
 	var gpmsRootPath = "http://localhost:8181/GPMS/";
 
+	$(function() {
+		// For Sidebar active menu
+		$('.acitem').find('a').eq(3).prop("class", "active");
+	});
+
 	//]]>
 </script>
 
+<script type="text/javascript" src="js/jQuery/jquery-ui.js"></script>
+
 <script type="text/javascript" src="js/core/gpmscore.js"></script>
+<script type="text/javascript" src="js/core/encoder.js"></script>
+
+<script type="text/javascript" src="js/core/jquery.disable_with.js"></script>
 
 <!-- For Side Bar Navigation -->
 <script type="text/javascript" src="js/core/dashboard.js"></script>
 <script type="text/javascript" src="js/sidebar_accordian.js"></script>
 <script type="text/javascript" src="js/superfish.js"></script>
 
+<script type="text/javascript"
+	src="js/FormValidation/jquery.validate.js"></script>
+<script type="text/javascript"
+	src="js/FormValidation/jquery.ui.datepicker.validation.js"></script>
+<script type="text/javascript"
+	src="js/FormValidation/jquery.maskedinput.js"></script>
+<script type="text/javascript" src="js/FormValidation/autoNumeric.js"></script>
+
 <script type="text/javascript" src="js/core/json2.js"></script>
-<script type="text/javascript" src="js/GridView/jquery-dateFormat.js"></script>
 
 <script type="text/javascript" src="js/jquery-browser.js"></script>
 <script type="text/javascript" src="js/jquery.uniform.js"></script>
 
+<script type="text/javascript" src="js/GridView/jquery.tablesorter.js"></script>
+<script type="text/javascript" src="js/GridView/jquery.grid.js"></script>
+<script type="text/javascript" src="js/GridView/SagePaging.js"></script>
+<script type="text/javascript" src="js/GridView/jquery.global.js"></script>
+<script type="text/javascript" src="js/GridView/jquery-dateFormat.js"></script>
+
 <script type="text/javascript" src="js/MessageBox/jquery.easing.1.3.js"></script>
 <script type="text/javascript" src="js/MessageBox/alertbox.js"></script>
 
-<script type="text/javascript" src="js/modules/AdminDashboard.js"></script>
+<script type="text/javascript" src="js/modules/SavePolicy.js"></script>
+
+<link type="text/css" rel="stylesheet"
+	href="css/Templates/jquery-ui.css" />
 
 <link type="text/css" rel="stylesheet" href="css/MessageBox/style.css" />
 
+<link type="text/css" rel="stylesheet" href="css/GridView/tablesort.css" />
+<link type="text/css" rel="stylesheet" href="css/Templates/grid.css" />
 <link type="text/css" rel="stylesheet"
 	href="css/Templates/topstickybar.css" />
 <link type="text/css" rel="stylesheet" href="css/Templates/admin.css" />
 </head>
 <body>
-	<form enctype="multipart/form-data" action="Dashboard.jsp"
+	<form enctype="multipart/form-data" action="SavePolicy.jsp"
 		method="post" name="form1" id="form1">
 		<div style="display: none;" id="UpdateProgress1">
 			<div class="sfLoadingbg">&nbsp;</div>
@@ -115,49 +143,44 @@
 							<%@ include file="AdminSideBar.jsp"%>
 						</div>
 						<!-- Side Bar Ends -->
+
 						<div class="sfMaincontent">
-							<div class="sfWelcomeWrap clearfix">
-								<h1>
-									Hi!
-									<%=session.getAttribute("gpmsUserName")%>
-									Welcome to GPMS Control Panel Screen.
-								</h1>
-								<h2>Proposal Workflow Management System - A web-based
-									application for replacing the manual approval process of grant
-									submission. You can take a quick tour to GPMS, on how to run
-									and operate the Grant Proposal Workflow Management Framework.
-									Get acquainted with the GPMS Dashboard. Take the tour.</h2>
-							</div>
-							<div class="sfDashboard clearfix">
-								<ul>
-									<li><a href="./ManageUsers.jsp"><span
-											class="sfModuleicon"> <i class="icon-user-accounts"></i></span>
-											<span class="sfModulename">Users</span> </a></li>
-
-									<li><a href="./ManageAdminUsers.jsp"><span
-											class="sfModuleicon"> <i class="icon-totalcustomerorder"></i></span>
-											<span class="sfModulename">Admin Users</span> </a></li>
-
-									<li><a href="./ManageProposals.jsp"><span
-											class="sfModuleicon"> <i class="icon-message-template"></i></span>
-											<span class="sfModulename">Proposals</span> </a></li>
-
-									<li><a href="./Settings.jsp"><span
-											class="sfModuleicon"> <i class="icon-settings"></i></span> <span
-											class="sfModulename">Settings</span> </a></li>
+							<div style="display: block" class="sfCpanel sfInnerwrapper"
+								id="divBottompanel">
+								<div class="sfModulecontent clearfix">
+									<!-- form -->
+									<div id="divUserForm">
+										<div class="cssClassCommonBox Curve">
+											<div class="cssClassHeader">
+												<h1>
+													<span id="lblFormHeading">Save ABAC Policy</span>
+												</h1>
+												<div>
+												</div>
+											</div>
+											<div class="cssClassTabPanelTable"></div>
+										</div>
+										<div class="sfButtonwrapper">
 											
-								    <li><a href="./SavePolicy.jsp"><span
-											class="sfModuleicon"> <i class="icon-settings"></i></span> <span
-											class="sfModulename">Save ABAC policy</span> </a></li>	
-								</ul>
-							</div>
+											<p>
+												<button title="Save Policy" type="button" id="btnSavePolicy"
+													class="sfBtn">
+													<span class="icon-save">Save</span>
+												</button>
+											</p>
+										</div>
+									</div>
+									<!-- End form -->
+								</div>
 
-							<!-- END sfMaincontent -->
+							</div>
 						</div>
+						<!-- END sfMaincontent -->
 					</div>
-					<!-- END Body Content sfContentwrapper -->
 				</div>
+				<!-- END Body Content sfContentwrapper -->
 			</div>
+		</div>
 	</form>
 </body>
 </html>

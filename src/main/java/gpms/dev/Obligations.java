@@ -134,7 +134,7 @@ public class Obligations {
 
     public static void submitPDS(Graph graph, Node pdsNode) throws PMException {
         // deassign the PDS from the RBAC and PDS policy classes
-        graph.deassign(pdsNode.getID(), getNodeID(graph, "RBAC_PDSs", OA, null));
+        graph.deassign(pdsNode.getID(), getNodeID(graph, "org_PDSs", OA, null));
         graph.deassign(pdsNode.getID(), getNodeID(graph, "PDSs", OA, null));
 
         // delete the associations for the PI

@@ -703,6 +703,46 @@ public class UserService {
 				.entity("{\"error\": \"Could Not Check For Unique Username\", \"status\": \"FAIL\"}")
 				.build();
 	}
+	
+	
+	@POST
+	@Path("/SavePolicy")
+	@ApiOperation(value = "Save policy", notes = "Saves the current ABAC Policy")
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, message = "Success: { True }"),
+			@ApiResponse(code = 400, message = "Failed: { \"error\":\"error description\", \"status\": \"FAIL\" }") })
+	public Response savePolicy(
+			@ApiParam(value = "Message", required = true, defaultValue = "", allowableValues = "", allowMultiple = false) String message) {
+		try {
+			log.info("UserService::SavePolicy started");
+			String profileId = new String();
+			ObjectMapper mapper = new ObjectMapper();
+			JsonNode root = mapper.readTree(message);
+			/*
+			 * if (root != null && root.has("userId")) { profileId =
+			 * root.get("userId").textValue(); }
+			 */
+			GPMSCommonInfo userInfo = new GPMSCommonInfo();
+			if (root != null && root.has("gpmsCommonObj")) {
+				JsonNode commonObj = root.get("gpmsCommonObj");
+				userInfo = new GPMSCommonInfo(commonObj);
+			}
+			
+			nGACPolicyLoader.savePolicy(null);
+			
+			return Response
+					.status(Response.Status.OK)
+					.entity(mapper.writerWithDefaultPrettyPrinter()
+							.writeValueAsString(true)).build();
+		} catch (Exception e) {
+			log.error("Could not save the policy error e=", e);
+		}
+		return Response
+				.status(Response.Status.BAD_REQUEST)
+				.entity("{\"error\": \"Could Not Save the policy\", \"status\": \"FAIL\"}")
+				.build();
+	}
+	
 
 	@POST
 	@Path("/CheckUniqueEmail")

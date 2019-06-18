@@ -5,7 +5,9 @@ import gov.nist.csd.pm.graph.Graph;
 import gov.nist.csd.pm.graph.GraphSerializer;
 import gov.nist.csd.pm.graph.MemGraph;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
@@ -71,8 +73,44 @@ public class NGACPolicyConfigurationLoader {
 			log.info("PM graph is already loaded.");
 		}
 	}
+	
+	/**
+	 * @param path is the location and name to save the json policy
+	 * if path is provided null or empty string it will be saved to a default location
+	 * @throws PMException
+	 * @throws IOException
+	 */
+	public void savePolicy(String path) throws PMException, IOException {
+		
+		String policyString = GraphSerializer.toJson(ngacPolicy);
+		
+		File file ;
+		if(path == null || path.isEmpty()) {
+			file = new File(Constants.POLICY_CONFIG_OUTPUT_FILE);
+		}
+		else {
+			file = new File(path);
+		}
+		
+		if (file.createNewFile()) {            
+            log.info("File has been created.");
+        } else {
+        
+            log.info("File already exists.");
+        }
+				
+		BufferedWriter writer = null;
+		writer = new BufferedWriter(new FileWriter(file));
+		writer.write(policyString);
+		writer.flush();
+
+		if(writer != null)
+			writer.close();		
+		
+	}
 
 	public static Graph getPolicy() {
+		
 		return ngacPolicy;
 	}
 

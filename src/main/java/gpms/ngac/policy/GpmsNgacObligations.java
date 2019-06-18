@@ -98,8 +98,8 @@ public class GpmsNgacObligations {
 	        ngacPolicy.associate(piUA.getID(), copiNode.getID(), new HashSet<>(Arrays.asList("read", "create-o","create-o-to-oa")));
 	        
 	        //Node facultyUA = graph.createNode(getID(), Constants.FACULTY_UA_LBL, UA, null);
-	        Long RBAC_PDSsOAid = PDSOperations.getNodeID(ngacPolicy, Constants.PDS_ORIGINATING_OA, OA, null);//graph.createNode(getID(), Constants.FACULTY_UA_LBL, UA, null);
-	        ngacPolicy.associate(piUA.getID(), RBAC_PDSsOAid, new HashSet<>(Arrays.asList( "assign from")));
+	        Long org_PDSsOAid = PDSOperations.getNodeID(ngacPolicy, Constants.PDS_ORIGINATING_OA, OA, null);//graph.createNode(getID(), Constants.FACULTY_UA_LBL, UA, null);
+	        ngacPolicy.associate(piUA.getID(), org_PDSsOAid, new HashSet<>(Arrays.asList( "assign from")));
 	        ngacPolicy.associate(piUA.getID(), copiUA.getID(), new HashSet<>(Arrays.asList( "assign-u to")));
 	        
 	        // grant PI permissions on the ProjectInfo container
@@ -155,7 +155,7 @@ public class GpmsNgacObligations {
 
     public static void submitPDS(Graph graph, Node pdsNode) throws PMException {
         // deassign the PDS from the RBAC and PDS policy classes
-        graph.deassign(pdsNode.getID(), getNodeID(graph, "RBAC_PDSs", OA, null));
+        graph.deassign(pdsNode.getID(), getNodeID(graph, "org_PDSs", OA, null));
         graph.deassign(pdsNode.getID(), getNodeID(graph, "PDSs", OA, null));
 
         // delete the associations for the PI

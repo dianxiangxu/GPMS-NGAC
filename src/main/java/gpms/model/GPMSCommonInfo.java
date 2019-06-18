@@ -48,6 +48,14 @@ public class GPMSCommonInfo implements Serializable {
 		}
 	}
 
+	@Override
+	public String toString() {
+		return "GPMSCommonInfo [userProfileID=" + userProfileID + ", userName=" + userName + ", userIsAdmin="
+				+ userIsAdmin + ", userCollege=" + userCollege + ", userDepartment=" + userDepartment
+				+ ", userPositionType=" + userPositionType + ", userPositionTitle=" + userPositionTitle
+				+ ", userIsActive=" + userIsActive + "]";
+	}
+
 	public String getUserProfileID() {
 		return userProfileID;
 	}

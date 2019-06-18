@@ -1247,6 +1247,7 @@ public class ProposalService {
 				JsonNode commonObj = root.get("gpmsCommonObj");
 				log.info(commonObj);
 				userInfo = new GPMSCommonInfo(commonObj);
+				log.info("User Info:"+userInfo.toString());
 				
 			}
 			

@@ -8,7 +8,9 @@ import gov.nist.csd.pm.graph.MemGraph;
 import gov.nist.csd.pm.graph.model.nodes.Node;
 import gov.nist.csd.pm.graph.model.nodes.NodeType;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
@@ -60,12 +62,51 @@ public class PDS {
         graph = GraphSerializer.fromJson(graph, json5);
         System.out.println("Nodes:"+graph.getNodes().size());
         
+        
+        String policyString = GraphSerializer.toJson(graph);
+        
+       // System.out.println(policyString);
+       // Files.write("", policyString.to, options)
+        
+       // File file6 = main.getFileFromResources(main,"docs/test.json");
+        File file6 = new File("docs/test.json");
+        BufferedWriter writer = null;
+        try
+        {
+            writer = new BufferedWriter( new FileWriter(file6));
+            writer.write( policyString);
+            writer.flush();
+
+        }
+        catch ( IOException e)
+        {
+        	e.printStackTrace();
+        }
+        catch(Exception ex)
+        {
+        	ex.printStackTrace();
+        }
+        finally
+        {
+            try
+            {
+                if ( writer != null)
+                writer.close( );
+            }
+            catch ( IOException e)
+            {
+            	e.printStackTrace();
+            }
+        }
+        
+        
+       /* System.out.println(getID());
         System.out.println(getID());
         System.out.println(getID());
         System.out.println(getID());
         System.out.println(getID());
         System.out.println(getID());
-        System.out.println(getID());
+        */
 
        // boolean found = isChildrenFound("bob","tenure",graph);
         
@@ -243,7 +284,7 @@ public class PDS {
      */
     private static void simulateAssignToEvent(Graph graph, long userID, Node targetNode, Node childNode) throws PMException {
         // check if the target of the event is a particular container and execute the corresponding "response"
-        if(targetNode.getID() == getNodeID(graph, "RBAC_PDSs", OA, null)) {
+        if(targetNode.getID() == getNodeID(graph, "org_PDSs", OA, null)) {
             Obligations.createPDS(graph, userID, childNode);
         } else if(targetNode.getID() == getNodeID(graph, "CoPI", OA, null)) {
             Obligations.addCoPI(graph, childNode);

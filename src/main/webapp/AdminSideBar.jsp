@@ -178,6 +178,8 @@
 						class="icon-message-template"></i><span>Manage Proposals</span></a></li>
 				<li class="sfLevel1"><a href="./Settings.jsp"><i
 						class="icon-settings"></i><span>Settings</span></a></li>
+				<li class="sfLevel1"><a href="./SavePolicy.jsp"><i
+						class="icon-settings"></i><span>Save ABAC Policy</span></a></li>
 			</ul>
 		</li>
 	</ul>

@@ -27,14 +27,14 @@ public enum Task
 			case CREATE_PROPOSAL:
 				ArrayList<String> ops = new ArrayList<String>();
 				ops.addAll(Arrays.asList(operationsCreateProposal));
-				Attribute att = new Attribute("RBAC_PDSs", NodeType.OA);
+				Attribute att = new Attribute(Constants.PDS_ORIGINATING_OA, NodeType.OA);
 				permissionsSet.put(att, new HashSet(ops) );
 				break;
 			case ADD_CO_PI:
 				ArrayList<String> ops2 = new ArrayList<String>();
 				ops2.add("assign");
 				ops2.add("assign to");
-				Attribute att2 = new Attribute("RBAC_PDSs", NodeType.OA);
+				Attribute att2 = new Attribute(Constants.PDS_ORIGINATING_OA, NodeType.OA);
 				permissionsSet.put(att2, new HashSet(ops2) );
 				break;
 		}
