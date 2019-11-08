@@ -1,13 +1,20 @@
 package gpms.dev;
 
 import gov.nist.csd.pm.exceptions.PMException;
-import gov.nist.csd.pm.graph.Graph;
-import gov.nist.csd.pm.graph.model.nodes.Node;
+import gov.nist.csd.pm.pip.graph.Graph;
+import gov.nist.csd.pm.pip.graph.GraphSerializer;
+import gov.nist.csd.pm.pip.graph.MemGraph;
+import gov.nist.csd.pm.pip.graph.model.nodes.Node;
+import gov.nist.csd.pm.pip.graph.model.nodes.NodeType;
 import gpms.ngac.policy.Constants;
+import gpms.ngac.policy.PolicyCreationFromTemplate;
 
 import java.util.*;
 
-import static gov.nist.csd.pm.graph.model.nodes.NodeType.*;
+import static gov.nist.csd.pm.pip.graph.model.nodes.NodeType.O;
+import static gov.nist.csd.pm.pip.graph.model.nodes.NodeType.OA;
+import static gov.nist.csd.pm.pip.graph.model.nodes.NodeType.U;
+import static gov.nist.csd.pm.pip.graph.model.nodes.NodeType.UA;
 import static gpms.dev.PDS.getID;
 import static gpms.dev.PDS.getNodeID;
 
@@ -16,6 +23,11 @@ import static gpms.dev.PDS.getNodeID;
  */
 public class Obligations {
 
+	private static PolicyCreation policyCreationFromTemplate = new PolicyCreation();
+	
+	public Obligations() {
+		
+	}
     /**
      * Obligation to create a new PDS, the given user is the PI, the given node is the base node for the PDS.
      * Some things are hard-coded in this example, so there will be errors with more than one PDS.
@@ -111,6 +123,36 @@ public class Obligations {
         // grant SP permissions on the BudgetInfo container
         graph.associate(spUA.getID(), budgInfoNode.getID(), new HashSet<>(Arrays.asList("read")));
     }
+    
+    
+    public static void createPDSNew(Graph ngacPolicy, long userID, Node iPdsNode) throws PMException {
+		
+		long id = iPdsNode.getID();
+		System.out.println("ID:"+id);
+		System.out.println("User ID:"+userID+"userName:"+ngacPolicy.getNode(userID).getName());
+		//Node node = policyCreationFromTemplate.createPolicyFromPolicy(ngacPolicy, iPdsNode);
+		policyCreationFromTemplate.createPolicyFromPolicy(ngacPolicy, iPdsNode);
+		Node userNode = ngacPolicy.getNode(userID);
+        
+		
+		Node userObj = ngacPolicy.createNode(getID(), userNode.getName(), O, null);
+		
+		// User Name is assigned to PI Object Attribute
+		String piNodeLabel = Constants.PI_OA_UA_LBL+Long.toString(id);		
+		System.out.println("PI:"+piNodeLabel);
+		long piOANodeId = getNodeID(ngacPolicy, piNodeLabel,  OA, null);		
+        ngacPolicy.assign(userObj.getID(), piOANodeId);
+        
+        //User is assigned to PI user Attribute
+        long piUANodeId = getNodeID(ngacPolicy, piNodeLabel,  UA, null);		
+        ngacPolicy.assign(userNode.getID(), piUANodeId);
+		
+        //iPDS node is assigned to PDSs
+		long pdssNode = getNodeID(ngacPolicy, Constants.PDSs_OA_UA_LBL, OA, null);  //PDSs OA
+        ngacPolicy.assign(iPdsNode.getID(), pdssNode);
+		
+	}
+	
 
     /**
      * When an object is added to the CoPI container get the user with the same name and assign that user to the CoPI user attribute.

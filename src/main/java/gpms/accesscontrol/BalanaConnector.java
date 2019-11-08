@@ -87,7 +87,9 @@ public class BalanaConnector {
 		try {
 			requestCtx = RequestCtxFactory.getFactory().getRequestCtx(
 					request.replaceAll(">\\s+<", "><"));
+			
 			responseCtx = pdp.evaluate(requestCtx);
+			
 		} catch (ParsingException e) {
 			String error = "Invalid request  : " + e.getMessage();
 			ArrayList<String> code = new ArrayList<String>();
@@ -221,6 +223,9 @@ public class BalanaConnector {
 	private PDP getPDPNewInstance() {
 		try {
 			PDPConfig pdpConfig = balana.getPdpConfig();
+			
+		//	pdpConfig.getAttributeFinder().getClass()
+			
 			pdpConfig = new PDPConfig(pdpConfig.getAttributeFinder(),
 					pdpConfig.getPolicyFinder(), pdpConfig.getResourceFinder(),
 					true);

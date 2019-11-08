@@ -2141,8 +2141,7 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 						newSponsorAndBudgetInfo.getGrantingAgency().add(
 								grantingAgency);
 					} else {
-						throw new Exception(
-								"The Granting Agency can not be Empty");
+						//throw new Exception( "The Granting Agency can not be Empty");
 					}
 				}
 			}
@@ -2155,7 +2154,7 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 					newSponsorAndBudgetInfo.setDirectCosts(Double
 							.parseDouble(directCost));
 				} else {
-					throw new Exception("The Direct Costs can not be Empty");
+					//throw new Exception("The Direct Costs can not be Empty");
 				}
 			}
 			if (sponsorAndBudgetInfo != null
@@ -2166,7 +2165,7 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 					newSponsorAndBudgetInfo.setFaCosts(Double
 							.parseDouble(FACosts));
 				} else {
-					throw new Exception("The FA Costs can not be Empty");
+					//throw new Exception("The FA Costs can not be Empty");
 				}
 			}
 			if (sponsorAndBudgetInfo != null
@@ -2178,7 +2177,7 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 					newSponsorAndBudgetInfo.setTotalCosts(Double
 							.parseDouble(totalCosts));
 				} else {
-					throw new Exception("The Total Costs can not be Empty");
+					//throw new Exception("The Total Costs can not be Empty");
 				}
 			}
 			if (sponsorAndBudgetInfo != null
@@ -2189,7 +2188,7 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 					newSponsorAndBudgetInfo.setFaRate(Double
 							.parseDouble(FARate));
 				} else {
-					throw new Exception("The FA Rate can not be Empty");
+					//throw new Exception("The FA Rate can not be Empty");
 				}
 			}
 		}
@@ -4082,9 +4081,8 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 			String piEmail = emailDetails.getPiEmail();
 			List<String> emaillist = emailDetails.getEmaillist();
 			if (!emailSubject.equals("")) {
-				EmailUtil emailUtil = new EmailUtil();
-				emailUtil.sendMailMultipleUsersWithoutAuth(piEmail, emaillist,
-						emailSubject + authorName, emailBody);
+				//EmailUtil emailUtil = new EmailUtil();
+				//emailUtil.sendMailMultipleUsersWithoutAuth(piEmail, emaillist,emailSubject + authorName, emailBody);
 			}
 		}
 		return changeDone;
@@ -4117,9 +4115,8 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 			String piEmail = emailDetails.getPiEmail();
 			List<String> emaillist = emailDetails.getEmaillist();
 			if (!emailSubject.equals("")) {
-				EmailUtil emailUtil = new EmailUtil();
-				emailUtil.sendMailMultipleUsersWithoutAuth(piEmail, emaillist,
-						emailSubject + authorName, emailBody);
+				//EmailUtil emailUtil = new EmailUtil();
+				//emailUtil.sendMailMultipleUsersWithoutAuth(piEmail, emaillist,emailSubject + authorName, emailBody);
 			}
 		}
 		return isDeleted;

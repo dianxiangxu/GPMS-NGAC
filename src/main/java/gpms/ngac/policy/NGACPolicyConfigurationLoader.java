@@ -1,14 +1,22 @@
 package gpms.ngac.policy;
 
 import gov.nist.csd.pm.exceptions.PMException;
-import gov.nist.csd.pm.graph.Graph;
-import gov.nist.csd.pm.graph.GraphSerializer;
-import gov.nist.csd.pm.graph.MemGraph;
+import gov.nist.csd.pm.pap.PAP;
+import gov.nist.csd.pm.pdp.PDP;
+import gov.nist.csd.pm.pip.graph.Graph;
+import gov.nist.csd.pm.pip.graph.GraphSerializer;
+import gov.nist.csd.pm.pip.graph.MemGraph;
+import gov.nist.csd.pm.pip.obligations.MemObligations;
+import gov.nist.csd.pm.pip.obligations.evr.EVRParser;
+import gov.nist.csd.pm.pip.obligations.model.Obligation;
+import gov.nist.csd.pm.pip.prohibitions.MemProhibitions;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -34,31 +42,35 @@ public class NGACPolicyConfigurationLoader {
 	public void init() {
 		if (ngacPolicy == null) {
 			File file_super = getFileFromResources(Constants.POLICY_CONFIG_FILE_SUPER);
-			File file_rbac = getFileFromResources(Constants.POLICY_CONFIG_FILE_RBAC);
-			File file_pds = getFileFromResources(Constants.POLICY_CONFIG_FILE_PDS);
-			File file_approval = getFileFromResources(Constants.POLICY_CONFIG_FILE_APPROVAL);
-			File file_getFaculty = getFileFromResources(Constants.POLICY_CONFIG_FILE_GET_FACULTY);
-			File file_cross_policy = getFileFromResources(Constants.POLICY_CONFIG_FILE_CROSS_POLICY);
+			File file_proposal_creation = getFileFromResources(Constants.POLICY_CONFIG_FILE_PROPOSAL_CREATION);
+			File file_university_org = getFileFromResources(Constants.POLICY_CONFIG_FILE_UNIVERSITY_ORGANIZATION);
+			//File file_pds = getFileFromResources(Constants.POLICY_CONFIG_FILE_PDS);
+			//File file_approval = getFileFromResources(Constants.POLICY_CONFIG_FILE_APPROVAL);
+			//File file_getFaculty = getFileFromResources(Constants.POLICY_CONFIG_FILE_GET_FACULTY);
+			//File file_cross_policy = getFileFromResources(Constants.POLICY_CONFIG_FILE_CROSS_POLICY);
 			String jsonSuper;
-			String jsonRbac;
+			String jsonProposalCreation;
+			String jsonUnivOrg;
 			String jsonPds;
 			String jsonApproval;
 			String jsonGetFaculty;
 			String jsonCrossPolicy;
 			try {
 				jsonSuper = new String(Files.readAllBytes(Paths.get(file_super.getAbsolutePath())));
-				jsonRbac = new String(Files.readAllBytes(Paths.get(file_rbac.getAbsolutePath())));
-				jsonPds = new String(Files.readAllBytes(Paths.get(file_pds.getAbsolutePath())));
-				jsonApproval = new String(Files.readAllBytes(Paths.get(file_approval.getAbsolutePath())));
-				jsonGetFaculty = new String(Files.readAllBytes(Paths.get(file_getFaculty.getAbsolutePath())));
-				jsonCrossPolicy = new String(Files.readAllBytes(Paths.get(file_cross_policy.getAbsolutePath())));
+				jsonProposalCreation = new String(Files.readAllBytes(Paths.get(file_proposal_creation.getAbsolutePath())));
+				jsonUnivOrg = new String(Files.readAllBytes(Paths.get(file_university_org.getAbsolutePath())));
+				//jsonPds = new String(Files.readAllBytes(Paths.get(file_pds.getAbsolutePath())));
+				//jsonApproval = new String(Files.readAllBytes(Paths.get(file_approval.getAbsolutePath())));
+				//jsonGetFaculty = new String(Files.readAllBytes(Paths.get(file_getFaculty.getAbsolutePath())));
+				//jsonCrossPolicy = new String(Files.readAllBytes(Paths.get(file_cross_policy.getAbsolutePath())));
 				try {
 					ngacPolicy = GraphSerializer.fromJson(new MemGraph(), jsonSuper);
-					ngacPolicy = GraphSerializer.fromJson(ngacPolicy, jsonRbac);
-					ngacPolicy = GraphSerializer.fromJson(ngacPolicy, jsonPds);
-					ngacPolicy = GraphSerializer.fromJson(ngacPolicy, jsonApproval);
-					ngacPolicy = GraphSerializer.fromJson(ngacPolicy, jsonGetFaculty);
-					ngacPolicy = GraphSerializer.fromJson(ngacPolicy, jsonCrossPolicy);
+					ngacPolicy = GraphSerializer.fromJson(ngacPolicy, jsonProposalCreation);
+					ngacPolicy = GraphSerializer.fromJson(ngacPolicy, jsonUnivOrg);
+					//ngacPolicy = GraphSerializer.fromJson(ngacPolicy, jsonPds);
+					//ngacPolicy = GraphSerializer.fromJson(ngacPolicy, jsonApproval);
+					//ngacPolicy = GraphSerializer.fromJson(ngacPolicy, jsonGetFaculty);
+					//ngacPolicy = GraphSerializer.fromJson(ngacPolicy, jsonCrossPolicy);
 				} catch (PMException e) {
 					log.debug("PM Exception: InitialConfigurationLoader : while loading NGAC base configuration. "
 							+ e.toString());
@@ -72,6 +84,52 @@ public class NGACPolicyConfigurationLoader {
 		} else {
 			log.info("PM graph is already loaded.");
 		}
+	}
+	
+	
+	/**
+	 * This method takes a null policy graph and generates a new graph policy based on template
+	 * @param policy
+	 * @return
+	 */
+	public Graph createAProposalGraph(Graph policy) {
+		
+			File file_proposal = getFileFromResources(Constants.PDS_TEMPLATE);
+			String jsonProposalPolicy = "";
+			try {
+				jsonProposalPolicy = new String(Files.readAllBytes(Paths.get(file_proposal.getAbsolutePath())));
+				log.info("Template file content:");
+				try {
+					policy = GraphSerializer.fromJson(policy, jsonProposalPolicy);					
+				    if(policy == null)
+				    {
+				    	log.info("Proposal graph is null");
+				    }
+				} catch (PMException e) {
+					log.debug("PM Exception: createAProposalGraph : while loading PDS base configuration. "
+							+ e.toString());
+				}
+			} catch (IOException e) {
+				log.debug("I/O Exception : createAProposalGraph : while loading PDS base configuration."
+						+ e.toString());
+			}
+
+		
+		return policy;
+	}
+	
+	
+	public Obligation loadObligation(String path) {
+		Obligation obligation = null;
+		try {
+			File file = getFileFromResources(path); 
+			InputStream is = new FileInputStream(file);
+			obligation = EVRParser.parse(is);
+		
+		}catch(Exception e) {
+			log.info("Exception: "+e.toString());
+		}
+		return obligation;
 	}
 	
 	/**

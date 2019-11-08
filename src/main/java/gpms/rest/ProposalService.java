@@ -24,7 +24,9 @@ import gpms.model.SignatureUserInfo;
 import gpms.model.Status;
 import gpms.model.UserAccount;
 import gpms.model.UserProfile;
+import gpms.ngac.policy.NGACPolicyConfigurationLoader;
 import gpms.ngac.policy.PDSOperations;
+import gpms.ngac.policy.ProposalDataSheet;
 import gpms.ngac.policy.UserTaskPermissionOperations;
 import gpms.ngac.policy.UserTaskPermissionRepo;
 import gpms.utils.EmailUtil;
@@ -71,6 +73,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import com.mongodb.MongoClient;
+
+import gov.nist.csd.pm.exceptions.PMException;
+import gov.nist.csd.pm.pip.graph.Graph;
 
 @Path("/proposals")
 @Api(value = "/proposals", description = "Manage Proposals")
@@ -597,17 +602,54 @@ public class ProposalService {
 				subjectMap.put("proposal.role", proposalRoles);
 				attrMap.put("Subject", subjectMap);
 			}
+			
+			List<String> actions = null;
+			
+			log.info("Proposal Role :"+proposalRoles);
+			log.info("User info :"+userInfo);
+			log.info("proposal ID:"+proposalId);
+			
 			ObjectId id = new ObjectId(proposalId);
 			Proposal existingProposal = proposalDAO
 					.findProposalByProposalID(id);
-			StringBuffer contentProfile = proposalDAO
-					.generateProposalContentProfile(proposalId, userInfo,
-							existingProposal);
-			if (attrMap.get("Resource") == null) {
-				attrMap.put("Resource", resourceMap);
+			
+			if(proposalRoles.equalsIgnoreCase("PI")) {
+				ProposalDataSheet projectProposal =  new ProposalDataSheet();
+				long proposalNgacId = existingProposal.getNgacId();
+				log.info("NN: Proposal NGAC Id:"+proposalNgacId);
+				
+				Graph proposalPolicy = null ;
+				
+				if(PDSOperations.proposalPolicies.get(existingProposal.getNgacId()) != null) {
+					projectProposal.setProposalPolicy(PDSOperations.proposalPolicies.get(existingProposal.getNgacId()));
+				} else {
+					log.info("Policy re-created.");
+					NGACPolicyConfigurationLoader loader = new NGACPolicyConfigurationLoader();
+				
+					proposalPolicy = loader.createAProposalGraph(proposalPolicy);
+					projectProposal.setProposalPolicy(proposalPolicy);
+				}
+				projectProposal.setProposal(existingProposal);	
+				projectProposal.updatePI();
+				projectProposal.updateCoPI();
+				projectProposal.updateSP();
+				
+				actions = projectProposal.getPermittedActions(projectProposal.getProposal().getInvestigatorInfo().getPi().getUserRef().getUserAccount().getUserName(), "PDSs");
+				
+			} else {
+				
+				StringBuffer contentProfile = proposalDAO
+						.generateProposalContentProfile(proposalId, userInfo,
+								existingProposal);
+				if (attrMap.get("Resource") == null) {
+					attrMap.put("Resource", resourceMap);
+				}
+				actions = proposalDAO.generateMDPDecision(attrMap,
+						actionMap, contentProfile);
+				
 			}
-			List<String> actions = proposalDAO.generateMDPDecision(attrMap,
-					actionMap, contentProfile);
+						
+			log.info("Permitted Actions:"+actions);
 			return Response
 					.status(Response.Status.OK)
 					.entity(mapper.setDateFormat(formatter)
@@ -772,6 +814,7 @@ public class ProposalService {
 					String projectTitle = proposalUniqueObj
 							.get("NewProjectTitle").textValue().trim()
 							.replaceAll("\\<[^>]*>", "");
+					log.info("Proposal Id: "+proposalID + ", Title:"+projectTitle);
 					if (proposalDAO.validateNotEmptyValue(projectTitle)) {
 						newProjectTitle = projectTitle;
 					} else {
@@ -1025,7 +1068,7 @@ public class ProposalService {
 								existingProposal, oldProposal, authorProfile,
 								irbApprovalRequired);
 
-				return sendSaveUpdateNotification(message, proposalId,
+				return sendSaveUpdateNotification(message,null, proposalId,
 						existingProposal, oldProposal, authorProfile, true,
 						null, irbApprovalRequired, null, emailDetails, "");
 			} else {
@@ -1066,14 +1109,20 @@ public class ProposalService {
 			UserProfile authorProfile = userProfileDAO
 					.findUserDetailsByProfileID(authorId);
 			String proposalId = new String();
+			String proposalNgacId = new String();
 			Proposal existingProposal = new Proposal();
+			ProposalDataSheet projectProposal =  new ProposalDataSheet();
 			Proposal oldProposal = new Proposal();
 			StringBuffer contentProfile = new StringBuffer();
 			BalanaConnector ac = new BalanaConnector();
 			if (root != null && root.has("proposalInfo")) {
 				JsonNode proposalInfo = root.get("proposalInfo");
+				log.info(proposalInfo);
 				if (proposalInfo != null && proposalInfo.has("ProposalID")) {
 					proposalId = proposalInfo.get("ProposalID").textValue();
+					log.info("NN: Proposal Id:"+proposalId);
+					proposalNgacId = proposalInfo.get("proposalNgacId").textValue();
+					log.info("NN: Proposal NGAC Id:"+proposalNgacId);
 					if (!proposalId.equals("0")) {
 						ObjectId id = new ObjectId(proposalId);
 						existingProposal = proposalDAO
@@ -1082,6 +1131,46 @@ public class ProposalService {
 								.cloneThroughSerialize(existingProposal);
 					}
 				}
+				log.info("Existing:"+existingProposal.toString());
+				log.info("Old:"+oldProposal.toString());
+				log.info(proposalInfo.toString());
+				log.info("******************");
+				Graph proposalPolicy = null ;
+				
+				
+				if(existingProposal.getNgacId() == 0l)
+				{	
+					log.info("NGAC ID found 0.");
+					existingProposal.setNgacId(Long.parseLong(proposalNgacId));
+					proposalPolicy = PDSOperations.proposalPolicies.get(Long.parseLong(proposalNgacId));
+					projectProposal.setProposalPolicy(proposalPolicy);
+					projectProposal.setProposal(existingProposal);	
+				}
+				else {
+					log.info("NGAC ID found :"+existingProposal.getNgacId());
+					//proposalPolicy = PDSOperations.proposalPolicies.get(existingProposal.getNgacId());
+				
+				     
+					if(PDSOperations.proposalPolicies.get(existingProposal.getNgacId()) != null) {
+						projectProposal.setProposalPolicy(PDSOperations.proposalPolicies.get(existingProposal.getNgacId()));
+					} else {
+						log.info("Policy re-created.");
+						NGACPolicyConfigurationLoader loader = new NGACPolicyConfigurationLoader();
+					
+						proposalPolicy = loader.createAProposalGraph(proposalPolicy);
+						projectProposal.setProposalPolicy(proposalPolicy);
+					}
+					projectProposal.setProposal(existingProposal);	
+					projectProposal.updatePI();
+					projectProposal.updateCoPI();
+					projectProposal.updateSP();
+				
+				}
+				
+				
+				
+				//log.info("Before save:"+proposalPolicy.getNodes().size());
+				log.info("Save Proposal:"+projectProposal.getProposalPolicy().getNodes().size());
 				proposalDAO.getAppendixDetails(proposalId, existingProposal,
 						oldProposal, proposalInfo);
 				getInvestigatorInfoDetails(proposalId, existingProposal,
@@ -1118,11 +1207,16 @@ public class ProposalService {
 										proposalId, existingProposal,
 										signedByCurrentUser, contentProfile,
 										irbApprovalRequired, requiredSignatures);
+						log.info("INSIDE SAVE UPDATE:"+attrMap);
+						
+						//intercept for action type
+						
 						Set<AbstractResult> set = ac
 								.getXACMLdecisionWithObligations(attrMap,
 										contentProfile);
 						Iterator<AbstractResult> it = set.iterator();
 						int intDecision = AbstractResult.DECISION_NOT_APPLICABLE;
+						log.info("INSIDE SAVE UPDATE:nazmul:"+action);
 						while (it.hasNext()) {
 							AbstractResult ar = it.next();
 							intDecision = ar.getDecision();
@@ -1141,7 +1235,7 @@ public class ProposalService {
 								EmailCommonInfo emailDetails = proposalDAO
 										.saveProposalWithObligations(obligations);
 
-								return sendSaveUpdateNotification(message,
+								return sendSaveUpdateNotification(message,projectProposal,
 										proposalId, existingProposal,
 										oldProposal, authorProfile, false,
 										signatures, irbApprovalRequired,
@@ -1188,16 +1282,87 @@ public class ProposalService {
 			log.info("ProposalService::checkUserPermissionForAProposal started");
 			ObjectMapper mapper = new ObjectMapper();
 			JsonNode root = mapper.readTree(message);
-					
-			
+			log.info("Root:"+root);
+						
 			if (root != null && root.has("policyInfo")) {
 				JsonNode policyInfo = root.get("policyInfo");
 				if (policyInfo != null && policyInfo.isArray()
 						&& policyInfo.size() > 0) {
 					HashMap<String, Multimap<String, String>> attrMap = proposalDAO
 							.generateAttributes(policyInfo);
+					
+					log.info("Nazmul : "+attrMap);
+					
+					GPMSCommonInfo userInfo = new GPMSCommonInfo();
+					if (root != null && root.has("gpmsCommonObj")) {
+						JsonNode commonObj = root.get("gpmsCommonObj");
+						userInfo = new GPMSCommonInfo(commonObj);
+					}
+					String proposalId = "";
+					String proposalSection = "";
+					String action = "";
+					if (root != null && root.has("proposalId")) {
+						JsonNode proposalIdNode = root.get("proposalId");
+						proposalId = proposalIdNode.textValue();
+						JsonNode proposalSectionNode = root.get("ProposalSection");
+						proposalSection = proposalSectionNode.textValue();
+						JsonNode proposalActionNode = root.get("Action");
+						action = proposalActionNode.textValue();
+						
+						
+					}
+					
+					
+					log.info("User Info : "+userInfo.getUserName());
+					log.info("ProposalId : "+proposalId);
+					log.info("Section : "+proposalSection);
+					log.info("Action : "+action);
+					//log.info("NGAC : "+action);
+					
+					ObjectId id = new ObjectId(proposalId);
+					Proposal existingProposal = proposalDAO
+							.findProposalByProposalID(id);
+					
+					log.info("NGAC :"+existingProposal.getNgacId());
+					
+					ProposalDataSheet projectProposal =  new ProposalDataSheet();
+					projectProposal.setProposal(existingProposal);
+					
+					Graph proposalPolicy = null;
+					
+					if(PDSOperations.proposalPolicies.get(existingProposal.getNgacId()) != null) {
+						projectProposal.setProposalPolicy(PDSOperations.proposalPolicies.get(existingProposal.getNgacId()));
+					} else {
+						log.info("Policy re-created.");
+						NGACPolicyConfigurationLoader loader = new NGACPolicyConfigurationLoader();
+					
+						proposalPolicy = loader.createAProposalGraph(proposalPolicy);
+						projectProposal.setProposalPolicy(proposalPolicy);
+						
+					}
+					
+					
+					
+					projectProposal.updatePI();
+					projectProposal.updateCoPI();
+					projectProposal.updateSP();
+					
+					String decision = "";
+					
+					if(action.equalsIgnoreCase("Edit"))
+					{
+						String objectAtt = "";
+						String acRight = "w";
+						objectAtt = projectProposal.setSection(proposalSection);
+						
+						decision = projectProposal.getPolicyDecision(userInfo.getUserName(), acRight, objectAtt);
+					    log.info("D:"+decision);
+					}
+					else {
 					BalanaConnector ac = new BalanaConnector();
-					String decision = ac.getXACMLdecision(attrMap);
+					decision = ac.getXACMLdecision(attrMap);
+					}
+					log.info("Decision :"+decision);
  					if (decision.equals("Permit")) {
 						return Response
 								.status(200)
@@ -1268,6 +1433,9 @@ public class ProposalService {
 					if(hasPermission)
 					{	
 						long proposalId = pdsOperations.createAProposal(userInfo.getUserName());
+						
+						log.info("New policy id:"+proposalId+"|"+PDSOperations.proposalPolicies.get(proposalId).getNodes().size());
+						
 						//log.info("ProposalService:"+userInfo.getUserName());
 						//UserTaskPermissionOperations.populateUsersApprovedTaskSet(userInfo.getUserName());
 						
@@ -1275,7 +1443,7 @@ public class ProposalService {
 								.status(200)
 								.type(MediaType.APPLICATION_JSON)
 								.entity(mapper.writerWithDefaultPrettyPrinter()
-										.writeValueAsString(true)).build();
+										.writeValueAsString(proposalId+"")).build();
 					}
 					else {
 					    return Response.status(403)
@@ -1545,6 +1713,7 @@ public class ProposalService {
 				proposalIsChanged = true;
 			}
 		} else {
+			//log.info("Here:"+existingProposal.toString());
 			proposalDAO.saveProposal(existingProposal, authorProfile);
 			proposalIsChanged = true;
 		}
@@ -1573,7 +1742,7 @@ public class ProposalService {
 	 * @return
 	 * @throws JsonProcessingException
 	 */
-	public Response sendSaveUpdateNotification(String message,
+	public Response sendSaveUpdateNotification(String message, ProposalDataSheet projectProposal,
 			String proposalId, Proposal existingProposal, Proposal oldProposal,
 			UserProfile authorProfile, boolean isAdminUser,
 			List<SignatureUserInfo> signatures, Boolean irbApprovalRequired,
@@ -1589,6 +1758,9 @@ public class ProposalService {
 		boolean proposalIsChanged = false;
 		try {
 			if (proposalId.equals("0")) {
+				
+				log.info("Existing Proposal : inside sendSaveUpdateNotification ");
+				
 				proposalIsChanged = saveProposal(message, existingProposal,
 						null, authorProfile, isAdminUser, proposalId, null,
 						irbApprovalRequired, null, action);
@@ -1603,6 +1775,22 @@ public class ProposalService {
 					.entity(e.getMessage()).build();
 		}
 		if (proposalIsChanged) {
+			
+			log.info("After Save:");
+			if(projectProposal != null)
+			{	
+				projectProposal.setProposal(existingProposal);
+				try {
+					projectProposal.updateCoPI();
+					projectProposal.updateSP();
+					
+				} catch (PMException e) {
+					log.info("Exception : inside sendSaveUpdateNotification");
+					e.printStackTrace();
+				}
+			} else {
+				log.info("Inside sendSaveUpdateNotification: projectProposal is NULL ");
+			}
 			if (!emailSubject.equals("")) {
 				EmailUtil emailUtil = new EmailUtil();
 				emailUtil.sendMailMultipleUsersWithoutAuth(piEmail, emaillist,
@@ -1630,6 +1818,7 @@ public class ProposalService {
 			throws UnknownHostException, Exception, ParseException,
 			IOException, JsonParseException, JsonMappingException {
 		String authorUserName = authorProfile.getFullName();
+		//log.info("Hello:"+message);
 		ObjectMapper mapper = new ObjectMapper();
 		JsonNode root = mapper.readTree(message);
 		JsonNode proposalInfo = null;

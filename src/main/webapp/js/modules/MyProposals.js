@@ -21,6 +21,7 @@ $(function() {
 	$.validator.setDefaults({
 		ignore : ".ignore"
 	});
+	
 
 	var gpmsCommonObj = function() {
 		var gpmsCommonInfo = {
@@ -75,6 +76,16 @@ $(function() {
 
 		return false;
 	});
+	
+	var shouldValidateAll = '1';
+
+	
+	var validationDecider = function () {
+		  if(window.shouldValidateAll == '1')
+			  return true;
+		  else
+			  return false;
+		};
 
 	var validator = $("#form1")
 			.validate(
@@ -89,183 +100,663 @@ $(function() {
 								maxlength : 250
 							},
 							projectType : {
-								required : true
+								required : false
 							},
 							typeOfRequest : {
-								required : true
+								required : false
 							},
 							dueDate : {
-								required : true,
+								required : false,
 								dpDate : true,
 								maxlength : 10
 							},
 							locationOfProject : {
-								required : true
+								required : false
 							},
 							projectPeriodFrom : {
-								required : true,
+								required : false,
 								dpDate : true,
 								maxlength : 10
 							},
 							projectPeriodTo : {
-								required : true,
+								required : false,
 								dpDate : true,
 								maxlength : 10
 							},
 							proposalStatus : {
-								required : true
+								required : false
 							},
 							nameOfGrantingAgency : {
-								required : true,
+								required : { 									
+									depends:function()
+							        {
+							          var sel = window.shouldValidateAll;							           
+							          if(sel =='1') {
+							                return true;
+							            } else {
+							                return false;
+							            }
+							        }
+								},
 								maxlength : 50
 							},
 							directCosts : {
-								required : true
+								required : { 									
+									depends:function()
+							        {
+							          var sel = window.shouldValidateAll;							           
+							          if(sel =='1') {
+							                return true;
+							            } else {
+							                return false;
+							            }
+							        }
+								}
 							},
 							FACosts : {
-								required : true
+								required : { 									
+									depends:function()
+							        {
+							          var sel = window.shouldValidateAll;							           
+							          if(sel =='1') {
+							                return true;
+							            } else {
+							                return false;
+							            }
+							        }
+								}
 							},
 							totalCosts : {
-								required : true
+								required : { 									
+									depends:function()
+							        {
+							          var sel = window.shouldValidateAll;							           
+							          if(sel =='1') {
+							                return true;
+							            } else {
+							                return false;
+							            }
+							        }
+								}
 							},
 							FARate : {
-								required : true
+								required : { 									
+									depends:function()
+							        {
+							          var sel = window.shouldValidateAll;							           
+							          if(sel =='1') {
+							                return true;
+							            } else {
+							                return false;
+							            }
+							        }
+								}
 							},
 							institutionalCommitmentCost : {
-								required : true
+								required : { 									
+									depends:function()
+							        {
+							          var sel = window.shouldValidateAll;							           
+							          if(sel =='1') {
+							                return true;
+							            } else {
+							                return false;
+							            }
+							        }
+								}
 							},
 							thirdPartyCommitmentCost : {
-								required : true
+								required : { 									
+									depends:function()
+							        {
+							          var sel = window.shouldValidateAll;							           
+							          if(sel =='1') {
+							                return true;
+							            } else {
+							                return false;
+							            }
+							        }
+								}
 							},
 							newSpaceRequired : {
-								required : true
+								required : { 									
+									depends:function()
+							        {
+							          var sel = window.shouldValidateAll;							           
+							          if(sel =='1') {
+							                return true;
+							            } else {
+							                return false;
+							            }
+							        }
+								}
 							},
 							rentalSpaceRequired : {
-								required : true
+								required : { 									
+									depends:function()
+							        {
+							          var sel = window.shouldValidateAll;							           
+							          if(sel =='1') {
+							                return true;
+							            } else {
+							                return false;
+							            }
+							        }
+								}
 							},
 							institutionalCommitmentsRequired : {
-								required : true
+								required : { 									
+									depends:function()
+							        {
+							          var sel = window.shouldValidateAll;							           
+							          if(sel =='1') {
+							                return true;
+							            } else {
+							                return false;
+							            }
+							        }
+								}
 							},
 							financialCOI : {
-								required : true
+								required : { 									
+									depends:function()
+							        {
+							          var sel = window.shouldValidateAll;							           
+							          if(sel =='1') {
+							                return true;
+							            } else {
+							                return false;
+							            }
+							        }
+								}
 							},
 							disclosedFinancialCOI : {
-								required : true
+								required : { 									
+									depends:function()
+							        {
+							          var sel = window.shouldValidateAll;							           
+							          if(sel =='1') {
+							                return true;
+							            } else {
+							                return false;
+							            }
+							        }
+								}
 							},
 							materialChanged : {
-								required : true
+								required : { 									
+									depends:function()
+							        {
+							          var sel = window.shouldValidateAll;							           
+							          if(sel =='1') {
+							                return true;
+							            } else {
+							                return false;
+							            }
+							        }
+								}
 							},
 							useHumanSubjects : {
-								required : true
+								required : { 									
+									depends:function()
+							        {
+							          var sel = window.shouldValidateAll;							           
+							          if(sel =='1') {
+							                return true;
+							            } else {
+							                return false;
+							            }
+							        }
+								}
 							},
 							IRBOptions : {
-								required : true
+								required : { 									
+									depends:function()
+							        {
+							          var sel = window.shouldValidateAll;							           
+							          if(sel =='1') {
+							                return true;
+							            } else {
+							                return false;
+							            }
+							        }
+								}
 							},
 							IRB : {
-								required : true,
+								required : { 									
+									depends:function()
+							        {
+							          var sel = window.shouldValidateAll;							           
+							          if(sel =='1') {
+							                return true;
+							            } else {
+							                return false;
+							            }
+							        }
+								},
 								maxlength : 15
 							},
 							useVertebrateAnimals : {
-								required : true
+								required : { 									
+									depends:function()
+							        {
+							          var sel = window.shouldValidateAll;							           
+							          if(sel =='1') {
+							                return true;
+							            } else {
+							                return false;
+							            }
+							        }
+								}
 							},
 							IACUCOptions : {
-								required : true
+								required : { 									
+									depends:function()
+							        {
+							          var sel = window.shouldValidateAll;							           
+							          if(sel =='1') {
+							                return true;
+							            } else {
+							                return false;
+							            }
+							        }
+								}
 							},
 							IACUC : {
-								required : true,
+								required : { 									
+									depends:function()
+							        {
+							          var sel = window.shouldValidateAll;							           
+							          if(sel =='1') {
+							                return true;
+							            } else {
+							                return false;
+							            }
+							        }
+								},
 								maxlength : 15
 							},
 							invovleBioSafety : {
-								required : true
+								required : { 									
+									depends:function()
+							        {
+							          var sel = window.shouldValidateAll;							           
+							          if(sel =='1') {
+							                return true;
+							            } else {
+							                return false;
+							            }
+							        }
+								}
 							},
 							IBCOptions : {
-								required : true
+								required : { 									
+									depends:function()
+							        {
+							          var sel = window.shouldValidateAll;							           
+							          if(sel =='1') {
+							                return true;
+							            } else {
+							                return false;
+							            }
+							        }
+								}
 							},
 							IBC : {
-								required : true,
+								required : { 									
+									depends:function()
+							        {
+							          var sel = window.shouldValidateAll;							           
+							          if(sel =='1') {
+							                return true;
+							            } else {
+							                return false;
+							            }
+							        }
+								},
 								maxlength : 15
 							},
 							environmentalConcerns : {
-								required : true
+								required : { 									
+									depends:function()
+							        {
+							          var sel = window.shouldValidateAll;							           
+							          if(sel =='1') {
+							                return true;
+							            } else {
+							                return false;
+							            }
+							        }
+								}
 							},
 							anticipateForeignNationals : {
-								required : true
+								required : { 									
+									depends:function()
+							        {
+							          var sel = window.shouldValidateAll;							           
+							          if(sel =='1') {
+							                return true;
+							            } else {
+							                return false;
+							            }
+							        }
+								}
 							},
 							anticipateReleaseTime : {
-								required : true
+								required : { 									
+									depends:function()
+							        {
+							          var sel = window.shouldValidateAll;							           
+							          if(sel =='1') {
+							                return true;
+							            } else {
+							                return false;
+							            }
+							        }
+								}
 							},
 							relatedToEnergyStudies : {
-								required : true
+								required : { 									
+									depends:function()
+							        {
+							          var sel = window.shouldValidateAll;							           
+							          if(sel =='1') {
+							                return true;
+							            } else {
+							                return false;
+							            }
+							        }
+								}
 							},
 							involveNonFundedCollabs : {
-								required : true
+								required :{ 									
+									depends:function()
+							        {
+							          var sel = window.shouldValidateAll;							           
+							          if(sel =='1') {
+							                return true;
+							            } else {
+							                return false;
+							            }
+							        }
+								}
 							},
 							collaborators : {
-								required : true,
+								required : { 									
+									depends:function()
+							        {
+							          var sel = window.shouldValidateAll;							           
+							          if(sel =='1') {
+							                return true;
+							            } else {
+							                return false;
+							            }
+							        }
+								},
 								maxlength : 50
 							},
 							proprietaryInformation : {
-								required : true
+								required : { 									
+									depends:function()
+							        {
+							          var sel = window.shouldValidateAll;							           
+							          if(sel =='1') {
+							                return true;
+							            } else {
+							                return false;
+							            }
+							        }
+								}
 							},
 							pagesWithProprietaryInfo : {
-								required : true,
+								required : { 									
+									depends:function()
+							        {
+							          var sel = window.shouldValidateAll;							           
+							          if(sel =='1') {
+							                return true;
+							            } else {
+							                return false;
+							            }
+							        }
+								},
 								maxlength : 50
 							},
 							ownIntellectualProperty : {
-								required : true
+								required : { 									
+									depends:function()
+							        {
+							          var sel = window.shouldValidateAll;							           
+							          if(sel =='1') {
+							                return true;
+							            } else {
+							                return false;
+							            }
+							        }
+								}
 							},
 							agencyList : {
-								required : true,
+								required : { 									
+									depends:function()
+							        {
+							          var sel = window.shouldValidateAll;							           
+							          if(sel =='1') {
+							                return true;
+							            } else {
+							                return false;
+							            }
+							        }
+								},
 								maxlength : 50
 							},
 							CFDANo : {
-								required : true,
-								number : true,
+								required : { 									
+									depends:function()
+							        {
+							          var sel = window.shouldValidateAll;							           
+							          if(sel =='1') {
+							                return true;
+							            } else {
+							                return false;
+							            }
+							        }
+								},
+								number : { 									
+									depends:function()
+							        {
+							          var sel = window.shouldValidateAll;							           
+							          if(sel =='1') {
+							                return true;
+							            } else {
+							                return false;
+							            }
+							        }
+								},
 								maxlength : 15
 							},
 							programNo : {
-								required : true,
-								number : true,
+								required : { 									
+									depends:function()
+							        {
+							          var sel = window.shouldValidateAll;							           
+							          if(sel =='1') {
+							                return true;
+							            } else {
+							                return false;
+							            }
+							        }
+								},
+								number : { 									
+									depends:function()
+							        {
+							          var sel = window.shouldValidateAll;							           
+							          if(sel =='1') {
+							                return true;
+							            } else {
+							                return false;
+							            }
+							        }
+								},
 								maxlength : 15
 							},
 							programTitle : {
-								required : true
+								required : { 									
+									depends:function()
+							        {
+							          var sel = window.shouldValidateAll;							           
+							          if(sel =='1') {
+							                return true;
+							            } else {
+							                return false;
+							            }
+							        }
+								}
 							},
 							PISalaryIncluded : {
-								required : true
+								required : { 									
+									depends:function()
+							        {
+							          var sel = window.shouldValidateAll;							           
+							          if(sel =='1') {
+							                return true;
+							            } else {
+							                return false;
+							            }
+							        }
+								}
 							},
 							PISalary : {
-								required : true
+								required : { 									
+									depends:function()
+							        {
+							          var sel = window.shouldValidateAll;							           
+							          if(sel =='1') {
+							                return true;
+							            } else {
+							                return false;
+							            }
+							        }
+								}
 							},
 							PIFringe : {
-								required : true
+								required : { 									
+									depends:function()
+							        {
+							          var sel = window.shouldValidateAll;							           
+							          if(sel =='1') {
+							                return true;
+							            } else {
+							                return false;
+							            }
+							        }
+								}
 							},
 							departmentID : {
-								required : true,
+								required : { 									
+									depends:function()
+							        {
+							          var sel = window.shouldValidateAll;							           
+							          if(sel =='1') {
+							                return true;
+							            } else {
+							                return false;
+							            }
+							        }
+								},
 								number : true,
 								maxlength : 15
 							},
 							institutionalCostDocumented : {
-								required : true
+								required : { 									
+									depends:function()
+							        {
+							          var sel = window.shouldValidateAll;							           
+							          if(sel =='1') {
+							                return true;
+							            } else {
+							                return false;
+							            }
+							        }
+								}
 							},
 							thirdPartyCostDocumented : {
-								required : true
+								required : { 									
+									depends:function()
+							        {
+							          var sel = window.shouldValidateAll;							           
+							          if(sel =='1') {
+							                return true;
+							            } else {
+							                return false;
+							            }
+							        }
+								}
 							},
 							subrecipients : {
-								required : true
+								required : { 									
+									depends:function()
+							        {
+							          var sel = window.shouldValidateAll;							           
+							          if(sel =='1') {
+							                return true;
+							            } else {
+							                return false;
+							            }
+							        }
+								}
 							},
 							namesSubrecipients : {
-								required : true,
+								required : { 									
+									depends:function()
+							        {
+							          var sel = window.shouldValidateAll;							           
+							          if(sel =='1') {
+							                return true;
+							            } else {
+							                return false;
+							            }
+							        }
+								},
 								maxlength : 50
 							},
 							PIEligibilityWaiver : {
-								required : true
+								required : { 									
+									depends:function()
+							        {
+							          var sel = window.shouldValidateAll;							           
+							          if(sel =='1') {
+							                return true;
+							            } else {
+							                return false;
+							            }
+							        }
+								}
 							},
 							COIForms : {
-								required : true
+								required : { 									
+									depends:function()
+							        {
+							          var sel = window.shouldValidateAll;							           
+							          if(sel =='1') {
+							                return true;
+							            } else {
+							                return false;
+							            }
+							        }
+								}
 							},
 							checkedExcludedPartyList : {
-								required : true
+								required : { 									
+									depends:function()
+							        {
+							          var sel = window.shouldValidateAll;							           
+							          if(sel =='1') {
+							                return true;
+							            } else {
+							                return false;
+							            }
+							        }
+								}
 							}
 						},
 						errorElement : "span",
@@ -456,10 +947,13 @@ $(function() {
 							}
 						}
 					});
+	
+	
 
 	var rowIndex = 0;
 	var projectTitleIsUnique = false;
 	var signatureInfo = '';
+	
 
 	var positionsDetails = [];
 
@@ -478,6 +972,7 @@ $(function() {
 			url : "",
 			ajaxCallMode : 0,
 			proposalId : "0",
+			proposalNgacId : "",
 			proposalRoles : "",
 			proposalStatus : "",
 			submittedByPI : "",
@@ -500,6 +995,8 @@ $(function() {
 			uploadObj : "",
 			investigatorButton : ""
 		},
+		
+		
 
 		ajaxCall : function(config) {
 			$
@@ -562,7 +1059,8 @@ $(function() {
 		CheckUserPermissionWithPositionTitle : function(buttonType,
 				proposal_id, proposalSection, config) {
 			var attributeArray = [];
-
+			
+			
 			attributeArray.push({
 				attributeType : "Subject",
 				attributeName : "position.title",
@@ -586,7 +1084,10 @@ $(function() {
 			this.config.data = JSON2.stringify({
 				policyInfo : attributeArray,
 				gpmsCommonObj : gpmsCommonObj(),
-				proposalId : proposal_id
+				proposalId : proposal_id,
+				ProposalSection : proposalSection,
+				Action : buttonType,
+				
 			});
 
 			this.config.buttonType = buttonType;
@@ -596,7 +1097,8 @@ $(function() {
 		CheckUserPermissionWithProposalRole : function(buttonType,
 				proposal_roles, proposal_id, proposalSection, config) {
 			var attributeArray = [];
-
+			
+			
 			attributeArray.push({
 				attributeType : "Subject",
 				attributeName : "proposal.role",
@@ -620,7 +1122,9 @@ $(function() {
 			this.config.data = JSON2.stringify({
 				policyInfo : attributeArray,
 				gpmsCommonObj : gpmsCommonObj(),
-				proposalId : proposal_id
+				proposalId : proposal_id,
+				ProposalSection : proposalSection,
+				Action : buttonType
 			});
 
 			this.config.buttonType = buttonType;
@@ -741,7 +1245,9 @@ $(function() {
 			this.config.data = JSON2.stringify({
 				policyInfo : attributeArray,
 				gpmsCommonObj : gpmsCommonObj(),
-				proposalId : proposal_id
+				proposalId : proposal_id,
+				ProposalSection : proposalSection,
+				Action : buttonType
 			});
 
 			this.config.buttonType = buttonType;
@@ -799,7 +1305,9 @@ $(function() {
 					+ "CheckPermissionForAProposal";
 			this.config.data = JSON2.stringify({
 				policyInfo : attributeArray,
-				gpmsCommonObj : gpmsCommonObj()
+				gpmsCommonObj : gpmsCommonObj(),
+				ProposalSection : proposalSection,
+				Action : buttonType
 			});
 
 			this.config.buttonType = buttonType;
@@ -1343,6 +1851,9 @@ $(function() {
 				myProposal.ClearForm();
 
 				myProposal.config.proposalRoles = $.trim(argus[5]);
+				
+				//csscody.alert('<h2>' + 'Message: '+ myProposal.config.proposalRoles + '</h2>');
+				
 				myProposal.config.proposalId = argus[0];
 
 				myProposal.config.submittedByPI = argus[7];
@@ -1420,6 +1931,7 @@ $(function() {
 					$("#fileuploader").show();
 					$("#dataTable tbody tr").find('input.AddCoPI').show();
 					$("#dataTable tbody tr").find('input.AddSenior').show();
+						
 				} else if ($.inArray("Co-PI", currentProposalRoles) !== -1) {
 					$("#fileuploader").show();
 					$("#dataTable tbody tr").find('input.AddSenior').show();
@@ -2882,14 +3394,20 @@ $(function() {
 
 				signatureInfo = '';
 
-				$(
-						'#trSignPICOPI > tbody  > tr, #trSignChair > tbody  > tr, #trSignDean > tbody  > tr, #trSignBusinessManager > tbody  > tr, #trSignIRB > tbody  > tr, #trSignAdministrator > tbody  > tr, #trSignDirector > tbody  > tr')
-						.each(function() {
-							myProposal.GetUserSignature($(this));
-						});
+				
+				// Nazmul commented this on 2019 Jul 16
+				
+				 $(
+				'#trSignPICOPI > tbody  > tr, #trSignChair > tbody  > tr, #trSignDean > tbody  > tr, #trSignBusinessManager > tbody  > tr, #trSignIRB > tbody  > tr, #trSignAdministrator > tbody  > tr, #trSignDirector > tbody  > tr')
+				.each(function() {
+					myProposal.GetUserSignature($(this));
+				});
 
 				signatureInfo = signatureInfo.substring(0,
 						signatureInfo.length - 3);
+						
+				
+				
 
 				var projectInfo = {
 					ProjectTitle : $.trim($("#txtProjectTitle").val()),
@@ -3001,6 +3519,7 @@ $(function() {
 
 				var proposalInfo = {
 					ProposalID : config.proposalId,
+					proposalNgacId : config.proposalNgacId ,
 					InvestigatorInfo : investigatorInfo,
 					ProjectInfo : projectInfo,
 					SponsorAndBudgetInfo : sponsorAndBudgetInfo,
@@ -3849,6 +4368,8 @@ $(function() {
 
 		case 7:// Unique Project Title Check
 			projectTitleIsUnique = stringToBoolean(msg);
+			//csscody.alert("<h2>" + 'Information Message'+ myProposal.config.proposalNgacId +"</h2>");
+			
 			break;
 
 		case 8:
@@ -4005,13 +4526,13 @@ $(function() {
 																$(this)
 																		.attr(
 																				"required",
-																				"true");
+																				"false");   //nazmul turned it into true to false 2019-08-13
 															} else { // Signature,
 																// Note
 																$(this)
 																		.attr(
 																				"required",
-																				"true");
+																				"false");   ////nazmul turned it into true to false 2019-08-13
 															}
 														});
 										// }
@@ -4085,6 +4606,11 @@ $(function() {
 
 		case 12:
 			if (myProposal.config.proposalId == '0') {
+				//myProposal.config.proposalPreId = msg.responseText;   //nazmul
+				//alert(myProposal.config.proposalPreId);
+				myProposal.config.proposalNgacId = msg;
+				//csscody.alert("<h2>" + 'Information Message'+ myProposal.config.proposalNgacId +"</h2>");
+				
 				$('#lblFormHeading').html('New Proposal Details');
 
 				// Initialize Appendices content and Uploader
@@ -4103,12 +4629,12 @@ $(function() {
 				$("#btnWithdrawProposal").hide();
 				$("#btnArchiveProposal").hide();
 
-				$('#ui-id-23').hide();
+				/*$('#ui-id-23').hide();
 				$('#ui-id-24').find('input, select, textarea').each(function() {
 					// $(this).addClass("ignore");
 					$(this).prop('disabled', true);
 				});
-
+*/
 				myProposal.ClearForm();
 
 				$('select[name=ddlName]').eq(0).val(
@@ -4126,7 +4652,8 @@ $(function() {
 
 				$("#dataTable tbody tr").find('select').prop('disabled', true);
 
-				myProposal.BindPICoPISignatures();
+				// Comment the following line 16 Jul 2019
+				//myProposal.BindPICoPISignatures();    
 
 				$('#divProposalGrid').hide();
 				$('#divProposalForm').show();
@@ -4364,12 +4891,14 @@ $(function() {
 					$('.ajax-file-upload-red').hide();
 				}
 
-				$(myProposal.config.content).find('input, select, textarea')
+				/*$(myProposal.config.content).find('input, select, textarea')
 						.each(function() {
 							// $(this).addClass("ignore");
 							$(this).prop('disabled', true);
 
 						});
+*/				
+				
 				// myProposal.config.event.preventDefault();
 				break;
 
@@ -4886,7 +5415,7 @@ $(function() {
 			$('#btnSaveProposal')
 					.click(
 							function(event) {
-								if (validator.form()) {
+								if (validator.form()) {     
 									var properties = {
 										onComplete : function(e) {
 											if (e) {
@@ -4947,6 +5476,7 @@ $(function() {
 							function(event) {
 								var currentPositionTitle = GPMS.utils
 										.GetUserPositionTitle();
+								window.shouldValidateAll = '1';     //nazmul
 
 								if (currentPositionTitle == "University Research Administrator"
 										|| currentPositionTitle == "University Research Director") {
@@ -5305,8 +5835,7 @@ $(function() {
 									} else if ($(this).prop("name") == "AddCoPI") {
 										if (myProposal.countCoPIs() < 4) {
 											if (myProposal.config.proposalId == "0") {
-												myProposal
-														.AddCoPIInvestigator($(this));
+												myProposal.AddCoPIInvestigator($(this));
 											} else {
 												myProposal.config.ajaxCallMode = 19;
 												myProposal.config.investigatorButton = $(this);

@@ -1,17 +1,31 @@
 package gpms.ngac.policy;
 
-import gov.nist.csd.pm.decider.PReviewDecider;
+import gov.nist.csd.pm.epp.events.AssignToEvent;
 import gov.nist.csd.pm.exceptions.PMException;
-import gov.nist.csd.pm.graph.Graph;
-import gov.nist.csd.pm.graph.GraphSerializer;
-import gov.nist.csd.pm.graph.MemGraph;
-import gov.nist.csd.pm.graph.model.nodes.Node;
-import gov.nist.csd.pm.graph.model.nodes.NodeType;
+import gov.nist.csd.pm.pap.PAP;
+import gov.nist.csd.pm.pdp.PDP;
+import gov.nist.csd.pm.pdp.decider.Decider;
+import gov.nist.csd.pm.pdp.decider.PReviewDecider;
+import gov.nist.csd.pm.pip.graph.Graph;
+import gov.nist.csd.pm.pip.graph.MemGraph;
+import gov.nist.csd.pm.pip.graph.model.nodes.Node;
+import gov.nist.csd.pm.pip.graph.model.nodes.NodeType;
+import gov.nist.csd.pm.pip.obligations.MemObligations;
+import gov.nist.csd.pm.pip.obligations.evr.EVRParser;
+import gov.nist.csd.pm.pip.obligations.model.Obligation;
+import gov.nist.csd.pm.pip.prohibitions.MemProhibitions;
+
+import static gov.nist.csd.pm.pip.graph.model.nodes.NodeType.O;
+import static gov.nist.csd.pm.pip.graph.model.nodes.NodeType.OA;
+import static gov.nist.csd.pm.pip.graph.model.nodes.NodeType.U;
+import static gov.nist.csd.pm.pip.graph.model.nodes.NodeType.UA;
 import gpms.model.GPMSCommonInfo;
 import gpms.rest.UserService;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -24,10 +38,8 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 
-import static gov.nist.csd.pm.graph.model.nodes.NodeType.O;
-import static gov.nist.csd.pm.graph.model.nodes.NodeType.OA;
-import static gov.nist.csd.pm.graph.model.nodes.NodeType.U;
-import static gov.nist.csd.pm.graph.model.nodes.NodeType.UA;
+
+
 
 /**
  * @author Md Nazmul Karim
@@ -42,12 +54,18 @@ public class PDSOperations {
 	
 	private GpmsNgacObligations  gpmsNgacObligations;
 	
+	public static HashMap<Long,Graph> proposalPolicies = new HashMap<Long,Graph>();
+	
 	private static final Logger log = Logger.getLogger(PDSOperations.class.getName());
+	
+	private NGACPolicyConfigurationLoader policyLoader;
 	
 	public PDSOperations()
 	{
 		this.ngacPolicy = NGACPolicyConfigurationLoader.getPolicy();
 		gpmsNgacObligations = new GpmsNgacObligations();
+		policyLoader = new NGACPolicyConfigurationLoader();
+		
 	}
 	
 	public PDSOperations(Graph gf)
@@ -85,22 +103,63 @@ public class PDSOperations {
 	
 	
 	
+	/*
+	 * public long createAProposal(String userName) throws PMException {
+	 * printAccessState("Before User creates PDS", ngacPolicy); long randomId =
+	 * getID(); //user creates a PDS and assigns it to Constants.PDS_ORIGINATING_OA
+	 * Node pdsNode = this.ngacPolicy.createNode(randomId,
+	 * createProposalId(randomId), OA, null);
+	 * 
+	 * long pdsOriginationOAID = getNodeID(ngacPolicy, Constants.PDS_ORIGINATING_OA,
+	 * OA, null); ngacPolicy.assign(pdsNode.getID(), pdsOriginationOAID);
+	 * 
+	 * 
+	 * long userID = getNodeID(ngacPolicy, userName, U, null);
+	 * simulateAssignToEvent(ngacPolicy, userID,
+	 * ngacPolicy.getNode(pdsOriginationOAID), pdsNode);
+	 * 
+	 * printAccessState("After User creates PDS", ngacPolicy);
+	 * 
+	 * return randomId; }
+	 */
+	
 	public long createAProposal(String userName) throws PMException
 	{
-		printAccessState("Before User creates PDS", ngacPolicy);
-		long randomId = getID();
-		//user creates a PDS and assigns it to Constants.PDS_ORIGINATING_OA
-        Node pdsNode = this.ngacPolicy.createNode(randomId, createProposalId(randomId), OA, null);
-        
-        long pdsOriginationOAID = getNodeID(ngacPolicy, Constants.PDS_ORIGINATING_OA, OA, null);
-        ngacPolicy.assign(pdsNode.getID(), pdsOriginationOAID);
-       
-        
-        long userID = getNodeID(ngacPolicy, userName, U, null);
-        simulateAssignToEvent(ngacPolicy, userID, ngacPolicy.getNode(pdsOriginationOAID), pdsNode);
+		
+		long randomId = getID(); 
+		Node pdsNode = this.ngacPolicy.createNode(randomId, ""+randomId, OA, null);
+		
+		long pdsOriginationOAID = getNodeID(ngacPolicy, Constants.PDS_ORIGINATING_OA,  OA, null); ngacPolicy.assign(pdsNode.getID(), pdsOriginationOAID);
+		//ngacPolicy.assign(pdsNode.getID(), pdsOriginationOAID);
+		try {
+		long userID = getNodeID(ngacPolicy, userName, U, null);
+		//simulateAssignToEvent(ngacPolicy, userID, ngacPolicy.getNode(pdsOriginationOAID), pdsNode);
+		
+		//added
+		
+		Graph proposalPolicy =null;
+		proposalPolicy = policyLoader.createAProposalGraph(ngacPolicy);
+		printAccessState("Initial configuration before op:", proposalPolicy);
+		
+		Obligation obligation = null; 
+		
+		
+			obligation = policyLoader.loadObligation(Constants.OBLIGATION_TEMPLATE_PROPOSAL_CREATION);
+			
+			PDP pdp = new PDP(new PAP(proposalPolicy, new MemProhibitions(), new MemObligations()));
+		 	pdp.getPAP().getObligationsPAP().add(obligation, true);	  
+		    pdp.getEPP().processEvent(new AssignToEvent(proposalPolicy.getNode(pdsOriginationOAID), pdsNode),userID, 123);
 
-        printAccessState("After User creates PDS", ngacPolicy);
-        
+			
+			//end
+		    log.info("Proposal policy saved:"+randomId +"|"+proposalPolicy.toString()+"|"+proposalPolicy.getNodes().size());
+			PDSOperations.proposalPolicies.put(randomId, proposalPolicy);	
+			printAccessState("Initial configuration after op:", proposalPolicy);
+
+			
+		}catch(Exception e) {
+			log.info("Exception:"+ e.toString() );
+		}
         return randomId;
 	}
 	
@@ -131,7 +190,7 @@ public class PDSOperations {
 
             log.info(user.getName());
             // get all of the nodes accessible for the current user
-            Map<Long, Set<String>> accessibleNodes = decider.getAccessibleNodes(user.getID());
+            Map<Long, Set<String>> accessibleNodes = decider.getAccessibleNodes(user.getID(),100);
             for(long objectID : accessibleNodes.keySet()) {
                 Node obj = graph.getNode(objectID);
                 log.info("\t" + obj.getName() + " -> " + accessibleNodes.get(objectID));
@@ -144,15 +203,29 @@ public class PDSOperations {
 	 /**
      * Method to simulate an obligation. All obligations used in this example are triggered by an "assign to" event,
      * so we'll assume there is a child node being assigned to a target node.
-     * @param graph the graph
+     * @param policy the graph
      * @param userID the ID of the user that triggered the event
      * @param targetNode the node that the event happens on
      * @throws PMException
      */
-    private void simulateAssignToEvent(Graph graph, long userID, Node targetNode, Node childNode) throws PMException {
+    private void simulateAssignToEvent(Graph policy, long userID, Node targetNode, Node childNode) throws PMException {
         // check if the target of the event is a particular container and execute the corresponding "response"
-        if(targetNode.getID() == this.getNodeID(graph, Constants.PDS_ORIGINATING_OA, OA, null)) {
-            gpmsNgacObligations.createPDS(graph, userID, childNode);
+        if(targetNode.getID() == getNodeID(policy, Constants.PDS_ORIGINATING_OA, OA, null)) {
+            //gpmsNgacObligations.createPDS(graph, userID, childNode);
+            gpmsNgacObligations.createPDS(policy, userID, childNode);
+        }
+        else if(targetNode.getID() == getNodeID(policy, "CoPI", OA, null)) {
+        	gpmsNgacObligations.addCoPI(policy, childNode);
+        } else if(targetNode.getID() == getNodeID(policy, "SP", OA, null)) {
+        	gpmsNgacObligations.addSP(policy, childNode);
+        } else if(targetNode.getID() == getNodeID(policy, "submitted_pdss", OA, null)) {
+        	gpmsNgacObligations.submitPDS(policy, childNode);
+        } else if(targetNode.getID() == getNodeID(policy, "cs_chair_approval", OA, null) ||
+                targetNode.getID() == getNodeID(policy, "math_chair_approval", OA, null)) {
+        	gpmsNgacObligations.chairApproval(policy, childNode);
+        }  else if(targetNode.getID() == getNodeID(policy, "coen_dean_approval", OA, null) ||
+                targetNode.getID() == getNodeID(policy, "coas_dean_approval", OA, null)) {
+        	gpmsNgacObligations.deanApproval(policy, childNode);
         }
     }
 	

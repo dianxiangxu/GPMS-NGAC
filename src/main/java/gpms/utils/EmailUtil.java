@@ -81,6 +81,7 @@ public class EmailUtil {
 	public void sendMailMultipleUsersWithoutAuth(String primaryEmail,
 			List<String> emailList, String subject, String body) {
 		try {
+			
 			Session session = Session.getInstance(properties, null);
 			MimeMessage msg = new MimeMessage(session);
 
@@ -101,7 +102,7 @@ public class EmailUtil {
 				msg.addRecipient(Message.RecipientType.BCC,
 						new InternetAddress(email));
 			}
-			Transport.send(msg);
+			//Transport.send(msg);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

@@ -1,0 +1,22 @@
+label: event create_proposal
+rules:
+  - label: u1 assign to
+    event:
+      subject:
+        anyUser:
+      operations:
+        - assign to
+      target:
+        policyElements:
+          - name: org_PDSs
+            type: OA
+    response:
+      actions:
+        - assign:
+            what:
+              - function:
+                  name: current_user
+            where:
+              - name: PI
+                type: UA
+                

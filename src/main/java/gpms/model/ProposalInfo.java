@@ -9,7 +9,7 @@ import com.ebay.xcelite.annotations.Row;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-@JsonPropertyOrder({ "rowTotal", "id", "projectTitle", "projectType",
+@JsonPropertyOrder({ "rowTotal", "id", "proposalNgacId" ,"projectTitle", "projectType",
 		"typeOfRequest", "projectLocation", "grantingAgencies", "directCosts",
 		"faCosts", "totalCosts", "faRate", "dateCreated", "dateSubmitted",
 		"dueDate", "projectPeriodFrom", "projectPeriodTo", "lastAudited",

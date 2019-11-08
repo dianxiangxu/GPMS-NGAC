@@ -1,6 +1,6 @@
 package gpms.ngac.policy;
 
-import gov.nist.csd.pm.graph.model.nodes.NodeType;
+import gov.nist.csd.pm.pip.graph.model.nodes.NodeType;
 
 /**
  * @author Md Nazmul Karim

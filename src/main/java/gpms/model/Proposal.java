@@ -15,6 +15,8 @@ import org.mongodb.morphia.annotations.Property;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import gov.nist.csd.pm.pip.graph.Graph;
+
 @Entity(value = ProposalDAO.COLLECTION_NAME, noClassnameStored = true)
 @JsonIgnoreProperties({ "signatureInfo", "id", "version", "auditLog",
 		"userProfile", "action", "activityDate" })
@@ -24,6 +26,9 @@ public class Proposal extends BaseEntity implements Serializable {
 	 */
 	private static final long serialVersionUID = 1L;
 
+	@Property("proposalNgacId")
+	private long proposalNgacId;
+		
 	@Property("date created")
 	private Date dateCreated = new Date();
 
@@ -119,6 +124,15 @@ public class Proposal extends BaseEntity implements Serializable {
 
 	public Proposal() {
 
+	}
+
+
+	public long getNgacId() {
+		return proposalNgacId;
+	}
+
+	public void setNgacId(long ngacId) {
+		this.proposalNgacId = ngacId;
 	}
 
 	public Date getDateCreated() {
@@ -369,7 +383,7 @@ public class Proposal extends BaseEntity implements Serializable {
 
 	@Override
 	public String toString() {
-		return "Proposal [dateCreated=" + dateCreated + ", dateSubmitted="
+		return "Proposal [dateCreated=" + dateCreated + ",proposalNgacId="+ proposalNgacId +",dateSubmitted="
 				+ dateSubmitted + ", proposalStatus=" + proposalStatus
 				+ ", submittedByPI=" + submittedByPI
 				+ ", readyForSubmissionByPI=" + readyForSubmissionByPI

@@ -1,6 +1,9 @@
 package gpms.ngac.policy;
 
-import static gov.nist.csd.pm.graph.model.nodes.NodeType.U;
+import static gov.nist.csd.pm.pip.graph.model.nodes.NodeType.O;
+import static gov.nist.csd.pm.pip.graph.model.nodes.NodeType.OA;
+import static gov.nist.csd.pm.pip.graph.model.nodes.NodeType.U;
+import static gov.nist.csd.pm.pip.graph.model.nodes.NodeType.UA;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -10,10 +13,13 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 
-import gov.nist.csd.pm.decider.PReviewDecider;
 import gov.nist.csd.pm.exceptions.PMException;
-import gov.nist.csd.pm.graph.Graph;
-import gov.nist.csd.pm.graph.model.nodes.Node;
+import gov.nist.csd.pm.pdp.decider.PReviewDecider;
+import gov.nist.csd.pm.pip.graph.Graph;
+import gov.nist.csd.pm.pip.graph.MemGraph;
+import gov.nist.csd.pm.exceptions.PMException;
+import gov.nist.csd.pm.pip.graph.model.nodes.Node;
+import gov.nist.csd.pm.pip.graph.model.nodes.NodeType;
 
 public class UserTaskPermissionOperations {
 
@@ -95,7 +101,7 @@ public class UserTaskPermissionOperations {
            
         	log.info("UserTaskPermissionOperations: "+user.getName());
             // get all of the nodes accessible for the current user
-            Map<Long, Set<String>> accessibleNodes = decider.getAccessibleNodes(user.getID());
+            Map<Long, Set<String>> accessibleNodes = decider.getAccessibleNodes(user.getID(),123);
             for(long objectID : accessibleNodes.keySet()) {
                 Node obj = graph.getNode(objectID);
                 log.info("\t" + obj.getName() + obj.getType().name()+" -> " + accessibleNodes.get(objectID));

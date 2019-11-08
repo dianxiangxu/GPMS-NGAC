@@ -6,7 +6,11 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 
-import gov.nist.csd.pm.graph.model.nodes.NodeType;
+import gov.nist.csd.pm.pip.graph.model.nodes.NodeType;
+import static gov.nist.csd.pm.pip.graph.model.nodes.NodeType.O;
+import static gov.nist.csd.pm.pip.graph.model.nodes.NodeType.OA;
+import static gov.nist.csd.pm.pip.graph.model.nodes.NodeType.U;
+import static gov.nist.csd.pm.pip.graph.model.nodes.NodeType.UA;
 
 public enum Task 
 {
@@ -18,16 +22,17 @@ public enum Task
 	{
 		HashMap<Attribute, HashSet> permissionsSet = new HashMap<Attribute,HashSet>();
 		
-		String[] operationsCreateProposal = {"create-oa","create-oa-to-oa"};
+		String[] operationsCreateProposal = {"create-oa"};
 		String[] operationsAddCoPi_on_Faculty = {"create-o","create-o-to-oa"};
 		
 		switch(this)  
 		{
 			
 			case CREATE_PROPOSAL:
+				//Math.p
 				ArrayList<String> ops = new ArrayList<String>();
 				ops.addAll(Arrays.asList(operationsCreateProposal));
-				Attribute att = new Attribute(Constants.PDS_ORIGINATING_OA, NodeType.OA);
+				Attribute att = new Attribute(Constants.PDS_ORIGINATING_OA, OA);
 				permissionsSet.put(att, new HashSet(ops) );
 				break;
 			case ADD_CO_PI:
