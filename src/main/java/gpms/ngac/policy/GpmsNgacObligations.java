@@ -46,8 +46,8 @@ public class GpmsNgacObligations {
 		Node proposalPI = proposalPolicy.createNode(getID(), userName, U, null);
         Node piName = proposalPolicy.createNode(getID(), userName, O, null);
         
-        long piOANode = PDSOperations.getNodeID(proposalPolicy, Constants.PI_OA_UA_LBL, OA, null);
-        long piUANode = PDSOperations.getNodeID(proposalPolicy, Constants.PI_OA_UA_LBL, UA, null);
+        long piOANode = PDSOperations.getNodeID(proposalPolicy, Constants.PI_UA_LBL, OA, null);
+        long piUANode = PDSOperations.getNodeID(proposalPolicy, Constants.PI_UA_LBL, UA, null);
         
         proposalPolicy.assign(proposalPI.getID(), piUANode);
         proposalPolicy.assign(piName.getID(), piOANode);
@@ -182,54 +182,54 @@ public class GpmsNgacObligations {
 	 * }
 	 */
 	 
-	private static void associatePIRights(Graph ngacPolicy, Node piUA, Node copiNode,  long org_PDSsOAid, Node copiUA,
-			Node projInfoNode, Node budgInfoNode, Node iPdsNode, Node investigatorInfoNode) throws PMException {
-		
-		ngacPolicy.associate(piUA.getID(), copiNode.getID(), new HashSet<>(Arrays.asList("read", "create-o","create-o-to-oa")));
-		ngacPolicy.associate(piUA.getID(), org_PDSsOAid, new HashSet<>(Arrays.asList("assign from")));
-		ngacPolicy.associate(piUA.getID(), copiUA.getID(), new HashSet<>(Arrays.asList("assign-u to")));
-
-		// grant PI permissions on the ProjectInfo container
-		ngacPolicy.associate(piUA.getID(), projInfoNode.getID(),
-				new HashSet<>(Arrays.asList("write", "read", "create-o", "create-o-to-oa")));
-		// grant PI permissions on the BudgetInfo container
-		ngacPolicy.associate(piUA.getID(), budgInfoNode.getID(),
-				new HashSet<>(Arrays.asList("write", "read", "create-o", "create-o-to-oa")));
-		ngacPolicy.associate(piUA.getID(), budgInfoNode.getID(),
-				new HashSet<>(Arrays.asList("read", "create-o", "create-o-to-oa")));
-		// grant PI permissions to assign the PDS
-		ngacPolicy.associate(piUA.getID(), iPdsNode.getID(),
-				new HashSet<>(Arrays.asList("create-oa", "create-oa-to-oa")));
-		// grant PI permission to read the PI container
-		ngacPolicy.associate(piUA.getID(), investigatorInfoNode.getID(), new HashSet<>(Arrays.asList("read")));
-
-	}
-	 
-	private static void associateCoPIRights(Graph ngacPolicy, Node copiUA, Node spNode, Node projInfoNode,
-			Node budgInfoNode) throws PMException {
-		// grant CoPI permissions on the PDS
-		// grant CoPI permissions on the SP container
-		ngacPolicy.associate(copiUA.getID(), spNode.getID(),
-				new HashSet<>(Arrays.asList("read", "create-o", "create-o-to-oa")));
-		// grant CoPI permissions on the ProjectInfo container
-		ngacPolicy.associate(copiUA.getID(), projInfoNode.getID(),
-				new HashSet<>(Arrays.asList("write", "read", "create-o", "create-o-to-oa")));
-		// grant CoPI permissions on the BudgetInfo container
-		ngacPolicy.associate(copiUA.getID(), budgInfoNode.getID(), new HashSet<>(Arrays.asList("read")));
-
-	}
-	
-	private static void associateSPRights(Graph ngacPolicy, Node spUA, Node investigatorInfoNode, Node projInfoNode,
-			Node budgInfoNode) throws PMException {
-		ngacPolicy.associate(spUA.getID(), investigatorInfoNode.getID(), new HashSet<>(Arrays.asList("read")));
-		// grant SP permissions on the ProjectInfo container
-		ngacPolicy.associate(spUA.getID(), projInfoNode.getID(), new HashSet<>(Arrays.asList("read")));
-		// grant SP permissions on the BudgetInfo container
-		ngacPolicy.associate(spUA.getID(), budgInfoNode.getID(), new HashSet<>(Arrays.asList("read")));
-	}
-	 private static void createInvertigatorUserAttributes(Graph ngacPolicy,Node pdsNode, Node userNode,long id) {
-		 
-	 }
+//	private static void associatePIRights(Graph ngacPolicy, Node piUA, Node copiNode,  long org_PDSsOAid, Node copiUA,
+//			Node projInfoNode, Node budgInfoNode, Node iPdsNode, Node investigatorInfoNode) throws PMException {
+//		
+//		ngacPolicy.associate(piUA.getID(), copiNode.getID(), new HashSet<>(Arrays.asList("read", "create-o","create-o-to-oa")));
+//		ngacPolicy.associate(piUA.getID(), org_PDSsOAid, new HashSet<>(Arrays.asList("assign from")));
+//		ngacPolicy.associate(piUA.getID(), copiUA.getID(), new HashSet<>(Arrays.asList("assign-u to")));
+//
+//		// grant PI permissions on the ProjectInfo container
+//		ngacPolicy.associate(piUA.getID(), projInfoNode.getID(),
+//				new HashSet<>(Arrays.asList("write", "read", "create-o", "create-o-to-oa")));
+//		// grant PI permissions on the BudgetInfo container
+//		ngacPolicy.associate(piUA.getID(), budgInfoNode.getID(),
+//				new HashSet<>(Arrays.asList("write", "read", "create-o", "create-o-to-oa")));
+//		ngacPolicy.associate(piUA.getID(), budgInfoNode.getID(),
+//				new HashSet<>(Arrays.asList("read", "create-o", "create-o-to-oa")));
+//		// grant PI permissions to assign the PDS
+//		ngacPolicy.associate(piUA.getID(), iPdsNode.getID(),
+//				new HashSet<>(Arrays.asList("create-oa", "create-oa-to-oa")));
+//		// grant PI permission to read the PI container
+//		ngacPolicy.associate(piUA.getID(), investigatorInfoNode.getID(), new HashSet<>(Arrays.asList("read")));
+//
+//	}
+//	 
+//	private static void associateCoPIRights(Graph ngacPolicy, Node copiUA, Node spNode, Node projInfoNode,
+//			Node budgInfoNode) throws PMException {
+//		// grant CoPI permissions on the PDS
+//		// grant CoPI permissions on the SP container
+//		ngacPolicy.associate(copiUA.getID(), spNode.getID(),
+//				new HashSet<>(Arrays.asList("read", "create-o", "create-o-to-oa")));
+//		// grant CoPI permissions on the ProjectInfo container
+//		ngacPolicy.associate(copiUA.getID(), projInfoNode.getID(),
+//				new HashSet<>(Arrays.asList("write", "read", "create-o", "create-o-to-oa")));
+//		// grant CoPI permissions on the BudgetInfo container
+//		ngacPolicy.associate(copiUA.getID(), budgInfoNode.getID(), new HashSet<>(Arrays.asList("read")));
+//
+//	}
+//	
+//	private static void associateSPRights(Graph ngacPolicy, Node spUA, Node investigatorInfoNode, Node projInfoNode,
+//			Node budgInfoNode) throws PMException {
+//		ngacPolicy.associate(spUA.getID(), investigatorInfoNode.getID(), new HashSet<>(Arrays.asList("read")));
+//		// grant SP permissions on the ProjectInfo container
+//		ngacPolicy.associate(spUA.getID(), projInfoNode.getID(), new HashSet<>(Arrays.asList("read")));
+//		// grant SP permissions on the BudgetInfo container
+//		ngacPolicy.associate(spUA.getID(), budgInfoNode.getID(), new HashSet<>(Arrays.asList("read")));
+//	}
+//	 private static void createInvertigatorUserAttributes(Graph ngacPolicy,Node pdsNode, Node userNode,long id) {
+//		 
+//	 }
 
     /**
      * When an object is added to the CoPI container get the user with the same name and assign that user to the CoPI user attribute.

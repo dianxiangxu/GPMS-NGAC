@@ -138,7 +138,7 @@ public class Obligations {
 		Node userObj = ngacPolicy.createNode(getID(), userNode.getName(), O, null);
 		
 		// User Name is assigned to PI Object Attribute
-		String piNodeLabel = Constants.PI_OA_UA_LBL+Long.toString(id);		
+		String piNodeLabel = Constants.PI_UA_LBL+Long.toString(id);		
 		System.out.println("PI:"+piNodeLabel);
 		long piOANodeId = getNodeID(ngacPolicy, piNodeLabel,  OA, null);		
         ngacPolicy.assign(userObj.getID(), piOANodeId);

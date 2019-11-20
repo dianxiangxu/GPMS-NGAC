@@ -1,6 +1,7 @@
 package gpms.dev;
 
 import gov.nist.csd.pm.epp.events.AssignToEvent;
+import gov.nist.csd.pm.epp.events.DeassignFromEvent;
 import gov.nist.csd.pm.exceptions.PMException;
 import gov.nist.csd.pm.pap.PAP;
 import gov.nist.csd.pm.pdp.PDP;
@@ -31,7 +32,10 @@ import static gov.nist.csd.pm.pip.graph.model.nodes.NodeType.O;
 import static gov.nist.csd.pm.pip.graph.model.nodes.NodeType.OA;
 import static gov.nist.csd.pm.pip.graph.model.nodes.NodeType.U;
 import static gov.nist.csd.pm.pip.graph.model.nodes.NodeType.UA;
+
+import gpms.model.GPMSCommonInfo;
 import gpms.ngac.policy.Constants;
+import gpms.ngac.policy.PDSOperations;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -64,8 +68,8 @@ public class PDS {
 		  File file = main.getFileFromResources(main,"docs/super_config.json"); 
 		  File file2 = main.getFileFromResources(main,"docs/proposal_creation.json"); 
 		  File file3 = main.getFileFromResources(main,"docs/university_organization.json"); 
-		  File file4 = main.getFileFromResources(main,"docs/editing_policy_before_submission.json"); 
-		  File file5 = main.getFileFromResources(main,"docs/create_proposal.yml"); 
+		  File file4 = main.getFileFromResources(main,"docs/editing_policyUp.json"); 
+		  File file5 = main.getFileFromResources(main,"docs/gpms_obligations.yml"); 
 		 
 		String json = new String(Files.readAllBytes(Paths.get(file.getAbsolutePath())));
         String json2 = new String(Files.readAllBytes(Paths.get(file2.getAbsolutePath())));
@@ -95,6 +99,11 @@ public class PDS {
 		
 		Obligation obligation=null;
 		
+		PDSOperations pdsOperations = new PDSOperations(); 
+		GPMSCommonInfo userInfo = new GPMSCommonInfo();
+		userInfo.setUserName("nazmul");		
+		System.out.println(pdsOperations.hasPermissionToCreateAProposal(graph, userInfo));
+		
 		try{
     		InputStream is = new FileInputStream(file5);
     		obligation = EVRParser.parse(is);
@@ -105,14 +114,86 @@ public class PDS {
 	        pdp.getPAP().getObligationsPAP().add(obligation, true);
 
 	       // test u1 assign to
+	        Set<Node> search = pdp.getPAP().getGraphPAP().search("nazmul", "O", null);	        
+	        System.out.println("Found nazmul inside:"+ !search.isEmpty());
+	        
 	        long userID = getNodeID(graph, "nazmul", U, null);
 	        pdp.getEPP().processEvent(new AssignToEvent(graph.getNode(pdsOriginationOAID), pdsNode),userID, 123);
 		
+	        
+	        search = pdp.getPAP().getGraphPAP().search("nazmul", "O", null);	        
+	        System.out.println("Found nazmul inside:"+ !search.isEmpty());
+	        
+	        printAccessState("Initial configuration", graph);
+	        
+	        //add Co PI : alice
+	        
+	        search = pdp.getPAP().getGraphPAP().search("liliana", "O", null);	        
+	        System.out.println("Found liliana inside:"+ !search.isEmpty());
+	        
+	        long pdCoPIUA = getNodeID(graph, Constants.CO_PI_UA_LBL,  UA, null); 
+			
+	        long userIDAlice = getNodeID(graph, "liliana", U, null);
+	        pdp.getEPP().processEvent(new AssignToEvent(graph.getNode(pdCoPIUA), graph.getNode(userIDAlice)),userID, 125);
+		
+	        
+	        search = pdp.getPAP().getGraphPAP().search("liliana", "O", null);	        
+	        System.out.println("Found alice inside:"+ !search.isEmpty());
+	        
+	        
+	       // userInfo.setUserName("nazmul");		
+		//	System.out.println("alice:"+pdsOperations.hasPermissionToAddAsCoPI(graph, userInfo, "alice"));
+	        
+	        
+	        //add SP : dave
+	        
+	        
+	        search = pdp.getPAP().getGraphPAP().search("tomtom", "O", null);	        
+	        System.out.println("Found tomtom inside:"+ !search.isEmpty());
+	        
+	        long pdsSpUA = getNodeID(graph, Constants.SENIOR_PERSON_UA_LBL,  UA, null); 
+			
+	        long userIDDave = getNodeID(graph, "tomtom", U, null);
+	        pdp.getEPP().processEvent(new AssignToEvent(graph.getNode(pdsSpUA), graph.getNode(userIDDave)),userID, 126);
+		
+	        
+	        search = pdp.getPAP().getGraphPAP().search("tomtom", "O", null);	        
+	        System.out.println("Found tomtom inside:"+ !search.isEmpty());
+	        
+	        
+	        // delete sp:
+	        
+	        
+	        //long pdsSpUA = getNodeID(graph, Constants.SENIOR_PERSON_OA_UA_LBL,  UA, null); 
+			
+	        //long userIDDave = getNodeID(graph, "dave", U, null);
+	      //  pdp.getEPP().processEvent(new DeassignFromEvent(graph.getNode(pdsSpUA), graph.getNode(userIDDave)),userID, 127);
+		
+	        
+	      //  search = pdp.getPAP().getGraphPAP().search("dave", "O", null);	        
+	     //   System.out.println("Found dave inside:"+ !search.isEmpty());
+	        
+	        
+	        
+	        Node node = graph.createNode(randomId, ""+randomId, O, null);
+	        long subInfoOA = getNodeID(graph, "Submission-Info",  OA, null); 
+			
+	        //long userIDDave = getNodeID(graph, "dave", U, null);
+	        pdp.getEPP().processEvent(new AssignToEvent(graph.getNode(subInfoOA), node),userID, 128);
+		
+	        
+	        
+	        printAccessState("Initial configuration", graph);
+	        
+	        
+	        
+	        
 		} catch(Exception e) {
-			System.out.println(e.toString());
+			//System.out.println(e.toString());
+			e.printStackTrace();
 		}
 		
-		 printAccessState("Initial configuration", graph);
+		// printAccessState("Initial configuration", graph);
 		//ngacPolicy.assign(pdsNode.getID(), pdsOriginationOAID);
 		//graph.assign(pdsNode.getID(), pdsOriginationOAID);
 		

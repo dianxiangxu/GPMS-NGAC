@@ -37,11 +37,28 @@ public enum Task
 				break;
 			case ADD_CO_PI:
 				ArrayList<String> ops2 = new ArrayList<String>();
-				ops2.add("assign");
-				ops2.add("assign to");
-				Attribute att2 = new Attribute(Constants.PDS_ORIGINATING_OA, NodeType.OA);
+				ops2.add("assign-u-from");
+				Attribute att2 = new Attribute(Constants.COPI_ELIGIBLE_FACULTY_OA, NodeType.UA);
 				permissionsSet.put(att2, new HashSet(ops2) );
+				
+				ArrayList<String> ops3 = new ArrayList<String>();
+				ops3.add("assign-u-to");
+				Attribute att3 = new Attribute(Constants.CO_PI_UA_LBL, NodeType.UA);
+				permissionsSet.put(att3, new HashSet(ops3) );
+				
 				break;
+			case ADD_SP:
+				ArrayList<String> ops4 = new ArrayList<String>();
+				ops4.add("assign-u-from");
+				Attribute att4 = new Attribute(Constants.SP_ELIGIBLE_FACULTY_OA, NodeType.UA);
+				permissionsSet.put(att4, new HashSet(ops4) );
+				
+				ArrayList<String> ops5 = new ArrayList<String>();
+				ops5.add("assign-u-to");
+				Attribute att5 = new Attribute(Constants.SENIOR_PERSON_UA_LBL, NodeType.UA);
+				permissionsSet.put(att5, new HashSet(ops5) );
+				
+				break;	
 		}
 		
 		return permissionsSet;

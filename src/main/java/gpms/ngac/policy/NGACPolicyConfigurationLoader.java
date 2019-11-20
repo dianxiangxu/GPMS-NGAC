@@ -38,46 +38,39 @@ public class NGACPolicyConfigurationLoader {
 	//This graph holds NGAC policy
 	private static Graph ngacPolicy;
 	private static final Logger log = Logger.getLogger(NGACPolicyConfigurationLoader.class.getName());
-
+	static String jsonProposalPolicy = "";
+	
 	public void init() {
 		if (ngacPolicy == null) {
 			File file_super = getFileFromResources(Constants.POLICY_CONFIG_FILE_SUPER);
 			File file_proposal_creation = getFileFromResources(Constants.POLICY_CONFIG_FILE_PROPOSAL_CREATION);
 			File file_university_org = getFileFromResources(Constants.POLICY_CONFIG_FILE_UNIVERSITY_ORGANIZATION);
-			//File file_pds = getFileFromResources(Constants.POLICY_CONFIG_FILE_PDS);
-			//File file_approval = getFileFromResources(Constants.POLICY_CONFIG_FILE_APPROVAL);
-			//File file_getFaculty = getFileFromResources(Constants.POLICY_CONFIG_FILE_GET_FACULTY);
-			//File file_cross_policy = getFileFromResources(Constants.POLICY_CONFIG_FILE_CROSS_POLICY);
+			File file_proposal = getFileFromResources(Constants.PDS_TEMPLATE_UP);
+			
 			String jsonSuper;
 			String jsonProposalCreation;
 			String jsonUnivOrg;
-			String jsonPds;
-			String jsonApproval;
-			String jsonGetFaculty;
-			String jsonCrossPolicy;
+			
+			
 			try {
 				jsonSuper = new String(Files.readAllBytes(Paths.get(file_super.getAbsolutePath())));
 				jsonProposalCreation = new String(Files.readAllBytes(Paths.get(file_proposal_creation.getAbsolutePath())));
 				jsonUnivOrg = new String(Files.readAllBytes(Paths.get(file_university_org.getAbsolutePath())));
-				//jsonPds = new String(Files.readAllBytes(Paths.get(file_pds.getAbsolutePath())));
-				//jsonApproval = new String(Files.readAllBytes(Paths.get(file_approval.getAbsolutePath())));
-				//jsonGetFaculty = new String(Files.readAllBytes(Paths.get(file_getFaculty.getAbsolutePath())));
-				//jsonCrossPolicy = new String(Files.readAllBytes(Paths.get(file_cross_policy.getAbsolutePath())));
+				jsonProposalPolicy = new String(Files.readAllBytes(Paths.get(file_proposal.getAbsolutePath())));
+				log.info("Editing Policy:"+jsonProposalPolicy.length());
 				try {
 					ngacPolicy = GraphSerializer.fromJson(new MemGraph(), jsonSuper);
 					ngacPolicy = GraphSerializer.fromJson(ngacPolicy, jsonProposalCreation);
 					ngacPolicy = GraphSerializer.fromJson(ngacPolicy, jsonUnivOrg);
-					//ngacPolicy = GraphSerializer.fromJson(ngacPolicy, jsonPds);
-					//ngacPolicy = GraphSerializer.fromJson(ngacPolicy, jsonApproval);
-					//ngacPolicy = GraphSerializer.fromJson(ngacPolicy, jsonGetFaculty);
-					//ngacPolicy = GraphSerializer.fromJson(ngacPolicy, jsonCrossPolicy);
 				} catch (PMException e) {
 					log.debug("PM Exception: InitialConfigurationLoader : while loading NGAC base configuration. "
 							+ e.toString());
+					e.printStackTrace();
 				}
 			} catch (IOException e) {
 				log.debug("I/O Exception : InitialConfigurationLoader : while loading NGAC base configuration."
 						+ e.toString());
+				e.printStackTrace();
 			}
 
 			log.info("PM Configuration loaded successfully");
@@ -87,29 +80,71 @@ public class NGACPolicyConfigurationLoader {
 	}
 	
 	
+	
+	public Graph reloadBasicConfig() {
+			Graph basicPlicy = null;
+			File file_super = getFileFromResources(Constants.POLICY_CONFIG_FILE_SUPER);
+			File file_proposal_creation = getFileFromResources(Constants.POLICY_CONFIG_FILE_PROPOSAL_CREATION);
+			File file_university_org = getFileFromResources(Constants.POLICY_CONFIG_FILE_UNIVERSITY_ORGANIZATION);
+			
+			String jsonSuper;
+			String jsonProposalCreation;
+			String jsonUnivOrg;
+			
+			
+			try {
+				jsonSuper = new String(Files.readAllBytes(Paths.get(file_super.getAbsolutePath())));
+				jsonProposalCreation = new String(Files.readAllBytes(Paths.get(file_proposal_creation.getAbsolutePath())));
+				jsonUnivOrg = new String(Files.readAllBytes(Paths.get(file_university_org.getAbsolutePath())));
+				try {
+					basicPlicy = GraphSerializer.fromJson(new MemGraph(), jsonSuper);
+					basicPlicy = GraphSerializer.fromJson(basicPlicy, jsonProposalCreation);
+					basicPlicy = GraphSerializer.fromJson(basicPlicy, jsonUnivOrg);
+				} catch (PMException e) {
+					log.debug("PM Exception: Basic InitialConfigurationLoader : while loading NGAC base configuration. "
+							+ e.toString());
+				}
+			} catch (IOException e) {
+				log.debug("I/O Exception : Basic InitialConfigurationLoader : while loading NGAC base configuration."
+						+ e.toString());
+			}
+
+			log.info("PM Basic Configuration loaded successfully");
+			return basicPlicy;
+		
+	}
+	
+	
 	/**
 	 * This method takes a null policy graph and generates a new graph policy based on template
 	 * @param policy
 	 * @return
 	 */
 	public Graph createAProposalGraph(Graph policy) {
-		
-			File file_proposal = getFileFromResources(Constants.PDS_TEMPLATE);
-			String jsonProposalPolicy = "";
-			try {
-				jsonProposalPolicy = new String(Files.readAllBytes(Paths.get(file_proposal.getAbsolutePath())));
-				log.info("Template file content:");
+		try {
+			//File file_proposal = getFileFromResources(Constants.PDS_TEMPLATE);
+			//String jsonProposalPolicy = "";
+			
+				//jsonProposalPolicy = new String(Files.readAllBytes(Paths.get(file_proposal.getAbsolutePath())));
+				log.info("Template file content:"+jsonProposalPolicy.length());
+				log.info("No of Nodes:"+policy.getNodes().size());
 				try {
-					policy = GraphSerializer.fromJson(policy, jsonProposalPolicy);					
+					
+					policy = GraphSerializer.fromJson(policy, jsonProposalPolicy);	
+					log.info("No of Nodes:"+policy.getNodes().size());
+					
 				    if(policy == null)
 				    {
 				    	log.info("Proposal graph is null");
+				    }
+				    else {
+				    	log.info("Proposal editing policy loaded.");
 				    }
 				} catch (PMException e) {
 					log.debug("PM Exception: createAProposalGraph : while loading PDS base configuration. "
 							+ e.toString());
 				}
-			} catch (IOException e) {
+			} catch (Exception e) {
 				log.debug("I/O Exception : createAProposalGraph : while loading PDS base configuration."
 						+ e.toString());
 			}
@@ -128,6 +163,7 @@ public class NGACPolicyConfigurationLoader {
 		
 		}catch(Exception e) {
 			log.info("Exception: "+e.toString());
+			e.printStackTrace();
 		}
 		return obligation;
 	}

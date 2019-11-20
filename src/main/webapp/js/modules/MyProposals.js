@@ -22,7 +22,6 @@ $(function() {
 		ignore : ".ignore"
 	});
 	
-
 	var gpmsCommonObj = function() {
 		var gpmsCommonInfo = {
 			UserProfileID : GPMS.utils.GetUserProfileID(),
@@ -1930,8 +1929,7 @@ $(function() {
 				if ($.inArray("PI", currentProposalRoles) !== -1) {
 					$("#fileuploader").show();
 					$("#dataTable tbody tr").find('input.AddCoPI').show();
-					$("#dataTable tbody tr").find('input.AddSenior').show();
-						
+					$("#dataTable tbody tr").find('input.AddSenior').show();						
 				} else if ($.inArray("Co-PI", currentProposalRoles) !== -1) {
 					$("#fileuploader").show();
 					$("#dataTable tbody tr").find('input.AddSenior').show();
@@ -3397,11 +3395,11 @@ $(function() {
 				
 				// Nazmul commented this on 2019 Jul 16
 				
-				 $(
-				'#trSignPICOPI > tbody  > tr, #trSignChair > tbody  > tr, #trSignDean > tbody  > tr, #trSignBusinessManager > tbody  > tr, #trSignIRB > tbody  > tr, #trSignAdministrator > tbody  > tr, #trSignDirector > tbody  > tr')
-				.each(function() {
-					myProposal.GetUserSignature($(this));
-				});
+				$(
+						'#trSignPICOPI > tbody  > tr, #trSignChair > tbody  > tr, #trSignDean > tbody  > tr, #trSignBusinessManager > tbody  > tr, #trSignIRB > tbody  > tr, #trSignAdministrator > tbody  > tr, #trSignDirector > tbody  > tr')
+						.each(function() {
+							myProposal.GetUserSignature($(this));
+						});
 
 				signatureInfo = signatureInfo.substring(0,
 						signatureInfo.length - 3);
@@ -4526,13 +4524,13 @@ $(function() {
 																$(this)
 																		.attr(
 																				"required",
-																				"false");   //nazmul turned it into true to false 2019-08-13
+																				"true");   //nazmul turned it into true to false 2019-08-13
 															} else { // Signature,
 																// Note
 																$(this)
 																		.attr(
 																				"required",
-																				"false");   ////nazmul turned it into true to false 2019-08-13
+																				"true");   ////nazmul turned it into true to false 2019-08-13
 															}
 														});
 										// }
@@ -4629,12 +4627,12 @@ $(function() {
 				$("#btnWithdrawProposal").hide();
 				$("#btnArchiveProposal").hide();
 
-				/*$('#ui-id-23').hide();
+				$('#ui-id-23').hide();
 				$('#ui-id-24').find('input, select, textarea').each(function() {
 					// $(this).addClass("ignore");
 					$(this).prop('disabled', true);
 				});
-*/
+
 				myProposal.ClearForm();
 
 				$('select[name=ddlName]').eq(0).val(
@@ -4653,7 +4651,7 @@ $(function() {
 				$("#dataTable tbody tr").find('select').prop('disabled', true);
 
 				// Comment the following line 16 Jul 2019
-				//myProposal.BindPICoPISignatures();    
+				myProposal.BindPICoPISignatures();    
 
 				$('#divProposalGrid').hide();
 				$('#divProposalForm').show();
@@ -4891,14 +4889,12 @@ $(function() {
 					$('.ajax-file-upload-red').hide();
 				}
 
-				/*$(myProposal.config.content).find('input, select, textarea')
+				$(myProposal.config.content).find('input, select, textarea')
 						.each(function() {
 							// $(this).addClass("ignore");
 							$(this).prop('disabled', true);
 
-						});
-*/				
-				
+						});			
 				// myProposal.config.event.preventDefault();
 				break;
 

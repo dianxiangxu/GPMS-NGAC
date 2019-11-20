@@ -93,19 +93,19 @@
     },
 	 {
       "id": 3918382103089094743,
-      "name": "MUSIC Chair",
+      "name": "PHYSICS Chair",
       "type": "UA",
       "properties": {
-        "chair": "Music"
+        "chair": "PHYSICS"
       }
     },
     
     {
       "id": 3452974349944313,
-      "name": "MATH Chair",
+      "name": "CHEMISTRY Chair",
       "type": "UA",
       "properties": {
-        "chair": "Math"
+        "chair": "CHEMISTRY"
       }
     },
 	
@@ -117,7 +117,7 @@
     },
 	{
       "id": 3941587421454889623,
-      "name": "MATH Business Manager",
+      "name": "CHEMISTRY Business Manager",
       "type": "UA",
       "properties": {}
     },
@@ -129,7 +129,7 @@
     },
 	{
       "id": -3893882683476287343,
-      "name": "MUSIC Business Manager",
+      "name": "PHYSICS Business Manager",
       "type": "UA",
       "properties": {}
     },
@@ -149,40 +149,16 @@
     
 	{
       "id": 6159912223249768137,
-      "name": "MATH",
+      "name": "CHEMISTRY",
       "type": "UA",
       "properties": {}
     },
 	 {
       "id": -8560546373184779058,
-      "name": "MUSIC",
+      "name": "PHYSICS",
       "type": "UA",
       "properties": {}
     },
-	
-	
-	{
-      "id": -5060873034783971306,
-      "name": "alice",
-      "type": "U",
-      "properties": {}
-    },
-   
- 
-    
-    {
-      "id": -2618610815424745257,
-      "name": "charlie",
-      "type": "U",
-      "properties": {}
-    },
-	 {
-      "id": 3080953031002080322,
-      "name": "dave",
-      "type": "U",
-      "properties": {}
-    },
-	
 	{
       "id": 3937856505754651961,
       "name": "COEN_Dean",
@@ -308,6 +284,17 @@
 	{
       "sourceID": 6674456450717933892,  
       "targetID": 6588474352522051738   
+    },
+	
+	
+	{
+      "sourceID": -5060873034783971306,  
+      "targetID": 6159912223249768137   
+    },
+	
+	{
+      "sourceID": 3080953031002080322,  
+      "targetID": -7329081160781035690   
     }
    
 	

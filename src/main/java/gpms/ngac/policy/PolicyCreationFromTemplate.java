@@ -47,7 +47,7 @@ public class PolicyCreationFromTemplate {
 		HashMap<String, Node> nodeMap = new HashMap<String, Node>();
 
 		try {
-			File file = getFileFromResources(Constants.PDS_TEMPLATE);
+			File file = getFileFromResources(Constants.PDS_TEMPLATE_UP);
 			Object obj = new JSONParser().parse(new FileReader(file));
 			JSONObject jasonObject = (JSONObject) obj;
 

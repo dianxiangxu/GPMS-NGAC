@@ -26,7 +26,7 @@ public class UserPermissionChecker {
 	
 	private static final Logger log = Logger.getLogger(UserPermissionChecker.class.getName());
 	
-	public static boolean checkPermission(Graph ngacPolicy, String userName,Attribute targetAttribute, Object[] objects) {
+	public static boolean checkPermission(Graph ngacPolicy, String userOrAttributeName,String type,Attribute targetAttribute, Object[] objects) {
 		
 		boolean hasPermission = false;
 		try {
@@ -35,17 +35,21 @@ public class UserPermissionChecker {
 			long targetId = PDSOperations.getNodeID(ngacPolicy, targetAttribute.getAttributeName(), targetAttribute.getAttributeType(), null);
 			
 			// get all of the users in the graph
-	        Set<Node> userSet = ngacPolicy.search(userName, U.toString(), null);
+	        Set<Node> userSet = ngacPolicy.search(userOrAttributeName, type, null);
+	        
+	        //Set<Node> uaSet = ngacPolicy.search(userName, UA.toString(), null);
 	        
 	        if(userSet.size() ==1)   // expect to get only one user
 	        {
 	        	String[] requiredAccessRights = Arrays.copyOf(objects, objects.length, String[].class);
 	   		 
 	        	 for(Node user : userSet) {
-	        		 log.info("UserTaskPermissionOperations: "+user.getName()+"|"+requiredAccessRights);
-	        		 hasPermission = decider.check(user.getID(), 123 ,targetId, requiredAccessRights);
+	        		 log.info("UserPermissionChecker: "+user.getName()+"|"+requiredAccessRights.toString());
+	        		 System.out.println("UserPermissionChecker: "+user.getName()+"|"+targetAttribute.toString()+"|"+Arrays.toString(requiredAccessRights));
+	        		 hasPermission = decider.check(user.getID(), NGACPolicyConfigurationLoader.getID() ,targetId, requiredAccessRights);
 	        		 
 	        		 log.info(hasPermission);
+	        		 System.out.println("Permission:"+hasPermission);
 	        	 }
 	        }
 	        else
@@ -76,8 +80,9 @@ public static boolean checkPermission2(Graph ngacPolicy, String userName,Attribu
 	        	//String[] requiredAccessRights = Arrays.copyOf(objects, objects.length, String[].class);
 	   		 
 	        	 for(Node user : userSet) {
-	        		 log.info("UserTaskPermissionOperations: "+user.getName()+"|"+objects);
-	        		 hasPermission = decider.check(user.getID(), 124 ,targetId, objects);
+	        		 log.info("UserPermissionChecker: "+user.getName()+"|"+objects.toString());
+	        		 System.out.println("UserPermissionChecker: "+user.getName()+"|"+targetAttribute.toString()+"|"+Arrays.toString(objects));
+	        		 hasPermission = decider.check(user.getID(), NGACPolicyConfigurationLoader.getID() ,targetId, objects);
 	        		 log.info(hasPermission);
 	        		
 	        	 }

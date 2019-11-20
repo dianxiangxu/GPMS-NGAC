@@ -380,7 +380,7 @@
 		 <dependency>
 		    <groupId>com.github.PM-Master</groupId>
 		    <artifactId>policy-machine-core</artifactId>
-		    <version>2.0-alpha.8</version>
+		    <version>2.0-alpha.10</version>
 		</dependency>
 	<!--  	 <dependency>
             <groupId>com.github.PM-Master</groupId>

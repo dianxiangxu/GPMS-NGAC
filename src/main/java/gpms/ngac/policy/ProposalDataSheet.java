@@ -58,22 +58,25 @@ public class ProposalDataSheet {
 	public void updatePI() throws PMException{
 		String userName = proposalData.getInvestigatorInfo().getPi().getUserRef().getUserAccount().getUserName();
 		
-		long PiOANode = PDSOperations.getNodeID(proposalPolicy, Constants.PI_OA_UA_LBL, OA, null);
-        long PiUANode = PDSOperations.getNodeID(proposalPolicy, Constants.PI_OA_UA_LBL, UA, null);
+		log.info("Updating PI:"+userName);
+		log.info("No of Nodes:"+proposalPolicy.getNodes().size());
+		long PiOANode = PDSOperations.getNodeID(proposalPolicy, Constants.PI_OA_LBL, OA, null);
+        long PiUANode = PDSOperations.getNodeID(proposalPolicy, Constants.PI_UA_LBL, UA, null);
 	    
 		
-		long piUANodeId;
+		long piUNodeId = 0;
         try {
-        	piUANodeId = PDSOperations.getNodeID(proposalPolicy,userName , U, null);
-        }catch(PMException e) {
-        	Node PINode =proposalPolicy.createNode(PDSOperations.getID(),userName, U, null);
+        	piUNodeId = PDSOperations.getNodeID(proposalPolicy,userName , U, null);
+        	//Node PINode =proposalPolicy.createNode(PDSOperations.getID(),userName, U, null);
         	Node piName =proposalPolicy.createNode(PDSOperations.getID(),userName, O, null);
         	
-        	piUANodeId = PINode.getID();
-        	proposalPolicy.assign(piUANodeId, PiUANode);
-            proposalPolicy.assign(piName.getID(), PiOANode);   		
+        	//piUANodeId = PINode.getID();
+        	proposalPolicy.assign(piUNodeId, PiUANode);
+            proposalPolicy.assign( piName.getID(),PiOANode);   		
         	log.info("PI added.");
         	PDSOperations.proposalPolicies.put(proposalData.getNgacId(), proposalPolicy);
+        }catch(PMException e) {
+        	e.printStackTrace();
         }
 	}
 	
@@ -85,8 +88,8 @@ public class ProposalDataSheet {
 		log.info("List of coPI:");
 		String coPiName = "";
 		
-		long coPiOANode = PDSOperations.getNodeID(proposalPolicy, Constants.CO_PI_OA_UA_LBL, OA, null);
-        long coPiUANode = PDSOperations.getNodeID(proposalPolicy, Constants.CO_PI_OA_UA_LBL, UA, null);
+		long coPiOANode = PDSOperations.getNodeID(proposalPolicy, Constants.CO_PI_OA_LBL, OA, null);
+        long coPiUANode = PDSOperations.getNodeID(proposalPolicy, Constants.CO_PI_UA_LBL, UA, null);
 	    
 		for(InvestigatorRefAndPosition investPos : investList)
 		{
@@ -95,18 +98,20 @@ public class ProposalDataSheet {
 			log.info(coPiName);
 		
 		
-	        long copiUANodeId;
+	        long copiUNodeId = 0;
 	        try {
-	        	copiUANodeId = PDSOperations.getNodeID(proposalPolicy,coPiName , U, null);
-	        }catch(PMException e) {
-	        	Node coPINode =proposalPolicy.createNode(PDSOperations.getID(),coPiName, U, null);
+	        	copiUNodeId = PDSOperations.getNodeID(proposalPolicy,coPiName , U, null);
+	        	
+	        	//Node coPINode =proposalPolicy.createNode(PDSOperations.getID(),coPiName, U, null);
 	        	Node copiName =proposalPolicy.createNode(PDSOperations.getID(),coPiName, O, null);
 	        	
-	        	copiUANodeId = coPINode.getID();
-	        	proposalPolicy.assign(copiUANodeId, coPiUANode);
+	        	//copiUANodeId = coPINode.getID();
+	        	proposalPolicy.assign(copiUNodeId, coPiUANode);
 	            proposalPolicy.assign(copiName.getID(), coPiOANode);   		
 	        	log.info("CoPI added.");
 	        	PDSOperations.proposalPolicies.put(proposalData.getNgacId(), proposalPolicy);
+	        }catch(PMException e) {
+	        	e.printStackTrace();
 	        }
 		}
 	}
@@ -119,8 +124,8 @@ public class ProposalDataSheet {
 		log.info("List of SP:");
 		String spName = "";
 		
-		long coPiOANode = PDSOperations.getNodeID(proposalPolicy, Constants.SENIOR_PERSON_OA_UA_LBL, OA, null);
-        long coPiUANode = PDSOperations.getNodeID(proposalPolicy, Constants.SENIOR_PERSON_OA_UA_LBL, UA, null);
+		long coPiOANode = PDSOperations.getNodeID(proposalPolicy, Constants.SENIOR_PERSON_OA_LBL, OA, null);
+        long coPiUANode = PDSOperations.getNodeID(proposalPolicy, Constants.SENIOR_PERSON_UA_LBL, UA, null);
 	    
 		for(InvestigatorRefAndPosition investPos : investList)
 		{
@@ -129,30 +134,51 @@ public class ProposalDataSheet {
 			log.info(spName);
 		
 		
-	        long spUANodeId;
+	        long spUNodeId = 0;
 	        try {
-	        	spUANodeId = PDSOperations.getNodeID(proposalPolicy,spName , U, null);
-	        }catch(PMException e) {
-	        	Node spNode =proposalPolicy.createNode(PDSOperations.getID(),spName, U, null);
+	        	spUNodeId = PDSOperations.getNodeID(proposalPolicy,spName , U, null);
+	        	
+	        	//Node spNode =proposalPolicy.createNode(PDSOperations.getID(),spName, U, null);
 	        	Node spNodeName =proposalPolicy.createNode(PDSOperations.getID(),spName, O, null);
 	        	
-	        	spUANodeId = spNode.getID();
-	        	proposalPolicy.assign(spUANodeId, coPiUANode);
+	        	//spUANodeId = spNode.getID();
+	        	proposalPolicy.assign(spUNodeId, coPiUANode);
 	            proposalPolicy.assign(spNodeName.getID(), coPiOANode);   		
 	        	log.info("SP added.");
 	        	PDSOperations.proposalPolicies.put(proposalData.getNgacId(), proposalPolicy);
+	        }catch(PMException e) {
+	        	e.printStackTrace();
 	        }
 		}
 	}
 	
 	public String getPolicyDecision(String username,String action,String objectAtt) {
+		
+		
+		log.info("userName:"+username+"| Action:"+action+"|OA:"+objectAtt);
 		String decision ="";
 		String[] operations = {action};
 		ArrayList<String> ops = new ArrayList<String>();
-		ops.addAll(Arrays.asList(operations));
-		
+		ops.addAll(Arrays.asList(operations));		
 		Attribute att = new Attribute(objectAtt, NodeType.OA);
 		boolean hasPermission = UserPermissionChecker.checkPermission2(proposalPolicy, username, att,  operations);
+		if(hasPermission == true)
+			decision = "Permit";
+		else
+			decision = "Deny";
+		return decision;
+	}
+	
+public String getPolicyDecisionAnyType(String subject,String type, String action,String objectAtt) {
+		
+		
+		log.info("Subject:"+subject+"|type:"+type+" Action:"+action+"|OA:"+objectAtt);
+		String decision ="";
+		String[] operations = {action};
+		ArrayList<String> ops = new ArrayList<String>();
+		ops.addAll(Arrays.asList(operations));		
+		Attribute att = new Attribute(objectAtt, NodeType.OA);
+		boolean hasPermission = UserPermissionChecker.checkPermission(proposalPolicy, subject, type,att,  operations);
 		if(hasPermission == true)
 			decision = "Permit";
 		else

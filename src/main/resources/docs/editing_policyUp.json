@@ -3,7 +3,7 @@
 	    
 	    {
 	      "id": -4607625889972348117,
-	      "name": "EditingPolicyBeforeSubmission",
+	      "name": "Editing Policy",
 	      "type": "PC",
 	      "properties": {
 	        "default_ua": "-5902017007735841032",
@@ -21,7 +21,7 @@
 	    },
 		 {
 			"id" : -5449382005586736685,
-			"name" : "CompositPDS",
+			"name" : "Composite PDS",
 			"type" : "OA",
 			"properties": {
         		"namespace": "PDS_TEMPLATE"
@@ -30,7 +30,7 @@
 		
 		{
 	      "id": -6615149973776705852,
-	      "name": "DataElement",
+	      "name": "Data-Element",
 	      "type": "OA",
 	     "properties": {
 	        "namespace": "PDS_TEMPLATE"
@@ -38,7 +38,72 @@
 	    },
 		{
 			"id" : 9167503850871231643,
-			"name" : "ApprovalElement",
+			"name" : "Approval-Element",
+			"type" : "OA",
+			"properties": {
+        		"namespace": "PDS_TEMPLATE"
+      		}
+		},
+		{
+			"id" : 2750318422398854466,
+			"name" : "Chair-Approval",
+			"type" : "OA",
+			"properties": {
+        		"namespace": "PDS_TEMPLATE"
+      		}
+		},
+		{
+			"id" : -5354253594823124359,
+			"name" : "BM-Approval",
+			"type" : "OA",
+			"properties": {
+        		"namespace": "PDS_TEMPLATE"
+      		}
+		},
+		{
+			"id" : -916238785149221322,
+			"name" : "Dean-Approval",
+			"type" : "OA",
+			"properties": {
+        		"namespace": "PDS_TEMPLATE"
+      		}
+		},
+		{
+			"id" : 1081764298527187021,
+			"name" : "Research-Admin-Approval",
+			"type" : "OA",
+			"properties": {
+        		"namespace": "PDS_TEMPLATE"
+      		}
+		},
+		{
+			"id" : 1559676298615558766,
+			"name" : "Research-Director-Approval",
+			"type" : "OA",
+			"properties": {
+        		"namespace": "PDS_TEMPLATE"
+      		}
+		},
+		{
+			"id" : -2066887753519890737,
+			"name" : "Signature-Info",
+			"type" : "OA",
+			"properties": {
+        		"namespace": "PDS_TEMPLATE"
+      		}
+		},
+		{
+			"id" : -1929643799755390863,
+			"name" : "Comment",
+			"type" : "OA",
+			"properties": {
+        		"namespace": "PDS_TEMPLATE"
+      		}
+		},
+		
+		{
+			"id" : 5575516001022439988,
+			"name" : "Submission-Info",
 			"type" : "OA",
 			"properties": {
         		"namespace": "PDS_TEMPLATE"
@@ -47,7 +112,7 @@
 		
 		{
 	      "id": 1432074838181907682,
-	      "name": "PIEditable",
+	      "name": "PI-Editable-Data",
 	      "type": "OA",
 	      "properties": {
 	        "namespace": "PDS_TEMPLATE"
@@ -56,7 +121,7 @@
 		
 		{
 	      "id": 375260122425903544,
-	      "name": "CoPIEditable",
+	      "name": "CoPI-Editable-Data",
 	      "type": "OA",
 	      "properties": {
 	        "namespace": "PDS_TEMPLATE"
@@ -65,7 +130,7 @@
 		
 		{
 			"id" : 7001563235694976423,
-			"name" : "InvestigatorInfo",
+			"name" : "Investigator-Info",
 			"type" : "OA",
 			"properties": {
         		"namespace": "PDS_TEMPLATE"
@@ -74,7 +139,7 @@
 		},
 		{
 			"id" : -5341305212299730455,
-			"name" : "BudgetInfo",
+			"name" : "Budget-Info",
 			"type" : "OA",
 			"properties": {
         		"namespace": "PDS_TEMPLATE"
@@ -82,7 +147,7 @@
 		},
 		{
 			"id" : -190539787517064699,
-			"name" : "ProjectInfo",
+			"name" : "Project-Info",
 			"type" : "OA",
 			"properties": {
         		"namespace": "PDS_TEMPLATE"
@@ -90,7 +155,7 @@
 		},
 		{
 			"id" : 3894258469648060145,
-			"name" : "CostShareInfo",
+			"name" : "Cost-Share-Info",
 			"type" : "OA",
 			"properties": {
         		"namespace": "PDS_TEMPLATE"
@@ -98,7 +163,7 @@
 		},
 		{
 			"id" : -8043143079246781366,
-			"name" : "UniversityCommitmentsInfo",
+			"name" : "University-Commitments-Info",
 			"type" : "OA",
 			"properties": {
         		"namespace": "PDS_TEMPLATE"
@@ -106,7 +171,7 @@
 		},
 		{
 			"id" : -2397200779418123885,
-			"name" : "ConflictOfInterestInfo",
+			"name" : "Conflict-Of-Interest-Info",
 			"type" : "OA",
 			"properties": {
         		"namespace": "PDS_TEMPLATE"
@@ -114,7 +179,7 @@
 		},
 		{
 			"id" : 6467546770626657861,
-			"name" : "ComplianceInfo",
+			"name" : "Compliance-Info",
 			"type" : "OA",
 			"properties": {
         		"namespace": "PDS_TEMPLATE"
@@ -122,7 +187,7 @@
 		},
 		{
 			"id" : -1768676899060472986,
-			"name" : "AdditionalInfo",
+			"name" : "Additional-Info",
 			"type" : "OA",
 			"properties": {
         		"namespace": "PDS_TEMPLATE"
@@ -130,7 +195,7 @@
 		},
 		{
 			"id" : -6310901605321273772,
-			"name" : "CollaborationInfo",
+			"name" : "Collaboration-Info",
 			"type" : "OA",
 			"properties": {
         		"namespace": "PDS_TEMPLATE"
@@ -138,7 +203,7 @@
 		},
 		{
 			"id" : -4012432083875732141,
-			"name" : "ConfidentialInfo",
+			"name" : "Confidential-Info",
 			"type" : "OA",
 			"properties": {
         		"namespace": "PDS_TEMPLATE"
@@ -146,7 +211,7 @@
 		},
 		{
 			"id" : 7551150462584150574,
-			"name" : "OSPSectionInfo",
+			"name" : "OSP-Section-Info",
 			"type" : "OA",
 			"properties": {
         		"namespace": "PDS_TEMPLATE"
@@ -154,7 +219,7 @@
 		},
 		{
 			"id" : 6901962756104494162,
-			"name" : "SignatureInfo",
+			"name" : "Signature-Info",
 			"type" : "OA",
 			"properties": {
         		"namespace": "PDS_TEMPLATE"
@@ -163,7 +228,7 @@
 		
 		{
 			"id" : 7802207678959344357,
-			"name" : "PI",
+			"name" : "PI-Info",
 			"type" : "OA",
 			"properties": {
         		"namespace": "PDS_TEMPLATE"
@@ -171,7 +236,7 @@
 		},
 		{
 			"id" : -9185667913592477577,
-			"name" : "CoPI",
+			"name" : "CoPI-Info",
 			"type" : "OA",
 			"properties": {
         		"namespace": "PDS_TEMPLATE"
@@ -179,12 +244,14 @@
 		},
 		{
 			"id" : 7199330667779893433,
-			"name" : "SP",
+			"name" : "SP-Info",
 			"type" : "OA",
 			"properties": {
         		"namespace": "PDS_TEMPLATE"
       		}
 		},
+		
+		
 		{
 			"id" : 780103731515376518,
 			"name" : "PI",
@@ -224,12 +291,65 @@
 			"properties": {
         		"namespace": "PDS_TEMPLATE"
       		}
+		},
+		
+		{
+			"id" : 9119011481844295193,
+			"name" : "Chair",
+			"type" : "UA",
+			"properties": {
+        		"namespace": "PDS_TEMPLATE"
+      		}
+		},
+		{
+			"id" : -8064244964736173254,
+			"name" : "Business Manager",
+			"type" : "UA",
+			"properties": {
+        		"namespace": "PDS_TEMPLATE"
+      		}
+		},
+		{
+			"id" : -6146157395029427080,
+			"name" : "Dean",
+			"type" : "UA",
+			"properties": {
+        		"namespace": "PDS_TEMPLATE"
+      		}
+		},
+		{
+			"id" : 7305893459676862759,
+			"name" : "Research-Admin",
+			"type" : "UA",
+			"properties": {
+        		"namespace": "PDS_TEMPLATE"
+      		}
+		},
+		{
+			"id" : -1686286092320439089,
+			"name" : "Research-Director",
+			"type" : "UA",
+			"properties": {
+        		"namespace": "PDS_TEMPLATE"
+      		}
 		}
+		
+		
 		
 		
 		
 	],
 	
+	
+
+
+
+
+
+
+
+
+
 	
 	"assignments":[
 		
@@ -241,8 +361,31 @@
 		{                                  
 	      "sourceID": -125095002669469944,  
 	      "targetID": -4607625889972348117  
-	    }, 		
-		                                    
+	    },
+		{                                  
+	      "sourceID": 9119011481844295193,  
+	      "targetID": -4607625889972348117  
+	    },
+		{                                  
+	      "sourceID": -8064244964736173254,  
+	      "targetID": -4607625889972348117  
+	    },
+		{                                  
+	      "sourceID": -6146157395029427080,  
+	      "targetID": -4607625889972348117  
+	    },
+		{                                  
+	      "sourceID": 7305893459676862759,  
+	      "targetID": -4607625889972348117  
+	    },
+		{                                  
+	      "sourceID": -1686286092320439089,  
+	      "targetID": -4607625889972348117  
+	    },
+		{                                  
+	      "sourceID": 5575516001022439988,  
+	      "targetID": -5449382005586736685  
+	    },                                    
 		{                                  
 	      "sourceID": 2918018706953930328,
 	      "targetID": -5902017007735841032   
@@ -270,6 +413,34 @@
 		{
 	      "sourceID": 9167503850871231643,  
 	      "targetID": -5449382005586736685  
+	    },
+		{
+	      "sourceID": -2066887753519890737,  
+	      "targetID": 2750318422398854466  
+	    },
+		{
+	      "sourceID": -1929643799755390863,  
+	      "targetID": 2750318422398854466  
+	    },
+		{
+	      "sourceID": 2750318422398854466,  
+	      "targetID": 9167503850871231643  
+	    },
+		{
+	      "sourceID": -5354253594823124359,  
+	      "targetID": 9167503850871231643  
+	    },
+		{
+	      "sourceID": -916238785149221322,  
+	      "targetID": 9167503850871231643  
+	    },
+		{
+	      "sourceID": 1081764298527187021,  
+	      "targetID": 9167503850871231643  
+	    },
+		{
+	      "sourceID": 1559676298615558766,  
+	      "targetID": 9167503850871231643  
 	    },
 	    
 	    {
@@ -328,8 +499,15 @@
 	    {
 	      "sourceID": 6901962756104494162, 
 	      "targetID": 375260122425903544  
+	    },
+		{
+	      "sourceID": 780103731515376518, 
+	      "targetID": 6725271236759789516  
+	    },
+	    {
+	      "sourceID": -4306211063214550717, 
+	      "targetID": 6725271236759789516  
 	    }
-		
     
 	],
 	
@@ -345,19 +523,35 @@
 	    {
 		  "operations": [
         	"Save",
-        	"Submit",
-        	"delete-u"
+        	"Delete",
+        	"Submit"
       		],
 	      "sourceID": 780103731515376518, 
 	      "targetID": -125095002669469944 
 	    },
 		{
 		  "operations": [
-        	"add-u",
-        	"delete-u"
+        	"create-o"
+      		],
+	      "sourceID": 780103731515376518, 
+	      "targetID": 5575516001022439988  
+	    },
+		{
+		  "operations": [
+        	"assign-u-to",
+        	"deassign-u-to"
       		],
 	      "sourceID": 780103731515376518, 
 	      "targetID": -4306211063214550717  
+	    },
+		
+		{
+		  "operations": [
+        	"assign-u-from",
+        	"deassign-u-from"
+      		],
+	      "sourceID": 780103731515376518, 
+	      "targetID": 3281040394433647477  
 	    },
 	    
 	    {
@@ -376,8 +570,8 @@
 	    },
 		{
 	      "operations": [
-        	"add-u",
-			"delete-u"
+        	"assign-u-to",
+			"deassign-u-to"
       		],
 	      "sourceID": -4306211063214550717,
 	      "targetID": -5902017007735841032  
@@ -387,7 +581,7 @@
         	"r"
       		],
 	      "sourceID": -5902017007735841032, 
-	      "targetID": -6615149973776705852 
+	      "targetID": -5449382005586736685 
 	    }	    
 	    
 	]
