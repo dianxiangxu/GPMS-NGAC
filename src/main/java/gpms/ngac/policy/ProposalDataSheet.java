@@ -67,10 +67,8 @@ public class ProposalDataSheet {
 		long piUNodeId = 0;
         try {
         	piUNodeId = PDSOperations.getNodeID(proposalPolicy,userName , U, null);
-        	//Node PINode =proposalPolicy.createNode(PDSOperations.getID(),userName, U, null);
         	Node piName =proposalPolicy.createNode(PDSOperations.getID(),userName, O, null);
         	
-        	//piUANodeId = PINode.getID();
         	proposalPolicy.assign(piUNodeId, PiUANode);
             proposalPolicy.assign( piName.getID(),PiOANode);   		
         	log.info("PI added.");
@@ -80,7 +78,7 @@ public class ProposalDataSheet {
         }
 	}
 	
-	public void updateCoPI() throws PMException{
+	public void updateCoPI(String actor) throws PMException{
 		//InvestigatorRefAndPosition
 		InvestigatorInfo investigatorInfo = proposalData.getInvestigatorInfo();
 		ArrayList<InvestigatorRefAndPosition> investList = new ArrayList(investigatorInfo.getCo_pi());
@@ -116,7 +114,7 @@ public class ProposalDataSheet {
 		}
 	}
 	
-	public void updateSP() throws PMException{
+	public void updateSP(String actor) throws PMException{
 		//InvestigatorRefAndPosition
 		InvestigatorInfo investigatorInfo = proposalData.getInvestigatorInfo();
 		ArrayList<InvestigatorRefAndPosition> investList = new ArrayList(investigatorInfo.getSeniorPersonnel());

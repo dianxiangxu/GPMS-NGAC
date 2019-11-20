@@ -32,6 +32,7 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
@@ -60,11 +61,14 @@ public class PDSOperations {
 	
 	private NGACPolicyConfigurationLoader policyLoader;
 	
+	Obligation obligation = null;	
+	PDP pdp =null;
+	
 	public PDSOperations()
 	{
 		this.ngacPolicy = NGACPolicyConfigurationLoader.getPolicy();
 		gpmsNgacObligations = new GpmsNgacObligations();
-		policyLoader = new NGACPolicyConfigurationLoader();
+		policyLoader = new NGACPolicyConfigurationLoader();			
 		
 	}
 	
@@ -72,6 +76,15 @@ public class PDSOperations {
 	{
 		this.ngacPolicy = gf;
 		gpmsNgacObligations = new GpmsNgacObligations();
+	}
+	
+	public PDP getPDP(Graph graph) throws PMException {
+		if(pdp == null) {
+			obligation = policyLoader.loadObligation(Constants.OBLIGATION_TEMPLATE_PROPOSAL_CREATION);
+			pdp = new PDP(new PAP(graph, new MemProhibitions(), new MemObligations()));
+		 	pdp.getPAP().getObligationsPAP().add(obligation, true);	
+		}
+	 	return pdp;
 	}
 	
 	public Graph getNGACPolicy() {
@@ -185,7 +198,7 @@ public class PDSOperations {
              Map.Entry<Attribute, HashSet> entry = itr.next(); 
              log.info("Container = " + entry.getKey() +  
                                  ", permission set = " + entry.getValue()); 
-            // hasPermission = hasPermission && UserPermissionChecker.checkPermission(policy, userInfo.getUserName(), U.toString(), (Attribute)entry.getKey(), entry.getValue().toArray());
+             hasPermission = hasPermission && UserPermissionChecker.checkPermission(policy, userInfo.getUserName(), U.toString(), (Attribute)entry.getKey(), entry.getValue().toArray());
         } 
         try {
         	hasPermission = hasPermission && isChildrenFound(policy, spApproachableUser, Constants.SENIOR_PERSON_UA_LBL);
@@ -239,13 +252,8 @@ public class PDSOperations {
 		proposalPolicy = policyLoader.createAProposalGraph(ngacPolicy); //loads editing policy
 		printAccessState("Initial configuration before op:", proposalPolicy);
 		
-		Obligation obligation = null;		
-		obligation = policyLoader.loadObligation(Constants.OBLIGATION_TEMPLATE_PROPOSAL_CREATION);
-		
-		PDP pdp = new PDP(new PAP(proposalPolicy, new MemProhibitions(), new MemObligations()));
-	 	pdp.getPAP().getObligationsPAP().add(obligation, true);	  
-	    pdp.getEPP().processEvent(new AssignToEvent(proposalPolicy.getNode(pdsOriginationOAID), pdsNode),userID, getID());
-
+		 
+	    getPDP(proposalPolicy).getEPP().processEvent(new AssignToEvent(proposalPolicy.getNode(pdsOriginationOAID), pdsNode),userID, getID());
 		
 	    log.info("Proposal policy saved:"+randomId +"|"+proposalPolicy.toString()+"|"+proposalPolicy.getNodes().size());
 		PDSOperations.proposalPolicies.put(randomId, proposalPolicy);	
@@ -293,6 +301,16 @@ public class PDSOperations {
             }
         }
         log.info("############### End Access state for " + step + "############");
+    }
+    
+    
+    public static void printGraph(Graph graph) throws PMException {
+    	List<Node> nodes =  (List<Node>) graph.getNodes();
+    	System.out.println("***********Nodes:************");
+    	for(Node node: nodes) {
+    		System.out.println(node.getName());
+    	}
+    	
     }
 	
 	

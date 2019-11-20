@@ -137,10 +137,9 @@ rules:
               properties: 
             operations:
               - w
-              - r
             target:
               complement: false
-              intersection: true
+              intersection: false
               containers:
                 - name: PI-Editable-Data
                   type: OA                     

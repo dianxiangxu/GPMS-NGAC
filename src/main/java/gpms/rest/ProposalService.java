@@ -638,8 +638,8 @@ public class ProposalService {
 				
 				projectProposal.setProposal(existingProposal);	
 				projectProposal.updatePI();
-				projectProposal.updateCoPI();
-				projectProposal.updateSP();
+				projectProposal.updateCoPI(userInfo.getUserName());
+				projectProposal.updateSP(userInfo.getUserName());
 				
 				pdsOperations.printAccessState("Print POLICY:", projectProposal.getProposalPolicy());
 				pdsOperations.printAccessState("Print NGAC POLICY:", pdsOperations.getNGACPolicy());
@@ -1079,9 +1079,15 @@ public class ProposalService {
 								existingProposal, oldProposal, authorProfile,
 								irbApprovalRequired);
 
-				return sendSaveUpdateNotification(message,null, proposalId,
+				if(sendSaveUpdateNotification(userInfo.getUserName(),message,null, proposalId,
 						existingProposal, oldProposal, authorProfile, true,
-						null, irbApprovalRequired, null, emailDetails, "");
+						null, irbApprovalRequired, null, emailDetails, "")) {
+					return Response
+							.status(200)
+							.type(MediaType.APPLICATION_JSON)
+							.entity(mapper.writerWithDefaultPrettyPrinter()
+									.writeValueAsString(true)).build();
+				}
 			} else {
 				return Response.status(Response.Status.BAD_REQUEST)
 						.type(MediaType.APPLICATION_JSON)
@@ -1179,8 +1185,8 @@ public class ProposalService {
 					}
 					projectProposal.setProposal(existingProposal);	
 					projectProposal.updatePI();
-					projectProposal.updateCoPI();
-					projectProposal.updateSP();
+					projectProposal.updateCoPI(userInfo.getUserName());
+					projectProposal.updateSP(userInfo.getUserName());
 				
 				}
 				
@@ -1288,12 +1294,23 @@ public class ProposalService {
 //									.equals("Permit")) {
 								
 
-								return sendSaveUpdateNotification(message,projectProposal,
+								if(sendSaveUpdateNotification(userInfo.getUserName(),message,projectProposal,
 										proposalId, existingProposal,
 										oldProposal, authorProfile, false,
 										signatures, irbApprovalRequired,
 										requiredSignatures, emailDetails,
-										action);
+										action)) {
+									//write the policy change here if action is submit
+									
+									//pdsOperations.printGraph(projectProposal.getProposalPolicy());
+									
+									
+									return Response
+											.status(200)
+											.type(MediaType.APPLICATION_JSON)
+											.entity(mapper.writerWithDefaultPrettyPrinter()
+													.writeValueAsString(true)).build();
+								}
 							} else {
 								return Response
 										.status(403)
@@ -1404,8 +1421,8 @@ public class ProposalService {
 					
 					
 					projectProposal.updatePI();
-					projectProposal.updateCoPI();
-					projectProposal.updateSP();
+					projectProposal.updateCoPI(userInfo.getUserName());
+					projectProposal.updateSP(userInfo.getUserName());
 					
 					//pdsOperations.printAccessState("Print POLICY:", projectProposal.getProposalPolicy());
 					
@@ -1492,15 +1509,12 @@ public class ProposalService {
 					
 					boolean hasPermission = false;
 					hasPermission = pdsOperations.hasPermissionToCreateAProposal(userInfo);
-					//hasPermission = UserTaskPermissionRepo.checkForPermission(userInfo.getUserName(),gpms.ngac.policy.Constants.TASK_NAME_CREATE_PROPOSAL);
+					
 					if(hasPermission)
 					{	
 						long proposalId = pdsOperations.createAProposal(userInfo.getUserName());
 						
 						log.info("New policy id:"+proposalId+"|"+PDSOperations.proposalPolicies.get(proposalId).getNodes().size());
-						
-						//log.info("ProposalService:"+userInfo.getUserName());
-						//UserTaskPermissionOperations.populateUsersApprovedTaskSet(userInfo.getUserName());
 						
 						return Response
 								.status(200)
@@ -1806,7 +1820,7 @@ public class ProposalService {
 	 * @return
 	 * @throws JsonProcessingException
 	 */
-	public Response sendSaveUpdateNotification(String message, ProposalDataSheet projectProposal,
+	public boolean sendSaveUpdateNotification(String userName,String message, ProposalDataSheet projectProposal,
 			String proposalId, Proposal existingProposal, Proposal oldProposal,
 			UserProfile authorProfile, boolean isAdminUser,
 			List<SignatureUserInfo> signatures, Boolean irbApprovalRequired,
@@ -1845,8 +1859,9 @@ public class ProposalService {
 						action);
 			}
 		} catch (Exception e) {
-			return Response.status(403).type(MediaType.APPLICATION_JSON)
-					.entity(e.getMessage()).build();
+//			return Response.status(403).type(MediaType.APPLICATION_JSON)
+//					.entity(e.getMessage()).build();
+			return false;
 		}
 		if (proposalIsChanged) {
 			
@@ -1855,8 +1870,8 @@ public class ProposalService {
 			{	
 				projectProposal.setProposal(existingProposal);
 				try {
-					projectProposal.updateCoPI();
-					projectProposal.updateSP();
+					projectProposal.updateCoPI(userName);
+					projectProposal.updateSP(userName);
 					
 				} catch (PMException e) {
 					log.info("Exception : inside sendSaveUpdateNotification");
@@ -1870,17 +1885,19 @@ public class ProposalService {
 				emailUtil.sendMailMultipleUsersWithoutAuth(piEmail, emaillist,
 						emailSubject + authorName, emailBody);
 			}
-			return Response
-					.status(200)
-					.type(MediaType.APPLICATION_JSON)
-					.entity(mapper.writerWithDefaultPrettyPrinter()
-							.writeValueAsString(true)).build();
+//			return Response
+//					.status(200)
+//					.type(MediaType.APPLICATION_JSON)
+//					.entity(mapper.writerWithDefaultPrettyPrinter()
+//							.writeValueAsString(true)).build();
+			return true;
 		} else {
-			return Response
-					.status(200)
-					.type(MediaType.APPLICATION_JSON)
-					.entity(mapper.writerWithDefaultPrettyPrinter()
-							.writeValueAsString(true)).build();
+//			return Response
+//					.status(200)
+//					.type(MediaType.APPLICATION_JSON)
+//					.entity(mapper.writerWithDefaultPrettyPrinter()
+//							.writeValueAsString(true)).build();
+			return true;
 		}
 	}
 

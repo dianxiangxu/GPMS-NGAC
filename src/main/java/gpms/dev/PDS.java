@@ -46,6 +46,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
@@ -84,6 +85,7 @@ public class PDS {
         graph = GraphSerializer.fromJson(graph, json3);
         graph = GraphSerializer.fromJson(graph, json4);
         System.out.println("Nodes:"+graph.getNodes().size());
+        System.out.println("Graph:"+graph.toString());
         printAccessState("Initial configuration", graph);
         } catch(Exception e)
         {
@@ -106,12 +108,9 @@ public class PDS {
 		
 		try{
     		InputStream is = new FileInputStream(file5);
-    		obligation = EVRParser.parse(is);
-    		
+    		obligation = EVRParser.parse(is);   		
     		PDP pdp = new PDP(new PAP(graph, new MemProhibitions(), new MemObligations()));
-    	 	  
-    	       
-	        pdp.getPAP().getObligationsPAP().add(obligation, true);
+    	 	pdp.getPAP().getObligationsPAP().add(obligation, true);
 
 	       // test u1 assign to
 	        Set<Node> search = pdp.getPAP().getGraphPAP().search("nazmul", "O", null);	        
@@ -405,6 +404,16 @@ public class PDS {
         return found;
         
     }
+    
+    
+    private static void printGraph(Graph graph) throws PMException {
+    	List<Node> nodes =  (List<Node>) graph.getNodes();
+    	System.out.println("***********Nodes:************");
+    	for(Node node: nodes) {
+    		System.out.println(node.getName());
+    	}
+    	
+    }
 
     /**
      * Utility method to print the current access state to the console.
@@ -435,6 +444,8 @@ public class PDS {
         }
         System.out.println("############### End Access state for " + step + "############");
     }
+    
+    
     
     
     private static void printAccessStateForUA(String step, Graph graph) throws PMException {
