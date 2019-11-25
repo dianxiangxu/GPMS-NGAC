@@ -9,6 +9,7 @@ import javax.validation.constraints.AssertTrue;
 import org.junit.Before;
 import org.junit.Test;
 
+import gov.nist.csd.pm.pip.prohibitions.MemProhibitions;
 import gpms.model.GPMSCommonInfo;
 
 
@@ -41,13 +42,13 @@ public class PDSOperationsTest {
 	@Test
     public void test1() {
        			
-		assertTrue(pdsOperations.hasPermissionToCreateAProposal(userInfo));
+		assertTrue(pdsOperations.hasPermissionToCreateAProposal(userInfo.getUserName(),new MemProhibitions()));
 	}
 	
 	@Test
     public void test2() {
        		
 		userInfo.setUserName("12345");
-		assertFalse(pdsOperations.hasPermissionToCreateAProposal(userInfo));
+		assertFalse(pdsOperations.hasPermissionToCreateAProposal(userInfo.getUserName(),new MemProhibitions()));
 	}
 }

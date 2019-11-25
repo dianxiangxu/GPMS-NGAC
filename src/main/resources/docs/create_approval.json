@@ -1,0 +1,94 @@
+{
+ "nodes" : [
+	{
+      "id": -8771780692804045305,
+      "name": "Create Approval",
+      "type": "PC",
+      "properties": {
+      }
+    },
+	    {
+      "id": 8841765776655713002,
+      "name": "Approval Content",
+      "type": "OA",
+      "properties": {
+        
+      }
+    },
+	
+    {
+      "id": 1143965176376399708,
+      "name": "Current Users",
+      "type": "UA",
+      "properties": {
+        
+      }
+    },
+    
+    {
+      "id": -9002276083422802089,
+      "name": "Current Comment-Sign",
+      "type": "OA",
+      "properties": {
+        
+      }
+    },
+	{
+      "id": -9019398846996575786,
+      "name": "Current Approval",
+      "type": "OA",
+      "properties": {
+        
+      }
+    },
+	{
+      "id": 989910375258151612,
+      "name": "Current Disapproval",
+      "type": "OA",
+      "properties": {
+        
+      }
+    }
+ ],
+ 
+	"assignments" :[
+	
+	{
+      "sourceID": 1143965176376399708, 
+      "targetID": -8771780692804045305 
+    },
+	
+	 {
+      "sourceID": 8841765776655713002, 
+      "targetID": -8771780692804045305  
+    },
+	 {
+      "sourceID": -9002276083422802089, 
+      "targetID": 8841765776655713002  
+    },
+	 {
+      "sourceID": -9019398846996575786,  
+      "targetID": 8841765776655713002   
+    },
+	{
+      "sourceID": 989910375258151612, 
+      "targetID": 8841765776655713002  
+    }
+	
+	],
+	
+	"associations":
+	[
+	
+	{
+      "operations": [
+        "create-o",
+		"assign-o"
+      ],
+      "sourceID": 1143965176376399708,  
+      "targetID": 8841765776655713002   
+    }
+   
+	]
+
+}

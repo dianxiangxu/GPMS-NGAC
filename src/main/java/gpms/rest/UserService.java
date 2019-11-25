@@ -17,9 +17,6 @@ import gpms.model.UserProfile;
 import gpms.model.UserProposalCount;
 import gpms.ngac.policy.NGACPolicyConfigurationLoader;
 import gpms.ngac.policy.PDSOperations;
-import gpms.ngac.policy.TaskConfigurationParser;
-import gpms.ngac.policy.UserTaskPermissionOperations;
-import gpms.ngac.policy.UserTaskPermissionRepo;
 import gpms.utils.MultimapAdapter;
 import gpms.utils.PasswordHash;
 import gpms.utils.SerializationHelper;
@@ -99,11 +96,8 @@ public class UserService {
 		notificationDAO = new NotificationDAO(mongoClient, morphia, dbName);
 		nGACPolicyLoader = new NGACPolicyConfigurationLoader();
 		nGACPolicyLoader.init();
-		//taskConfigurationParser = new TaskConfigurationParser();
-		//taskConfigurationParser.init();
-		//userTaskPermissionRepo = new UserTaskPermissionRepo();
-		//userTaskPermissionRepo.init();
 		pdsOperations = new PDSOperations();
+		DepartmentsPositionsCollection.init();
 	}
 
 	@GET
@@ -728,7 +722,7 @@ public class UserService {
 				userInfo = new GPMSCommonInfo(commonObj);
 			}
 			
-			nGACPolicyLoader.savePolicy(null);
+			//nGACPolicyLoader.savePolicy(null);
 			
 			return Response
 					.status(Response.Status.OK)

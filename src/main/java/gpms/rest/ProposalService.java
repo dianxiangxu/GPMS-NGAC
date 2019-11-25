@@ -22,14 +22,14 @@ import gpms.model.RequiredSignaturesInfo;
 import gpms.model.SignatureInfo;
 import gpms.model.SignatureUserInfo;
 import gpms.model.Status;
+import gpms.model.SubmitType;
 import gpms.model.UserAccount;
+import gpms.model.UserInfo;
 import gpms.model.UserProfile;
 import gpms.ngac.policy.Constants;
 import gpms.ngac.policy.NGACPolicyConfigurationLoader;
 import gpms.ngac.policy.PDSOperations;
 import gpms.ngac.policy.ProposalDataSheet;
-import gpms.ngac.policy.UserTaskPermissionOperations;
-import gpms.ngac.policy.UserTaskPermissionRepo;
 import gpms.utils.EmailUtil;
 import gpms.utils.SerializationHelper;
 import io.swagger.annotations.Api;
@@ -48,6 +48,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.ws.rs.Consumes;
@@ -77,6 +78,7 @@ import com.mongodb.MongoClient;
 
 import gov.nist.csd.pm.exceptions.PMException;
 import gov.nist.csd.pm.pip.graph.Graph;
+import gov.nist.csd.pm.pip.prohibitions.MemProhibitions;
 
 @Path("/proposals")
 @Api(value = "/proposals", description = "Manage Proposals")
@@ -95,6 +97,7 @@ public class ProposalService {
 	DelegationDAO delegationDAO = null;
 	public NotificationDAO notificationDAO = null;
 	private PDSOperations pdsOperations;
+	NGACPolicyConfigurationLoader loader;
 	public DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 	private static final Logger log = Logger.getLogger(ProposalService.class
 			.getName());
@@ -109,6 +112,7 @@ public class ProposalService {
 		delegationDAO = new DelegationDAO(mongoClient, morphia, dbName);
 		notificationDAO = new NotificationDAO(mongoClient, morphia, dbName);
 		pdsOperations = new PDSOperations();
+		loader = new NGACPolicyConfigurationLoader();
 	}
 
 	@GET
@@ -614,38 +618,46 @@ public class ProposalService {
 			Proposal existingProposal = proposalDAO
 					.findProposalByProposalID(id);
 			
-			if(proposalRoles.equalsIgnoreCase("PI") || proposalRoles.equalsIgnoreCase("Co-PI") || proposalRoles.equalsIgnoreCase("SP")) {
-				ProposalDataSheet projectProposal =  new ProposalDataSheet();
+			if(proposalRoles.equalsIgnoreCase("PI") || proposalRoles.equalsIgnoreCase("Co-PI") || proposalRoles.equalsIgnoreCase("SP") ||
+					userInfo.getUserPositionType().equalsIgnoreCase("Administrator")) {
+				ProposalDataSheet projectProposal =  new ProposalDataSheet(); 
 				long proposalNgacId = existingProposal.getNgacId();
 				log.info("NN: Proposal NGAC Id:"+proposalNgacId);
 				
-				Graph proposalPolicy = pdsOperations.getBacicNGACPolicy();
-				pdsOperations.printAccessState("Print POLICY:", proposalPolicy);
-				
+				Graph proposalPolicy=null;
+
+				projectProposal.setProposal(existingProposal);
 				
 				if(PDSOperations.proposalPolicies.get(existingProposal.getNgacId()) != null) {
 					projectProposal.setProposalPolicy(PDSOperations.proposalPolicies.get(existingProposal.getNgacId()));
 					log.info("Policy found in hashmap.");
 					
-				} else {
+				}
+				else {
 					log.info("Policy re-created.");
-					NGACPolicyConfigurationLoader loader = new NGACPolicyConfigurationLoader();
+					proposalPolicy = pdsOperations.getBacicNGACPolicy();
 				
 					proposalPolicy = loader.createAProposalGraph(proposalPolicy);
-					PDSOperations.proposalPolicies.put(existingProposal.getNgacId(),proposalPolicy);
 					projectProposal.setProposalPolicy(proposalPolicy);
+					
+					
+					projectProposal.clearIngestigator();
+					projectProposal.updatePI(false);
+					projectProposal.updateCoPI(userInfo.getUserName(), false);
+					projectProposal.updateSP(userInfo.getUserName(),false);					
+					PDSOperations.proposalPolicies.put(existingProposal.getNgacId(),proposalPolicy);
+					
+					
 				}
 				
-				projectProposal.setProposal(existingProposal);	
-				projectProposal.updatePI();
-				projectProposal.updateCoPI(userInfo.getUserName());
-				projectProposal.updateSP(userInfo.getUserName());
 				
-				pdsOperations.printAccessState("Print POLICY:", projectProposal.getProposalPolicy());
-				pdsOperations.printAccessState("Print NGAC POLICY:", pdsOperations.getNGACPolicy());
-				
-				
-				actions = projectProposal.getPermittedActions(userInfo.getUserName(), "PDSs");
+				if(existingProposal.getSubmittedByPI().equals(SubmitType.SUBMITTED)){
+					log.info("Call for Prohibition load");
+					projectProposal.generatePostSubmissionProhibitions();
+				}
+					
+		
+				actions = projectProposal.getPermittedActions(pdsOperations, userInfo.getUserName(), Constants.PDSs_OA_UA_LBL);
 				
 			} else {
 				
@@ -1158,7 +1170,7 @@ public class ProposalService {
 				//pdsOperations.printAccessState("Print Basic POLICY:", proposalPolicy);
 				//pdsOperations.printAccessState("Print NGAC POLICY:", pdsOperations.getNGACPolicy());
 				
-				
+				projectProposal.setProposal(existingProposal);	
 				
 				if(existingProposal.getNgacId() == 0l)
 				{	
@@ -1167,6 +1179,7 @@ public class ProposalService {
 					proposalPolicy = PDSOperations.proposalPolicies.get(Long.parseLong(proposalNgacId));
 					projectProposal.setProposalPolicy(proposalPolicy);
 					projectProposal.setProposal(existingProposal);	
+					projectProposal.checkStaticACRights();
 				}
 				else {
 					log.info("NGAC ID found :"+existingProposal.getNgacId());
@@ -1175,18 +1188,25 @@ public class ProposalService {
 				     
 					if(PDSOperations.proposalPolicies.get(existingProposal.getNgacId()) != null) {
 						projectProposal.setProposalPolicy(PDSOperations.proposalPolicies.get(existingProposal.getNgacId()));
+						//projectProposal.checkStaticACRights();
 					} else {
 						log.info("Policy re-created.");
-						NGACPolicyConfigurationLoader loader = new NGACPolicyConfigurationLoader();
+						//NGACPolicyConfigurationLoader loader = new NGACPolicyConfigurationLoader();
 					
 						proposalPolicy = loader.createAProposalGraph(proposalPolicy);
-						PDSOperations.proposalPolicies.put(existingProposal.getNgacId(),proposalPolicy);
 						projectProposal.setProposalPolicy(proposalPolicy);
+						
+						//projectProposal.checkStaticACRights();
 					}
-					projectProposal.setProposal(existingProposal);	
-					projectProposal.updatePI();
-					projectProposal.updateCoPI(userInfo.getUserName());
-					projectProposal.updateSP(userInfo.getUserName());
+					
+					projectProposal.clearIngestigator();
+					projectProposal.updatePI(false);
+					projectProposal.updateCoPI(userInfo.getUserName(),false);
+					projectProposal.updateSP(userInfo.getUserName(),false);
+					PDSOperations.proposalPolicies.put(existingProposal.getNgacId(),proposalPolicy);
+					
+					
+					
 				
 				}
 				
@@ -1253,14 +1273,16 @@ public class ProposalService {
 						int intDecision = AbstractResult.DECISION_NOT_APPLICABLE;
 						
 						
-						if(action.equals("Save") || action.equals("Submit") ) {
+						if (action.equals("Save") || action.equals("Submit") || action.equals("Approve")
+								|| action.equals("Disapprove")) {
 							String objectAtt = Constants.PDSs_OA_UA_LBL;
 							String acRight = action;
-							//objectAtt = projectProposal.setSection(proposalSection);
+							// objectAtt = projectProposal.setSection(proposalSection);
 							log.info("objectAtt:"+objectAtt);
-							decisionString = projectProposal.getPolicyDecisionAnyType(userInfo.getUserName(),"U", acRight, objectAtt);
+							decisionString = projectProposal.getPolicyDecisionAnyType(pdsOperations, userInfo.getUserName(),"U", acRight, objectAtt);
 						    log.info("D:"+decisionString);
 							
+						    
 						}
 						else {
 						
@@ -1301,6 +1323,33 @@ public class ProposalService {
 										requiredSignatures, emailDetails,
 										action)) {
 									//write the policy change here if action is submit
+									
+									loader.savePolicy(proposalPolicy, Constants.POLICY_CONFIG_OUTPUT_FILE+existingProposal.getNgacId()+".json");
+									
+									log.info("User Info:"+userInfo.toString());
+									List<UserInfo> userList = userProfileDAO.findAllForAdminUserGrid(0, 1000, userInfo);
+									log.info("All admins:");
+									for(UserInfo user : userList) {
+										log.info(user.toString());
+									}
+									
+									
+									if(action.equals("Submit")) {
+										log.info("Call for Prohibition load");
+										projectProposal.generatePostSubmissionProhibitions();
+										//PDSOperations.proposalProhibitions.put(existingProposal.getNgacId(),projectProposal.getProhibitions());
+										//loader.saveProhibition(projectProposal.getProhibitions(), Constants.POLICY_CONFIG_OUTPUT_FILE+"prohibition_"+existingProposal.getNgacId()+".json");
+											
+										projectProposal.clearIngestigator();
+										projectProposal.updatePI(true);
+										projectProposal.updateCoPI(userInfo.getUserName(),true);
+										projectProposal.updateSP(userInfo.getUserName(),true);
+										
+										projectProposal.updatePostSubmissionchanges();
+										PDSOperations.proposalPolicies.put(existingProposal.getNgacId(),proposalPolicy);
+										
+										
+									}
 									
 									//pdsOperations.printGraph(projectProposal.getProposalPolicy());
 									
@@ -1399,30 +1448,39 @@ public class ProposalService {
 					projectProposal.setProposal(existingProposal);
 					
 					Graph proposalPolicy = null;
+					for (Entry<Long, Graph> mapElement : PDSOperations.proposalPolicies.entrySet()) { 
+						long key = (long)mapElement.getKey(); 
+						log.info("key:"+key);
+			            }
 					
 					if(PDSOperations.proposalPolicies.get(existingProposal.getNgacId()) != null) {
+						log.info("HashMap has the current policy: "+existingProposal.getNgacId());
 						projectProposal.setProposalPolicy(PDSOperations.proposalPolicies.get(existingProposal.getNgacId()));
 					} else {
-						log.info("Policy re-created.");
-						
-						proposalPolicy = pdsOperations.getBacicNGACPolicy() ;
-						
-						NGACPolicyConfigurationLoader loader = new NGACPolicyConfigurationLoader();
-					
+						log.info("Policy re-created.");						
+						proposalPolicy = pdsOperations.getBacicNGACPolicy() ;						
 						//proposalPolicy = loader.createAProposalGraph(proposalPolicy);
 						proposalPolicy = loader.createAProposalGraph(proposalPolicy);
-						PDSOperations.proposalPolicies.put(existingProposal.getNgacId(),proposalPolicy);
 						projectProposal.setProposalPolicy(proposalPolicy);
 						
+//						projectProposal.updatePI();
+//						projectProposal.updateCoPI(userInfo.getUserName());
+//						projectProposal.updateSP(userInfo.getUserName());
+						
 					}
+					
+					projectProposal.clearIngestigator();
+					projectProposal.updatePI(false);
+					projectProposal.updateCoPI(userInfo.getUserName(),false);
+					projectProposal.updateSP(userInfo.getUserName(),false);
+					PDSOperations.proposalPolicies.put(existingProposal.getNgacId(),proposalPolicy);
+					
 					
 					//pdsOperations.printAccessState("Print NGAC POLICY:", pdsOperations.getNGACPolicy());
 					
 					
 					
-					projectProposal.updatePI();
-					projectProposal.updateCoPI(userInfo.getUserName());
-					projectProposal.updateSP(userInfo.getUserName());
+					
 					
 					//pdsOperations.printAccessState("Print POLICY:", projectProposal.getProposalPolicy());
 					
@@ -1435,8 +1493,14 @@ public class ProposalService {
 						String acRight = "w";
 						objectAtt = projectProposal.setSection(proposalSection);
 						log.info("objectAtt:"+objectAtt);
-						decision = projectProposal.getPolicyDecision(userInfo.getUserName(), acRight, objectAtt);
+						decision = projectProposal.getPolicyDecision(pdsOperations, userInfo.getUserName(), acRight, objectAtt);
 					    log.info("D:"+decision);
+					}else if(action.equalsIgnoreCase("Delete") && proposalSection.equalsIgnoreCase("InvestigatorInformation")){
+						Boolean hasPermission = pdsOperations.hasPermissionToDeleteCoPI(projectProposal.getProposalPolicy(),userInfo.getUserName(),projectProposal.getProhibitions());
+					    if(hasPermission)
+					    	decision  = "Permit";
+					    else
+					    	decision = "Deny";
 					}
 					else {
 					BalanaConnector ac = new BalanaConnector();
@@ -1508,7 +1572,7 @@ public class ProposalService {
 					log.info("Attribute Map PM:"+attrMapPm);
 					
 					boolean hasPermission = false;
-					hasPermission = pdsOperations.hasPermissionToCreateAProposal(userInfo);
+					hasPermission = pdsOperations.hasPermissionToCreateAProposal(userInfo.getUserName(),new MemProhibitions());
 					
 					if(hasPermission)
 					{	
@@ -1870,8 +1934,8 @@ public class ProposalService {
 			{	
 				projectProposal.setProposal(existingProposal);
 				try {
-					projectProposal.updateCoPI(userName);
-					projectProposal.updateSP(userName);
+					projectProposal.updateCoPI(userName,false);
+					projectProposal.updateSP(userName,false);
 					
 				} catch (PMException e) {
 					log.info("Exception : inside sendSaveUpdateNotification");

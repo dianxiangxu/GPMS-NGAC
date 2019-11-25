@@ -7,7 +7,6 @@ import gov.nist.csd.pm.pip.graph.MemGraph;
 import gov.nist.csd.pm.pip.graph.model.nodes.Node;
 import gov.nist.csd.pm.pip.graph.model.nodes.NodeType;
 import gpms.ngac.policy.Constants;
-import gpms.ngac.policy.PolicyCreationFromTemplate;
 
 import java.util.*;
 

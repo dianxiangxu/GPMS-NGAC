@@ -21,21 +21,36 @@ import gov.nist.csd.pm.pip.obligations.model.EvrNode;
 import gov.nist.csd.pm.pip.obligations.model.Obligation;
 import gov.nist.csd.pm.pip.obligations.model.ResponsePattern;
 import gov.nist.csd.pm.pip.obligations.model.Rule;
-import gov.nist.csd.pm.pip.obligations.model.Subject;
 import gov.nist.csd.pm.pip.obligations.model.Target;
 import gov.nist.csd.pm.pip.obligations.model.actions.Action;
 import gov.nist.csd.pm.pip.obligations.model.actions.CreateAction;
 import gov.nist.csd.pm.pip.obligations.model.functions.Arg;
 import gov.nist.csd.pm.pip.prohibitions.MemProhibitions;
+import gov.nist.csd.pm.pip.prohibitions.Prohibitions;
+import gov.nist.csd.pm.pip.prohibitions.ProhibitionsSerializer;
+import gov.nist.csd.pm.pip.prohibitions.model.Prohibition;
+import gov.nist.csd.pm.pip.prohibitions.model.Prohibition.Subject.Type;
+import gov.nist.csd.pm.pip.prohibitions.model.Prohibition.Subject;
 
 import static gov.nist.csd.pm.pip.graph.model.nodes.NodeType.O;
 import static gov.nist.csd.pm.pip.graph.model.nodes.NodeType.OA;
 import static gov.nist.csd.pm.pip.graph.model.nodes.NodeType.U;
 import static gov.nist.csd.pm.pip.graph.model.nodes.NodeType.UA;
+import static gov.nist.csd.pm.pip.graph.model.nodes.NodeType.PC;
 
+import gpms.DAL.MongoDBConnector;
+import gpms.dao.ProposalDAO;
+import gpms.dao.UserAccountDAO;
+import gpms.dao.UserProfileDAO;
 import gpms.model.GPMSCommonInfo;
+import gpms.model.UserAccount;
+import gpms.model.UserInfo;
+import gpms.model.UserProfile;
+import gpms.ngac.policy.Attribute;
 import gpms.ngac.policy.Constants;
+import gpms.ngac.policy.NGACPolicyConfigurationLoader;
 import gpms.ngac.policy.PDSOperations;
+import gpms.ngac.policy.UserPermissionChecker;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -46,10 +61,17 @@ import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+
+import org.mongodb.morphia.Morphia;
+
+import com.mongodb.MongoClient;
 
 
 
@@ -61,32 +83,447 @@ public class PDS {
     public static void main(String[] args) throws IOException, PMException {
         // load the initial configuration from json
     	
-     
-    	PDS main = new PDS();
-    	//File file = main.getFileFromResources(main,"docs/super_config.json");
-    	
+		PDS main = new PDS();		
+		//main.testGraph27WithObligations(main);
+		//main.testGraph25WithObligations(main);
+		//main.testGraph26WithProhibitions(main);
 		
-		  File file = main.getFileFromResources(main,"docs/super_config.json"); 
-		  File file2 = main.getFileFromResources(main,"docs/proposal_creation.json"); 
-		  File file3 = main.getFileFromResources(main,"docs/university_organization.json"); 
-		  File file4 = main.getFileFromResources(main,"docs/editing_policyUp.json"); 
-		  File file5 = main.getFileFromResources(main,"docs/gpms_obligations.yml"); 
-		 
+//		main.testMongoInfo();
+//		main.testDeleteAllChildren(main);
+//		main.testGenerateIds();
+		main.testGenerateIds();
+		
+
+    }
+    
+    void testGenerateIds() {
+    	System.out.println(getID());
+    	System.out.println(getID());
+    	System.out.println(getID());
+    	System.out.println(getID());
+    	System.out.println(getID());
+    }
+    
+    void testMongoInfo() {
+    	MongoClient mongoClient = null;
+    	Morphia morphia = null;
+    	String dbName = "db_gpms";
+    	UserAccountDAO userAccountDAO = null;
+    	UserProfileDAO userProfileDAO = null;
+    	ProposalDAO proposalDAO = null;
+    	mongoClient = MongoDBConnector.getMongo();
+		morphia = new Morphia();
+		morphia.map(UserProfile.class).map(UserAccount.class);
+		userAccountDAO = new UserAccountDAO(mongoClient, morphia, dbName);
+		userProfileDAO = new UserProfileDAO(mongoClient, morphia, dbName);
+		proposalDAO = new ProposalDAO(mongoClient, morphia, dbName);
+    	
+		GPMSCommonInfo userInfo = new GPMSCommonInfo();
+		//userInfo.setUserProfileID("5cddc20d2edd2f0d3c61c120");
+		//userInfo.setUserName("nazmul");
+		userInfo.setUserIsActive(true);
+		//userInfo.setUserIsAdmin(false);
+		//userInfo.setUserCollege("Engineering");
+		//userInfo.setUserDepartment("Computer Science");
+		//userInfo.setUserPositionType("Tenured/tenure-track faculty");
+		//userInfo.setUserPositionTitle("Assistant Professor");
+		try {
+	    	System.out.println("User Info:"+userInfo.toString());
+			//List<UserInfo> userList = userProfileDAO.findAllForAdminUserGrid(0, 1000, userInfo);
+			List<UserProfile> userList = userProfileDAO.findAllUsersWithPosition();
+			System.out.println("All positions:");
+			for(UserProfile user : userList) {
+				System.out.println(user.toString());
+			}
+			
+			List<UserProfile> deptUsers = userProfileDAO.findAllForAdminUserGrid("DEPT");
+			System.out.println("All Admins:");
+			for(UserProfile user : deptUsers) {
+				System.out.println(user.getUserAccount().getUserName()+" |"+user.getDetails(0).getDepartment()+"|"+user.getDetails(0).getCollege()+"|"+user.getDetails(0).getPositionTitle());
+			}
+			
+			List<UserProfile> users = userProfileDAO.findAllForAdminUserGrid("UNIVERSITY");
+			System.out.println("All Admins:");
+			for(UserProfile user : users) {
+				System.out.println(user.getUserAccount().getUserName()+" |"+user.getDetails(0).getDepartment()+"|"+user.getDetails(0).getCollege()+"|"+user.getDetails(0).getPositionTitle());
+			}
+			
+			
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+		
+    }
+    
+    void testDeleteAllChildren(PDS main) throws PMException, IOException {
+    	File file = main.getFileFromResources(main, "docs/super_config.json");
+		File file2 = main.getFileFromResources(main, "docs/proposal_creation.json");
+		File file3 = main.getFileFromResources(main, "docs/university_organization.json");
+		File file4 = main.getFileFromResources(main, "docs/editing_policyUp.json");
+		
+		
+		File file5 = main.getFileFromResources(main, "docs/gpms_obligations.yml");
+
 		String json = new String(Files.readAllBytes(Paths.get(file.getAbsolutePath())));
-        String json2 = new String(Files.readAllBytes(Paths.get(file2.getAbsolutePath())));
+		String json2 = new String(Files.readAllBytes(Paths.get(file2.getAbsolutePath())));
         String json3 = new String(Files.readAllBytes(Paths.get(file3.getAbsolutePath())));
         String json4 = new String(Files.readAllBytes(Paths.get(file4.getAbsolutePath())));
         //String yml = new String(Files.readAllBytes(Paths.get(file4.getAbsolutePath())));
      
         Graph graph =null;
         try {
-        graph = GraphSerializer.fromJson(new MemGraph(), json);
-        graph = GraphSerializer.fromJson(graph, json2);
-        graph = GraphSerializer.fromJson(graph, json3);
-        graph = GraphSerializer.fromJson(graph, json4);
-        System.out.println("Nodes:"+graph.getNodes().size());
-        System.out.println("Graph:"+graph.toString());
+	        graph = GraphSerializer.fromJson(new MemGraph(), json);
+	        graph = GraphSerializer.fromJson(graph, json2);
+	        graph = GraphSerializer.fromJson(graph, json3);
+	        graph = GraphSerializer.fromJson(graph, json4);
+	        System.out.println("Nodes:"+graph.getNodes().size());
+	        System.out.println("Graph:"+graph.toString());
+        } catch(Exception e)
+        {
+        	System.out.println(e.toString());
+        	e.printStackTrace();
+        }
+        
+        Node node = graph.createNode(getID(), "nazmul", NodeType.U, null);
+    	long  userAttNodeID = getNodeID(graph, "PI", NodeType.UA, null);
+    	graph.assign(node.getID(), userAttNodeID);
+    	Set<Long> childIds = graph.getChildren(userAttNodeID);
+    	
+    	System.out.println(childIds.size());
+    	
+    	for(long id : childIds) {
+    		graph.deassign(id, userAttNodeID);
+    	}
+    	
+    	childIds = graph.getChildren(userAttNodeID);
+    	
+    	System.out.println(childIds.size());
+    	System.out.println(getNodeID(graph, "PI", NodeType.UA, null));
+    	
+    }
+    
+    void testGraph24WithProhibitions(PDS main) throws PMException, IOException {
+
+		File file = main.getFileFromResources(main,"docs/test_prohibition.json"); 
+		String json = new String(Files.readAllBytes(Paths.get(file.getAbsolutePath())));
+		//System.out.println(json);
+		Graph graph =null;
+	    graph = GraphSerializer.fromJson(new MemGraph(), json);
+		
+		
+		Prohibitions prohibitions = new MemProhibitions();
+
+		
+		File file_prohibition = main.getFileFromResources(main,"docs/prohibitions.json"); 
+		String json_prohibition = new String(Files.readAllBytes(Paths.get(file_prohibition.getAbsolutePath())));
+		prohibitions = ProhibitionsSerializer.fromJson(prohibitions, json_prohibition);
+		
+		String prohibitionString = ProhibitionsSerializer.toJson(prohibitions);	 	
+	 	System.out.println("Prohibition:"+json_prohibition);
+
+		PReviewDecider decider = new PReviewDecider(graph, prohibitions);
+		Set<String> list = decider.list(2, 0, 6);
+		
+		for(String st: list) {
+			System.out.print(st + " ");
+		}
+		System.out.println();
+		Set<String> list2 = decider.list(2, 1, 7);
+		
+		for(String st2: list2) {
+			System.out.print(st2 + " ");
+		}
+		System.out.println();
+		Set<String> list3 = decider.list(2, 2, 10);
+		
+		for(String st2: list3) {
+			System.out.print(st2 + " ");
+		}
+		
+		PReviewDecider decider2 = new PReviewDecider(graph, new MemProhibitions());
+		
+		System.out.println();
+		Set<String> list4 = decider2.list(2, 5, 6);
+		
+		for(String st2: list4) {
+			System.out.print(st2 + " ");
+		}
+		
+		boolean hasPermission = decider.check(2, NGACPolicyConfigurationLoader.getID() ,10, new String[] {"execute"});
+		System.out.println(hasPermission);
+		
+		System.out.println(ProhibitionsSerializer.toJson(prohibitions));
+	
+	}
+	
+	
+	
+	void testGraph26WithProhibitions(PDS main) throws PMException, IOException {
+
+		File file = main.getFileFromResources(main, "docs/super_config.json");
+		File file2 = main.getFileFromResources(main, "docs/proposal_creation.json");
+		File file3 = main.getFileFromResources(main, "docs/university_organization.json");
+		File file4 = main.getFileFromResources(main, "docs/editing_policyUp.json");
+		
+		
+		File file5 = main.getFileFromResources(main, "docs/gpms_obligations.yml");
+
+		String json = new String(Files.readAllBytes(Paths.get(file.getAbsolutePath())));
+		String json2 = new String(Files.readAllBytes(Paths.get(file2.getAbsolutePath())));
+        String json3 = new String(Files.readAllBytes(Paths.get(file3.getAbsolutePath())));
+        String json4 = new String(Files.readAllBytes(Paths.get(file4.getAbsolutePath())));
+        //String yml = new String(Files.readAllBytes(Paths.get(file4.getAbsolutePath())));
+     
+        Graph graph =null;
+        try {
+	        graph = GraphSerializer.fromJson(new MemGraph(), json);
+	        graph = GraphSerializer.fromJson(graph, json2);
+	        graph = GraphSerializer.fromJson(graph, json3);
+	        graph = GraphSerializer.fromJson(graph, json4);
+	        System.out.println("Nodes:"+graph.getNodes().size());
+	        System.out.println("Graph:"+graph.toString());
+        } catch(Exception e)
+        {
+        	System.out.println(e.toString());
+        	e.printStackTrace();
+        }
+		
+		
+		Prohibitions prohibitions = new MemProhibitions();		
+		String pro = ProhibitionsSerializer.toJson(prohibitions);
+		System.out.println("Prohibition:"+pro);
+		//String prohibitionString = ProhibitionsSerializer.toJson(prohibitions);	 	
+	 	
+		
+		
+		System.out.println("*******Without prohibition********");
+		PReviewDecider decider = new PReviewDecider(graph, new MemProhibitions());
+		Set<String> list = decider.list(780103731515376518l, 0, 1432074838181907682l);
+		
+		for(String st: list) {
+			System.out.println(st);
+		}
+		
+		Boolean hasPermission = decider.check(780103731515376518l, NGACPolicyConfigurationLoader.getID() ,1432074838181907682l, new String[] {"Delete","Save", "Submit"});
+		System.out.println(hasPermission);
+		
+
+		File file_prohibition = main.getFileFromResources(main,"docs/post_submission_prohibitions.json"); 
+		String json_prohibition = new String(Files.readAllBytes(Paths.get(file_prohibition.getAbsolutePath())));
+		prohibitions = ProhibitionsSerializer.fromJson(prohibitions, json_prohibition);
+		
+		//String prohibitionString = ProhibitionsSerializer.toJson(prohibitions);	 	
+	 	System.out.println("Prohibition:"+json_prohibition);
+
+		decider = new PReviewDecider(graph, prohibitions);
+		list = decider.list(780103731515376518l, 1, 1432074838181907682l);
+		
+		for(String st: list) {
+			System.out.println(st);
+		}
+		hasPermission = decider.check(780103731515376518l, NGACPolicyConfigurationLoader.getID() ,1432074838181907682l, new String[] {"Delete","Save","Submit"});
+		System.out.println(hasPermission);
+		
+		
+		
+		
+		//System.out.println(ProhibitionsSerializer.toJson(prohibitions));
+		//assertEquals(1, list.size());
+		//assertTrue(list.contains("execute"));
+	}
+	
+    
+    void testGraph25WithObligations(PDS main) throws PMException, IOException {
+
+		File file = main.getFileFromResources(main,"docs/test_prohibition.json"); 
+		String json = new String(Files.readAllBytes(Paths.get(file.getAbsolutePath())));
+		//System.out.println(json);
+		Graph graph =null;
+	    graph = GraphSerializer.fromJson(new MemGraph(), json);
+		
+		
+		Prohibitions prohibitions = new MemProhibitions();
+		
+		File file5 = main.getFileFromResources(main, "docs/test_obligation.yml");
+		InputStream is = new FileInputStream(file5);
+		Obligation obligation = EVRParser.parse(is); 
+		
+		PReviewDecider decider = new PReviewDecider(graph, prohibitions);
+		Set<String> list = decider.list(2, 0, 7);
+		
+		for(String st: list) {
+			System.out.print(st+" ");
+		}
+		System.out.println();
+		boolean hasPermission = decider.check(2, NGACPolicyConfigurationLoader.getID() ,7, new String[] {"execute"});
+		System.out.println(hasPermission);
+		hasPermission = decider.check(2, NGACPolicyConfigurationLoader.getID() ,5, new String[] {"execute"});
+		System.out.println(hasPermission);
+		hasPermission = decider.check(2, NGACPolicyConfigurationLoader.getID() ,10, new String[] {"read"});
+		System.out.println(hasPermission);
+		hasPermission = decider.check(2, NGACPolicyConfigurationLoader.getID() ,10, new String[] {"delete"});
+		System.out.println(hasPermission);
+		
+		PDP pdp = new PDP(new PAP(graph, new MemProhibitions(), new MemObligations()));
+	 	pdp.getPAP().getObligationsPAP().add(obligation, true);
+
+	 	
+      
+        long userID = getNodeID(graph, "u1", U, null);
+        long childID = getNodeID(graph, "u2", U, null);
+        long pdsSpUA = getNodeID(graph, "ua1", UA, null);
+        pdp.getEPP().processEvent(new DeassignFromEvent(graph.getNode(pdsSpUA), graph.getNode(childID)),userID, 127);
+		
+        
+		decider = new PReviewDecider(graph, prohibitions);
+		list = decider.list(3, 1, 7);
+		
+		for(String st: list) {
+			System.out.print(st+" ");
+		}
+		System.out.println();
+		hasPermission = decider.check(2, NGACPolicyConfigurationLoader.getID() ,7, new String[] {"execute"});
+		System.out.println(hasPermission);
+		hasPermission = decider.check(2, NGACPolicyConfigurationLoader.getID() ,5, new String[] {"execute"});
+		System.out.println(hasPermission);
+		hasPermission = decider.check(2, NGACPolicyConfigurationLoader.getID() ,10, new String[] {"read"});
+		System.out.println(hasPermission);
+		hasPermission = decider.check(2, NGACPolicyConfigurationLoader.getID() ,10, new String[] {"delete"});
+		System.out.println(hasPermission);
+		
+	}
+    
+    void testGraph27WithObligations(PDS main) throws PMException, IOException {
+
+		File file = main.getFileFromResources(main, "docs/super_config.json");
+		File file2 = main.getFileFromResources(main, "docs/proposal_creation.json");
+		File file3 = main.getFileFromResources(main, "docs/university_organization.json");
+		File file4 = main.getFileFromResources(main, "docs/editing_policyUp.json");
+		
+		
+		//File file5 = main.getFileFromResources(main, "docs/gpms_obligations.yml");
+
+		String json = new String(Files.readAllBytes(Paths.get(file.getAbsolutePath())));
+		String json2 = new String(Files.readAllBytes(Paths.get(file2.getAbsolutePath())));
+        String json3 = new String(Files.readAllBytes(Paths.get(file3.getAbsolutePath())));
+        String json4 = new String(Files.readAllBytes(Paths.get(file4.getAbsolutePath())));
+        //String yml = new String(Files.readAllBytes(Paths.get(file4.getAbsolutePath())));
+     
+        Graph graph =null;
+        try {
+	        graph = GraphSerializer.fromJson(new MemGraph(), json);
+	        graph = GraphSerializer.fromJson(graph, json2);
+	        graph = GraphSerializer.fromJson(graph, json3);
+	        graph = GraphSerializer.fromJson(graph, json4);
+	        System.out.println("Nodes:"+graph.getNodes().size());
+	        System.out.println("Graph:"+graph.toString());
+        } catch(Exception e)
+        {
+        	System.out.println(e.toString());
+        	e.printStackTrace();
+        }
+        
+        //nazmul -> Pi
+        graph.assign(7890168025809137159l, 780103731515376518l);
         printAccessState("Initial configuration", graph);
+		
+		Prohibitions prohibitions = new MemProhibitions();
+
+		File file5 = main.getFileFromResources(main, "docs/gpms_obligations.yml");
+		InputStream is = new FileInputStream(file5);
+		Obligation obligation = EVRParser.parse(is); 
+		
+		PReviewDecider decider = new PReviewDecider(graph, prohibitions);
+		Set<String> list = decider.list(780103731515376518l, 0, 1432074838181907682l);
+		
+		System.out.println("PI->PI Editable Data");
+		for(String st: list) {
+			System.out.print(st+" ");
+			}		
+		System.out.println();
+		System.out.println("PI->CoPI-Editable-Data");
+		list = decider.list(780103731515376518l, 2, -125095002669469944l);		
+		for(String st2: list) {
+			System.out.print(st2+" ");
+		}
+		PDP pdp = new PDP(new PAP(graph, new MemProhibitions(), new MemObligations()));
+	 	pdp.getPAP().getObligationsPAP().add(obligation, true);
+	 	
+      
+        long userID = getNodeID(graph, "nazmul", U, null);
+        long pdsSpUA = getNodeID(graph, "Submission-Info", OA, null);
+        Node child = graph.createNode(5, "123", NodeType.O, null);//(graph, "ua1", UA, null);
+        pdp.getEPP().processEvent(new AssignToEvent(graph.getNode(pdsSpUA), graph.getNode(child.getID())),userID, 129);
+		
+           
+		System.out.println();
+		list = decider.list(780103731515376518l, 2, 1432074838181907682l);		
+		for(String str: list) {
+			System.out.print(str+" ");
+		}
+		System.out.println();
+		list = decider.list(780103731515376518l, 2, -125095002669469944l);		
+		for(String str2: list) {
+			System.out.print(str2+" ");
+		}
+		
+		boolean hasPermission = decider.check(780103731515376518l, NGACPolicyConfigurationLoader.getID() ,-125095002669469944l, new String[] {"Delete"});
+		System.out.println("Dec:"+hasPermission);
+//		hasPermission = decider.check(2, NGACPolicyConfigurationLoader.getID() ,6, new String[] {"execute"});
+//		System.out.println(hasPermission);
+//		hasPermission = decider.check(2, NGACPolicyConfigurationLoader.getID() ,6, new String[] {"read"});
+//		System.out.println(hasPermission);
+		
+//
+//		PReviewDecider decider = new PReviewDecider(graph, prohibitions);
+//		Set<String> list = decider.list(780103731515376518l, 0, 1432074838181907682l);
+//		
+//		for(String st: list) {
+//			System.out.println(st);
+//		}
+//		boolean hasPermission = decider.check(780103731515376518l, NGACPolicyConfigurationLoader.getID() ,1432074838181907682l, new String[] {"Delete","Submit"});
+//		System.out.println(hasPermission);
+//		
+//		System.out.println("***************");
+//		decider = new PReviewDecider(graph, new MemProhibitions());
+//		list = decider.list(780103731515376518l, 0, 1432074838181907682l);
+//		
+//		for(String st: list) {
+//			System.out.println(st);
+//		}
+//		hasPermission = decider.check(780103731515376518l, NGACPolicyConfigurationLoader.getID() ,1432074838181907682l, new String[] {"Delete","Submit"});
+//		System.out.println(hasPermission);
+		
+		//System.out.println(ProhibitionsSerializer.toJson(prohibitions));
+		//assertEquals(1, list.size());
+		//assertTrue(list.contains("execute"));
+	}
+    
+    void testAll(PDS main) throws IOException,PMException {
+    	
+    	File file = main.getFileFromResources(main, "docs/super_config.json");
+		File file2 = main.getFileFromResources(main, "docs/proposal_creation.json");
+		File file3 = main.getFileFromResources(main, "docs/university_organization.json");
+		File file4 = main.getFileFromResources(main, "docs/editing_policyUp.json");
+		
+		
+		File file5 = main.getFileFromResources(main, "docs/gpms_obligations.yml");
+
+		String json = new String(Files.readAllBytes(Paths.get(file.getAbsolutePath())));
+		String json2 = new String(Files.readAllBytes(Paths.get(file2.getAbsolutePath())));
+        String json3 = new String(Files.readAllBytes(Paths.get(file3.getAbsolutePath())));
+        String json4 = new String(Files.readAllBytes(Paths.get(file4.getAbsolutePath())));
+        //String yml = new String(Files.readAllBytes(Paths.get(file4.getAbsolutePath())));
+     
+        Graph graph =null;
+        try {
+	        graph = GraphSerializer.fromJson(new MemGraph(), json);
+	        graph = GraphSerializer.fromJson(graph, json2);
+	        graph = GraphSerializer.fromJson(graph, json3);
+	        graph = GraphSerializer.fromJson(graph, json4);
+	        System.out.println("Nodes:"+graph.getNodes().size());
+	        System.out.println("Graph:"+graph.toString());
+      //  printAccessState("Initial configuration", graph);
         } catch(Exception e)
         {
         	System.out.println(e.toString());
@@ -104,11 +541,37 @@ public class PDS {
 		PDSOperations pdsOperations = new PDSOperations(); 
 		GPMSCommonInfo userInfo = new GPMSCommonInfo();
 		userInfo.setUserName("nazmul");		
-		System.out.println(pdsOperations.hasPermissionToCreateAProposal(graph, userInfo));
+		System.out.println(pdsOperations.hasPermissionToCreateAProposal(graph, userInfo, new MemProhibitions()));
 		
 		try{
     		InputStream is = new FileInputStream(file5);
     		obligation = EVRParser.parse(is);   		
+    		
+    		Prohibitions prohibitions = new MemProhibitions();
+    		
+    		//String name, Subject subject, List<Node> nodes, Set<String> operations, boolean intersection
+//    		List<gov.nist.csd.pm.pip.prohibitions.model.Prohibition.Node> nodes = new ArrayList<gov.nist.csd.pm.pip.prohibitions.model.Prohibition.Node>();
+//    		nodes.add(new gov.nist.csd.pm.pip.prohibitions.model.Prohibition.Node(1432074838181907682l, false));
+//    		Subject sub = new Subject(780103731515376518l,Type.USER_ATTRIBUTE);
+//    		Set<String> set = new HashSet<String>();
+//    		set.add("w");
+//    		Prohibition prohibition = new Prohibition("PI_deny_w",sub,nodes,set,true);
+//    		
+//    		prohibitions.add(prohibition);
+//    		
+//    		PDP pdp = new PDP(new PAP(graph, prohibitions, new MemObligations()));
+//    	 	pdp.getPAP().getObligationsPAP().add(obligation, true);
+//    	 	
+//    	 	String prohibitionString = ProhibitionsSerializer.toJson(prohibitions);    	 	
+//    	 	System.out.println("Prohibition:"+prohibitionString);
+//    	 	
+//    	 	PReviewDecider decider = new PReviewDecider(graph, prohibitions);
+//    		Set<String> list = decider.list(780103731515376518l, 0, 1432074838181907682l);
+//    		
+//    		for(String st: list) {
+//    			System.out.println(st);
+//    		}
+    	 	
     		PDP pdp = new PDP(new PAP(graph, new MemProhibitions(), new MemObligations()));
     	 	pdp.getPAP().getObligationsPAP().add(obligation, true);
 
@@ -129,6 +592,7 @@ public class PDS {
 	        
 	        search = pdp.getPAP().getGraphPAP().search("liliana", "O", null);	        
 	        System.out.println("Found liliana inside:"+ !search.isEmpty());
+	        System.out.println(UserPermissionChecker.checkPermissionAnyType(graph, new MemProhibitions(), "liliana", U.toString(), new Attribute("CoPI-Editable-Data",NodeType.OA), Arrays.asList("w") ));
 	        
 	        long pdCoPIUA = getNodeID(graph, Constants.CO_PI_UA_LBL,  UA, null); 
 			
@@ -138,6 +602,9 @@ public class PDS {
 	        
 	        search = pdp.getPAP().getGraphPAP().search("liliana", "O", null);	        
 	        System.out.println("Found alice inside:"+ !search.isEmpty());
+	        
+	        System.out.println(UserPermissionChecker.checkPermissionAnyType(graph, new MemProhibitions(), "liliana", U.toString(), new Attribute("CoPI-Editable-Data",NodeType.OA), Arrays.asList("w") ));
+	        
 	        
 	        
 	       // userInfo.setUserName("nazmul");		
@@ -159,18 +626,26 @@ public class PDS {
 	        search = pdp.getPAP().getGraphPAP().search("tomtom", "O", null);	        
 	        System.out.println("Found tomtom inside:"+ !search.isEmpty());
 	        
+	        search = pdp.getPAP().getGraphPAP().search("amy", "U", null);	        
+	        System.out.println("Found amy inside:"+ !search.isEmpty());
+	        
+	        //Tenured Faculty
+	        
 	        
 	        // delete sp:
 	        
 	        
-	        //long pdsSpUA = getNodeID(graph, Constants.SENIOR_PERSON_OA_UA_LBL,  UA, null); 
+	        //long pdsSpUA = getNodeID(graph, Constants.SENIOR_PERSON_OA_LBL,  UA, null); 
 			
-	        //long userIDDave = getNodeID(graph, "dave", U, null);
-	      //  pdp.getEPP().processEvent(new DeassignFromEvent(graph.getNode(pdsSpUA), graph.getNode(userIDDave)),userID, 127);
+	       // long userIDDave = getNodeID(graph, "dave", U, null);
+	        pdp.getEPP().processEvent(new DeassignFromEvent(graph.getNode(pdsSpUA), graph.getNode(userIDDave)),userID, 127);
 		
 	        
-	      //  search = pdp.getPAP().getGraphPAP().search("dave", "O", null);	        
-	     //   System.out.println("Found dave inside:"+ !search.isEmpty());
+	        search = pdp.getPAP().getGraphPAP().search("tomtom", "O", null);	        
+	        System.out.println("Found tomtom inside:"+ !search.isEmpty());
+	        
+	        search = pdp.getPAP().getGraphPAP().search("amy", "U", null);	        
+	        System.out.println("Found amy inside:"+ !search.isEmpty());
 	        
 	        
 	        
@@ -191,124 +666,7 @@ public class PDS {
 			//System.out.println(e.toString());
 			e.printStackTrace();
 		}
-		
-		// printAccessState("Initial configuration", graph);
-		//ngacPolicy.assign(pdsNode.getID(), pdsOriginationOAID);
-		//graph.assign(pdsNode.getID(), pdsOriginationOAID);
-		
-		//long userID = getNodeID(graph, userName, U, null);
-		//simulateAssignToEvent(graph, userID, graph.getNode(pdsOriginationOAID), pdsNode);
-		
-		
-        
-        
-		
-//		 System.out.println(getID()); System.out.println(getID());
-//		 System.out.println(getID()); System.out.println(getID());
-//		 System.out.println(getID()); System.out.println(getID());
-//		 System.out.println(getID()); System.out.println(getID());
-//		 System.out.println(getID()); System.out.println(getID());
-//		 System.out.println(getID()); System.out.println(getID());
-        
-        /*String json = new String(Files.readAllBytes(Paths.get(file.getAbsolutePath())));
-        String json2 = new String(Files.readAllBytes(Paths.get(file2.getAbsolutePath())));
-        String json3 = new String(Files.readAllBytes(Paths.get(file3.getAbsolutePath())));
-        String json4 = new String(Files.readAllBytes(Paths.get(file4.getAbsolutePath())));
-        String json5 = new String(Files.readAllBytes(Paths.get(file5.getAbsolutePath())));
-        */
-    	//String json6 = new String(Files.readAllBytes(Paths.get(file6.getAbsolutePath())));
-
-        
-        //System.out.println(json);
-    //    Graph graph = GraphSerializer.fromJson(new MemGraph(), json1);
-    //   graph = GraphSerializer.fromJson(graph, json2);
-        
-       /* Graph graph = GraphSerializer.fromJson(new MemGraph(), json);
-        graph = GraphSerializer.fromJson(graph, json2);
-        graph = GraphSerializer.fromJson(graph, json3);
-        graph = GraphSerializer.fromJson(graph, json4);
-        graph = GraphSerializer.fromJson(graph, json5);
-        */
-        
-        //File file4 =
-		/* * main.getFileFromResources(main,"docs/approval_config.json"); File file5 =
-		 * main.getFileFromResources(main,"docs/cross_policy.json");
-		 */
-    	//File file6 = main.getFileFromResources(main,"docs/pds_template_updated2.json");
-
-      //  printFile(file);
     	
-       // String json = new String(Files.readAllBytes(Paths.get("/resources/docs/pds.json")));
-       
-        
-       // System.out.println(json6);       
-		/*
-		 * long randomId = getID(); //user creates a PDS and assigns it to
-		 * Constants.PDS_ORIGINATING_OA Node pdsNode = graph.createNode(randomId,
-		 * createProposalId(randomId), OA, null);
-		 * 
-		 * long pdsOriginationOAID = getNodeID(graph, Constants.PDS_ORIGINATING_OA, OA,
-		 * null); graph.assign(pdsNode.getID(), pdsOriginationOAID);
-		 * 
-		 * String userName = "nazmul";
-		 * 
-		 * 
-		 * 
-		 * long userID = getNodeID(graph, userName, U, null);
-		 * simulateAssignToEvent(graph, userID, graph.getNode(pdsOriginationOAID),
-		 * pdsNode);
-		 * 
-		 * printAccessState("After User creates PDS", graph);
-		 * 
-		 */
-        
-		/*
-		 * // ----------------writing policy to json-------------------- String
-		 * policyString = GraphSerializer.toJson(graph);
-		 * 
-		 * // System.out.println(policyString); // Files.write("", policyString.to,
-		 * options)
-		 * 
-		 * // File file6 = main.getFileFromResources(main,"docs/test.json"); File file6
-		 * = new File("docs/test.json"); BufferedWriter writer = null; try { writer =
-		 * new BufferedWriter( new FileWriter(file6)); writer.write( policyString);
-		 * writer.flush();
-		 * 
-		 * } catch ( IOException e) { e.printStackTrace(); } catch(Exception ex) {
-		 * ex.printStackTrace(); } finally { try { if ( writer != null) writer.close( );
-		 * } catch ( IOException e) { e.printStackTrace(); } }
-		 * //-----------------writing ends here------------------
-		 */      
-        
-       
-       
-       
-       
-       
-       
-       
-       
-
-       // boolean found = isChildrenFound("bob","tenure",graph);
-        
-      // printAccessStateForUA("Initial configuration", graph);
-        
-    
-        
-      //  printAccessState("Initial configuration", graph);
-
-		/*
-		 * // Step 1. Bob creates a PDS and assigns it to RBAC_PDSs Node pdsNode =
-		 * graph.createNode(getID(), "PDSi", OA, null); long rbacPDSsID =
-		 * getNodeID(graph, "RBAC_PDSs", OA, null); graph.assign(pdsNode.getID(),
-		 * rbacPDSsID); // simulate an event // normally the Event Processing Point will
-		 * do this, so we'll just simulate it by // calling the simulateAssignToEvent
-		 * method long bobID = getNodeID(graph, "bob", U, null);
-		 * simulateAssignToEvent(graph, bobID, graph.getNode(rbacPDSsID), pdsNode);
-		 * 
-		 * p
-		 rintAccessState("After bob creates PDS", graph);
-		 */
     }
     
     
@@ -317,66 +675,7 @@ public class PDS {
 		return "PDS"+id;
 	}
     
-    /*
-        // Step 2. Bob adds alice as a CoPI
-        Node aliceObj = graph.createNode(getID(), "alice", O, null);
-        long copiID = getNodeID(graph, "CoPI", OA, null);
-        graph.assign(aliceObj.getID(), copiID);
-        // simulate an event
-        simulateAssignToEvent(graph, bobID, graph.getNode(copiID), aliceObj);
-
-        printAccessState("After bob adds alice as a CoPI", graph);
-
-        // Step 3. Alice adds Charlie as a CoPI
-        Node charlieObj = graph.createNode(getID(), "charlie", O, null);
-        long spID = getNodeID(graph, "SP", OA, null);
-        graph.assign(charlieObj.getID(), spID);
-        // simulate an event
-        long aliceID = getNodeID(graph, "alice", U, null);
-        simulateAssignToEvent(graph, aliceID, graph.getNode(spID), charlieObj);
-
-        printAccessState("After alice adds charlie as a SP", graph);
-
-        // Step 4. Bob submits the PDS for approval
-        long submittedPDSs = getNodeID(graph, "submitted_pdss", OA, null);
-        graph.assign(pdsNode.getID(), submittedPDSs);
-        // simulate an event
-        simulateAssignToEvent(graph, bobID, graph.getNode(submittedPDSs), pdsNode);
-
-        printAccessState("After bob submits the PDS for approval", graph);
-
-        // Step 5. CS Chair approves
-        long csChairApproval = getNodeID(graph, "cs_chair_approval", OA, null);
-        graph.assign(pdsNode.getID(), csChairApproval);
-        // simulate an event
-        simulateAssignToEvent(graph, getNodeID(graph, "CS_Chair", U, null), graph.getNode(csChairApproval), pdsNode);
-
-        printAccessState("After the CS Chair approves the PDS", graph);
-
-        // Step 6. Math Chair approves
-        long mathChairApproval = getNodeID(graph, "math_chair_approval", OA, null);
-        graph.assign(pdsNode.getID(), mathChairApproval);
-        // simulate an event
-        simulateAssignToEvent(graph, getNodeID(graph, "Math_Chair", U, null), graph.getNode(mathChairApproval), pdsNode);
-
-        printAccessState("After Math Chair approves the PDS", graph);
-
-        // Step 7. COEN Dean approves
-        long coenDeanApproval = getNodeID(graph, "coen_dean_approval", OA, null);
-        graph.assign(pdsNode.getID(), coenDeanApproval);
-        // simulate an event
-        simulateAssignToEvent(graph, getNodeID(graph, "COEN_Dean", U, null), graph.getNode(coenDeanApproval), pdsNode);
-
-        printAccessState("After the COEN Dean approves the PDS", graph);
-
-        // Step 8. COAS Dean approves
-        long coasDeanApproval = getNodeID(graph, "coas_dean_approval", OA, null);
-        graph.assign(pdsNode.getID(), coasDeanApproval);
-        // simulate an event
-        simulateAssignToEvent(graph, getNodeID(graph, "COAS_Dean", U, null), graph.getNode(coasDeanApproval), pdsNode);
-
-        printAccessState("After the COAS Dean approves the PDS", graph);
-    }*/
+    
     
     private static boolean isChildrenFound(String name,String parent, Graph graph) throws PMException
     {
@@ -527,4 +826,58 @@ public class PDS {
         }
 
     }
+    
+	void testGraph23WithProhibitions() throws PMException {
+		Graph graph = new MemGraph();
+
+		Node u1 = graph.createNode(getID(), "u1", U, null);
+		Node ua1 = graph.createNode(getID(), "ua1", UA, null);
+		Node o1 = graph.createNode(getID(), "o1", NodeType.O, null);
+		Node oa1 = graph.createNode(getID(), "oa1", OA, null);
+		Node oa2 = graph.createNode(getID(), "oa2", OA, null);
+		Node oa3 = graph.createNode(getID(), "oa3", OA, null);
+		Node pc1 = graph.createNode(getID(), "pc1", PC, null);
+
+		graph.assign(u1.getID(), ua1.getID());
+		graph.assign(oa2.getID(), oa3.getID());
+		graph.assign(o1.getID(), oa1.getID());
+		graph.assign(o1.getID(), oa2.getID());
+		graph.assign(oa3.getID(), pc1.getID());
+
+		graph.associate(ua1.getID(), oa3.getID(), new HashSet<>(Arrays.asList("read", "write", "execute")));
+
+		Prohibitions prohibitions = new MemProhibitions();
+		Prohibition prohibition = new Prohibition();
+		prohibition.setName("deny");
+		prohibition.setSubject(new Prohibition.Subject(ua1.getID(), Prohibition.Subject.Type.USER_ATTRIBUTE));
+		prohibition.setOperations(new HashSet<>(Arrays.asList("read")));
+		//prohibition.addNode(new Prohibition.Node(oa1.getID(), false));
+		prohibition.addNode(new Prohibition.Node(oa2.getID(), false));
+		prohibition.setIntersection(true);
+		prohibitions.add(prohibition);
+
+//		prohibition = new Prohibition("deny2", new Prohibition.Subject(u1.getID(), Prohibition.Subject.Type.USER));
+//		prohibition.setOperations(new HashSet<>(Arrays.asList("write")));
+//		prohibition.addNode(new Prohibition.Node(oa3.getID(), false));
+//		prohibition.setIntersection(true);
+//		prohibitions.add(prohibition);
+		
+		String prohibitionString = ProhibitionsSerializer.toJson(prohibitions);
+	 	
+	 	System.out.println("Prohibition:"+prohibitionString);
+
+		PReviewDecider decider = new PReviewDecider(graph, prohibitions);
+		Set<String> list = decider.list(ua1.getID(), 0, oa2.getID());
+		
+		for(String st: list) {
+			System.out.println(st);
+		}
+		//assertEquals(1, list.size());
+		//assertTrue(list.contains("execute"));
+	}
+	
+	
+	
+	
+	
 }

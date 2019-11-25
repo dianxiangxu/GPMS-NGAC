@@ -24,14 +24,14 @@ public class NGACPolicyConfigurationLoaderTest {
     }
 	
 	
-	@Test
-	public void test2() {
-		try {
-			loader.savePolicy("C:/data/test2.json");
-		} catch (Exception e) {
-			ex = e;
-		}
-		assertEquals(null, ex);
-	}
+//	@Test
+//	public void test2() {
+//		try {
+//			loader.savePolicy("C:/data/test2.json");
+//		} catch (Exception e) {
+//			ex = e;
+//		}
+//		assertEquals(null, ex);
+//	}
 
 }

@@ -1306,6 +1306,7 @@ $(function() {
 				policyInfo : attributeArray,
 				gpmsCommonObj : gpmsCommonObj(),
 				ProposalSection : proposalSection,
+				proposalId : config.proposalId,    //added nazmul 2019 11 23
 				Action : buttonType
 			});
 
@@ -5813,7 +5814,7 @@ $(function() {
 														myProposal
 																.CheckUserPermissionForInvestigator(
 																		"Delete",
-																		subSection,
+																		"InvestigatorInformation",    //nazmul 2019 11 23  subSection
 																		myProposal.config);
 													}
 												}
@@ -5842,7 +5843,7 @@ $(function() {
 												myProposal
 														.CheckUserPermissionForInvestigator(
 																$buttonType,
-																"InvestigatorInformation.Co-PI",
+																"InvestigatorInformation", //  "InvestigatorInformation.Co-PI", nazmul on 2019 11 23
 																myProposal.config);
 											}
 										} else {
@@ -5880,7 +5881,7 @@ $(function() {
 											myProposal
 													.CheckUserPermissionForInvestigator(
 															$buttonType,
-															"InvestigatorInformation.Senior-Personnel",
+															"InvestigatorInformation",    //"InvestigatorInformation.Senior-Personnel", nazmul on 2019 11 23
 															myProposal.config);
 										}
 									} else {

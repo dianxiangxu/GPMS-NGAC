@@ -27,10 +27,10 @@ public class GpmsNgacObligations {
 	
 	private static final Logger log = Logger.getLogger(GpmsNgacObligations.class.getName());
 
-	private PolicyCreationFromTemplate policyCreationFromTemplate;
+	//private PolicyCreationFromTemplate policyCreationFromTemplate;
 	
 	public GpmsNgacObligations() {
-		policyCreationFromTemplate = new PolicyCreationFromTemplate();
+		//policyCreationFromTemplate = new PolicyCreationFromTemplate();
 	}
 	
 	

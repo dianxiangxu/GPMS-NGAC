@@ -30,10 +30,6 @@ rules:
                           - function:
                               name: current_user
                     - O
-                    - function:
-                        name: to_props
-                        args:
-                          - key1 = value1
             where:
               - name: PI-Info
                 type: OA
@@ -60,10 +56,6 @@ rules:
                           - function:
                               name: child_of_assign
                     - O
-                    - function:
-                        name: to_props
-                        args:
-                          - key1 = value1
             where:
               - name: CoPI-Info
                 type: OA  
@@ -90,10 +82,6 @@ rules:
                           - function:
                               name: child_of_assign
                     - O
-                    - function:
-                        name: to_props
-                        args:
-                          - key1 = value1
             where:
               - name: SP-Info
                 type: OA
@@ -110,13 +98,15 @@ rules:
     response:
       actions:
         - delete:
-            create:
-              what:
-                - name: dave
-                  type: O
-              where:
-                - name: SP-Info
-                  type: OA      
+            grant:
+              subjects:
+                - name: PI
+                  type: UA 
+              operations:
+                - w
+              targets:
+                - name: PI-Editable-Data
+                  type: OA                
   - label: submit_proposal
     event:
       subject:
@@ -129,17 +119,13 @@ rules:
             type: OA
     response:
       actions:
-        - deny:
-            label: deny_this_ev
-            subject:
-              name: PI
-              type: UA
-              properties: 
-            operations:
-              - w
-            target:
-              complement: false
-              intersection: false
-              containers:
-                - name: PI-Editable-Data
-                  type: OA                     
+        - delete:
+            grant:
+              subjects:
+                - name: PI
+                  type: UA 
+              operations:    
+                - Delete
+              targets:
+                - name: PDSs
+                  type: OA   

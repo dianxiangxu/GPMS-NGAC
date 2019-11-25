@@ -21,16 +21,20 @@ import gov.nist.csd.pm.pip.graph.MemGraph;
 import gov.nist.csd.pm.exceptions.PMException;
 import gov.nist.csd.pm.pip.graph.model.nodes.Node;
 import gov.nist.csd.pm.pip.graph.model.nodes.NodeType;
+import gov.nist.csd.pm.pip.prohibitions.Prohibitions;
+import gov.nist.csd.pm.pip.prohibitions.ProhibitionsSerializer;
 
 public class UserPermissionChecker {
 	
 	private static final Logger log = Logger.getLogger(UserPermissionChecker.class.getName());
 	
-	public static boolean checkPermission(Graph ngacPolicy, String userOrAttributeName,String type,Attribute targetAttribute, Object[] objects) {
+	public static boolean checkPermissionAnyType(Graph ngacPolicy, Prohibitions prohibitions, String userOrAttributeName,String type,Attribute targetAttribute, List<String> objects) {
 		
 		boolean hasPermission = false;
 		try {
-			PReviewDecider decider = new PReviewDecider(ngacPolicy);
+			String pro = ProhibitionsSerializer.toJson(prohibitions);
+			log.info("Prohibition:"+pro);
+			PReviewDecider decider = new PReviewDecider(ngacPolicy,prohibitions);
 			
 			long targetId = PDSOperations.getNodeID(ngacPolicy, targetAttribute.getAttributeName(), targetAttribute.getAttributeType(), null);
 			
@@ -41,8 +45,9 @@ public class UserPermissionChecker {
 	        
 	        if(userSet.size() ==1)   // expect to get only one user
 	        {
-	        	String[] requiredAccessRights = Arrays.copyOf(objects, objects.length, String[].class);
-	   		 
+	        	String[] requiredAccessRights = objects.toArray(new String[0]) ;//Arrays.copyOf(objects, objects.size(), String[].class);
+	   		    //objects.to
+	        	
 	        	 for(Node user : userSet) {
 	        		 log.info("UserPermissionChecker: "+user.getName()+"|"+requiredAccessRights.toString());
 	        		 System.out.println("UserPermissionChecker: "+user.getName()+"|"+targetAttribute.toString()+"|"+Arrays.toString(requiredAccessRights));
@@ -64,11 +69,14 @@ public class UserPermissionChecker {
 		return hasPermission;
 	}
 	
-public static boolean checkPermission2(Graph ngacPolicy, String userName,Attribute targetAttribute, String[] objects) {
+public static boolean checkPermission(Graph ngacPolicy, Prohibitions prohibitions, String userName,Attribute targetAttribute, String[] objects) {
 		
 		boolean hasPermission = false;
 		try {
-			PReviewDecider decider = new PReviewDecider(ngacPolicy);
+			
+			String pro = ProhibitionsSerializer.toJson(prohibitions);
+			log.info("Prohibition:"+pro);
+			PReviewDecider decider = new PReviewDecider(ngacPolicy,prohibitions);
 			
 			long targetId = PDSOperations.getNodeID(ngacPolicy, targetAttribute.getAttributeName(), targetAttribute.getAttributeType(), null);
 			

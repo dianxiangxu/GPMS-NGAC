@@ -15,6 +15,50 @@ import java.util.Set;
 public class DepartmentsPositionsCollection {
 	private static final Map<String, HashMap<String, HashMap<String, ArrayList<String>>>> ht = new HashMap<String, HashMap<String, HashMap<String, ArrayList<String>>>>();
 
+	public static HashMap<String, String> adminUsers =null;
+	public static HashMap<String, String> departmentNames =null;
+	
+	public static void init() {
+		if(adminUsers == null) {
+			adminUsers = new HashMap<String, String>();
+			adminUsers.put("CSCHAIR","chaircomputerscience");
+			adminUsers.put("CSBM","bmcomputerscience");
+			adminUsers.put("CSDEAN","deancomputerscience");
+			
+			adminUsers.put("CECHAIR","chaircomputerengineering");
+			adminUsers.put("CEBM","bmcomputerengineering1");
+			adminUsers.put("CEDEAN","deancomputerengineering");
+			
+			adminUsers.put("ECECHAIR","chairelectricalengineering");
+			adminUsers.put("ECEBM","bmelectricalengineering");
+			adminUsers.put("ECEDEAN","deanelectricalengineering");
+			
+			adminUsers.put("PHYCHAIR","chairphysics1");
+			adminUsers.put("PHYBM","bmphysics1");
+			adminUsers.put("PHYDEAN","deanphysics1");
+			
+			adminUsers.put("CHECHAIR","chairchemistry");
+			adminUsers.put("CHEBM","bmchemistry1");
+			adminUsers.put("CHEDEAN","deanchemistry1");
+			
+			adminUsers.put("URA","racomputerscience");
+			adminUsers.put("URD","directorcomputerscience");
+			adminUsers.put("IRB","irbglobal");
+			
+		}
+		
+		if(departmentNames == null) {
+			departmentNames = new HashMap<String, String>();			
+			departmentNames.put("Computer Science","CS");
+			departmentNames.put("Computer Engineering","CE");
+			departmentNames.put("Electrical Engineering","ECE");
+			departmentNames.put("Physics","PHY");
+			departmentNames.put("Chemistry","CHE");
+		}
+		
+		
+	}
+	
 	public DepartmentsPositionsCollection() {
 		ArrayList<String> tenuredTitles = new ArrayList<String>();
 		tenuredTitles.add("Distinguished Professor");

@@ -10,6 +10,8 @@ import gov.nist.csd.pm.pip.obligations.MemObligations;
 import gov.nist.csd.pm.pip.obligations.evr.EVRParser;
 import gov.nist.csd.pm.pip.obligations.model.Obligation;
 import gov.nist.csd.pm.pip.prohibitions.MemProhibitions;
+import gov.nist.csd.pm.pip.prohibitions.Prohibitions;
+import gov.nist.csd.pm.pip.prohibitions.ProhibitionsSerializer;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -38,26 +40,30 @@ public class NGACPolicyConfigurationLoader {
 	//This graph holds NGAC policy
 	private static Graph ngacPolicy;
 	private static final Logger log = Logger.getLogger(NGACPolicyConfigurationLoader.class.getName());
-	static String jsonProposalPolicy = "";
+	private static String jsonProposalPolicy = "";
+	private static String jsonApprovalPolicy = "";
 	
 	public void init() {
 		if (ngacPolicy == null) {
 			File file_super = getFileFromResources(Constants.POLICY_CONFIG_FILE_SUPER);
 			File file_proposal_creation = getFileFromResources(Constants.POLICY_CONFIG_FILE_PROPOSAL_CREATION);
 			File file_university_org = getFileFromResources(Constants.POLICY_CONFIG_FILE_UNIVERSITY_ORGANIZATION);
-			File file_proposal = getFileFromResources(Constants.PDS_TEMPLATE_UP);
-			
+			File file_proposal_editing = getFileFromResources(Constants.PDS_EDITING_TEMPLATE);
+			File file_proposal_approval = getFileFromResources(Constants.POLICY_CONFIG_FILE_CREATE_APPROVAL);
+
 			String jsonSuper;
 			String jsonProposalCreation;
 			String jsonUnivOrg;
-			
-			
+
 			try {
 				jsonSuper = new String(Files.readAllBytes(Paths.get(file_super.getAbsolutePath())));
-				jsonProposalCreation = new String(Files.readAllBytes(Paths.get(file_proposal_creation.getAbsolutePath())));
+				jsonProposalCreation = new String(
+						Files.readAllBytes(Paths.get(file_proposal_creation.getAbsolutePath())));
 				jsonUnivOrg = new String(Files.readAllBytes(Paths.get(file_university_org.getAbsolutePath())));
-				jsonProposalPolicy = new String(Files.readAllBytes(Paths.get(file_proposal.getAbsolutePath())));
-				log.info("Editing Policy:"+jsonProposalPolicy.length());
+				jsonProposalPolicy = new String(Files.readAllBytes(Paths.get(file_proposal_editing.getAbsolutePath())));
+				jsonApprovalPolicy = new String(Files.readAllBytes(Paths.get(file_proposal_approval.getAbsolutePath())));
+				log.info("Editing Policy:" + jsonProposalPolicy.length());
+				log.info("Approval Policy:" + jsonApprovalPolicy.length());
 				try {
 					ngacPolicy = GraphSerializer.fromJson(new MemGraph(), jsonSuper);
 					ngacPolicy = GraphSerializer.fromJson(ngacPolicy, jsonProposalCreation);
@@ -122,34 +128,45 @@ public class NGACPolicyConfigurationLoader {
 	 */
 	public Graph createAProposalGraph(Graph policy) {
 		try {
-			//File file_proposal = getFileFromResources(Constants.PDS_TEMPLATE);
-			//String jsonProposalPolicy = "";
-			
-				//jsonProposalPolicy = new String(Files.readAllBytes(Paths.get(file_proposal.getAbsolutePath())));
-				log.info("Template file content:"+jsonProposalPolicy.length());
-				log.info("No of Nodes:"+policy.getNodes().size());
-				try {
-					
-					policy = GraphSerializer.fromJson(policy, jsonProposalPolicy);	
-					log.info("No of Nodes:"+policy.getNodes().size());
-					
-				    if(policy == null)
-				    {
-				    	log.info("Proposal graph is null");
-				    }
-				    else {
-				    	log.info("Proposal editing policy loaded.");
-				    }
-				} catch (PMException e) {
-					log.debug("PM Exception: createAProposalGraph : while loading PDS base configuration. "
-							+ e.toString());
-				}
-			} catch (Exception e) {
-				log.debug("I/O Exception : createAProposalGraph : while loading PDS base configuration."
-						+ e.toString());
-			}
+			log.info("Template file content:" + jsonProposalPolicy.length());
+			log.info("Basic Policy :No of Nodes:" + policy.getNodes().size());
+			try {
 
-		
+				policy = GraphSerializer.fromJson(policy, jsonProposalPolicy);
+				log.info("Combined policy: No of Nodes:" + policy.getNodes().size());
+
+				if (policy != null) {
+					log.info("Proposal editing policy loaded.");
+				}
+			} catch (PMException e) {
+				log.debug("PM Exception: createAProposalGraph : while loading PDS base configuration. " + e.toString());
+			}
+		} catch (Exception e) {
+			log.debug("I/O Exception : createAProposalGraph : while loading PDS base configuration." + e.toString());
+		}
+
+		return policy;
+	}
+	
+	public Graph createAprovalGraph(Graph policy) {
+		try {
+			log.info("Template file content:" + jsonApprovalPolicy.length());
+			log.info("Basic Policy :No of Nodes:" + policy.getNodes().size());
+			try {
+
+				policy = GraphSerializer.fromJson(policy, jsonApprovalPolicy);
+				log.info("Combined with approval policy: No of Nodes:" + policy.getNodes().size());
+
+				if (policy != null) {
+					log.info("Proposal approval policy loaded.");
+				}
+			} catch (PMException e) {
+				log.debug("PM Exception: createAprovalGraph : while loading PDS base configuration. " + e.toString());
+			}
+		} catch (Exception e) {
+			log.debug("I/O Exception : createAprovalGraph : while loading PDS base configuration." + e.toString());
+		}
+
 		return policy;
 	}
 	
@@ -168,48 +185,88 @@ public class NGACPolicyConfigurationLoader {
 		return obligation;
 	}
 	
+	public Prohibitions loadProhibitions(String path) {
+		Prohibitions prohibitions = new MemProhibitions();
+		try {
+		File file_prohibition = getFileFromResources(path); 
+		String json_prohibition = new String(Files.readAllBytes(Paths.get(file_prohibition.getAbsolutePath())));
+		prohibitions = ProhibitionsSerializer.fromJson(prohibitions, json_prohibition);
+		
+		}catch(Exception e) {
+			log.info("Exception: "+e.toString());
+			e.printStackTrace();
+		}
+		return prohibitions;
+	}
+	
 	/**
 	 * @param path is the location and name to save the json policy
 	 * if path is provided null or empty string it will be saved to a default location
 	 * @throws PMException
 	 * @throws IOException
 	 */
-	public void savePolicy(String path) throws PMException, IOException {
-		
-		String policyString = GraphSerializer.toJson(ngacPolicy);
-		
-		File file ;
-		if(path == null || path.isEmpty()) {
+	public void savePolicy(Graph policy, String path) throws PMException, IOException {
+
+		String policyString = GraphSerializer.toJson(policy);
+
+		File file;
+		if (path == null || path.isEmpty()) {
 			file = new File(Constants.POLICY_CONFIG_OUTPUT_FILE);
-		}
-		else {
+		} else {
 			file = new File(path);
 		}
-		
-		if (file.createNewFile()) {            
-            log.info("File has been created.");
-        } else {
-        
-            log.info("File already exists.");
-        }
-				
+
+		if (file.createNewFile()) {
+			log.info("File has been created.");
+		} else {
+
+			log.info("File already exists.");
+		}
+
 		BufferedWriter writer = null;
 		writer = new BufferedWriter(new FileWriter(file));
 		writer.write(policyString);
 		writer.flush();
 
-		if(writer != null)
-			writer.close();		
+		if (writer != null)
+			writer.close();
+
+	}
+	
+	public void saveProhibition(Prohibitions prohibitions, String path) throws PMException, IOException {
+
+		String pro = ProhibitionsSerializer.toJson(prohibitions);
 		
+		File file;
+		if (path == null || path.isEmpty()) {
+			file = new File(Constants.POLICY_CONFIG_OUTPUT_FILE);
+		} else {
+			file = new File(path);
+		}
+
+		if (file.createNewFile()) {
+			log.info("Prohibition File has been created.");
+		} else {
+
+			log.info("Prohibition File already exists.");
+		}
+
+		BufferedWriter writer = null;
+		writer = new BufferedWriter(new FileWriter(file));
+		writer.write(pro);
+		writer.flush();
+
+		if (writer != null)
+			writer.close();
+
 	}
 
 	public static Graph getPolicy() {
-		
 		return ngacPolicy;
 	}
 
-	public void setPolicy(Graph policy) {
-		this.ngacPolicy = policy;
+	public static void setPolicy(Graph policy) {		
+		ngacPolicy = policy;
 	}
 
 	public static long getID() {

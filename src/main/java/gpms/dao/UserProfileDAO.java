@@ -15,7 +15,6 @@ import gpms.model.UserDetail;
 import gpms.model.UserInfo;
 import gpms.model.UserProfile;
 import gpms.model.UserProposalCount;
-import gpms.ngac.policy.UserTaskPermissionOperations;
 import gpms.utils.EmailUtil;
 
 import java.io.File;
@@ -306,6 +305,35 @@ public class UserProfileDAO extends BasicDAO<UserProfile, String> {
 		}
 		return users;
 	}
+	public List<UserProfile> findAllForAdminUserGrid(String type) {
+		Datastore ds = getDatastore();
+		Boolean isActive = true;
+		List<UserInfo> users = new ArrayList<UserInfo>();
+		Query<UserProfile> profileQuery = ds.createQuery(UserProfile.class);
+		Query<UserAccount> accountQuery = ds.createQuery(UserAccount.class);
+		
+		if (isActive != null) {
+			accountQuery.criteria("active").equal(isActive);
+		}
+		profileQuery.criteria("user id").in(accountQuery.asKeyList());
+		List<String> positionTitles = new ArrayList<String>();
+		if (type.equals("DEPT")) {
+			positionTitles.add("Department Chair");
+			positionTitles.add("Dean");
+			positionTitles.add("Business Manager");
+		}
+		else if(type.equals("UNIVERSITY")) {
+			positionTitles.add("IRB");
+			positionTitles.add("University Research Administrator");
+			positionTitles.add("University Research Director");
+		}
+		profileQuery.criteria("details.position title").in(positionTitles);
+		
+		List<UserProfile> userProfiles = profileQuery.asList();
+		
+		return userProfiles;
+	}
+	
 
 	public List<UserInfo> findAllForAdminUserGrid(int offset, int limit,
 			GPMSCommonInfo userInfo) {

@@ -14,6 +14,11 @@ import gov.nist.csd.pm.pip.obligations.MemObligations;
 import gov.nist.csd.pm.pip.obligations.evr.EVRParser;
 import gov.nist.csd.pm.pip.obligations.model.Obligation;
 import gov.nist.csd.pm.pip.prohibitions.MemProhibitions;
+import gov.nist.csd.pm.pip.prohibitions.Prohibitions;
+import gov.nist.csd.pm.pip.prohibitions.ProhibitionsSerializer;
+import gov.nist.csd.pm.pip.prohibitions.model.Prohibition;
+import gov.nist.csd.pm.pip.prohibitions.model.Prohibition.Subject.Type;
+import gov.nist.csd.pm.pip.prohibitions.model.Prohibition.Subject;
 
 import static gov.nist.csd.pm.pip.graph.model.nodes.NodeType.O;
 import static gov.nist.csd.pm.pip.graph.model.nodes.NodeType.OA;
@@ -29,6 +34,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -56,10 +62,13 @@ public class PDSOperations {
 	private GpmsNgacObligations  gpmsNgacObligations;
 	
 	public static HashMap<Long,Graph> proposalPolicies = new HashMap<Long,Graph>();
+	public static Prohibitions proposalProhibitions = null;
 	
 	private static final Logger log = Logger.getLogger(PDSOperations.class.getName());
 	
 	private NGACPolicyConfigurationLoader policyLoader;
+	
+	
 	
 	Obligation obligation = null;	
 	PDP pdp =null;
@@ -68,7 +77,7 @@ public class PDSOperations {
 	{
 		this.ngacPolicy = NGACPolicyConfigurationLoader.getPolicy();
 		gpmsNgacObligations = new GpmsNgacObligations();
-		policyLoader = new NGACPolicyConfigurationLoader();			
+		policyLoader = new NGACPolicyConfigurationLoader();	
 		
 	}
 	
@@ -96,12 +105,14 @@ public class PDSOperations {
 	}
 	
 	
+	
+	
 	/**
 	 * This function checks whether a user has permission for a task
-	 * @param userInfo
+	 * @param userName
 	 * @return true/false
 	 */
-	public boolean hasPermissionToCreateAProposal( GPMSCommonInfo userInfo)
+	public boolean hasPermissionToCreateAProposal( String userName, Prohibitions prohibitions)
 	{
 		boolean hasPermission = true;		
 		
@@ -109,13 +120,13 @@ public class PDSOperations {
 		
 		Iterator<Map.Entry<Attribute, HashSet>> itr = map.entrySet().iterator(); 
          
-        while(itr.hasNext()) 
-        { 
-             Map.Entry<Attribute, HashSet> entry = itr.next(); 
-             log.info("Container = " + entry.getKey() +  
-                                 ", permission set = " + entry.getValue()); 
-             hasPermission = UserPermissionChecker.checkPermission(ngacPolicy, userInfo.getUserName(),U.toString(), (Attribute)entry.getKey(), entry.getValue().toArray());
-        } 
+		while (itr.hasNext()) {
+			Map.Entry<Attribute, HashSet> entry = itr.next();
+			log.info("Container = " + entry.getKey() + ", permission set = " + entry.getValue());
+			hasPermission = UserPermissionChecker.checkPermissionAnyType(ngacPolicy, prohibitions,
+					userName, U.toString(), (Attribute) entry.getKey(),
+					new ArrayList<String>(entry.getValue()));
+		}
         
 		log.info("Create Proposal Permission : "+hasPermission);
 		
@@ -123,34 +134,32 @@ public class PDSOperations {
 	}
 	
 	
-	public boolean hasPermissionToCreateAProposal(Graph policy, GPMSCommonInfo userInfo)
-	{
-		boolean hasPermission = true;		
-		
+	public boolean hasPermissionToCreateAProposal(Graph policy, GPMSCommonInfo userInfo, Prohibitions prohibitions) {
+		boolean hasPermission = true;
+
 		HashMap map = Task.CREATE_PROPOSAL.getPermissionsSets();
-		
-		Iterator<Map.Entry<Attribute, HashSet>> itr = map.entrySet().iterator(); 
-         
-        while(itr.hasNext()) 
-        { 
-             Map.Entry<Attribute, HashSet> entry = itr.next(); 
-             log.info("Container = " + entry.getKey() +  
-                                 ", permission set = " + entry.getValue()); 
-             hasPermission = UserPermissionChecker.checkPermission(policy, userInfo.getUserName(),U.toString(), (Attribute)entry.getKey(), entry.getValue().toArray());
-        } 
-        
-		log.info("Create Proposal Permission : "+hasPermission);
-		
+
+		Iterator<Map.Entry<Attribute, HashSet>> itr = map.entrySet().iterator();
+
+		while (itr.hasNext()) {
+			Map.Entry<Attribute, HashSet> entry = itr.next();
+			log.info("Container = " + entry.getKey() + ", permission set = " + entry.getValue());
+			hasPermission = UserPermissionChecker.checkPermissionAnyType(policy, prohibitions, userInfo.getUserName(),
+					U.toString(), (Attribute) entry.getKey(), new ArrayList<String>(entry.getValue()));
+		}
+
+		log.info("Create Proposal Permission : " + hasPermission);
+
 		return hasPermission;
 	}
 	/**
 	 * This function checks whether a user has permission to add another user as CoPI
-	 * @param userInfo the performer
+	 * @param userName the performer
 	 * @param coPIApproachableUser the intended user to be a CoPI
 	 * @return true/false
 	 */
 	
-	public boolean hasPermissionToAddAsCoPI(Graph policy, GPMSCommonInfo userInfo,String coPIApproachableUser)
+	public boolean hasPermissionToAddAsCoPI(Graph policy, String userName,String coPIApproachableUser, Prohibitions prohibitions)
 	{
 		boolean hasPermission = true;		
 		
@@ -163,7 +172,7 @@ public class PDSOperations {
              Map.Entry<Attribute, HashSet> entry = itr.next(); 
              log.info("Container = " + entry.getKey() + ", permission set = " + entry.getValue()); 
              System.out.println("Container = " + entry.getKey() + ", permission set = " + entry.getValue()); 
-             hasPermission = hasPermission && UserPermissionChecker.checkPermission(policy, "PI", UA.toString(), (Attribute)entry.getKey(), entry.getValue().toArray());
+             hasPermission = hasPermission && UserPermissionChecker.checkPermissionAnyType(policy, prohibitions, "PI", UA.toString(), (Attribute)entry.getKey(), new ArrayList<String>(entry.getValue()));
         } 
         try {
         	hasPermission = hasPermission && isChildrenFound(policy, coPIApproachableUser, Constants.CO_PI_UA_LBL);
@@ -177,37 +186,63 @@ public class PDSOperations {
 		return hasPermission;
 	}
 	
-	
-	/**
-	 * This function checks whether a user has permission to add another user as SP
-	 * @param userInfo the performer
-	 * @param spApproachableUser the intended user to be a SP
-	 * @return true/false
-	 */
-	
-	public boolean hasPermissionToAddAsSP(Graph policy,GPMSCommonInfo userInfo,String spApproachableUser)
+	public boolean hasPermissionToDeleteCoPI(Graph policy, String userName, Prohibitions prohibitions)
 	{
 		boolean hasPermission = true;		
 		
-		HashMap map = Task.ADD_SP.getPermissionsSets();
+		HashMap map = Task.DELETE_CO_PI.getPermissionsSets();
 		
 		Iterator<Map.Entry<Attribute, HashSet>> itr = map.entrySet().iterator(); 
          
         while(itr.hasNext()) 
         { 
              Map.Entry<Attribute, HashSet> entry = itr.next(); 
-             log.info("Container = " + entry.getKey() +  
-                                 ", permission set = " + entry.getValue()); 
-             hasPermission = hasPermission && UserPermissionChecker.checkPermission(policy, userInfo.getUserName(), U.toString(), (Attribute)entry.getKey(), entry.getValue().toArray());
+             log.info("Container = " + entry.getKey() + ", permission set = " + entry.getValue()); 
+             System.out.println("Container = " + entry.getKey() + ", permission set = " + entry.getValue()); 
+             hasPermission = hasPermission && UserPermissionChecker.checkPermissionAnyType(policy, prohibitions, "PI", UA.toString(), (Attribute)entry.getKey(), new ArrayList<String>(entry.getValue()));
         } 
-        try {
-        	hasPermission = hasPermission && isChildrenFound(policy, spApproachableUser, Constants.SENIOR_PERSON_UA_LBL);
-        }
-        catch(PMException e){
-        	e.printStackTrace();
-        }
-		log.info("Add SP Permission : "+hasPermission);
+//        try {
+//        	hasPermission = hasPermission && isChildrenFound(policy, coPIApproachableUser, Constants.CO_PI_UA_LBL);
+//        }
+//        catch(PMException e){
+//        	e.printStackTrace();
+//        }
+		log.info("Add CoPI Permission : "+hasPermission);
+		System.out.println("Add CoPI Permission : "+hasPermission);
 		
+		return hasPermission;
+	}
+	
+	
+	/**
+	 * This function checks whether a user has permission to add another user as SP
+	 * @param userName the performer
+	 * @param spApproachableUser the intended user to be a SP
+	 * @return true/false
+	 */
+	
+	public boolean hasPermissionToAddAsSP(Graph policy, String userName, String spApproachableUser, Prohibitions prohibitions) {
+		boolean hasPermission = true;
+
+		HashMap map = Task.ADD_SP.getPermissionsSets();
+
+		Iterator<Map.Entry<Attribute, HashSet>> itr = map.entrySet().iterator();
+
+		while (itr.hasNext()) {
+			Map.Entry<Attribute, HashSet> entry = itr.next();
+			log.info("Container = " + entry.getKey() + ", permission set = " + entry.getValue());
+			hasPermission = hasPermission
+					&& UserPermissionChecker.checkPermissionAnyType(policy, prohibitions, userName,
+							U.toString(), (Attribute) entry.getKey(), new ArrayList<String>(entry.getValue()));
+		}
+		try {
+			hasPermission = hasPermission
+					&& isChildrenFound(policy, spApproachableUser, Constants.SENIOR_PERSON_UA_LBL);
+		} catch (PMException e) {
+			e.printStackTrace();
+		}
+		log.info("Add SP Permission : " + hasPermission);
+
 		return hasPermission;
 	}
 	
@@ -233,37 +268,38 @@ public class PDSOperations {
 	 * return randomId; }
 	 */
 	
-	public long createAProposal(String userName) throws PMException
-	{
-		
-		long randomId = getID(); 
-		Node pdsNode = this.ngacPolicy.createNode(randomId, ""+randomId, OA, null);
-		log.info("ID:"+randomId);
-		
-		long pdsOriginationOAID = getNodeID(ngacPolicy, Constants.PDS_ORIGINATING_OA,  OA, null); ngacPolicy.assign(pdsNode.getID(), pdsOriginationOAID);
-		//ngacPolicy.assign(pdsNode.getID(), pdsOriginationOAID);
-		try {
-		long userID = getNodeID(ngacPolicy, userName, U, null);
-		//simulateAssignToEvent(ngacPolicy, userID, ngacPolicy.getNode(pdsOriginationOAID), pdsNode);
-		
-		//added
-		
-		Graph proposalPolicy =null;
-		proposalPolicy = policyLoader.createAProposalGraph(ngacPolicy); //loads editing policy
-		printAccessState("Initial configuration before op:", proposalPolicy);
-		
-		 
-	    getPDP(proposalPolicy).getEPP().processEvent(new AssignToEvent(proposalPolicy.getNode(pdsOriginationOAID), pdsNode),userID, getID());
-		
-	    log.info("Proposal policy saved:"+randomId +"|"+proposalPolicy.toString()+"|"+proposalPolicy.getNodes().size());
-		PDSOperations.proposalPolicies.put(randomId, proposalPolicy);	
-		printAccessState("Initial configuration after op:", proposalPolicy);
+	public long createAProposal(String userName) throws PMException {
 
-			
-		}catch(Exception e) {
-			log.info("Exception:"+ e.toString() );
+		long randomId = getID();
+
+		try {
+
+			Graph proposalPolicy = null;
+			// proposalPolicy = policyLoader.createAProposalGraph(ngacPolicy); //loads
+			// editing policy
+			proposalPolicy = policyLoader.reloadBasicConfig();
+			proposalPolicy = policyLoader.createAProposalGraph(proposalPolicy); // loads editing policy
+
+			Node pdsNode = proposalPolicy.createNode(randomId, "" + randomId, OA, null);
+			//log.info("ID:" + randomId);
+			long pdsOriginationOAID = getNodeID(proposalPolicy, Constants.PDS_ORIGINATING_OA, OA, null);
+			long userID = getNodeID(proposalPolicy, userName, U, null);
+
+			//printAccessState("Initial configuration before op:", proposalPolicy);
+			log.info("CREATE PROPOSAL: # nodes BEFORE:"+proposalPolicy.getNodes().size());
+			getPDP(proposalPolicy).getEPP().processEvent(
+					new AssignToEvent(proposalPolicy.getNode(pdsOriginationOAID), pdsNode), userID, getID());
+
+			log.info("Proposal policy saved:" + randomId + "|" + proposalPolicy.toString() + "|"
+					+ proposalPolicy.getNodes().size());
+			PDSOperations.proposalPolicies.put(randomId, proposalPolicy);
+			//printAccessState("Initial configuration after op:", proposalPolicy);
+			log.info("CREATE PROPOSAL: # nodes AFTER:"+proposalPolicy.getNodes().size());
+
+		} catch (Exception e) {
+			log.info("Exception:" + e.toString());
 		}
-        return randomId;
+		return randomId;
 	}
 	
 	
@@ -372,6 +408,7 @@ public class PDSOperations {
         Set<Node> search = policy.search(parent, UA.toString(), null);
         
         System.out.println(search.size());
+        
         
         for(Node userAttNode : search) {
         	
