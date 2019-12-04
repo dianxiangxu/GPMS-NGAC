@@ -3819,6 +3819,47 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 			}
 		}
 	}
+	
+	public Set<String> getExistingSignatureProfileIdForAProposal(
+			Proposal existingProposal, Set<String> profileIds,String tag) {
+
+		for (SignatureInfo sign : existingProposal.getSignatureInfo()) {
+			if (sign.getPositionTitle().equals(tag)) {
+				profileIds.add(sign.getUserProfileId());
+			} 			
+		}
+		return profileIds;
+		
+		//
+//		for (SignatureInfo sign : existingProposal.getSignatureInfo()) {
+//			if (sign.getPositionTitle().equals("PI")) {
+//				requiredSigns.getExistingPISign().add(sign.getUserProfileId());
+//			} else if (sign.getPositionTitle().equals("Co-PI")) {
+//				requiredSigns.getExistingCoPISigns().add(
+//						sign.getUserProfileId());
+//			} else if (sign.getPositionTitle().equals("Department Chair")) {
+//				requiredSigns.getExistingChairSigns().add(
+//						sign.getUserProfileId());
+//			} else if (sign.getPositionTitle().equals("Business Manager")) {
+//				requiredSigns.getExistingBusinessManagerSigns().add(
+//						sign.getUserProfileId());
+//			} else if (sign.getPositionTitle().equals("Dean")) {
+//				requiredSigns.getExistingDeanSigns().add(
+//						sign.getUserProfileId());
+//			} else if (sign.getPositionTitle().equals("IRB")) {
+//				requiredSigns.getExistingIRBSigns()
+//						.add(sign.getUserProfileId());
+//			} else if (sign.getPositionTitle().equals(
+//					"University Research Administrator")) {
+//				requiredSigns.getExistingResearchAdminSigns().add(
+//						sign.getUserProfileId());
+//			} else if (sign.getPositionTitle().equals(
+//					"University Research Director")) {
+//				requiredSigns.getExistingResearchDirectorSigns().add(
+//						sign.getUserProfileId());
+//			}
+//		}
+	}
 
 	/***
 	 * Updates Withdrawn Status for a Proposal

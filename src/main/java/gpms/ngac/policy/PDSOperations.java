@@ -174,12 +174,12 @@ public class PDSOperations {
              System.out.println("Container = " + entry.getKey() + ", permission set = " + entry.getValue()); 
              hasPermission = hasPermission && UserPermissionChecker.checkPermissionAnyType(policy, prohibitions, "PI", UA.toString(), (Attribute)entry.getKey(), new ArrayList<String>(entry.getValue()));
         } 
-        try {
-        	hasPermission = hasPermission && isChildrenFound(policy, coPIApproachableUser, Constants.CO_PI_UA_LBL);
-        }
-        catch(PMException e){
-        	e.printStackTrace();
-        }
+       // try {
+       // 	hasPermission = hasPermission && isChildrenFound(policy, coPIApproachableUser, Constants.CO_PI_UA_LBL);
+      //  }
+      //  catch(PMException e){
+       // 	e.printStackTrace();
+       // }
 		log.info("Add CoPI Permission : "+hasPermission);
 		System.out.println("Add CoPI Permission : "+hasPermission);
 		
@@ -207,8 +207,35 @@ public class PDSOperations {
 //        catch(PMException e){
 //        	e.printStackTrace();
 //        }
-		log.info("Add CoPI Permission : "+hasPermission);
-		System.out.println("Add CoPI Permission : "+hasPermission);
+		log.info("Delete CoPI Permission : "+hasPermission);
+		System.out.println("Delete CoPI Permission : "+hasPermission);
+		
+		return hasPermission;
+	}
+	
+	public boolean hasPermissionToDeleteSP(Graph policy, String userName, Prohibitions prohibitions)
+	{
+		boolean hasPermission = true;		
+		
+		HashMap map = Task.DELETE_SP.getPermissionsSets();
+		
+		Iterator<Map.Entry<Attribute, HashSet>> itr = map.entrySet().iterator(); 
+         
+        while(itr.hasNext()) 
+        { 
+             Map.Entry<Attribute, HashSet> entry = itr.next(); 
+             log.info("Container = " + entry.getKey() + ", permission set = " + entry.getValue()); 
+             System.out.println("Container = " + entry.getKey() + ", permission set = " + entry.getValue()); 
+             hasPermission = hasPermission && UserPermissionChecker.checkPermissionAnyType(policy, prohibitions, "PI", UA.toString(), (Attribute)entry.getKey(), new ArrayList<String>(entry.getValue()));
+        } 
+//        try {
+//        	hasPermission = hasPermission && isChildrenFound(policy, coPIApproachableUser, Constants.CO_PI_UA_LBL);
+//        }
+//        catch(PMException e){
+//        	e.printStackTrace();
+//        }
+		log.info("Delete SP Permission : "+hasPermission);
+		System.out.println("Delete SP Permission : "+hasPermission);
 		
 		return hasPermission;
 	}
@@ -235,12 +262,12 @@ public class PDSOperations {
 					&& UserPermissionChecker.checkPermissionAnyType(policy, prohibitions, userName,
 							U.toString(), (Attribute) entry.getKey(), new ArrayList<String>(entry.getValue()));
 		}
-		try {
-			hasPermission = hasPermission
-					&& isChildrenFound(policy, spApproachableUser, Constants.SENIOR_PERSON_UA_LBL);
-		} catch (PMException e) {
-			e.printStackTrace();
-		}
+//		try {
+//			hasPermission = hasPermission
+//					&& isChildrenFound(policy, spApproachableUser, Constants.SENIOR_PERSON_UA_LBL);
+//		} catch (PMException e) {
+//			e.printStackTrace();
+//		}
 		log.info("Add SP Permission : " + hasPermission);
 
 		return hasPermission;
@@ -279,6 +306,7 @@ public class PDSOperations {
 			// editing policy
 			proposalPolicy = policyLoader.reloadBasicConfig();
 			proposalPolicy = policyLoader.createAProposalGraph(proposalPolicy); // loads editing policy
+			proposalPolicy = policyLoader.createAprovalGraph(proposalPolicy); // loads editing policy
 
 			Node pdsNode = proposalPolicy.createNode(randomId, "" + randomId, OA, null);
 			//log.info("ID:" + randomId);

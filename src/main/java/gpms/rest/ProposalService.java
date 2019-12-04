@@ -618,47 +618,30 @@ public class ProposalService {
 			Proposal existingProposal = proposalDAO
 					.findProposalByProposalID(id);
 			
+			//more roles : Professional staff(BM)|Administrator(Dean.chair)|University administrator(irb/ra/rd)
 			if(proposalRoles.equalsIgnoreCase("PI") || proposalRoles.equalsIgnoreCase("Co-PI") || proposalRoles.equalsIgnoreCase("SP") ||
-					userInfo.getUserPositionType().equalsIgnoreCase("Administrator")) {
+					userInfo.getUserPositionType().equalsIgnoreCase("Administrator") 
+					||userInfo.getUserPositionType().equalsIgnoreCase("Professional staff")
+					||userInfo.getUserPositionType().equalsIgnoreCase("University administrator")) {
 				ProposalDataSheet projectProposal =  new ProposalDataSheet(); 
 				long proposalNgacId = existingProposal.getNgacId();
 				log.info("NN: Proposal NGAC Id:"+proposalNgacId);
 				
 				Graph proposalPolicy=null;
-
-				projectProposal.setProposal(existingProposal);
-				
-				if(PDSOperations.proposalPolicies.get(existingProposal.getNgacId()) != null) {
-					projectProposal.setProposalPolicy(PDSOperations.proposalPolicies.get(existingProposal.getNgacId()));
-					log.info("Policy found in hashmap.");
-					
-				}
-				else {
-					log.info("Policy re-created.");
-					proposalPolicy = pdsOperations.getBacicNGACPolicy();
-				
-					proposalPolicy = loader.createAProposalGraph(proposalPolicy);
-					projectProposal.setProposalPolicy(proposalPolicy);
-					
-					
-					projectProposal.clearIngestigator();
-					projectProposal.updatePI(false);
-					projectProposal.updateCoPI(userInfo.getUserName(), false);
-					projectProposal.updateSP(userInfo.getUserName(),false);					
-					PDSOperations.proposalPolicies.put(existingProposal.getNgacId(),proposalPolicy);
-					
-					
-				}
+				setPolicyState(projectProposal, existingProposal, proposalPolicy, userInfo.getUserName(), false);
 				
 				
-				if(existingProposal.getSubmittedByPI().equals(SubmitType.SUBMITTED)){
-					log.info("Call for Prohibition load");
-					projectProposal.generatePostSubmissionProhibitions();
-				}
-					
+//				if(existingProposal.getSubmittedByPI().equals(SubmitType.SUBMITTED)){
+//					log.info("Call for Prohibition load");
+//					projectProposal.generatePostSubmissionProhibitions();
+//				}
+				if(projectProposal.isProposalSubmitted()) {
+					String stage = projectProposal.getApprovalStage();
+					actions = projectProposal.getPermittedActions(pdsOperations, userInfo.getUserName(), Constants.APPROVAL_CONTENT);
+				}else {
 		
 				actions = projectProposal.getPermittedActions(pdsOperations, userInfo.getUserName(), Constants.PDSs_OA_UA_LBL);
-				
+				}
 			} else {
 				
 				StringBuffer contentProfile = proposalDAO
@@ -1116,6 +1099,51 @@ public class ProposalService {
 				.entity("{\"error\": \"Could Not Save A New User OR Update AN Existing Proposal\", \"status\": \"FAIL\"}")
 				.build();
 	}
+	
+	private void setPolicyState(ProposalDataSheet projectProposal, Proposal existingProposal , Graph proposalPolicy, String userName, boolean firstSave) throws PMException{
+		
+		projectProposal.setProposal(existingProposal);
+		log.info("NGAC ID found :" + existingProposal.getNgacId());
+		
+		log.info("222222222");
+		     
+		if(PDSOperations.proposalPolicies.get(existingProposal.getNgacId()) != null) {
+			projectProposal.setProposalPolicy(PDSOperations.proposalPolicies.get(existingProposal.getNgacId()));
+			proposalPolicy = projectProposal.getProposalPolicy();
+			log.info("33333333");
+		} else {
+			log.info("Policy re-created.");
+			log.info("44444444444");
+			
+			proposalPolicy = pdsOperations.getBacicNGACPolicy() ;
+			proposalPolicy = loader.createAProposalGraph(proposalPolicy);
+			proposalPolicy = loader.createAprovalGraph(proposalPolicy);
+			projectProposal.setProposalPolicy(proposalPolicy);
+			
+		}
+		
+		boolean isPostSubmissionStage = false;
+		
+		if(projectProposal.isProposalSubmitted()) {
+			isPostSubmissionStage = true;
+			log.info("55555555555");
+		}
+		if(!firstSave) {
+		projectProposal.clearIngestigator();
+		projectProposal.updatePI(isPostSubmissionStage);
+		projectProposal.updateCoPI(userName,isPostSubmissionStage);
+		projectProposal.updateSP(userName,isPostSubmissionStage);
+		}
+		
+		if(isPostSubmissionStage) {
+			log.info("666666666666");
+			projectProposal.generatePostSubmissionProhibitions();
+			projectProposal.updatePostSubmissionchanges(proposalDAO);
+			projectProposal.associateApprovalRelation(projectProposal.getApprovalStage());
+		}
+		proposalPolicy = projectProposal.getProposalPolicy();
+		PDSOperations.proposalPolicies.put(existingProposal.getNgacId(),proposalPolicy);
+	}
 
 	@POST
 	@Path("/SaveUpdateProposal")
@@ -1161,60 +1189,30 @@ public class ProposalService {
 								.cloneThroughSerialize(existingProposal);
 					}
 				}
+				
+				String proposalRoles = "";
+				if (root != null && root.has("proposalRoles")) {
+					proposalRoles = root.get("proposalRoles").textValue();
+				}
 				log.info("Existing:"+existingProposal.toString().length());
 				log.info("Old:"+oldProposal.toString().length());
 				log.info("Proposal Info:"+proposalInfo.toString());
+				log.info("Proposal Role:"+proposalRoles);
 				log.info("******************");
-				Graph proposalPolicy = pdsOperations.getBacicNGACPolicy() ;
+				Graph proposalPolicy = null ;
+				boolean firstSave = false;
 				
-				//pdsOperations.printAccessState("Print Basic POLICY:", proposalPolicy);
-				//pdsOperations.printAccessState("Print NGAC POLICY:", pdsOperations.getNGACPolicy());
-				
-				projectProposal.setProposal(existingProposal);	
-				
-				if(existingProposal.getNgacId() == 0l)
-				{	
+				projectProposal.setProposal(existingProposal);				
+				if (existingProposal.getNgacId() == 0l) {
 					log.info("NGAC ID 0.");
+					firstSave = true;
 					existingProposal.setNgacId(Long.parseLong(proposalNgacId));
-					proposalPolicy = PDSOperations.proposalPolicies.get(Long.parseLong(proposalNgacId));
-					projectProposal.setProposalPolicy(proposalPolicy);
-					projectProposal.setProposal(existingProposal);	
-					projectProposal.checkStaticACRights();
-				}
-				else {
-					log.info("NGAC ID found :"+existingProposal.getNgacId());
-					//proposalPolicy = PDSOperations.proposalPolicies.get(existingProposal.getNgacId());
-				
-				     
-					if(PDSOperations.proposalPolicies.get(existingProposal.getNgacId()) != null) {
-						projectProposal.setProposalPolicy(PDSOperations.proposalPolicies.get(existingProposal.getNgacId()));
-						//projectProposal.checkStaticACRights();
-					} else {
-						log.info("Policy re-created.");
-						//NGACPolicyConfigurationLoader loader = new NGACPolicyConfigurationLoader();
-					
-						proposalPolicy = loader.createAProposalGraph(proposalPolicy);
-						projectProposal.setProposalPolicy(proposalPolicy);
-						
-						//projectProposal.checkStaticACRights();
-					}
-					
-					projectProposal.clearIngestigator();
-					projectProposal.updatePI(false);
-					projectProposal.updateCoPI(userInfo.getUserName(),false);
-					projectProposal.updateSP(userInfo.getUserName(),false);
-					PDSOperations.proposalPolicies.put(existingProposal.getNgacId(),proposalPolicy);
-					
-					
-					
-				
 				}
 				
-				//pdsOperations.printAccessState("Print POLICY:", projectProposal.getProposalPolicy());
-				//pdsOperations.printAccessState("Print NGAC POLICY:", pdsOperations.getNGACPolicy());
 				
+				setPolicyState(projectProposal, existingProposal, proposalPolicy, userInfo.getUserName(),firstSave);
 				
-				
+			
 				
 				//log.info("Before save:"+proposalPolicy.getNodes().size());
 				log.info("Save Proposal: Number of Nodes:"+projectProposal.getProposalPolicy().getNodes().size());
@@ -1267,14 +1265,22 @@ public class ProposalService {
 						log.info("INSIDE SAVE UPDATE:"+attrMap);
 						log.info("Action NOW:"+action+"|Subject:"+subject+"| object:"+object);
 						
+						
+						
+						for( SignatureUserInfo sign: signatures) {
+							log.info(sign.getDepartment()+"|"+sign.getPositionTitle()+"|"+sign.getUserName());
+						}
+						
+						//requiredSignatures.
+						
+						
 						//intercept for action type
 						String decisionString = "";
 						EmailCommonInfo emailDetails = new EmailCommonInfo();
 						int intDecision = AbstractResult.DECISION_NOT_APPLICABLE;
 						
 						
-						if (action.equals("Save") || action.equals("Submit") || action.equals("Approve")
-								|| action.equals("Disapprove")) {
+						if (action.equals("Save") || action.equals("Submit"))  {
 							String objectAtt = Constants.PDSs_OA_UA_LBL;
 							String acRight = action;
 							// objectAtt = projectProposal.setSection(proposalSection);
@@ -1282,7 +1288,27 @@ public class ProposalService {
 							decisionString = projectProposal.getPolicyDecisionAnyType(pdsOperations, userInfo.getUserName(),"U", acRight, objectAtt);
 						    log.info("D:"+decisionString);
 							
+						    if(action.equals("Submit")) {
+						    	if(!projectProposal.isReadyForSubMission()) {
+						    		return Response.status(403).type(MediaType.APPLICATION_JSON)
+											.entity("Proposal is not ready to be submitted.").build();
+						    	}
+						    }
+						   
 						    
+						}else if(action.equals("Approve") || action.equals("Disapprove")){
+							List<String> actions = null;
+							String objectAtt = Constants.APPROVAL_CONTENT;
+							String acRight = action;
+							// objectAtt = projectProposal.setSection(proposalSection);
+							log.info("objectAtt:"+objectAtt);
+							actions = projectProposal.getPermittedActions(pdsOperations, userInfo.getUserName(), Constants.APPROVAL_CONTENT);
+							//decisionString = projectProposal.getPolicyDecisionAnyType(pdsOperations, userInfo.getUserName(),"U", acRight, objectAtt);
+						    if(actions.contains(action))
+						    	decisionString = "Permit";
+						    else
+						    	decisionString = "Deny";
+							log.info("D:"+decisionString);
 						}
 						else {
 						
@@ -1315,7 +1341,9 @@ public class ProposalService {
 //							if (AbstractResult.DECISIONS[intDecision]
 //									.equals("Permit")) {
 								
-
+							log.info("Pre :Action:"+action+"|Role:"+proposalRoles+"|Name:"+userInfo.getUserName()+"|Stage:"+projectProposal.getApprovalStage());
+							String ApprovalStagePre = projectProposal.getApprovalStage();
+							String ApprovalStagePost = "";
 								if(sendSaveUpdateNotification(userInfo.getUserName(),message,projectProposal,
 										proposalId, existingProposal,
 										oldProposal, authorProfile, false,
@@ -1324,13 +1352,17 @@ public class ProposalService {
 										action)) {
 									//write the policy change here if action is submit
 									
-									loader.savePolicy(proposalPolicy, Constants.POLICY_CONFIG_OUTPUT_FILE+existingProposal.getNgacId()+".json");
+									//loader.savePolicy(proposalPolicy, Constants.POLICY_CONFIG_OUTPUT_FILE+existingProposal.getNgacId()+".json");
 									
 									log.info("User Info:"+userInfo.toString());
 									List<UserInfo> userList = userProfileDAO.findAllForAdminUserGrid(0, 1000, userInfo);
 									log.info("All admins:");
 									for(UserInfo user : userList) {
 										log.info(user.toString());
+									}
+									
+									for( SignatureUserInfo sign: signatures) {
+										log.info(sign.getDepartment()+"|"+sign.getPositionTitle()+"|"+sign.getUserName());
 									}
 									
 									
@@ -1345,10 +1377,25 @@ public class ProposalService {
 										projectProposal.updateCoPI(userInfo.getUserName(),true);
 										projectProposal.updateSP(userInfo.getUserName(),true);
 										
-										projectProposal.updatePostSubmissionchanges();
+										projectProposal.updatePostSubmissionchanges(proposalDAO);
 										PDSOperations.proposalPolicies.put(existingProposal.getNgacId(),proposalPolicy);
+										ApprovalStagePost = projectProposal.getApprovalStage();
+										log.info("Post : Action:"+action+"|Role:"+proposalRoles+"|Name:"+userInfo.getUserName()+"|Stage:"+ApprovalStagePost);
+										if(!ApprovalStagePre.equals(ApprovalStagePost)) {
+											
+											//projectProposal.disassociateApprovalRelation(ApprovalStagePre);
+											projectProposal.associateApprovalRelation(ApprovalStagePost);
+										}
 										
+									}else if(action.equals("Approve")) {
+										ApprovalStagePost = projectProposal.getApprovalStage();
+										log.info("Post : Action:"+action+"|Role:"+proposalRoles+"|Name:"+userInfo.getUserName()+"|Stage:"+ApprovalStagePost);
 										
+										if(!ApprovalStagePre.equals(ApprovalStagePost)) {
+											projectProposal.updatePostSubmissionchanges(proposalDAO);
+											projectProposal.disassociateApprovalRelation(ApprovalStagePre);
+											projectProposal.associateApprovalRelation(ApprovalStagePost);
+										}
 									}
 									
 									//pdsOperations.printGraph(projectProposal.getProposalPolicy());
@@ -1378,6 +1425,7 @@ public class ProposalService {
 			return Response.status(403).type(MediaType.APPLICATION_JSON)
 					.entity("No User Permission Attributes are send!").build();
 		} catch (Exception e) {
+			e.printStackTrace();
 			log.error(
 					"Could not save a New Proposal or update an existing Proposal error e=",
 					e);
@@ -1426,7 +1474,7 @@ public class ProposalService {
 						JsonNode proposalSectionNode = root.get("ProposalSection");
 						proposalSection = proposalSectionNode.textValue();
 						JsonNode proposalActionNode = root.get("Action");
-						action = proposalActionNode.textValue();
+						action = proposalActionNode.textValue().trim();
 						
 						
 					}
@@ -1445,45 +1493,50 @@ public class ProposalService {
 					log.info("NGAC :"+existingProposal.getNgacId());
 					
 					ProposalDataSheet projectProposal =  new ProposalDataSheet();
-					projectProposal.setProposal(existingProposal);
+					//projectProposal.setProposal(existingProposal);
 					
-					Graph proposalPolicy = null;
-					for (Entry<Long, Graph> mapElement : PDSOperations.proposalPolicies.entrySet()) { 
-						long key = (long)mapElement.getKey(); 
-						log.info("key:"+key);
-			            }
-					
-					if(PDSOperations.proposalPolicies.get(existingProposal.getNgacId()) != null) {
-						log.info("HashMap has the current policy: "+existingProposal.getNgacId());
-						projectProposal.setProposalPolicy(PDSOperations.proposalPolicies.get(existingProposal.getNgacId()));
-					} else {
-						log.info("Policy re-created.");						
-						proposalPolicy = pdsOperations.getBacicNGACPolicy() ;						
-						//proposalPolicy = loader.createAProposalGraph(proposalPolicy);
-						proposalPolicy = loader.createAProposalGraph(proposalPolicy);
-						projectProposal.setProposalPolicy(proposalPolicy);
-						
-//						projectProposal.updatePI();
-//						projectProposal.updateCoPI(userInfo.getUserName());
-//						projectProposal.updateSP(userInfo.getUserName());
-						
+					for (Entry<Long, Graph> mapElement : PDSOperations.proposalPolicies.entrySet()) {
+						long key = (long) mapElement.getKey();
+						log.info("key:" + key);
+
 					}
+					Graph proposalPolicy = null;
 					
-					projectProposal.clearIngestigator();
-					projectProposal.updatePI(false);
-					projectProposal.updateCoPI(userInfo.getUserName(),false);
-					projectProposal.updateSP(userInfo.getUserName(),false);
-					PDSOperations.proposalPolicies.put(existingProposal.getNgacId(),proposalPolicy);
+					setPolicyState(projectProposal, existingProposal, proposalPolicy, userInfo.getUserName(),false);
 					
-					
-					//pdsOperations.printAccessState("Print NGAC POLICY:", pdsOperations.getNGACPolicy());
-					
-					
-					
-					
-					
-					//pdsOperations.printAccessState("Print POLICY:", projectProposal.getProposalPolicy());
-					
+//					if(PDSOperations.proposalPolicies.get(existingProposal.getNgacId()) != null) {
+//						log.info("HashMap has the current policy: "+existingProposal.getNgacId());
+//						projectProposal.setProposalPolicy(PDSOperations.proposalPolicies.get(existingProposal.getNgacId()));
+//					}
+//					else {
+//						log.info("Policy re-created.");						
+//						proposalPolicy = pdsOperations.getBacicNGACPolicy() ;						
+//						//proposalPolicy = loader.createAProposalGraph(proposalPolicy);
+//						proposalPolicy = loader.createAProposalGraph(proposalPolicy);
+//						projectProposal.setProposalPolicy(proposalPolicy);
+//						
+////						projectProposal.updatePI();
+////						projectProposal.updateCoPI(userInfo.getUserName());
+////						projectProposal.updateSP(userInfo.getUserName());
+//						
+//					}
+//					
+//				    log.info("Graph size:"+projectProposal.getProposalPolicy().getNodes().size());
+//					projectProposal.clearIngestigator();
+//					projectProposal.updatePI(false);
+//					projectProposal.updateCoPI(userInfo.getUserName(),false);
+//					projectProposal.updateSP(userInfo.getUserName(),false);
+//					
+//					
+//					if(projectProposal.isProposalSubmitted()) {
+//						projectProposal.generatePostSubmissionProhibitions();
+//						projectProposal.updatePostSubmissionchanges();
+//					}
+//					
+//					
+//					log.info("Graph size:"+projectProposal.getProposalPolicy().getNodes().size());
+//					PDSOperations.proposalPolicies.put(existingProposal.getNgacId(),proposalPolicy);
+//					
 					
 					String decision = "";
 					
@@ -1495,8 +1548,29 @@ public class ProposalService {
 						log.info("objectAtt:"+objectAtt);
 						decision = projectProposal.getPolicyDecision(pdsOperations, userInfo.getUserName(), acRight, objectAtt);
 					    log.info("D:"+decision);
-					}else if(action.equalsIgnoreCase("Delete") && proposalSection.equalsIgnoreCase("InvestigatorInformation")){
+					}else if(action.equalsIgnoreCase("Add Co-PI")) {
+						Boolean hasPermission = pdsOperations.hasPermissionToAddAsCoPI(projectProposal.getProposalPolicy(),userInfo.getUserName(),"",projectProposal.getProhibitions());
+					    if(hasPermission)
+					    	decision  = "Permit";
+					    else
+					    	decision = "Deny";
+					}
+					else if(action.equalsIgnoreCase("Add Senior Personnel")) {
+						Boolean hasPermission = pdsOperations.hasPermissionToAddAsSP(projectProposal.getProposalPolicy(),userInfo.getUserName(),"",projectProposal.getProhibitions());
+					    if(hasPermission)
+					    	decision  = "Permit";
+					    else
+					    	decision = "Deny";
+					}
+					else if(action.equalsIgnoreCase("Delete") && proposalSection.equalsIgnoreCase("InvestigatorInformation.Co-PI")){
 						Boolean hasPermission = pdsOperations.hasPermissionToDeleteCoPI(projectProposal.getProposalPolicy(),userInfo.getUserName(),projectProposal.getProhibitions());
+					    if(hasPermission)
+					    	decision  = "Permit";
+					    else
+					    	decision = "Deny";
+					}
+					else if(action.equalsIgnoreCase("Delete") && proposalSection.equalsIgnoreCase("InvestigatorInformation.Senior-Personnel")){
+						Boolean hasPermission = pdsOperations.hasPermissionToDeleteSP(projectProposal.getProposalPolicy(),userInfo.getUserName(),projectProposal.getProhibitions());
 					    if(hasPermission)
 					    	decision  = "Permit";
 					    else
@@ -1925,6 +1999,7 @@ public class ProposalService {
 		} catch (Exception e) {
 //			return Response.status(403).type(MediaType.APPLICATION_JSON)
 //					.entity(e.getMessage()).build();
+			e.printStackTrace();
 			return false;
 		}
 		if (proposalIsChanged) {
@@ -1934,8 +2009,19 @@ public class ProposalService {
 			{	
 				projectProposal.setProposal(existingProposal);
 				try {
-					projectProposal.updateCoPI(userName,false);
-					projectProposal.updateSP(userName,false);
+					if(!projectProposal.isProposalSubmitted()) {
+						projectProposal.clearIngestigator();
+						projectProposal.updatePI(false);
+						projectProposal.updateCoPI(userName,false);
+						projectProposal.updateSP(userName,false);
+						
+						//projectProposal.updateCoPI(userName,false);
+						//projectProposal.updateSP(userName,false);
+					}
+//					if(projectProposal.isProposalSubmitted()) {
+//						projectProposal.generatePostSubmissionProhibitions();
+//						projectProposal.updatePostSubmissionchanges();
+//					}
 					
 				} catch (PMException e) {
 					log.info("Exception : inside sendSaveUpdateNotification");

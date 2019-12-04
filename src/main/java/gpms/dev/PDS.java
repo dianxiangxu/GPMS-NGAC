@@ -51,6 +51,7 @@ import gpms.ngac.policy.Constants;
 import gpms.ngac.policy.NGACPolicyConfigurationLoader;
 import gpms.ngac.policy.PDSOperations;
 import gpms.ngac.policy.UserPermissionChecker;
+import gpms.utils.EmailUtil;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -88,12 +89,19 @@ public class PDS {
 		//main.testGraph25WithObligations(main);
 		//main.testGraph26WithProhibitions(main);
 		
-//		main.testMongoInfo();
+		//main.testMongoInfo();
 //		main.testDeleteAllChildren(main);
 //		main.testGenerateIds();
-		main.testGenerateIds();
+	//	main.testGenerateIds();
 		
+		main.testEmail();
 
+    }
+    
+    void testEmail() {
+    	EmailUtil emailUtil = new EmailUtil();
+    	emailUtil.sendSimpleEmail("md.n.karim@outlook.com","GPMS-NGAC Notification", "Dear Sir/Madam,<br>You have a new notification<br>Regards<br><br><b>GPMS-NGAC Notification System</b><br>");
+    	//emailUtil.sendMailWithGmailSSL("md.n.karim@outlook.com","Test Email","This is a test email");
     }
     
     void testGenerateIds() {
@@ -139,13 +147,13 @@ public class PDS {
 			List<UserProfile> deptUsers = userProfileDAO.findAllForAdminUserGrid("DEPT");
 			System.out.println("All Admins:");
 			for(UserProfile user : deptUsers) {
-				System.out.println(user.getUserAccount().getUserName()+" |"+user.getDetails(0).getDepartment()+"|"+user.getDetails(0).getCollege()+"|"+user.getDetails(0).getPositionTitle());
+				System.out.println(user.getId().toString()+"|"+user.getUserAccount().getUserName()+" |"+user.getDetails(0).getDepartment()+"|"+user.getDetails(0).getCollege()+"|"+user.getDetails(0).getPositionTitle()+"|position type:"+user.getDetails(0).getPositionType());
 			}
 			
 			List<UserProfile> users = userProfileDAO.findAllForAdminUserGrid("UNIVERSITY");
 			System.out.println("All Admins:");
 			for(UserProfile user : users) {
-				System.out.println(user.getUserAccount().getUserName()+" |"+user.getDetails(0).getDepartment()+"|"+user.getDetails(0).getCollege()+"|"+user.getDetails(0).getPositionTitle());
+				System.out.println(user.getId()+"|"+user.getUserAccount().getUserName()+" |"+user.getDetails(0).getDepartment()+"|"+user.getDetails(0).getCollege()+"|"+user.getDetails(0).getPositionTitle()+"|position type:"+user.getDetails(0).getPositionType());
 			}
 			
 			

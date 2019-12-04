@@ -83,7 +83,9 @@
 	{
       "operations": [
         "create-o",
-		"assign-o"
+		"assign-o",
+		"Approve",
+		"Disapprove"
       ],
       "sourceID": 1143965176376399708,  
       "targetID": 8841765776655713002   

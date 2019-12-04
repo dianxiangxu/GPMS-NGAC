@@ -17,6 +17,7 @@ public enum Task
 	CREATE_PROPOSAL,
 	ADD_CO_PI,
 	DELETE_CO_PI,
+	DELETE_SP,
 	ADD_SP;
 	
 	public HashMap<Attribute,HashSet> getPermissionsSets()
@@ -68,6 +69,14 @@ public enum Task
 				permissionsSet.put(att5, new HashSet(ops5) );
 				
 				break;	
+			case DELETE_SP:
+				
+				ArrayList<String> opsDelDP = new ArrayList<String>();
+				opsDelDP.add("deassign-u-to");
+				Attribute attDelSP = new Attribute(Constants.SENIOR_PERSON_UA_LBL, NodeType.UA);
+				permissionsSet.put(attDelSP, new HashSet(opsDelDP) );
+				
+				break;		
 		}
 		
 		return permissionsSet;

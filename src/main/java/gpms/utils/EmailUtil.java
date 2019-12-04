@@ -145,6 +145,82 @@ public class EmailUtil {
 		Session session = Session.getInstance(properties, auth);
 		sendEmail(session, toEmail, subject, body);
 	}
+	
+	
+	public void sendSimpleEmail(String to,String subject, String body) {
+		
+		final String from = "nkarim25@gmail.com";
+        final String password = "Admission0!";
+        //String from = "";
+        String host = "smtp.gmail.com";
+        Properties properties = System.getProperties();
+        
+        body = body+"<br><b>[This email is from GPMS-NGAC development test purpose only.]</b>";
+        
+        to = "md.n.karim@outlook.com";
+        // Setup mail server
+        properties.put("mail.smtp.host", host);
+        properties.put("mail.smtp.port", "587");
+        properties.put("mail.smtp.auth", "true");
+        properties.put("mail.smtp.starttls.enable", "true"); //TLS
+        properties.put("mail.smtp.ssl.trust", "smtp.gmail.com");
+
+
+
+        // Get the Session object.// and pass username and password
+        Session session = Session.getInstance(properties, new javax.mail.Authenticator() {
+
+            protected PasswordAuthentication getPasswordAuthentication() {
+
+                return new PasswordAuthentication(from, password);
+
+            }
+
+        });
+
+        // Used to debug SMTP issues
+        session.setDebug(true);
+
+        try {
+            // Create a default MimeMessage object.
+        	
+        	MimeMessage message = new MimeMessage(session);
+			message.addHeader("Content-type", "text/HTML; charset=UTF-8");
+			message.addHeader("format", "flowed");
+			message.addHeader("Content-Transfer-Encoding", "8bit");
+			
+        	
+        	
+            //MimeMessage message = new MimeMessage(session);
+			//msg.setFrom(new InternetAddress("do-not-reply@seal.boisestate.edu",
+			//		"do-not-reply@seal.boisestate.edu"));
+			//msg.setSubject(subject, "UTF-8");
+			//msg.setText(body, "utf-8", "html");
+
+            // Set From: header field of the header.
+            message.setFrom(new InternetAddress(from));
+
+            // Set To: header field of the header.
+            message.addRecipient(Message.RecipientType.TO, new InternetAddress(to));
+            message.addRecipient(Message.RecipientType.BCC, new InternetAddress("mdnazmulkarim@u.boisestate.edu"));
+
+            // Set Subject: header field
+            message.setSubject(subject, "UTF-8");
+
+            // Now set the actual message
+            message.setText(body,"utf-8", "html");
+
+            System.out.println("sending...");
+            // Send message
+            Transport.send(message);
+            System.out.println("Sent message successfully....");
+        } catch (MessagingException mex) {
+            mex.printStackTrace();
+        }
+
+    
+    
+	}
 
 	/***
 	 * Sends Email with SSL Authentication
@@ -158,9 +234,10 @@ public class EmailUtil {
 	 */
 	public void sendMailWithGmailSSL(String toEmail, String subject, String body) {
 		// Valid gmail ID
-		final String fromEmail = "noreplygpms@gmail.com";
+		//final String fromEmail = "noreplygpms@gmail.com";
+		final String fromEmail = "nkarim25@gmail.com";
 		// Valid gmail password
-		final String password = "gpmstest";
+		final String password = "Admission0!";
 		System.out.println("SSLEmail Start");
 		properties = new Properties();
 		// SMTP Host

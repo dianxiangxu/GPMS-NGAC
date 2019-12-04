@@ -44,9 +44,16 @@ public class Constants {
 	public static final String OSP_SECTION_INFO_OA_LBL = "OSP-Section-Info";
 	public static final String SIGNATURE_INFO_OA_LBL = "Signature-Info";
 	
+	public static final String APPROVAL_CONTENT = "Approval Content";
 	public static final String PDSs_OA_UA_LBL = "PDSs";
 	public static final String CHAIR_UA = "Chair";
+	public static final String CURRENT_USERS_UA = "Current Users";
 	public static final String CHAIR_APPROVAL = "Chair-Approval";
+	public static final String BM_APPROVAL = "BM-Approval";
+	public static final String DEAN_APPROVAL = "Dean-Approval";
+	public static final String IRB_APPROVAL = "IRB-Approval";
+	public static final String RA_APPROVAL = "Research-Admin-Approval";
+	public static final String RD_APPROVAL = "Research-Director-Approval";
 	public static final String BM_UA = "Business-Manager";
 	public static final String DEAN_UA = "Dean";
 	public static final String IRB_UA = "IRB";

@@ -464,6 +464,7 @@ public class NotificationDAO extends BasicDAO<NotificationLog, String> {
 		notification.setPositionType(investigator.getPositionType());
 		notification.setPositionTitle(investigator.getPositionTitle());
 		save(notification);
+		//investigator.getUserRef().
 	}
 
 	public void createNotificationForAUser(String proposalID,

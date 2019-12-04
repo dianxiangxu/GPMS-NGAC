@@ -6,6 +6,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.mongodb.morphia.Morphia;
+
+import com.mongodb.MongoClient;
+
+import gpms.dao.ProposalDAO;
+import gpms.dao.UserAccountDAO;
+import gpms.dao.UserProfileDAO;
+import gpms.model.GPMSCommonInfo;
+import gpms.model.UserAccount;
+import gpms.model.UserProfile;
+
 /***
  * Available Department Positions Types and Titles for a User
  * 
@@ -17,6 +28,7 @@ public class DepartmentsPositionsCollection {
 
 	public static HashMap<String, String> adminUsers =null;
 	public static HashMap<String, String> departmentNames =null;
+	public static HashMap<String, String> userIdNameMap =null;
 	
 	public static void init() {
 		if(adminUsers == null) {
@@ -54,6 +66,35 @@ public class DepartmentsPositionsCollection {
 			departmentNames.put("Electrical Engineering","ECE");
 			departmentNames.put("Physics","PHY");
 			departmentNames.put("Chemistry","CHE");
+		}
+		
+		if(userIdNameMap == null) {
+			userIdNameMap = new HashMap<String, String>();
+			UserProfileDAO userProfileDAO = null;
+			MongoClient mongoClient = null;
+			Morphia morphia = null;
+			String dbName = "db_gpms";
+			
+			mongoClient = MongoDBConnector.getMongo();
+			morphia = new Morphia();
+			morphia.map(UserProfile.class).map(UserAccount.class);
+			userProfileDAO = new UserProfileDAO(mongoClient, morphia, dbName);
+			
+			GPMSCommonInfo userInfo = new GPMSCommonInfo();
+			userInfo.setUserIsActive(true);
+			
+			List<UserProfile> deptUsers = userProfileDAO.findAllForAdminUserGrid("DEPT");
+			//System.out.println("All Admins:");
+			for(UserProfile user : deptUsers) {
+				userIdNameMap.put( user.getUserAccount().getUserName(),user.getId().toString());
+			}
+			
+			List<UserProfile> users = userProfileDAO.findAllForAdminUserGrid("UNIVERSITY");
+			//System.out.println("All Admins:");
+			for(UserProfile user : users) {
+				userIdNameMap.put( user.getUserAccount().getUserName(),user.getId().toString());
+			}
+			
 		}
 		
 		

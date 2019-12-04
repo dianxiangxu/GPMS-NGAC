@@ -5814,7 +5814,7 @@ $(function() {
 														myProposal
 																.CheckUserPermissionForInvestigator(
 																		"Delete",
-																		"InvestigatorInformation",    //nazmul 2019 11 23  subSection
+																		subSection,    //nazmul 2019 11 23  subSection
 																		myProposal.config);
 													}
 												}
@@ -5843,7 +5843,7 @@ $(function() {
 												myProposal
 														.CheckUserPermissionForInvestigator(
 																$buttonType,
-																"InvestigatorInformation", //  "InvestigatorInformation.Co-PI", nazmul on 2019 11 23
+																"InvestigatorInformation.Co-PI", //  "InvestigatorInformation.Co-PI", nazmul on 2019 11 23
 																myProposal.config);
 											}
 										} else {
@@ -5881,7 +5881,7 @@ $(function() {
 											myProposal
 													.CheckUserPermissionForInvestigator(
 															$buttonType,
-															"InvestigatorInformation",    //"InvestigatorInformation.Senior-Personnel", nazmul on 2019 11 23
+															"InvestigatorInformation.Senior-Personnel",    //"InvestigatorInformation.Senior-Personnel", nazmul on 2019 11 23
 															myProposal.config);
 										}
 									} else {
