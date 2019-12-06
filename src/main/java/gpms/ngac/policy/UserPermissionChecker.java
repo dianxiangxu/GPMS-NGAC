@@ -33,7 +33,7 @@ public class UserPermissionChecker {
 		boolean hasPermission = false;
 		try {
 			String pro = ProhibitionsSerializer.toJson(prohibitions);
-			log.info("Prohibition:"+pro);
+			log.info("Prohibition:"+pro.length());
 			PReviewDecider decider = new PReviewDecider(ngacPolicy,prohibitions);
 			
 			long targetId = PDSOperations.getNodeID(ngacPolicy, targetAttribute.getAttributeName(), targetAttribute.getAttributeType(), null);
@@ -75,7 +75,7 @@ public static boolean checkPermission(Graph ngacPolicy, Prohibitions prohibition
 		try {
 			
 			String pro = ProhibitionsSerializer.toJson(prohibitions);
-			log.info("Prohibition:"+pro);
+			log.info("Prohibition:"+pro.length());
 			PReviewDecider decider = new PReviewDecider(ngacPolicy,prohibitions);
 			
 			long targetId = PDSOperations.getNodeID(ngacPolicy, targetAttribute.getAttributeName(), targetAttribute.getAttributeType(), null);

@@ -43,6 +43,7 @@ public class NotificationDAO extends BasicDAO<NotificationLog, String> {
 	public static final String COLLECTION_NAME = "notification";
 	private static Morphia morphia;
 	private static Datastore ds;
+	EmailUtil emailUtil;
 
 	private static Morphia getMorphia() throws UnknownHostException,
 			MongoException {
@@ -69,6 +70,7 @@ public class NotificationDAO extends BasicDAO<NotificationLog, String> {
 
 	public NotificationDAO(MongoClient mongo, Morphia morphia, String dbName) {
 		super(mongo, morphia, dbName);
+		emailUtil = new EmailUtil();
 	}
 
 	public long findAllNotificationCountForAUser(GPMSCommonInfo userInfo)
@@ -465,6 +467,8 @@ public class NotificationDAO extends BasicDAO<NotificationLog, String> {
 		notification.setPositionTitle(investigator.getPositionTitle());
 		save(notification);
 		//investigator.getUserRef().
+		String email = investigator.getUserRef().getWorkEmails().get(0);
+		emailUtil.sendSimpleEmail(email, "GPMS-NGAC proposal Notification::This test email is intended for: "+email, "Dear Sir/Madam,<br>GPMS-NGAC proposal has been "+ notificationMessage+"<br>Regards,<Br><b>GPMS-NGAC Team</b>");
 	}
 
 	public void createNotificationForAUser(String proposalID,

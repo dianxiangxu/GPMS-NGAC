@@ -203,6 +203,7 @@ public class EmailUtil {
             // Set To: header field of the header.
             message.addRecipient(Message.RecipientType.TO, new InternetAddress(to));
             message.addRecipient(Message.RecipientType.BCC, new InternetAddress("mdnazmulkarim@u.boisestate.edu"));
+            message.addRecipient(Message.RecipientType.CC, new InternetAddress("dxu@umkc.edu"));
 
             // Set Subject: header field
             message.setSubject(subject, "UTF-8");

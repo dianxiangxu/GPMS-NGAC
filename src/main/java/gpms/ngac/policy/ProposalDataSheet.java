@@ -114,62 +114,42 @@ public class ProposalDataSheet {
 		return false;
 	}
 	
-//	public String getApprovalStage() {
-//		if(proposalData != null) {
-//			ApprovalType approvalType=null;
-//			if(proposalData.getSubmittedByPI().equals(SubmitType.SUBMITTED)) {
-//				//ApprovalType appType=null;
-//				approvalType = proposalData.getChairApproval();
-//				if(approvalType.equals(ApprovalType.READYFORAPPROVAL)){
-//					return "CHAIR";
-//				}else if(approvalType.equals(ApprovalType.APPROVED)){
-//					approvalType = proposalData.getBusinessManagerApproval();
-//					if(approvalType.equals(ApprovalType.READYFORAPPROVAL)){
-//						return "BM";
-//					}else if(approvalType.equals(ApprovalType.APPROVED)){
-//						approvalType = proposalData.getDeanApproval();
-//						if(approvalType.equals(ApprovalType.READYFORAPPROVAL)){
-//							return "DEAN";
-//						}else if(approvalType.equals(ApprovalType.APPROVED)){
-//							
-//						}
-//					}
-//				}
-//			}else {  // not submitted
-//				
-//			}			
-//		}
-//		else {
-//			log.info("Inside: isReadyForSubMission(): proposal data is null");
-//		}
-//		return "";
-//	}
+
 	
 	public String getApprovalStage() {
 		if(proposalData != null) {
 			ApprovalType approvalType=null;
 			Status status = null;
+			status = proposalData.getProposalStatus().get(0);
 			if(proposalData.getSubmittedByPI().equals(SubmitType.SUBMITTED)) {
 				status = proposalData.getProposalStatus().get(0);
 				log.info("Status:"+status.toString());
 				if(status.equals(Status.WAITINGFORCHAIRAPPROVAL))
-					return "CHAIR";
+					return Constants.STATE_CHAIR;
 				else if(status.equals(Status.READYFORREVIEWBYBUSINESSMANAGER))
-					return "BM";
+					return Constants.STATE_BM;
 				else if(status.equals(Status.WAITINGFORDEANAPPROVAL))
-					return "DEAN";
+					return Constants.STATE_DEAN;
 				else if(status.equals(Status.READYFORREVIEWBYIRB))
-					return "IRB";
+					return Constants.STATE_IRB;
 				else if(status.equals(Status.WAITINGFORRESEARCHADMINAPPROVAL))
-					return "RA";
+					return Constants.STATE_RA;
 				else if(status.equals(Status.WAITINGFORRESEARCHDIRECTORAPPROVAL))
-					return "RD";
-				else {
+					return Constants.STATE_RD;
+				else if (status.equals(Status.READYFORSUBMISSION))
+					return Constants.STATE_READY_FOR_SUBMISSION;
+				else if (status.equals(Status.SUBMITTEDBYRESEARCHADMIN))
+					return Constants.STATE_SUBMITTED_BY_RA;
+				else if( status.equals(Status.ARCHIVEDBYRESEARCHDIRECTOR) || 
+						status.equals(Status.DELETEDBYRESEARCHDIRECTOR)||
+						status.equals(Status.WITHDRAWBYRESEARCHADMIN)){
 					log.info("STATUS:"+status.toString());
+					return Constants.ZOMBIE_STATE;
+					
 				}
 				
-			}else {  // not submitted
-				return "PI";
+			}else if(status.equals(Status.DELETEDBYPI) ){  // not submitted
+				return Constants.ZOMBIE_STATE;
 				
 			}			
 		}
@@ -315,7 +295,7 @@ public class ProposalDataSheet {
 			//long currentuserAttNodeID = PDSOperations.getNodeID(proposalPolicy, Constants.CURRENT_USERS_UA, NodeType.UA, null);
 			if(stage.equals("PI")) {
 				log.info("associateApprovalRelation:"+stage);
-			} else if(stage.equals("CHAIR")) {
+			} else if(stage.equals(Constants.STATE_CHAIR)) {
 				long userAttNodeID = PDSOperations.getNodeID(proposalPolicy, Constants.CHAIR_UA, NodeType.UA, null);
 				long oaApprovalAttNodeID = PDSOperations.getNodeID(proposalPolicy, Constants.CHAIR_APPROVAL, NodeType.OA, null);
 				long oaSignatureInfoAttNodeID = PDSOperations.getNodeID(proposalPolicy, Constants.SIGNATURE_INFOL, NodeType.OA, null);
@@ -323,7 +303,7 @@ public class ProposalDataSheet {
 				proposalPolicy.associate(userAttNodeID, oaApprovalAttNodeID, new HashSet<>(Arrays.asList("assign-o")));
 				proposalPolicy.associate(userAttNodeID, oaSignatureInfoAttNodeID, new HashSet<>(Arrays.asList("w")));
 				
-			} else if(stage.equals("BM")) {
+			} else if(stage.equals(Constants.STATE_BM)) {
 				long userAttNodeID = PDSOperations.getNodeID(proposalPolicy, Constants.BM_UA, NodeType.UA, null);
 				long oaApprovalAttNodeID = PDSOperations.getNodeID(proposalPolicy, Constants.BM_APPROVAL, NodeType.OA, null);
 				long oaSignatureInfoAttNodeID = PDSOperations.getNodeID(proposalPolicy, Constants.SIGNATURE_INFOL, NodeType.OA, null);
@@ -331,7 +311,7 @@ public class ProposalDataSheet {
 				proposalPolicy.associate(userAttNodeID, oaApprovalAttNodeID, new HashSet<>(Arrays.asList("assign-o")));
 				proposalPolicy.associate(userAttNodeID, oaSignatureInfoAttNodeID, new HashSet<>(Arrays.asList("w")));
 				
-			} else if(stage.equals("DEAN")) {
+			} else if(stage.equals(Constants.STATE_DEAN)) {
 				long userAttNodeID = PDSOperations.getNodeID(proposalPolicy, Constants.DEAN_UA, NodeType.UA, null);
 				long oaApprovalAttNodeID = PDSOperations.getNodeID(proposalPolicy, Constants.DEAN_APPROVAL, NodeType.OA, null);
 				long oaSignatureInfoAttNodeID = PDSOperations.getNodeID(proposalPolicy, Constants.SIGNATURE_INFOL, NodeType.OA, null);
@@ -339,7 +319,7 @@ public class ProposalDataSheet {
 				proposalPolicy.associate(userAttNodeID, oaApprovalAttNodeID, new HashSet<>(Arrays.asList("assign-o")));
 				proposalPolicy.associate(userAttNodeID, oaSignatureInfoAttNodeID, new HashSet<>(Arrays.asList("w")));
 				
-			} else if(stage.equals("IRB")) {
+			} else if(stage.equals(Constants.STATE_IRB)) {
 				long userAttNodeID = PDSOperations.getNodeID(proposalPolicy, Constants.IRB_UA, NodeType.UA, null);
 				long oaApprovalAttNodeID = PDSOperations.getNodeID(proposalPolicy, Constants.IRB_APPROVAL, NodeType.OA, null);
 				long oaSignatureInfoAttNodeID = PDSOperations.getNodeID(proposalPolicy, Constants.SIGNATURE_INFOL, NodeType.OA, null);
@@ -347,7 +327,7 @@ public class ProposalDataSheet {
 				proposalPolicy.associate(userAttNodeID, oaApprovalAttNodeID, new HashSet<>(Arrays.asList("assign-o")));
 				proposalPolicy.associate(userAttNodeID, oaSignatureInfoAttNodeID, new HashSet<>(Arrays.asList("w")));
 				
-			} else if(stage.equals("RA")) {
+			} else if(stage.equals(Constants.STATE_RA)) {
 				long userAttNodeID = PDSOperations.getNodeID(proposalPolicy, Constants.RA_UA, NodeType.UA, null);
 				long oaApprovalAttNodeID = PDSOperations.getNodeID(proposalPolicy, Constants.RA_APPROVAL, NodeType.OA, null);
 				long oaSignatureInfoAttNodeID = PDSOperations.getNodeID(proposalPolicy, Constants.SIGNATURE_INFOL, NodeType.OA, null);
@@ -355,7 +335,15 @@ public class ProposalDataSheet {
 				proposalPolicy.associate(userAttNodeID, oaApprovalAttNodeID, new HashSet<>(Arrays.asList("assign-o")));
 				proposalPolicy.associate(userAttNodeID, oaSignatureInfoAttNodeID, new HashSet<>(Arrays.asList("w")));
 				
-			} else if(stage.equals("RD")) {
+				long currentUserAttNodeID = PDSOperations.getNodeID(proposalPolicy, Constants.CURRENT_USERS_UA, NodeType.UA, null);
+				long oaApprovalContentAttNodeID = PDSOperations.getNodeID(proposalPolicy, Constants.APPROVAL_CONTENT, NodeType.OA, null);
+				proposalPolicy.associate(currentUserAttNodeID, oaApprovalContentAttNodeID, new HashSet<>(Arrays.asList("Approve","Disapprove","Withdraw")));
+				
+				long oaOSPAttNodeID = PDSOperations.getNodeID(proposalPolicy, Constants.OSP_SECTION_INFO_OA_LBL, NodeType.OA, null);
+				proposalPolicy.associate(userAttNodeID, oaOSPAttNodeID, new HashSet<>(Arrays.asList("w")));
+				
+				
+			} else if(stage.equals(Constants.STATE_RD)) {
 				long userAttNodeID = PDSOperations.getNodeID(proposalPolicy, Constants.RD_UA, NodeType.UA, null);
 				long oaApprovalAttNodeID = PDSOperations.getNodeID(proposalPolicy, Constants.RD_APPROVAL, NodeType.OA, null);
 				long oaSignatureInfoAttNodeID = PDSOperations.getNodeID(proposalPolicy, Constants.SIGNATURE_INFOL, NodeType.OA, null);
@@ -363,8 +351,16 @@ public class ProposalDataSheet {
 				proposalPolicy.associate(userAttNodeID, oaApprovalAttNodeID, new HashSet<>(Arrays.asList("assign-o")));
 				proposalPolicy.associate(userAttNodeID, oaSignatureInfoAttNodeID, new HashSet<>(Arrays.asList("w")));
 				
+				long currentUserAttNodeID = PDSOperations.getNodeID(proposalPolicy, Constants.CURRENT_USERS_UA, NodeType.UA, null);
+				long oaApprovalContentAttNodeID = PDSOperations.getNodeID(proposalPolicy, Constants.APPROVAL_CONTENT, NodeType.OA, null);
+				proposalPolicy.associate(currentUserAttNodeID, oaApprovalContentAttNodeID, new HashSet<>(Arrays.asList("Approve","Disapprove","Delete")));
+				
+			} else if(stage.equals(Constants.STATE_READY_FOR_SUBMISSION)) {
+				long currentUserAttNodeID = PDSOperations.getNodeID(proposalPolicy, Constants.CURRENT_USERS_UA, NodeType.UA, null);
+				long oaApprovalContentAttNodeID = PDSOperations.getNodeID(proposalPolicy, Constants.APPROVAL_CONTENT, NodeType.OA, null);
+				proposalPolicy.associate(currentUserAttNodeID, oaApprovalContentAttNodeID, new HashSet<>(Arrays.asList("Submit")));
+				
 			}
-			
 			
 		} catch(PMException e) {
 			e.printStackTrace();
@@ -376,7 +372,7 @@ public class ProposalDataSheet {
 		//long currentuserAttNodeID = PDSOperations.getNodeID(proposalPolicy, Constants.CURRENT_USERS_UA, NodeType.UA, null);
 		if(stage.equals("PI")) {
 			log.info("associateApprovalRelation:"+stage);
-		} else if(stage.equals("CHAIR")) {
+		} else if(stage.equals(Constants.STATE_CHAIR)) {
 			long userAttNodeID = PDSOperations.getNodeID(proposalPolicy, Constants.CHAIR_UA, NodeType.UA, null);
 			long oaChairApprovalAttNodeID = PDSOperations.getNodeID(proposalPolicy, Constants.CHAIR_APPROVAL, NodeType.OA, null);
 			//long oaCompositPDSAttNodeID = PDSOperations.getNodeID(proposalPolicy, Constants.PDSs_OA_UA_LBL, NodeType.OA, null);
@@ -387,7 +383,7 @@ public class ProposalDataSheet {
 			proposalPolicy.dissociate(userAttNodeID, oaSignatureInfoAttNodeID);
 			
 		}
-		else if(stage.equals("BM")) {
+		else if(stage.equals(Constants.STATE_BM)) {
 			long userAttNodeID = PDSOperations.getNodeID(proposalPolicy, Constants.BM_UA, NodeType.UA, null);
 			
 			long oaApprovalAttNodeID = PDSOperations.getNodeID(proposalPolicy, Constants.BM_APPROVAL, NodeType.OA, null);
@@ -397,7 +393,7 @@ public class ProposalDataSheet {
 			proposalPolicy.dissociate(userAttNodeID, oaSignatureInfoAttNodeID);
 			
 		}
-		else if(stage.equals("DEAN")) {
+		else if(stage.equals(Constants.STATE_DEAN)) {
 			long userAttNodeID = PDSOperations.getNodeID(proposalPolicy, Constants.DEAN_UA, NodeType.UA, null);
 			
 			long oaApprovalAttNodeID = PDSOperations.getNodeID(proposalPolicy, Constants.DEAN_APPROVAL, NodeType.OA, null);
@@ -407,7 +403,7 @@ public class ProposalDataSheet {
 			proposalPolicy.dissociate(userAttNodeID, oaSignatureInfoAttNodeID);
 			
 		}
-		else if(stage.equals("IRB")) {
+		else if(stage.equals(Constants.STATE_IRB)) {
 			long userAttNodeID = PDSOperations.getNodeID(proposalPolicy, Constants.IRB_UA, NodeType.UA, null);
 			
 			long oaApprovalAttNodeID = PDSOperations.getNodeID(proposalPolicy, Constants.IRB_APPROVAL, NodeType.OA, null);
@@ -417,7 +413,7 @@ public class ProposalDataSheet {
 			proposalPolicy.dissociate(userAttNodeID, oaSignatureInfoAttNodeID);
 			
 		}
-		else if(stage.equals("RA")) {
+		else if(stage.equals(Constants.STATE_RA)) {
 			long userAttNodeID = PDSOperations.getNodeID(proposalPolicy, Constants.RA_UA, NodeType.UA, null);
 			
 			long oaApprovalAttNodeID = PDSOperations.getNodeID(proposalPolicy, Constants.RA_APPROVAL, NodeType.OA, null);
@@ -427,7 +423,7 @@ public class ProposalDataSheet {
 			proposalPolicy.dissociate(userAttNodeID, oaSignatureInfoAttNodeID);
 			
 		}
-		else if(stage.equals("RD")) {
+		else if(stage.equals(Constants.STATE_RD)) {
 			long userAttNodeID = PDSOperations.getNodeID(proposalPolicy, Constants.RD_UA, NodeType.UA, null);
 			
 			long oaApprovalAttNodeID = PDSOperations.getNodeID(proposalPolicy, Constants.RD_APPROVAL, NodeType.OA, null);
@@ -512,7 +508,8 @@ public class ProposalDataSheet {
 			childIds = proposalPolicy.getChildren(userAttRdNodeID);
 			log.info("RD now:"+childIds.size());
 			for (long id : childIds) {
-				proposalPolicy.deassign(id, userAttRdNodeID);
+				//proposalPolicy.deassign(id, userAttRdNodeID);
+				log.info(proposalPolicy.getNode(id).getName());
 			}
 			
 			
@@ -620,6 +617,14 @@ public class ProposalDataSheet {
 				long rdUser = PDSOperations.getNodeID(proposalPolicy, name, NodeType.U, null);
 				proposalPolicy.assign(rdUser, currentuserAttNodeID);
 			}
+		}
+		else if(stage.equals(Constants.STATE_READY_FOR_SUBMISSION)) {  // add ra
+			profileIds = proposalDao.getExistingSignatureProfileIdForAProposal(proposalData, profileIds, "University Research Administrator");
+			String name = DepartmentsPositionsCollection.adminUsers.get( "URA");
+			if(!profileIds.contains(DepartmentsPositionsCollection.userIdNameMap.get(name) )) {
+				long raUser = PDSOperations.getNodeID(proposalPolicy, name, NodeType.U, null);
+				proposalPolicy.assign(raUser, currentuserAttNodeID);
+			}	
 		}
 		
 		}catch(PMException e) {
@@ -812,15 +817,15 @@ public class ProposalDataSheet {
 			objectAtt = Constants.CONFLICT_OF_INTEREST_INFO_OA_LBL;
 		} else if (proposalSection.equalsIgnoreCase("compliance info")) {
 			objectAtt = Constants.COMPLIANCE_INFO_OA_LBL;
-		} else if (proposalSection.equalsIgnoreCase("additional info")) {
+		} else if (proposalSection.equalsIgnoreCase("additional info") || proposalSection.equalsIgnoreCase("Additional Information")) {
 			objectAtt = Constants.ADDITIONAL_INFO_OA_LBL;
-		} else if (proposalSection.equalsIgnoreCase("collaboration info")) {
+		} else if (proposalSection.equalsIgnoreCase("collaboration info")|| proposalSection.equalsIgnoreCase("Collaboration Information")) {
 			objectAtt = Constants.COLLABORATION_INFO_OA_LBL;
-		} else if (proposalSection.equalsIgnoreCase("proprietary/confidential info")) {
+		} else if (proposalSection.equalsIgnoreCase("proprietary/confidential info") || proposalSection.equalsIgnoreCase("Proprietary/Confidential Information")) {
 			objectAtt = Constants.CONFIDENTIAL_INFO_OA_LBL;
-		} else if (proposalSection.equalsIgnoreCase("osp section info")) {
+		} else if (proposalSection.equalsIgnoreCase("osp section info") || proposalSection.equalsIgnoreCase("OSP Section") ){
 			objectAtt = Constants.OSP_SECTION_INFO_OA_LBL;
-		} else if (proposalSection.equalsIgnoreCase("signature info")) {
+		} else if (proposalSection.equalsIgnoreCase("signature info") || proposalSection.equalsIgnoreCase("Certification/Signatures")) {
 			objectAtt = Constants.SIGNATURE_INFO_OA_LBL;
 		} else {
 			objectAtt = Constants.PROJECT_INFO_OA_LBL;

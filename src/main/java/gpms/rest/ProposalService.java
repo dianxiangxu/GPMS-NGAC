@@ -608,7 +608,7 @@ public class ProposalService {
 				attrMap.put("Subject", subjectMap);
 			}
 			
-			List<String> actions = null;
+			List<String> actions = new ArrayList<String>();
 			
 			log.info("Proposal Role :"+proposalRoles);
 			log.info("User info :"+userInfo);
@@ -631,18 +631,17 @@ public class ProposalService {
 				setPolicyState(projectProposal, existingProposal, proposalPolicy, userInfo.getUserName(), false);
 				
 				
-//				if(existingProposal.getSubmittedByPI().equals(SubmitType.SUBMITTED)){
-//					log.info("Call for Prohibition load");
-//					projectProposal.generatePostSubmissionProhibitions();
-//				}
+
+				String stage = projectProposal.getApprovalStage();
+				log.info("Stage:"+stage);
 				if(projectProposal.isProposalSubmitted()) {
-					String stage = projectProposal.getApprovalStage();
+					if(!stage.equals(Constants.ZOMBIE_STATE)) {
 					actions = projectProposal.getPermittedActions(pdsOperations, userInfo.getUserName(), Constants.APPROVAL_CONTENT);
-				}else {
-		
-				actions = projectProposal.getPermittedActions(pdsOperations, userInfo.getUserName(), Constants.PDSs_OA_UA_LBL);
+					}
+				}else if(!stage.equals(Constants.ZOMBIE_STATE)) {					
+					 actions = projectProposal.getPermittedActions(pdsOperations, userInfo.getUserName(), Constants.PDSs_OA_UA_LBL);
 				}
-			} else {
+				} else {
 				
 				StringBuffer contentProfile = proposalDAO
 						.generateProposalContentProfile(proposalId, userInfo,
@@ -1350,11 +1349,10 @@ public class ProposalService {
 										signatures, irbApprovalRequired,
 										requiredSignatures, emailDetails,
 										action)) {
-									//write the policy change here if action is submit
 									
-									//loader.savePolicy(proposalPolicy, Constants.POLICY_CONFIG_OUTPUT_FILE+existingProposal.getNgacId()+".json");
 									
 									log.info("User Info:"+userInfo.toString());
+									/*
 									List<UserInfo> userList = userProfileDAO.findAllForAdminUserGrid(0, 1000, userInfo);
 									log.info("All admins:");
 									for(UserInfo user : userList) {
@@ -1364,9 +1362,12 @@ public class ProposalService {
 									for( SignatureUserInfo sign: signatures) {
 										log.info(sign.getDepartment()+"|"+sign.getPositionTitle()+"|"+sign.getUserName());
 									}
-									
+									*/
 									
 									if(action.equals("Submit")) {
+										
+										
+										
 										log.info("Call for Prohibition load");
 										projectProposal.generatePostSubmissionProhibitions();
 										//PDSOperations.proposalProhibitions.put(existingProposal.getNgacId(),projectProposal.getProhibitions());
@@ -1503,41 +1504,7 @@ public class ProposalService {
 					Graph proposalPolicy = null;
 					
 					setPolicyState(projectProposal, existingProposal, proposalPolicy, userInfo.getUserName(),false);
-					
-//					if(PDSOperations.proposalPolicies.get(existingProposal.getNgacId()) != null) {
-//						log.info("HashMap has the current policy: "+existingProposal.getNgacId());
-//						projectProposal.setProposalPolicy(PDSOperations.proposalPolicies.get(existingProposal.getNgacId()));
-//					}
-//					else {
-//						log.info("Policy re-created.");						
-//						proposalPolicy = pdsOperations.getBacicNGACPolicy() ;						
-//						//proposalPolicy = loader.createAProposalGraph(proposalPolicy);
-//						proposalPolicy = loader.createAProposalGraph(proposalPolicy);
-//						projectProposal.setProposalPolicy(proposalPolicy);
-//						
-////						projectProposal.updatePI();
-////						projectProposal.updateCoPI(userInfo.getUserName());
-////						projectProposal.updateSP(userInfo.getUserName());
-//						
-//					}
-//					
-//				    log.info("Graph size:"+projectProposal.getProposalPolicy().getNodes().size());
-//					projectProposal.clearIngestigator();
-//					projectProposal.updatePI(false);
-//					projectProposal.updateCoPI(userInfo.getUserName(),false);
-//					projectProposal.updateSP(userInfo.getUserName(),false);
-//					
-//					
-//					if(projectProposal.isProposalSubmitted()) {
-//						projectProposal.generatePostSubmissionProhibitions();
-//						projectProposal.updatePostSubmissionchanges();
-//					}
-//					
-//					
-//					log.info("Graph size:"+projectProposal.getProposalPolicy().getNodes().size());
-//					PDSOperations.proposalPolicies.put(existingProposal.getNgacId(),proposalPolicy);
-//					
-					
+			
 					String decision = "";
 					
 					if(action.equalsIgnoreCase("Edit"))
