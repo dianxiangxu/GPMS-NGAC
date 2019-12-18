@@ -185,8 +185,8 @@
 						class="icon-reports"></i><span>My Proposals</span></a></li>
 				<!-- <li class="sfLevel1"><a href="./Notifications.jsp"><i
 						class="icon-text"></i><span>Notifications</span></a></li> -->
-				<li class="sfLevel1"><a href="./Delegation.jsp"><i
-						class="icon-roles"></i><span>Delegation</span></a></li>
+				<!--  	<li class="sfLevel1"><a href="./Delegation.jsp"><i
+						class="icon-roles"></i><span>Delegation</span></a></li>   -->
 				<li class="sfLevel1"><a href="./AccountSettings.jsp"><i
 						class="icon-tools"></i><span>Account Settings</span></a></li>
 			</ul>

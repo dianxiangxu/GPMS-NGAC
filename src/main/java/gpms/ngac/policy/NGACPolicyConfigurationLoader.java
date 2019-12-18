@@ -41,7 +41,9 @@ public class NGACPolicyConfigurationLoader {
 	private static Graph ngacPolicy;
 	private static final Logger log = Logger.getLogger(NGACPolicyConfigurationLoader.class.getName());
 	private static String jsonProposalPolicy = "";
-	private static String jsonApprovalPolicy = "";
+	private static String jsonApprovalPolicy = "";	
+	private static File obligationFile = null;
+	String jsonProhibitionPolicy = "";
 	
 	public void init() {
 		if (ngacPolicy == null) {
@@ -50,7 +52,9 @@ public class NGACPolicyConfigurationLoader {
 			File file_university_org = getFileFromResources(Constants.POLICY_CONFIG_FILE_UNIVERSITY_ORGANIZATION);
 			File file_proposal_editing = getFileFromResources(Constants.PDS_EDITING_TEMPLATE);
 			File file_proposal_approval = getFileFromResources(Constants.POLICY_CONFIG_FILE_CREATE_APPROVAL);
-
+			File prohibitionFile = getFileFromResources(Constants.PROHIBITION_POST_SUBMISSION); 
+			
+			obligationFile = getFileFromResources(Constants.OBLIGATION_TEMPLATE_PROPOSAL_CREATION); 
 			String jsonSuper;
 			String jsonProposalCreation;
 			String jsonUnivOrg;
@@ -62,8 +66,14 @@ public class NGACPolicyConfigurationLoader {
 				jsonUnivOrg = new String(Files.readAllBytes(Paths.get(file_university_org.getAbsolutePath())));
 				jsonProposalPolicy = new String(Files.readAllBytes(Paths.get(file_proposal_editing.getAbsolutePath())));
 				jsonApprovalPolicy = new String(Files.readAllBytes(Paths.get(file_proposal_approval.getAbsolutePath())));
+				jsonProhibitionPolicy = new String(Files.readAllBytes(Paths.get(prohibitionFile.getAbsolutePath())));
+				
 				log.info("Editing Policy:" + jsonProposalPolicy.length());
 				log.info("Approval Policy:" + jsonApprovalPolicy.length());
+				log.info("Prohibition:" + jsonProhibitionPolicy.length());
+				if(obligationFile.exists()) {
+					log.info("Obligation ready.");
+				}
 				try {
 					ngacPolicy = GraphSerializer.fromJson(new MemGraph(), jsonSuper);
 					ngacPolicy = GraphSerializer.fromJson(ngacPolicy, jsonProposalCreation);
@@ -171,11 +181,11 @@ public class NGACPolicyConfigurationLoader {
 	}
 	
 	
-	public Obligation loadObligation(String path) {
+	public Obligation getObligation() {
 		Obligation obligation = null;
 		try {
-			File file = getFileFromResources(path); 
-			InputStream is = new FileInputStream(file);
+			
+			InputStream is = new FileInputStream(obligationFile);
 			obligation = EVRParser.parse(is);
 		
 		}catch(Exception e) {
@@ -185,12 +195,10 @@ public class NGACPolicyConfigurationLoader {
 		return obligation;
 	}
 	
-	public Prohibitions loadProhibitions(String path) {
+	public Prohibitions getProhibitions() {
 		Prohibitions prohibitions = new MemProhibitions();
 		try {
-		File file_prohibition = getFileFromResources(path); 
-		String json_prohibition = new String(Files.readAllBytes(Paths.get(file_prohibition.getAbsolutePath())));
-		prohibitions = ProhibitionsSerializer.fromJson(prohibitions, json_prohibition);
+		prohibitions = ProhibitionsSerializer.fromJson(prohibitions, jsonProhibitionPolicy);
 		
 		}catch(Exception e) {
 			log.info("Exception: "+e.toString());

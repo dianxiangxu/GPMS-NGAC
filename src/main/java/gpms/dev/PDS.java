@@ -86,7 +86,7 @@ public class PDS {
     	
 		PDS main = new PDS();		
 		//main.testGraph27WithObligations(main);
-		//main.testGraph25WithObligations(main);
+		main.testGraph25WithObligations(main);
 		//main.testGraph26WithProhibitions(main);
 		
 		//main.testMongoInfo();
@@ -94,7 +94,7 @@ public class PDS {
 //		main.testGenerateIds();
 	//	main.testGenerateIds();
 		
-		main.testEmail();
+	//	main.testEmail();
 
     }
     
@@ -212,7 +212,7 @@ public class PDS {
     
     void testGraph24WithProhibitions(PDS main) throws PMException, IOException {
 
-		File file = main.getFileFromResources(main,"docs/test_prohibition.json"); 
+		File file = main.getFileFromResources(main,"docs/test_policy_graph.json"); 
 		String json = new String(Files.readAllBytes(Paths.get(file.getAbsolutePath())));
 		//System.out.println(json);
 		Graph graph =null;
@@ -343,7 +343,7 @@ public class PDS {
     
     void testGraph25WithObligations(PDS main) throws PMException, IOException {
 
-		File file = main.getFileFromResources(main,"docs/test_prohibition.json"); 
+		File file = main.getFileFromResources(main,"docs/test_policy_graph.json"); 
 		String json = new String(Files.readAllBytes(Paths.get(file.getAbsolutePath())));
 		//System.out.println(json);
 		Graph graph =null;
@@ -352,8 +352,8 @@ public class PDS {
 		
 		Prohibitions prohibitions = new MemProhibitions();
 		
-		File file5 = main.getFileFromResources(main, "docs/test_obligation.yml");
-		InputStream is = new FileInputStream(file5);
+		File file_obligation = main.getFileFromResources(main, "docs/test_obligation.yml");
+		InputStream is = new FileInputStream(file_obligation);
 		Obligation obligation = EVRParser.parse(is); 
 		
 		PReviewDecider decider = new PReviewDecider(graph, prohibitions);

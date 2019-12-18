@@ -946,26 +946,81 @@ public class ProposalService {
 					BalanaConnector ac = new BalanaConnector();
 					HashMap<String, Multimap<String, String>> attrMap = proposalDAO
 							.generateAttributes(policyInfo);
-					Set<AbstractResult> set = ac
-							.getXACMLdecisionWithObligations(attrMap,
-									contentProfile);
-					Iterator<AbstractResult> it = set.iterator();
-					int intDecision = AbstractResult.DECISION_NOT_APPLICABLE;
-					while (it.hasNext()) {
-						AbstractResult ar = it.next();
-						intDecision = ar.getDecision();
-						if (intDecision == AbstractResult.DECISION_INDETERMINATE_DENY
-								|| intDecision == AbstractResult.DECISION_INDETERMINATE_PERMIT
-								|| intDecision == AbstractResult.DECISION_INDETERMINATE_DENY_OR_PERMIT) {
-							intDecision = AbstractResult.DECISION_INDETERMINATE;
+					
+					log.info("Action:"+buttonType);
+					String action = new String();
+					String subject = new String();
+					String object = new String();
+					for (JsonNode node : policyInfo) {
+						String attributeValue = node.path("attributeValue")
+								.asText();
+						String attributeType = node.path("attributeType")
+								.asText();
+						switch (attributeType) {
+						case "Action":
+							action = attributeValue;
+							break;
+						case "Subject":
+							log.info("ATT NAME:"+node.path("attributeName"));
+							subject = attributeValue;
+							log.info("ATT VALUE:"+subject);
+							break;	
+						case "Resource":
+							object = attributeValue;
+							break;		
+						default:
+							break;
 						}
-						System.out.println("Decision:" + intDecision
-								+ " that is: "
-								+ AbstractResult.DECISIONS[intDecision]);
-						if (AbstractResult.DECISIONS[intDecision]
-								.equals("Permit")) {
-							List<ObligationResult> obligations = ar
-									.getObligations();
+					}
+					
+					log.info("Action:"+action);
+					log.info("Subject:"+subject);
+					log.info("Resource:"+object);
+					String decision = "";
+					
+					if(action.equals("Archive")  ) {
+						
+						ProposalDataSheet projectProposal =  new ProposalDataSheet(); 
+						long proposalNgacId = existingProposal.getNgacId();
+						log.info("NN: Proposal NGAC Id:"+proposalNgacId);
+						
+						Graph proposalPolicy=null;
+						setPolicyState(projectProposal, existingProposal, proposalPolicy, userInfo.getUserName(), false);
+						
+						String stage = projectProposal.getApprovalStage();
+						log.info("Stage:"+stage);
+					    
+						decision = projectProposal.getPolicyDecision(pdsOperations, userInfo.getUserName(), action, Constants.APPROVAL_CONTENT);
+					    log.info("D:"+decision);
+					    
+					    
+					}
+					
+					
+					
+//					Set<AbstractResult> set = ac
+//							.getXACMLdecisionWithObligations(attrMap,
+//									contentProfile);
+//					Iterator<AbstractResult> it = set.iterator();
+//					int intDecision = AbstractResult.DECISION_NOT_APPLICABLE;
+//					while (it.hasNext()) {
+//						AbstractResult ar = it.next();
+//						intDecision = ar.getDecision();
+//						if (intDecision == AbstractResult.DECISION_INDETERMINATE_DENY
+//								|| intDecision == AbstractResult.DECISION_INDETERMINATE_PERMIT
+//								|| intDecision == AbstractResult.DECISION_INDETERMINATE_DENY_OR_PERMIT) {
+//							intDecision = AbstractResult.DECISION_INDETERMINATE;
+//						}
+//						System.out.println("Decision:" + intDecision
+//								+ " that is: "
+//								+ AbstractResult.DECISIONS[intDecision]);
+//						if (AbstractResult.DECISIONS[intDecision]
+//								.equals("Permit")) 
+						if(decision.equals("Permit"))
+						{
+							//List<ObligationResult> obligations = ar
+							//		.getObligations();
+							List<ObligationResult> obligations = new ArrayList<ObligationResult>();
 							String changeDone = proposalDAO
 									.updateProposalStatusWithObligations(
 											proposalId, buttonType,
@@ -1007,10 +1062,10 @@ public class ProposalService {
 									.status(403)
 									.type(MediaType.APPLICATION_JSON)
 									.entity("Your permission is: "
-											+ AbstractResult.DECISIONS[intDecision])
+											+ decision)
 									.build();
 						}
-					}
+				//	}   ///end while
 				} else {
 					return Response.status(403)
 							.type(MediaType.APPLICATION_JSON)
@@ -1161,6 +1216,7 @@ public class ProposalService {
 				JsonNode commonObj = root.get("gpmsCommonObj");
 				userInfo = new GPMSCommonInfo(commonObj);
 				log.info("USER NAME:"+userInfo.getUserName());
+				log.info("USER POSITIon TITLE:"+userInfo.getUserPositionTitle());
 			}
 			ObjectId authorId = new ObjectId(userInfo.getUserProfileID());
 			UserProfile authorProfile = userProfileDAO
@@ -1284,6 +1340,10 @@ public class ProposalService {
 							String acRight = action;
 							// objectAtt = projectProposal.setSection(proposalSection);
 							log.info("objectAtt:"+objectAtt);
+							
+							if(action.equals("Submit") && userInfo.getUserPositionTitle().equalsIgnoreCase("University Research Administrator")) {
+								objectAtt = Constants.APPROVAL_CONTENT;
+							}
 							decisionString = projectProposal.getPolicyDecisionAnyType(pdsOperations, userInfo.getUserName(),"U", acRight, objectAtt);
 						    log.info("D:"+decisionString);
 							
@@ -1352,6 +1412,9 @@ public class ProposalService {
 									
 									
 									log.info("User Info:"+userInfo.toString());
+									//pdsOperations.testUsersAccessights_Proposal_created(projectProposal.getProposalPolicy());
+									
+									
 									/*
 									List<UserInfo> userList = userProfileDAO.findAllForAdminUserGrid(0, 1000, userInfo);
 									log.info("All admins:");
@@ -1364,7 +1427,7 @@ public class ProposalService {
 									}
 									*/
 									
-									if(action.equals("Submit")) {
+									if(action.equals("Submit") && !userInfo.getUserPositionTitle().equalsIgnoreCase("University Research Administrator")) {
 										
 										
 										
@@ -1383,9 +1446,10 @@ public class ProposalService {
 										ApprovalStagePost = projectProposal.getApprovalStage();
 										log.info("Post : Action:"+action+"|Role:"+proposalRoles+"|Name:"+userInfo.getUserName()+"|Stage:"+ApprovalStagePost);
 										if(!ApprovalStagePre.equals(ApprovalStagePost)) {
-											
+											log.info("Action:"+action+"|Differ PRE and POST Stage!"+ApprovalStagePre+"|"+ApprovalStagePost);
 											//projectProposal.disassociateApprovalRelation(ApprovalStagePre);
 											projectProposal.associateApprovalRelation(ApprovalStagePost);
+											
 										}
 										
 									}else if(action.equals("Approve")) {
@@ -1393,9 +1457,12 @@ public class ProposalService {
 										log.info("Post : Action:"+action+"|Role:"+proposalRoles+"|Name:"+userInfo.getUserName()+"|Stage:"+ApprovalStagePost);
 										
 										if(!ApprovalStagePre.equals(ApprovalStagePost)) {
+											log.info("Action:"+action+"|Differ PRE and POST Stage!"+ApprovalStagePre+"|"+ApprovalStagePost);
 											projectProposal.updatePostSubmissionchanges(proposalDAO);
 											projectProposal.disassociateApprovalRelation(ApprovalStagePre);
 											projectProposal.associateApprovalRelation(ApprovalStagePost);
+										}else {
+											log.info("Same PRE and POST Stage!"+ApprovalStagePre+"|"+ApprovalStagePost);
 										}
 									}
 									
@@ -1612,6 +1679,8 @@ public class ProposalService {
 					log.info("Attribute Map:"+attrMap);
 					log.info("Attribute Map PM:"+attrMapPm);
 					
+					//pdsOperations.testUsersAccessights_Proposal_not_created();
+					
 					boolean hasPermission = false;
 					hasPermission = pdsOperations.hasPermissionToCreateAProposal(userInfo.getUserName(),new MemProhibitions());
 					
@@ -1620,6 +1689,9 @@ public class ProposalService {
 						long proposalId = pdsOperations.createAProposal(userInfo.getUserName());
 						
 						log.info("New policy id:"+proposalId+"|"+PDSOperations.proposalPolicies.get(proposalId).getNodes().size());
+						
+						//pdsOperations.testUsersAccessights_Proposal_created(PDSOperations.proposalPolicies.get(proposalId));
+						
 						
 						return Response
 								.status(200)

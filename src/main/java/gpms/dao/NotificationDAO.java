@@ -468,7 +468,7 @@ public class NotificationDAO extends BasicDAO<NotificationLog, String> {
 		save(notification);
 		//investigator.getUserRef().
 		String email = investigator.getUserRef().getWorkEmails().get(0);
-		emailUtil.sendSimpleEmail(email, "GPMS-NGAC proposal Notification::This test email is intended for: "+email, "Dear Sir/Madam,<br>GPMS-NGAC proposal has been "+ notificationMessage+"<br>Regards,<Br><b>GPMS-NGAC Team</b>");
+		emailUtil.sendSimpleEmail(email, "GPMS-NGAC Notification", "Dear Sir/Madam,<br>GPMS-NGAC proposal : '"+projectTitle+"' has been updated.<br>Please login GPMS-NGAC for details.<br>Regards,<Br><b>GPMS-NGAC Team</b>");
 	}
 
 	public void createNotificationForAUser(String proposalID,

@@ -24,6 +24,8 @@ import static gov.nist.csd.pm.pip.graph.model.nodes.NodeType.O;
 import static gov.nist.csd.pm.pip.graph.model.nodes.NodeType.OA;
 import static gov.nist.csd.pm.pip.graph.model.nodes.NodeType.U;
 import static gov.nist.csd.pm.pip.graph.model.nodes.NodeType.UA;
+
+import gpms.DAL.DepartmentsPositionsCollection;
 import gpms.model.GPMSCommonInfo;
 import gpms.rest.UserService;
 
@@ -35,6 +37,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -59,7 +62,7 @@ public class PDSOperations {
 	private Graph ngacPolicy;
 	public static Random rand = new Random();
 	
-	private GpmsNgacObligations  gpmsNgacObligations;
+	//private GpmsNgacObligations  gpmsNgacObligations;
 	
 	public static HashMap<Long,Graph> proposalPolicies = new HashMap<Long,Graph>();
 	public static Prohibitions proposalProhibitions = null;
@@ -76,7 +79,7 @@ public class PDSOperations {
 	public PDSOperations()
 	{
 		this.ngacPolicy = NGACPolicyConfigurationLoader.getPolicy();
-		gpmsNgacObligations = new GpmsNgacObligations();
+		//gpmsNgacObligations = new GpmsNgacObligations();
 		policyLoader = new NGACPolicyConfigurationLoader();	
 		
 	}
@@ -84,12 +87,12 @@ public class PDSOperations {
 	public PDSOperations(Graph gf)
 	{
 		this.ngacPolicy = gf;
-		gpmsNgacObligations = new GpmsNgacObligations();
+	//	gpmsNgacObligations = new GpmsNgacObligations();
 	}
 	
 	public PDP getPDP(Graph graph) throws PMException {
 		if(pdp == null) {
-			obligation = policyLoader.loadObligation(Constants.OBLIGATION_TEMPLATE_PROPOSAL_CREATION);
+			obligation = policyLoader.getObligation();
 			pdp = new PDP(new PAP(graph, new MemProhibitions(), new MemObligations()));
 		 	pdp.getPAP().getObligationsPAP().add(obligation, true);	
 		}
@@ -386,26 +389,26 @@ public class PDSOperations {
      * @param targetNode the node that the event happens on
      * @throws PMException
      */
-    private void simulateAssignToEvent(Graph policy, long userID, Node targetNode, Node childNode) throws PMException {
-        // check if the target of the event is a particular container and execute the corresponding "response"
-        if(targetNode.getID() == getNodeID(policy, Constants.PDS_ORIGINATING_OA, OA, null)) {
-            //gpmsNgacObligations.createPDS(graph, userID, childNode);
-            gpmsNgacObligations.createPDS(policy, userID, childNode);
-        }
-        else if(targetNode.getID() == getNodeID(policy, "CoPI", OA, null)) {
-        	gpmsNgacObligations.addCoPI(policy, childNode);
-        } else if(targetNode.getID() == getNodeID(policy, "SP", OA, null)) {
-        	gpmsNgacObligations.addSP(policy, childNode);
-        } else if(targetNode.getID() == getNodeID(policy, "submitted_pdss", OA, null)) {
-        	gpmsNgacObligations.submitPDS(policy, childNode);
-        } else if(targetNode.getID() == getNodeID(policy, "cs_chair_approval", OA, null) ||
-                targetNode.getID() == getNodeID(policy, "math_chair_approval", OA, null)) {
-        	gpmsNgacObligations.chairApproval(policy, childNode);
-        }  else if(targetNode.getID() == getNodeID(policy, "coen_dean_approval", OA, null) ||
-                targetNode.getID() == getNodeID(policy, "coas_dean_approval", OA, null)) {
-        	gpmsNgacObligations.deanApproval(policy, childNode);
-        }
-    }
+//    private void simulateAssignToEvent(Graph policy, long userID, Node targetNode, Node childNode) throws PMException {
+//        // check if the target of the event is a particular container and execute the corresponding "response"
+//        if(targetNode.getID() == getNodeID(policy, Constants.PDS_ORIGINATING_OA, OA, null)) {
+//            //gpmsNgacObligations.createPDS(graph, userID, childNode);
+//            gpmsNgacObligations.createPDS(policy, userID, childNode);
+//        }
+//        else if(targetNode.getID() == getNodeID(policy, "CoPI", OA, null)) {
+//        	gpmsNgacObligations.addCoPI(policy, childNode);
+//        } else if(targetNode.getID() == getNodeID(policy, "SP", OA, null)) {
+//        	gpmsNgacObligations.addSP(policy, childNode);
+//        } else if(targetNode.getID() == getNodeID(policy, "submitted_pdss", OA, null)) {
+//        	gpmsNgacObligations.submitPDS(policy, childNode);
+//        } else if(targetNode.getID() == getNodeID(policy, "cs_chair_approval", OA, null) ||
+//                targetNode.getID() == getNodeID(policy, "math_chair_approval", OA, null)) {
+//        	gpmsNgacObligations.chairApproval(policy, childNode);
+//        }  else if(targetNode.getID() == getNodeID(policy, "coen_dean_approval", OA, null) ||
+//                targetNode.getID() == getNodeID(policy, "coas_dean_approval", OA, null)) {
+//        	gpmsNgacObligations.deanApproval(policy, childNode);
+//        }
+//    }
 	
 	public static long getNodeID(Graph graph, String name, NodeType type, Map<String, String> properties) throws PMException {
         Set<Node> search = graph.search(name, type.toString(), properties);
@@ -461,6 +464,57 @@ public class PDSOperations {
         
     }
 	
+	public void testUsersAccessights_Proposal_created(Graph proposalPolicy) {
+		try {
+			long userIdNazmul = PDSOperations.getNodeID(proposalPolicy, "nazmul", NodeType.U, null);  //tanure track + cs
+			long userIdAmy = PDSOperations.getNodeID(proposalPolicy, "amy", NodeType.U, null);     //adjunct
+			long userIdtom = PDSOperations.getNodeID(proposalPolicy, "tomtom", NodeType.U, null);     //adjunct
+			long userIdSamer = PDSOperations.getNodeID(proposalPolicy, "samer", NodeType.U, null);     // CE
+			
+			long userIdCSChair = PDSOperations.getNodeID(proposalPolicy, DepartmentsPositionsCollection.adminUsers.get("CSCHAIR"), NodeType.U, null);     
+			
+			log.info("************Start**************");
+			Attribute att = new Attribute("Budget-Info", NodeType.OA);
+			String[] ops = new String[] {"w"};
+			boolean hasPermission = UserPermissionChecker.checkPermissionAnyType(proposalPolicy, new MemProhibitions(),"nazmul", "U",att, Arrays.asList(ops));
+			log.info("Nazmul:Budget-Info(w):"+hasPermission);
+			
+			att = new Attribute("Budget-Info", NodeType.OA);
+			ops = new String[] {"w"};
+			String userName = "tomtom";
+			hasPermission = UserPermissionChecker.checkPermissionAnyType(proposalPolicy, new MemProhibitions(),userName, "U",att, Arrays.asList(ops));
+			log.info("tomtom:Budget-Info(w):"+hasPermission);
+			
+			att = new Attribute("Project-Info", NodeType.OA);
+			ops = new String[] {"r"};
+			userName = "tomtom";
+			hasPermission = UserPermissionChecker.checkPermissionAnyType(proposalPolicy, new MemProhibitions(),userName, "U",att, Arrays.asList(ops));
+			log.info("Project-Info(w):"+hasPermission);
+			log.info("**************End************");
+			
+		}catch(PMException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	
+	
+	public void testUsersAccessights_Proposal_not_created() {
+		try {
+			log.info("************Start**************");
+			long userIdNazmul = PDSOperations.getNodeID(ngacPolicy, "nazmul", NodeType.U, null);  //tanure track + cs
+			long userIdAmy = PDSOperations.getNodeID(ngacPolicy, "amy", NodeType.U, null);     //adjunct
+			Attribute att = new Attribute("PDS", NodeType.OA);
+			String[] ops = new String[] {"create-oa"};
+			boolean hasPermission = UserPermissionChecker.checkPermissionAnyType(ngacPolicy, new MemProhibitions(),"nazmul", "U",att, Arrays.asList(ops));
+			log.info("Nazmul:Create Proposal:"+hasPermission);
+			hasPermission = UserPermissionChecker.checkPermissionAnyType(ngacPolicy, new MemProhibitions(),"amy", "U",att, Arrays.asList(ops));
+			log.info("Amy:Create Proposal:"+hasPermission);
+			log.info("************End**************");
+		}catch(PMException e) {
+			e.printStackTrace();
+		}
+	}
     
 
 
