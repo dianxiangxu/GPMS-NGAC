@@ -150,7 +150,7 @@ public class EmailUtil {
 	public void sendSimpleEmail(String to,String subject, String body) {
 		
 		final String from = "nkarim25@gmail.com";
-        final String password = "Admission0!";
+        final String password = "Admiss";
         //String from = "";
         String host = "smtp.gmail.com";
         Properties properties = System.getProperties();
