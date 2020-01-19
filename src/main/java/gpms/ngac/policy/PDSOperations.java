@@ -1,6 +1,7 @@
 package gpms.ngac.policy;
 
 import gov.nist.csd.pm.epp.events.AssignToEvent;
+import gov.nist.csd.pm.epp.events.DeassignFromEvent;
 import gov.nist.csd.pm.exceptions.PMException;
 import gov.nist.csd.pm.pap.PAP;
 import gov.nist.csd.pm.pdp.PDP;
@@ -320,7 +321,19 @@ public class PDSOperations {
 			log.info("CREATE PROPOSAL: # nodes BEFORE:"+proposalPolicy.getNodes().size());
 			getPDP(proposalPolicy).getEPP().processEvent(
 					new AssignToEvent(proposalPolicy.getNode(pdsOriginationOAID), pdsNode), userID, getID());
-
+			
+			
+			/*
+			long COPIUAID = getNodeID(proposalPolicy, Constants.CO_PI_UA_LBL, UA, null);
+			long COPIUID = getNodeID(proposalPolicy, "liliana", U, null);
+			
+			
+			getPDP(proposalPolicy).getEPP().processEvent(
+					new AssignToEvent(proposalPolicy.getNode(COPIUAID), proposalPolicy.getNode(COPIUID)), userID, getID());
+			
+			*/
+			
+			
 			log.info("Proposal policy saved:" + randomId + "|" + proposalPolicy.toString() + "|"
 					+ proposalPolicy.getNodes().size());
 			PDSOperations.proposalPolicies.put(randomId, proposalPolicy);
