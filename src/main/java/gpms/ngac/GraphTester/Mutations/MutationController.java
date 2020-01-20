@@ -29,7 +29,7 @@ public class MutationController {
 		mc.createTestMethods();
 		mc.createHeaderForCSV();
 		for (String testMethod : mc.testMethods) {
-			String[] row=new String[8];
+			String[] row=new String[10];
 			mc.totalNumberOfMutantsForTest = 0;
 			mc.totalNumberOfKilledMutantsForTest = 0;
 			double resultADDAR = mc.testADDAR(testMethod);
@@ -38,7 +38,9 @@ public class MutationController {
 			double resultDISS = mc.testDISS(testMethod);
 			double resultREMAR = mc.testREMAR(testMethod);
 			double resultREMNODE = mc.testREMNODE(testMethod);
-			
+			double resultCHANGEAS = mc.testCHANGEAS(testMethod);
+			double resultCHANGEASSOC = mc.testCHANGEASSOC(testMethod);
+
 			row[0] = testMethod;
 			row[1] = Double.toString(resultADDAR);
 			row[2] = Double.toString(resultADDASSOC);
@@ -46,7 +48,9 @@ public class MutationController {
 			row[4] = Double.toString(resultDISS);
 			row[5] = Double.toString(resultREMAR);
 			row[6] = Double.toString(resultREMNODE);
-			row[7] = Double.toString((double)mc.totalNumberOfKilledMutantsForTest/(double)mc.totalNumberOfMutantsForTest*100);
+			row[7] = Double.toString(resultCHANGEAS);
+			row[8] = Double.toString(resultCHANGEASSOC);
+			row[9] = Double.toString((double)mc.totalNumberOfKilledMutantsForTest/(double)mc.totalNumberOfMutantsForTest*100);
 			mc.data.add(row);
 		}
 		mc.saveCSV(mc.data, CSV);
@@ -188,7 +192,50 @@ public class MutationController {
 		return mutationScore;
 
 	}
+	private double testCHANGEAS(String testMethod) {
+		MutatorCHANGEAS mutatorCHANGEAS = new MutatorCHANGEAS();
 
+		try {
+			mutatorCHANGEAS.init(testMethod);
+		} catch (PMException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		double mutationScore = mutatorCHANGEAS.calculateMutationScore(mutatorCHANGEAS.getNumberOfMutants(),
+				mutatorCHANGEAS.getNumberOfKilledMutants());
+		System.out.println("Number of mutations: " + mutatorCHANGEAS.getNumberOfMutants());
+		System.out.println("Number of killed mutants: " + mutatorCHANGEAS.getNumberOfKilledMutants());
+
+		System.out.println("Mutation Score: " + mutationScore + "%");
+		System.out.println();
+		totalNumberOfMutantsForTest += mutatorCHANGEAS.getNumberOfMutants();
+		totalNumberOfKilledMutantsForTest += mutatorCHANGEAS.getNumberOfKilledMutants();
+		return mutationScore;
+
+	}
+	private double testCHANGEASSOC(String testMethod) {
+		MutatorCHANGEASSOC mutatorCHANGEASSOC = new MutatorCHANGEASSOC();
+
+		try {
+			mutatorCHANGEASSOC.init(testMethod);
+		} catch (PMException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		double mutationScore = mutatorCHANGEASSOC.calculateMutationScore(mutatorCHANGEASSOC.getNumberOfMutants(),
+				mutatorCHANGEASSOC.getNumberOfKilledMutants());
+		System.out.println("Number of mutations: " + mutatorCHANGEASSOC.getNumberOfMutants());
+		System.out.println("Number of killed mutants: " + mutatorCHANGEASSOC.getNumberOfKilledMutants());
+
+		System.out.println("Mutation Score: " + mutationScore + "%");
+		System.out.println();
+		totalNumberOfMutantsForTest += mutatorCHANGEASSOC.getNumberOfMutants();
+		totalNumberOfKilledMutantsForTest += mutatorCHANGEASSOC.getNumberOfKilledMutants();
+		return mutationScore;
+
+	}
 	private void createTestMethods() {
 		testMethods = new ArrayList<String>();
 		testMethods.add("RS");
@@ -200,7 +247,7 @@ public class MutationController {
 	}
 
 	private void createHeaderForCSV() {
-		String[] header = new String[8];
+		String[] header = new String[10];
 		header[0] = "TestMethod";
 		header[1] = "ADDAR";
 		header[2] = "ADDASSOC";
@@ -208,7 +255,9 @@ public class MutationController {
 		header[4] = "DISS";
 		header[5] = "REMAR";
 		header[6] = "REMNODE";
-		header[7] = "totalMutationScore";
+		header[7] = "CHANGEAS";
+		header[8] = "CHANGEASSOC";
+		header[9] = "totalMutationScore";
 		data.add(header);
 	}
 	
