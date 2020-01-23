@@ -120,9 +120,9 @@ public class EmailUtil {
 	 */
 	public void sendMailWithGmailTLS(String toEmail, String subject, String body) {
 		// Valid gmail ID
-		final String fromEmail = "noreplygpms@gmail.com";
+		final String fromEmail = "gpmsngac2020@gmail.com";
 		// Valid gmail password
-		final String password = "gpmstest";
+		final String password = "GPMSngac2020*";
 
 		// Must enable less secure Apps
 		// https://www.google.com/settings/u/1/security/lesssecureapps
@@ -149,15 +149,15 @@ public class EmailUtil {
 	
 	public void sendSimpleEmail(String to,String subject, String body) {
 		
-		final String from = "nkarim25@gmail.com";
-        final String password = "Admiss";
+		final String from = "gpmsngac2020@gmail.com";
+        final String password = "GPMSngac2020*";
         //String from = "";
         String host = "smtp.gmail.com";
         Properties properties = System.getProperties();
         
         body = body+"<br><b>[This email is from GPMS-NGAC development test purpose only.]</b>";
         
-        to = "md.n.karim@outlook.com";
+        to = "gpmsngac2020@gmail.com";
         // Setup mail server
         properties.put("mail.smtp.host", host);
         properties.put("mail.smtp.port", "587");
@@ -202,7 +202,7 @@ public class EmailUtil {
 
             // Set To: header field of the header.
             message.addRecipient(Message.RecipientType.TO, new InternetAddress(to));
-            message.addRecipient(Message.RecipientType.BCC, new InternetAddress("mdnazmulkarim@u.boisestate.edu"));
+            message.addRecipient(Message.RecipientType.BCC, new InternetAddress("gpmsngac2020@gmail.com"));
            // message.addRecipient(Message.RecipientType.CC, new InternetAddress("dxu@umkc.edu"));
 
             // Set Subject: header field
@@ -236,9 +236,9 @@ public class EmailUtil {
 	public void sendMailWithGmailSSL(String toEmail, String subject, String body) {
 		// Valid gmail ID
 		//final String fromEmail = "noreplygpms@gmail.com";
-		final String fromEmail = "nkarim25@gmail.com";
+		final String fromEmail = "gpmsngac2020@gmail.com";
 		// Valid gmail password
-		final String password = "Admission0!";
+		final String password = "GPMSngac2020*";
 		System.out.println("SSLEmail Start");
 		properties = new Properties();
 		// SMTP Host
