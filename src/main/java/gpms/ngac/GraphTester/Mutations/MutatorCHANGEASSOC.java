@@ -19,8 +19,8 @@ public class MutatorCHANGEASSOC extends MutantTester {
 		String testResults = "CSV/" + testMethod + "/" + testMethod + "testResultsCHANGEASSOC.csv";
 		String testSuitePath = "CSV/testSuits/" + testMethod + "testSuite.csv";
 		getGraphLoaded(initialGraphConfig);
-		for (Node oa : OAs) {
-			performMutation(oa, testMethod, testSuitePath);
+		for (Node oaua : UAsOAs) {
+			performMutation(oaua, testMethod, testSuitePath);
 		}
 		saveCSV(data, new File(testResults), testMethod);
 

@@ -40,6 +40,7 @@ abstract class MutantTester {
 
 	public String initialGraphConfig = "C:/data/ngac_config_Vlad3.json";
 	List<Node> UAs;
+	List<Node> UAsOAs;
 	List<Node> UAsPCs;
 	List<Node> UAsPCsOAs;
 	public void testMutant(Graph mutant, File testSuiteCSV, String testMethod, int mutantNumber, String mutationMethod)
@@ -199,6 +200,7 @@ abstract class MutantTester {
 			System.out.println("No UAs, PCs, and OAs found");
 			return;
 		}
+		getUAsOAsInGraph();
 	}
 
 	private void getUAsInGraph() throws PMException {
@@ -208,6 +210,17 @@ abstract class MutantTester {
 		for (Node node : nodes) {
 			if (node.getType() == UA) {
 				UAs.add(node);
+			}
+		}
+
+	}
+	private void getUAsOAsInGraph() throws PMException {
+		UAsOAs = new ArrayList<Node>();
+
+		Node[] nodes = graph.getNodes().toArray(new Node[graph.getNodes().size()]);
+		for (Node node : nodes) {
+			if (node.getType() == UA||node.getType() == OA) {
+				UAsOAs.add(node);
 			}
 		}
 
