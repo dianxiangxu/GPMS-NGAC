@@ -79,6 +79,8 @@ import com.mongodb.MongoClient;
 import gov.nist.csd.pm.exceptions.PMException;
 import gov.nist.csd.pm.pip.graph.Graph;
 import gov.nist.csd.pm.pip.prohibitions.MemProhibitions;
+import gov.nist.csd.pm.pip.prohibitions.Prohibitions;
+import gov.nist.csd.pm.pip.prohibitions.ProhibitionsSerializer;
 
 @Path("/proposals")
 @Api(value = "/proposals", description = "Manage Proposals")
@@ -101,7 +103,7 @@ public class ProposalService {
 	public DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 	private static final Logger log = Logger.getLogger(ProposalService.class
 			.getName());
-
+	static Prohibitions prohibitions = new MemProhibitions();
 	public ProposalService() {
 		mongoClient = MongoDBConnector.getMongo();
 		morphia = new Morphia();
@@ -1351,7 +1353,9 @@ public class ProposalService {
 						    	if(!projectProposal.isReadyForSubMission()) {
 						    		return Response.status(403).type(MediaType.APPLICATION_JSON)
 											.entity("Proposal is not ready to be submitted.").build();
+
 						    	}
+						    	prohibitions = pdsOperations.submitAProposal(userInfo.getUserName());
 						    }
 						   
 						    
@@ -1580,6 +1584,9 @@ public class ProposalService {
 						String acRight = "w";
 						objectAtt = projectProposal.setSection(proposalSection);
 						log.info("objectAtt:"+objectAtt);
+						projectProposal.setProhibitions(prohibitions);
+						String pro = ProhibitionsSerializer.toJson(prohibitions);
+						log.info("Prohibition:"+pro);
 						decision = projectProposal.getPolicyDecision(pdsOperations, userInfo.getUserName(), acRight, objectAtt);
 					    log.info("D:"+decision);
 					}else if(action.equalsIgnoreCase("Add Co-PI")) {

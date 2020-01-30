@@ -844,7 +844,9 @@ public class ProposalDataSheet {
 		return objectAtt;
 	}
 	
-	
+	public void setProhibitions(Prohibitions prohibitions) {
+		this.prohibitions = prohibitions;
+	}
 	
 
 }

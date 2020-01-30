@@ -43,6 +43,9 @@ public class Constants {
 	public static final String CONFIDENTIAL_INFO_OA_LBL = "Confidential-Info";
 	public static final String OSP_SECTION_INFO_OA_LBL = "OSP-Section-Info";
 	public static final String SIGNATURE_INFO_OA_LBL = "Signature-Info";
+	public static final String SUBMISSION_INFO_OA_LBL = "Submission-Info";
+	public static final String PI_EDITABLE_DATA_OA_LBL = "PI-Editable-Data";
+
 	
 	public static final String ZOMBIE_STATE = "ZOMBIE";
 	public static final String STATE_CHAIR = "CHAIR";

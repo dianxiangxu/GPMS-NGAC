@@ -2,18 +2,21 @@ package gpms.ngac.policy;
 
 import gov.nist.csd.pm.epp.events.AssignToEvent;
 import gov.nist.csd.pm.epp.events.DeassignFromEvent;
+import gov.nist.csd.pm.epp.functions.FunctionExecutor;
 import gov.nist.csd.pm.exceptions.PMException;
 import gov.nist.csd.pm.pap.PAP;
 import gov.nist.csd.pm.pdp.PDP;
 import gov.nist.csd.pm.pdp.decider.Decider;
 import gov.nist.csd.pm.pdp.decider.PReviewDecider;
 import gov.nist.csd.pm.pip.graph.Graph;
+import gov.nist.csd.pm.pip.graph.GraphSerializer;
 import gov.nist.csd.pm.pip.graph.MemGraph;
 import gov.nist.csd.pm.pip.graph.model.nodes.Node;
 import gov.nist.csd.pm.pip.graph.model.nodes.NodeType;
 import gov.nist.csd.pm.pip.obligations.MemObligations;
 import gov.nist.csd.pm.pip.obligations.evr.EVRParser;
 import gov.nist.csd.pm.pip.obligations.model.Obligation;
+import gov.nist.csd.pm.pip.obligations.model.functions.Function;
 import gov.nist.csd.pm.pip.prohibitions.MemProhibitions;
 import gov.nist.csd.pm.pip.prohibitions.Prohibitions;
 import gov.nist.csd.pm.pip.prohibitions.ProhibitionsSerializer;
@@ -92,14 +95,16 @@ public class PDSOperations {
 	}
 	
 	public PDP getPDP(Graph graph) throws PMException {
+		GetUserToDenySubjectExecutor getUserToDenySubjectExecuter = new GetUserToDenySubjectExecutor();
+
 		if(pdp == null) {
 			obligation = policyLoader.getObligation();
-			pdp = new PDP(new PAP(graph, new MemProhibitions(), new MemObligations()));
+			pdp = new PDP(new PAP(graph, new MemProhibitions(), new MemObligations()),getUserToDenySubjectExecuter);
 		 	pdp.getPAP().getObligationsPAP().add(obligation, true);	
 		}
 	 	return pdp;
 	}
-	
+
 	public Graph getNGACPolicy() {
 		return this.ngacPolicy;
 	}
@@ -345,7 +350,70 @@ public class PDSOperations {
 		}
 		return randomId;
 	}
-	
+	public Prohibitions submitAProposal(String userName) throws PMException {
+		
+		long randomId = getID();
+		Prohibitions prohibitions = new MemProhibitions();
+
+		try {
+			Graph proposalPolicy = null;
+			// proposalPolicy = policyLoader.createAProposalGraph(ngacPolicy); //loads
+			// editing policy
+			proposalPolicy = policyLoader.reloadBasicConfig();
+			proposalPolicy = policyLoader.createAProposalGraph(proposalPolicy); // loads editing policy
+			proposalPolicy = policyLoader.createAprovalGraph(proposalPolicy); // loads editing policy
+			Node pdsNode = proposalPolicy.createNode(randomId, "" + randomId, OA, null);
+			//log.info("ID:" + randomId);
+			long pdsOriginationOAID = getNodeID(proposalPolicy, Constants.SUBMISSION_INFO_OA_LBL, OA, null);
+			long userID = getNodeID(proposalPolicy, userName, U, null);
+
+			//printAccessState("Initial configuration before op:", proposalPolicy);
+			log.info("CREATE PROPOSAL: # nodes BEFORE:"+proposalPolicy.getNodes().size());
+			PReviewDecider decider = new PReviewDecider(proposalPolicy);
+			String[] array = new String[1];
+			array[0] = "w";
+			System.out.println("Before event: !!!!!!!!!!!!!!!!  "+decider.check(-4306211063214550717L, 101L, 375260122425903544L, array));
+
+	   		 PDP pdp = getPDP(proposalPolicy);
+	   		 try {
+			pdp.getEPP().processEvent(
+					new AssignToEvent(proposalPolicy.getNode(pdsOriginationOAID), pdsNode), userID, getID());
+			
+			
+			
+			prohibitions.add(pdp.getPAP().getProhibitionsPAP().get("deny1"));
+	        System.out.println(pdp.getPAP().getProhibitionsPAP().get("deny1").getName());
+
+	        prohibitions.add(pdp.getPAP().getProhibitionsPAP().get("deny3"));
+	        System.out.println(pdp.getPAP().getProhibitionsPAP().get("deny3").getName());
+	   		 }
+	   		 catch(NullPointerException ex) {
+	   			 ex.printStackTrace();
+	   		 }
+			/*
+			long COPIUAID = getNodeID(proposalPolicy, Constants.CO_PI_UA_LBL, UA, null);
+			long COPIUID = getNodeID(proposalPolicy, "liliana", U, null);
+			
+			
+			getPDP(proposalPolicy).getEPP().processEvent(
+					new AssignToEvent(proposalPolicy.getNode(COPIUAID), proposalPolicy.getNode(COPIUID)), userID, getID());
+			
+			*/
+			
+			
+		//	log.info("Proposal policy saved:" + randomId + "|" + proposalPolicy.toString() + "|"
+			//		+ proposalPolicy.getNodes().size());
+			//PDSOperations.proposalPolicies.put(randomId, proposalPolicy);
+			//printAccessState("Initial configuration after op:", proposalPolicy);
+			log.info("SUBMIT PROPOSAL: # nodes AFTER:"+proposalPolicy.getNodes().size());
+			
+	   		 System.out.println("RESULT!!!!!!!2 "+ pdsOriginationOAID+ decider.check(userID, NGACPolicyConfigurationLoader.getID() ,1432074838181907682L,array));
+
+		} catch (Exception e) {
+			log.info("Exception:" + e.toString());
+		}
+		return prohibitions;
+	}
 	
 	private String createProposalId(long id)
 	{
