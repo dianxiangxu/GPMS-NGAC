@@ -384,30 +384,15 @@ public class PDSOperations {
 			prohibitions.add(pdp.getPAP().getProhibitionsPAP().get("deny1"));
 	        System.out.println(pdp.getPAP().getProhibitionsPAP().get("deny1").getName());
 
-	        prohibitions.add(pdp.getPAP().getProhibitionsPAP().get("deny3"));
-	        System.out.println(pdp.getPAP().getProhibitionsPAP().get("deny3").getName());
+	        prohibitions.add(pdp.getPAP().getProhibitionsPAP().get("deny2"));
+	        System.out.println(pdp.getPAP().getProhibitionsPAP().get("deny2").getName());
+	        
 	   		 }
 	   		 catch(NullPointerException ex) {
 	   			 ex.printStackTrace();
 	   		 }
-			/*
-			long COPIUAID = getNodeID(proposalPolicy, Constants.CO_PI_UA_LBL, UA, null);
-			long COPIUID = getNodeID(proposalPolicy, "liliana", U, null);
-			
-			
-			getPDP(proposalPolicy).getEPP().processEvent(
-					new AssignToEvent(proposalPolicy.getNode(COPIUAID), proposalPolicy.getNode(COPIUID)), userID, getID());
-			
-			*/
-			
-			
-		//	log.info("Proposal policy saved:" + randomId + "|" + proposalPolicy.toString() + "|"
-			//		+ proposalPolicy.getNodes().size());
-			//PDSOperations.proposalPolicies.put(randomId, proposalPolicy);
-			//printAccessState("Initial configuration after op:", proposalPolicy);
+
 			log.info("SUBMIT PROPOSAL: # nodes AFTER:"+proposalPolicy.getNodes().size());
-			
-	   		 System.out.println("RESULT!!!!!!!2 "+ pdsOriginationOAID+ decider.check(userID, NGACPolicyConfigurationLoader.getID() ,1432074838181907682L,array));
 
 		} catch (Exception e) {
 			log.info("Exception:" + e.toString());

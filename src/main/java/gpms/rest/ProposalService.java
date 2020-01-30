@@ -1366,6 +1366,9 @@ public class ProposalService {
 							// objectAtt = projectProposal.setSection(proposalSection);
 							log.info("objectAtt:"+objectAtt);
 							actions = projectProposal.getPermittedActions(pdsOperations, userInfo.getUserName(), Constants.APPROVAL_CONTENT);
+							if(action.equals("Disapprove")) {
+								prohibitions = new MemProhibitions();
+							}
 							//decisionString = projectProposal.getPolicyDecisionAnyType(pdsOperations, userInfo.getUserName(),"U", acRight, objectAtt);
 						    if(actions.contains(action))
 						    	decisionString = "Permit";

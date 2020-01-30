@@ -58,7 +58,7 @@ rules:
                 - name: PI-Editable-Data
                   type: OA
         - deny:
-            label: deny3
+            label: deny2
             subject:
               function: 
                 name: get_user_to_deny_subject
