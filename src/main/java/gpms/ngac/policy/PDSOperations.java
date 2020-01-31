@@ -386,7 +386,6 @@ public class PDSOperations {
 
 	        prohibitions.add(pdp.getPAP().getProhibitionsPAP().get("deny2"));
 	        System.out.println(pdp.getPAP().getProhibitionsPAP().get("deny2").getName());
-	        
 	   		 }
 	   		 catch(NullPointerException ex) {
 	   			 ex.printStackTrace();
