@@ -184,6 +184,12 @@ public class ProposalDataSheet {
 			log.info("CoPI deassign:" + childIds.size());
 			for (long id : childIds) {
 				proposalPolicy.deassign(id, userAttCoPINodeID);
+				try {
+				PDSOperations.deleteCoPI(proposalPolicy.getNode(id).getName(), id, userAttCoPINodeID, proposalPolicy);
+				}
+				catch(PMException ex) {
+					ex.printStackTrace();
+				}
 				log.info("deassign:" + (proposalPolicy.getNode(id).getName()));
 			}
 
@@ -193,6 +199,12 @@ public class ProposalDataSheet {
 			log.info("SP deassign:" + childIds.size());
 			for (long id : childIds) {
 				proposalPolicy.deassign(id, userAttSPNodeID);
+				try {
+					PDSOperations.deleteSP(proposalPolicy.getNode(id).getName(), id, userAttSPNodeID, proposalPolicy);
+					}
+					catch(PMException ex) {
+						ex.printStackTrace();
+					}
 				log.info("deassign:" + (proposalPolicy.getNode(id).getName()));
 			}
 

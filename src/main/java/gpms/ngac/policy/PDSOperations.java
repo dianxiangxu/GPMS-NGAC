@@ -48,6 +48,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.Set;
 
@@ -92,11 +93,13 @@ public class PDSOperations {
 
 	public static PDP getPDP(Graph graph) throws PMException {
 		GetUserToDenySubjectExecutor getUserToDenySubjectExecuter = new GetUserToDenySubjectExecutor();
+		DeleteNodeExecutor deleteNodeExecutor = new DeleteNodeExecutor();
 
+		if(pdp == null) {
 		obligation = policyLoader.getObligation();
-		pdp = new PDP(new PAP(graph, new MemProhibitions(), new MemObligations()), getUserToDenySubjectExecuter);
+		pdp = new PDP(new PAP(graph, new MemProhibitions(), new MemObligations()), getUserToDenySubjectExecuter, deleteNodeExecutor);
 		pdp.getPAP().getObligationsPAP().add(obligation, true);
-
+		}
 		return pdp;
 	}
 
@@ -375,7 +378,7 @@ public class PDSOperations {
 		// long CoPIID = getNodeID(intialGraph, CoPINode, U, null);
 
 		// printAccessState("Initial configuration before op:", proposalPolicy);
-		log.info("SUBMIT PROPOSAL: # nodes BEFORE:" + intialGraph.getNodes().size());
+		log.info("ADD CoPI: # nodes BEFORE:" + intialGraph.getNodes().size());
 		
 		intialGraph.assign(CoPINode, CoPIUAID);
 
@@ -383,7 +386,7 @@ public class PDSOperations {
 		pdp.getEPP().processEvent(new AssignToEvent(intialGraph.getNode(CoPIUAID), intialGraph.getNode(CoPINode)),
 				userID, getID());
 		log.info("User Name " + intialGraph.getNode(userID).getName());
-		log.info("SUBMIT PROPOSAL: # nodes AFTER:" + intialGraph.getNodes().size());
+		log.info("ADD CoPI: # nodes AFTER:" + intialGraph.getNodes().size());
 		log.info("CoPIU Name" + intialGraph.getNode(CoPINode).getName());
 		// System.out.println(GraphSerializer.toJson(intialGraph));
 
@@ -401,7 +404,7 @@ public class PDSOperations {
 		// long CoPIID = getNodeID(intialGraph, CoPINode, U, null);
 
 		// printAccessState("Initial configuration before op:", proposalPolicy);
-		log.info("SUBMIT PROPOSAL: # nodes BEFORE:" + intialGraph.getNodes().size());
+		log.info("ADD SP: # nodes BEFORE:" + intialGraph.getNodes().size());
 		
 		intialGraph.assign(SPNode, SPUAID);
 
@@ -409,17 +412,100 @@ public class PDSOperations {
 		pdp.getEPP().processEvent(new AssignToEvent(intialGraph.getNode(SPUAID), intialGraph.getNode(SPNode)),
 				userID, getID());
 		log.info("User Name " + intialGraph.getNode(userID).getName());
-		log.info("SUBMIT PROPOSAL: # nodes AFTER:" + intialGraph.getNodes().size());
+		log.info("ADD SP: # nodes AFTER:" + intialGraph.getNodes().size());
 		log.info("CoPIU Name" + intialGraph.getNode(SPNode).getName());
 		// System.out.println(GraphSerializer.toJson(intialGraph));
-
 		
 		for (Long parent : intialGraph.getParents(SPNode)) {
 			log.info("Children: " + intialGraph.getNode(parent).getName());
 		}
+	}
+		public static void deleteCoPI(String userName, Long CoPINode, long CoPIUAID, Graph intialGraph) throws PMException {
+			// log.info("ID:" + randomId);
+			// long CoPIOAID = getNodeID(intialGraph, Constants.CO_PI_OA_LBL, OA, null);
+			long userID = 0;
+			try {
+			 userID =  getNodeID(intialGraph, userName, U, null);
+			}
+			catch(PMException e)
+			{
+				String string = "node was not found: "+e.getMessage();
+				log.info(string);
+				return;
+			}
+			// long CoPIID = getNodeID(intialGraph, CoPINode, U, null);
 
+			// printAccessState("Initial configuration before op:", proposalPolicy);
+			log.info("DELETE CoPI: # nodes BEFORE:" + intialGraph.getNodes().size());
+			
+			intialGraph.assign(CoPINode, CoPIUAID);
+
+			PDP pdp = getPDP(intialGraph);
+			try {
+			pdp.getEPP().processEvent(new DeassignFromEvent(intialGraph.getNode(CoPIUAID), intialGraph.getNode(CoPINode)),
+					userID, getID());
+			log.info("Found so many nodes: "+intialGraph.search("tomtom", "O", new HashMap<String, String>()).size());
+			}
+			catch(NoSuchElementException ex) {
+				ex.printStackTrace();
+			}
+			log.info("User Name " + intialGraph.getNode(userID).getName());
+			log.info("DELETE CoPI: # nodes AFTER:" + intialGraph.getNodes().size());
+			log.info("CoPIU Name" + intialGraph.getNode(CoPINode).getName());
+			// System.out.println(GraphSerializer.toJson(intialGraph));
+
+			
+			for (Long parent : intialGraph.getParents(CoPIUAID)) {
+				log.info("Parents: " + intialGraph.getNode(parent).getName());
+			}
+		
+		
 		// get all of the users in the graph
 	}
+		
+		public static void deleteSP(String userName, Long SPNode, long SPUAID, Graph intialGraph) throws PMException {
+			// log.info("ID:" + randomId);
+			// long CoPIOAID = getNodeID(intialGraph, Constants.CO_PI_OA_LBL, OA, null);
+			long userID = 0;
+			try {
+			 userID =  getNodeID(intialGraph, userName, U, null);
+			}
+			catch(PMException e)
+			{
+				String string = "node was not found: "+e.getMessage();
+				log.info(string);
+				return;
+			}
+			// long CoPIID = getNodeID(intialGraph, CoPINode, U, null);
+
+			// printAccessState("Initial configuration before op:", proposalPolicy);
+			log.info("DELETE SP: # nodes BEFORE:" + intialGraph.getNodes().size());
+			
+			intialGraph.assign(SPNode, SPUAID);
+
+			PDP pdp = getPDP(intialGraph);
+			try {
+			pdp.getEPP().processEvent(new DeassignFromEvent(intialGraph.getNode(SPUAID), intialGraph.getNode(SPNode)),
+					userID, getID());
+			log.info("Found so many nodes: "+intialGraph.search("liliana", "O", new HashMap<String, String>()).size());
+			}
+			catch(NoSuchElementException ex) {
+				ex.printStackTrace();
+			}
+			log.info("User Name " + intialGraph.getNode(userID).getName());
+			log.info("DELETE SP: # nodes AFTER:" + intialGraph.getNodes().size());
+			log.info("SP Name" + intialGraph.getNode(SPNode).getName());
+			// System.out.println(GraphSerializer.toJson(intialGraph));
+
+			
+			for (Long parent : intialGraph.getParents(SPUAID)) {
+				log.info("Parents: " + intialGraph.getNode(parent).getName());
+			}
+		
+		
+		// get all of the users in the graph
+	}
+	
 	private String createProposalId(long id) {
 		return "PDS" + id;
 	}

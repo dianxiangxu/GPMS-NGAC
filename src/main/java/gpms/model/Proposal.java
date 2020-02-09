@@ -128,6 +128,19 @@ public class Proposal extends BaseEntity implements Serializable {
 	@Embedded("prohibitions")
 	private String prohibitions = new String();
 	
+	@JsonProperty("policyGraph")
+	@Embedded("policyGraph")
+	private String policyGraph = new String();
+	public String getPolicyGraph() {
+		return policyGraph;
+	}
+
+
+	public void setPolicyGraph(String policyGraph) {
+		this.policyGraph = policyGraph;
+	}
+
+
 	public Proposal() {
 
 	}
@@ -629,6 +642,11 @@ public class Proposal extends BaseEntity implements Serializable {
 			if (other.prohibitions != null)
 				return false;
 		} else if (!prohibitions.equals(other.prohibitions))
+			return false;
+		if (policyGraph == null) {
+			if (other.policyGraph != null)
+				return false;
+		} else if (!policyGraph.equals(other.policyGraph))
 			return false;
 		return true;
 	}

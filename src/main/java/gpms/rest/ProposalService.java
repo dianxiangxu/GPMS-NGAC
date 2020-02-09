@@ -78,6 +78,7 @@ import com.mongodb.MongoClient;
 
 import gov.nist.csd.pm.exceptions.PMException;
 import gov.nist.csd.pm.pip.graph.Graph;
+import gov.nist.csd.pm.pip.graph.GraphSerializer;
 import gov.nist.csd.pm.pip.prohibitions.MemProhibitions;
 import gov.nist.csd.pm.pip.prohibitions.Prohibitions;
 import gov.nist.csd.pm.pip.prohibitions.ProhibitionsSerializer;
@@ -1167,7 +1168,8 @@ public class ProposalService {
 								String json = ProhibitionsSerializer
 										.toJson(pdsOperations.submitAProposal(userInfo.getUserName()));
 								existingProposal.setProhibitions(json);
-								// PDSOperations.proposalProhibitions.put(existingProposal.getNgacId(),pdsOperations.submitAProposal(userInfo.getUserName()));
+								
+								existingProposal.setPolicyGraph(GraphSerializer.toJson(projectProposal.getProposalPolicy()));
 							}
 
 						} else if (action.equals("Approve") || action.equals("Disapprove")) {
@@ -1186,6 +1188,7 @@ public class ProposalService {
 							}
 							// decisionString = projectProposal.getPolicyDecisionAnyType(pdsOperations,
 							// userInfo.getUserName(),"U", acRight, objectAtt);
+							existingProposal.setPolicyGraph(GraphSerializer.toJson(projectProposal.getProposalPolicy()));
 							if (actions.contains(action))
 								decisionString = "Permit";
 							else

@@ -212,4 +212,53 @@ rules:
             where:
               - name: SP-Info
                 type: OA  
+  - label: delete_copi
+    event:
+      subject:
+        anyUser:
+      operations:
+        - deassign from
+      target:
+        policyElements:
+          - name: CoPI
+            type: UA
+    response:
+      actions:
+        - delete:
+            create:
+              what: 
+                - function:
+                    name: delete_node
+                    args: 
+                      - function:
+                          name: get_node_name 
+                          args:
+                            - function:
+                                name: child_of_assign
+                      - O
+  - label: delete_sp
+    event:
+      subject:
+        anyUser:
+      operations:
+        - deassign from
+      target:
+        policyElements:
+          - name: SP
+            type: UA
+    response:
+      actions:
+        - delete:
+            create:
+              what: 
+                - function:
+                    name: delete_node
+                    args: 
+                      - function:
+                          name: get_node_name 
+                          args:
+                            - function:
+                                name: child_of_assign
+                      - O
+                
                     
