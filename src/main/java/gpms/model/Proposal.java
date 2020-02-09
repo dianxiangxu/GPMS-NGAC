@@ -16,6 +16,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import gov.nist.csd.pm.pip.graph.Graph;
+import gov.nist.csd.pm.pip.prohibitions.MemProhibitions;
+import gov.nist.csd.pm.pip.prohibitions.Prohibitions;
 
 @Entity(value = ProposalDAO.COLLECTION_NAME, noClassnameStored = true)
 @JsonIgnoreProperties({ "signatureInfo", "id", "version", "auditLog",
@@ -121,7 +123,11 @@ public class Proposal extends BaseEntity implements Serializable {
 	@JsonProperty("appendices")
 	@Embedded("appendices")
 	private List<Appendix> appendices = new ArrayList<Appendix>();
-
+	
+	@JsonProperty("prohibitions")
+	@Embedded("prohibitions")
+	private String prohibitions = new String();
+	
 	public Proposal() {
 
 	}
@@ -619,6 +625,21 @@ public class Proposal extends BaseEntity implements Serializable {
 				return false;
 		} else if (!universityCommitments.equals(other.universityCommitments))
 			return false;
+		if (prohibitions == null) {
+			if (other.prohibitions != null)
+				return false;
+		} else if (!prohibitions.equals(other.prohibitions))
+			return false;
 		return true;
+	}
+
+
+	public String getProhibitions() {
+		return prohibitions;
+	}
+
+
+	public void setProhibitions(String prohibitions) {
+		this.prohibitions = prohibitions;
 	}
 }

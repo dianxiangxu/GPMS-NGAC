@@ -71,4 +71,145 @@ rules:
               complement: false
               containers:
                 - name: CoPI-Editable-Data
-                  type: OA                      
+                  type: OA 
+        - deny:
+            label: deny3
+            subject:
+              function: 
+                name: current_user_to_deny_subject
+            operations:
+               - assign-u-from
+            target:
+              complement: false
+              containers:
+                - name: CoPI
+                  type: UA 
+        - deny:
+            label: deny4
+            subject:
+              function: 
+                name: get_user_to_deny_subject
+                args: 
+                  - CoPI
+                  - UA 
+            operations:
+               - assign-u-to
+            target:
+              complement: false
+              containers:
+                - name: SP
+                  type: UA 
+        - deny:
+            label: deny5
+            subject:
+              function: 
+                name: get_user_to_deny_subject
+                args: 
+                  - CoPI
+                  - UA 
+            operations:
+               - deassign-u-to
+            target:
+              complement: false
+              containers:
+                - name: SP
+                  type: UA  
+        - deny:
+            label: deny6
+            subject:
+              function: 
+                name: get_user_to_deny_subject
+                args: 
+                  - PI
+                  - UA
+            operations:
+               - Save
+            target:
+              complement: false
+              containers:
+                - name: PDSs
+                  type: OA
+        - deny:
+            label: deny7
+            subject:
+              function: 
+                name: get_user_to_deny_subject
+                args: 
+                  - PI
+                  - UA
+            operations:
+               - Delete
+            target:
+              complement: false
+              containers:
+                - name: PDSs
+                  type: OA
+        - deny:
+            label: deny8
+            subject:
+              function: 
+                name: get_user_to_deny_subject
+                args: 
+                  - PI
+                  - UA
+            operations:
+               - Submit
+            target:
+              complement: false
+              containers:
+                - name: PDSs
+                  type: OA    
+                  
+  - label: add_copi
+    event:
+      subject:
+        anyUser:
+      operations:
+        - assign to
+      target:
+        policyElements:
+          - name: CoPI
+            type: UA
+    response:
+      actions:
+        - create:
+            what:
+              - function:
+                  name: create_node
+                  args: 
+                    - function:
+                        name: get_node_name 
+                        args:
+                          - function:
+                              name: child_of_assign
+                    - O
+            where:
+              - name: CoPI-Info
+                type: OA
+  - label: add_sp
+    event:
+      subject:
+        anyUser:
+      operations:
+        - assign to
+      target:
+        policyElements:
+          - name: SP
+            type: UA
+    response:
+      actions:
+        - create:
+            what:
+              - function:
+                  name: create_node
+                  args: 
+                    - function:
+                        name: get_node_name 
+                        args:
+                          - function:
+                              name: child_of_assign
+                    - O
+            where:
+              - name: SP-Info
+                type: OA  
+                    
