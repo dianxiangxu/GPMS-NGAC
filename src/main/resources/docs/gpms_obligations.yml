@@ -186,6 +186,13 @@ rules:
             where:
               - name: CoPI-Info
                 type: OA
+        - assign:
+            what:
+              - function:
+                  name: child_of_assign
+            where:
+              - name: CoPI
+                type: UA
   - label: add_sp
     event:
       subject:

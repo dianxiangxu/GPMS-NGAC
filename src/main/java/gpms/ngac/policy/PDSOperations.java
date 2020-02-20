@@ -380,7 +380,7 @@ public class PDSOperations {
 		// printAccessState("Initial configuration before op:", proposalPolicy);
 		log.info("ADD CoPI: # nodes BEFORE:" + intialGraph.getNodes().size());
 		
-		intialGraph.assign(CoPINode, CoPIUAID);
+		//intialGraph.assign(CoPINode, CoPIUAID);
 
 		PDP pdp = getPDP(intialGraph);
 		pdp.getEPP().processEvent(new AssignToEvent(intialGraph.getNode(CoPIUAID), intialGraph.getNode(CoPINode)),

@@ -383,12 +383,21 @@ public class ProposalService {
 					projectProposal.setProposal(existingProposal);
 					setPolicyState(projectProposal, existingProposal, null, userInfo.getUserName(), false);
 
+					
+					
 					String decisionString = projectProposal.getPolicyDecisionAnyType(pdsOperations,
 							userInfo.getUserName(), "U", "Delete", objectAtt);
 					boolean isDeleted = false;
 					if (decisionString.equals("Permit")) {
 						isDeleted = proposalDAO.deleteProposal(existingProposal, proposalRoles, proposalUserTitle,
 								authorProfile);
+						
+						if(isDeleted == false) {
+							decisionString = projectProposal.getPolicyDecisionAnyType(pdsOperations,
+									userInfo.getUserName(), "U", "Del", objectAtt);
+							return Response.status(403).type(MediaType.APPLICATION_JSON)
+								.entity("Your permission is: " + "Deny").build();}
+						
 						log.info("D:" + decisionString + "Access Granted" + isDeleted);
 						return Response.status(200).type(MediaType.APPLICATION_JSON)
 								.entity(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(true)).build();

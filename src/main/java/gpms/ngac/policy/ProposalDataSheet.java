@@ -167,7 +167,6 @@ public class ProposalDataSheet {
 	}
 
 	public void clearIngestigator() {
-		log.info("HELLO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! CLEAR INVESTIGATOR");
 		
 		try {
 			long userAttPINodeID = PDSOperations.getNodeID(proposalPolicy, "PI", NodeType.UA, null);
