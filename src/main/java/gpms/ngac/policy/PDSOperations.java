@@ -96,11 +96,10 @@ public class PDSOperations {
 		DeleteNodeExecutor deleteNodeExecutor = new DeleteNodeExecutor();
 		EmailExecutor emailExecutor = new EmailExecutor();
 
-		if(pdp == null) {
 		obligation = policyLoader.getObligation();
 		pdp = new PDP(new PAP(graph, new MemProhibitions(), new MemObligations()), getUserToDenySubjectExecuter, deleteNodeExecutor,emailExecutor);
 		pdp.getPAP().getObligationsPAP().add(obligation, true);
-		}
+		
 		return pdp;
 	}
 
@@ -265,7 +264,7 @@ public class PDSOperations {
 			Map.Entry<Attribute, HashSet> entry = itr.next();
 			log.info("Container = " + entry.getKey() + ", permission set = " + entry.getValue());
 			hasPermission = hasPermission && UserPermissionChecker.checkPermissionAnyType(policy, prohibitions,
-					userName, U.toString(), (Attribute) entry.getKey(), new ArrayList<String>(entry.getValue()));
+					"CoPI", UA.toString(), (Attribute) entry.getKey(), new ArrayList<String>(entry.getValue()));
 		}
 //		try {
 //			hasPermission = hasPermission

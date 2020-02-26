@@ -757,7 +757,10 @@ public class ProposalDataSheet {
 			try {
 				copiUNodeId = PDSOperations.getNodeID(proposalPolicy, coPiName, U, null);
 				Set<Node> search = proposalPolicy.search(coPiName, "O", null);
-				if(!search.isEmpty()) continue;
+				if(!search.isEmpty()) {
+					CoPItoPreserve.add(copiUNodeId);
+					continue;
+				} 
 				// Node coPINode =proposalPolicy.createNode(PDSOperations.getID(),coPiName, U,
 				// null);
 				// Node copiName =proposalPolicy.createNode(PDSOperations.getID(),coPiName, O,
@@ -782,13 +785,15 @@ public class ProposalDataSheet {
 			} catch (PMException e) {
 				e.printStackTrace();
 			}
-			currentCoPIs.removeAll(CoPItoPreserve);
+			
+		}
+		currentCoPIs.removeAll(CoPItoPreserve);
 
-			for(Long removedCoPI : currentCoPIs) {
-				
-				PDSOperations.deleteCoPI(actor, removedCoPI, coPiUANode, proposalPolicy);
+		for(Long removedCoPI : currentCoPIs) {
+			if(proposalPolicy.getNode(removedCoPI).getName().equals("CoPIAdd")) continue;
 
-			}
+			PDSOperations.deleteCoPI(actor, removedCoPI, coPiUANode, proposalPolicy);
+
 		}
 	}
 
@@ -809,6 +814,8 @@ public class ProposalDataSheet {
 			spName = investPos.getUserRef().getUserAccount().getUserName();
 			log.info(spName);
 
+			
+			
 //			if(updateDept) {
 //				involvedDepartments.add(investPos.getDepartment());
 //			}
@@ -816,6 +823,12 @@ public class ProposalDataSheet {
 			long spUNodeId = 0;
 			try {
 				spUNodeId = PDSOperations.getNodeID(proposalPolicy, spName, U, null);
+				
+				Set<Node> search = proposalPolicy.search(spName, "O", null);
+				if(!search.isEmpty()) {
+					SPtoPreserve.add(spUNodeId);
+					continue;
+				} 
 
 				// Node spNode =proposalPolicy.createNode(PDSOperations.getID(),spName, U,
 				// null);
@@ -834,14 +847,14 @@ public class ProposalDataSheet {
 			} catch (PMException e) {
 				e.printStackTrace();
 			}
-			
-			currentSPs.removeAll(SPtoPreserve);
+						
+		}
+		currentSPs.removeAll(SPtoPreserve);
 
-			for(Long removedCoPI : currentSPs) {
-				
-				PDSOperations.deleteSP(actor, removedCoPI, coPiUANode, proposalPolicy);
+		for(Long removedCoPI : currentSPs) {
+			if(proposalPolicy.getNode(removedCoPI).getName().equals("SPAdd")) continue;
+			PDSOperations.deleteSP(actor, removedCoPI, coPiUANode, proposalPolicy);
 
-			}
 		}
 	}
 

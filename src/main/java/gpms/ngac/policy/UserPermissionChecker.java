@@ -35,7 +35,7 @@ public class UserPermissionChecker {
 		try {
 			String pro = ProhibitionsSerializer.toJson(prohibitions);
 			log.info("Prohibition:"+pro.length());
-			log.info("Graph Policy:"+ GraphSerializer.toJson(ngacPolicy));
+			//log.info("Graph Policy:"+ GraphSerializer.toJson(ngacPolicy));
 
 			PReviewDecider decider = new PReviewDecider(ngacPolicy,prohibitions);
 			

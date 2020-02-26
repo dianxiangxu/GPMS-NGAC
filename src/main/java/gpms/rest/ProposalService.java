@@ -1260,12 +1260,11 @@ public class ProposalService {
 									// PDSOperations.proposalProhibitions.put(existingProposal.getNgacId(),projectProposal.getProhibitions());
 									// loader.saveProhibition(projectProposal.getProhibitions(),
 									// Constants.POLICY_CONFIG_OUTPUT_FILE+"prohibition_"+existingProposal.getNgacId()+".json");
-									if(!action.equals("Edit")) {
 									projectProposal.clearIngestigator();
 									projectProposal.updatePI(true);
 									projectProposal.updateCoPI(userInfo.getUserName(), true);
 									projectProposal.updateSP(userInfo.getUserName(), true);
-									}
+									
 									projectProposal.updatePostSubmissionchanges(proposalDAO);
 									PDSOperations.proposalPolicies.put(existingProposal.getNgacId(), proposalPolicy);
 									ApprovalStagePost = projectProposal.getApprovalStage();
@@ -1296,7 +1295,8 @@ public class ProposalService {
 									}
 								}
 
-								// pdsOperations.printGraph(projectProposal.getProposalPolicy());
+								//System.out.println(GraphSerializer.toJson(projectProposal.getProposalPolicy()));
+								 //pdsOperations.printGraph(projectProposal.getProposalPolicy());
 
 								return Response.status(200).type(MediaType.APPLICATION_JSON)
 										.entity(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(true))
