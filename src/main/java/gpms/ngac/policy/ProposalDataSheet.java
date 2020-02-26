@@ -8,13 +8,17 @@ import gpms.ngac.policy.ProposalStage;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.log4j.Logger;
 
 import gov.nist.csd.pm.exceptions.PMException;
+import gov.nist.csd.pm.pdp.decider.PReviewDecider;
 import gov.nist.csd.pm.pip.graph.Graph;
 import gov.nist.csd.pm.pip.graph.model.nodes.Node;
 import gov.nist.csd.pm.pip.graph.model.nodes.NodeType;
@@ -177,35 +181,35 @@ public class ProposalDataSheet {
 				log.info("deassign:" + (proposalPolicy.getNode(id).getName()));
 			}
 
-			long userAttCoPINodeID = PDSOperations.getNodeID(proposalPolicy, "CoPI", NodeType.UA, null);
-			childIds.clear();
-			childIds = proposalPolicy.getChildren(userAttCoPINodeID);
-			log.info("CoPI deassign:" + childIds.size());
-			for (long id : childIds) {
-				proposalPolicy.deassign(id, userAttCoPINodeID);
-				try {
-				PDSOperations.deleteCoPI(proposalPolicy.getNode(id).getName(), id, userAttCoPINodeID, proposalPolicy);
-				}
-				catch(PMException ex) {
-					ex.printStackTrace();
-				}
-				log.info("deassign:" + (proposalPolicy.getNode(id).getName()));
-			}
+//			long userAttCoPINodeID = PDSOperations.getNodeID(proposalPolicy, "CoPI", NodeType.UA, null);
+//			childIds.clear();
+//			childIds = proposalPolicy.getChildren(userAttCoPINodeID);
+//			log.info("CoPI deassign:" + childIds.size());
+//			for (long id : childIds) {
+//				proposalPolicy.deassign(id, userAttCoPINodeID);
+//				try {
+//				PDSOperations.deleteCoPI(proposalPolicy.getNode(id).getName(), id, userAttCoPINodeID, proposalPolicy);
+//				}
+//				catch(PMException ex) {
+//					ex.printStackTrace();
+//				}
+//				log.info("deassign:" + (proposalPolicy.getNode(id).getName()));
+//			}
 
-			long userAttSPNodeID = PDSOperations.getNodeID(proposalPolicy, "SP", NodeType.UA, null);
-			childIds.clear();
-			childIds = proposalPolicy.getChildren(userAttSPNodeID);
-			log.info("SP deassign:" + childIds.size());
-			for (long id : childIds) {
-				proposalPolicy.deassign(id, userAttSPNodeID);
-				try {
-					PDSOperations.deleteSP(proposalPolicy.getNode(id).getName(), id, userAttSPNodeID, proposalPolicy);
-					}
-					catch(PMException ex) {
-						ex.printStackTrace();
-					}
-				log.info("deassign:" + (proposalPolicy.getNode(id).getName()));
-			}
+//			long userAttSPNodeID = PDSOperations.getNodeID(proposalPolicy, "SP", NodeType.UA, null);
+//			childIds.clear();
+//			childIds = proposalPolicy.getChildren(userAttSPNodeID);
+//			log.info("SP deassign:" + childIds.size());
+//			for (long id : childIds) {
+//				proposalPolicy.deassign(id, userAttSPNodeID);
+//				try {
+//					PDSOperations.deleteSP(proposalPolicy.getNode(id).getName(), id, userAttSPNodeID, proposalPolicy);
+//					}
+//					catch(PMException ex) {
+//						ex.printStackTrace();
+//					}
+//				log.info("deassign:" + (proposalPolicy.getNode(id).getName()));
+//			}
 
 		} catch (PMException e) {
 			e.printStackTrace();
@@ -724,6 +728,10 @@ public class ProposalDataSheet {
 	}
 
 	public void updateCoPI(String actor, boolean updateDept) throws PMException {
+		
+		
+		
+		
 		// InvestigatorRefAndPosition
 		InvestigatorInfo investigatorInfo = proposalData.getInvestigatorInfo();
 		ArrayList<InvestigatorRefAndPosition> investList = new ArrayList(investigatorInfo.getCo_pi());
@@ -733,10 +741,13 @@ public class ProposalDataSheet {
 
 		long coPiOANode = PDSOperations.getNodeID(proposalPolicy, Constants.CO_PI_OA_LBL, OA, null);
 		long coPiUANode = PDSOperations.getNodeID(proposalPolicy, Constants.CO_PI_UA_LBL, UA, null);
-
+		List<Long> CoPItoPreserve = new ArrayList<Long>();
+		List<Long> currentCoPIs= proposalPolicy.getChildren(coPiUANode).stream().collect(Collectors.toCollection(ArrayList::new));
+		
 		for (InvestigatorRefAndPosition investPos : investList) {
 			log.info(investPos.getPositionTitle());
 			coPiName = investPos.getUserRef().getUserAccount().getUserName();
+			List<String> emails = investPos.getUserRef().getWorkEmails();
 			log.info(coPiName);
 			if (updateDept) {
 				involvedDepartments.add(investPos.getDepartment());
@@ -745,7 +756,8 @@ public class ProposalDataSheet {
 			long copiUNodeId = 0;
 			try {
 				copiUNodeId = PDSOperations.getNodeID(proposalPolicy, coPiName, U, null);
-
+				Set<Node> search = proposalPolicy.search(coPiName, "O", null);
+				if(!search.isEmpty()) continue;
 				// Node coPINode =proposalPolicy.createNode(PDSOperations.getID(),coPiName, U,
 				// null);
 				// Node copiName =proposalPolicy.createNode(PDSOperations.getID(),coPiName, O,
@@ -755,14 +767,27 @@ public class ProposalDataSheet {
 				// proposalPolicy.assign(copiUNodeId, coPiUANode);
 
 				// proposalPolicy.assign(copiName.getID(), coPiOANode);
-
+				Map<String, String> properties = new HashMap<String,String>();
+				if(emails.size()>0) {
+				properties.put("workEmail", emails.get(0));
+				}
+				
+				proposalPolicy.updateNode(copiUNodeId, null, properties);
 				PDSOperations.addCoPI(actor, copiUNodeId, coPiUANode, proposalPolicy);
 				log.info("CoPI added.");
 				log.info("SUBMIT PROPOSAL: # nodes AFTER:" + proposalPolicy.getNodes().size());
 
 				PDSOperations.proposalPolicies.put(proposalData.getNgacId(), proposalPolicy);
+				CoPItoPreserve.add(copiUNodeId);
 			} catch (PMException e) {
 				e.printStackTrace();
+			}
+			currentCoPIs.removeAll(CoPItoPreserve);
+
+			for(Long removedCoPI : currentCoPIs) {
+				
+				PDSOperations.deleteCoPI(actor, removedCoPI, coPiUANode, proposalPolicy);
+
 			}
 		}
 	}
@@ -777,7 +802,8 @@ public class ProposalDataSheet {
 
 		long coPiOANode = PDSOperations.getNodeID(proposalPolicy, Constants.SENIOR_PERSON_OA_LBL, OA, null);
 		long coPiUANode = PDSOperations.getNodeID(proposalPolicy, Constants.SENIOR_PERSON_UA_LBL, UA, null);
-
+		List<Long> SPtoPreserve = new ArrayList<Long>();
+		List<Long> currentSPs= proposalPolicy.getChildren(coPiUANode).stream().collect(Collectors.toCollection(ArrayList::new));
 		for (InvestigatorRefAndPosition investPos : investList) {
 			log.info(investPos.getPositionTitle());
 			spName = investPos.getUserRef().getUserAccount().getUserName();
@@ -803,8 +829,18 @@ public class ProposalDataSheet {
 				PDSOperations.addSP(actor, spUNodeId, coPiUANode, proposalPolicy);
 
 				PDSOperations.proposalPolicies.put(proposalData.getNgacId(), proposalPolicy);
+				SPtoPreserve.add(spUNodeId);
+
 			} catch (PMException e) {
 				e.printStackTrace();
+			}
+			
+			currentSPs.removeAll(SPtoPreserve);
+
+			for(Long removedCoPI : currentSPs) {
+				
+				PDSOperations.deleteSP(actor, removedCoPI, coPiUANode, proposalPolicy);
+
 			}
 		}
 	}

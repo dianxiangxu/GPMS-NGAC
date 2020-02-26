@@ -1023,6 +1023,8 @@ public class ProposalService {
 			log.info("55555555555");
 		}
 		if (!firstSave) {
+			System.out.println("77777777777777777777777777777");
+
 			projectProposal.clearIngestigator();
 			projectProposal.updatePI(isPostSubmissionStage);
 			projectProposal.updateCoPI(userName, isPostSubmissionStage);
@@ -1258,12 +1260,12 @@ public class ProposalService {
 									// PDSOperations.proposalProhibitions.put(existingProposal.getNgacId(),projectProposal.getProhibitions());
 									// loader.saveProhibition(projectProposal.getProhibitions(),
 									// Constants.POLICY_CONFIG_OUTPUT_FILE+"prohibition_"+existingProposal.getNgacId()+".json");
-
+									if(!action.equals("Edit")) {
 									projectProposal.clearIngestigator();
 									projectProposal.updatePI(true);
 									projectProposal.updateCoPI(userInfo.getUserName(), true);
 									projectProposal.updateSP(userInfo.getUserName(), true);
-
+									}
 									projectProposal.updatePostSubmissionchanges(proposalDAO);
 									PDSOperations.proposalPolicies.put(existingProposal.getNgacId(), proposalPolicy);
 									ApprovalStagePost = projectProposal.getApprovalStage();

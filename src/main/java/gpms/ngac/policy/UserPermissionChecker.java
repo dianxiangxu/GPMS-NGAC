@@ -17,6 +17,7 @@ import org.apache.log4j.Logger;
 
 import gov.nist.csd.pm.pdp.decider.PReviewDecider;
 import gov.nist.csd.pm.pip.graph.Graph;
+import gov.nist.csd.pm.pip.graph.GraphSerializer;
 import gov.nist.csd.pm.pip.graph.MemGraph;
 import gov.nist.csd.pm.exceptions.PMException;
 import gov.nist.csd.pm.pip.graph.model.nodes.Node;
@@ -34,6 +35,8 @@ public class UserPermissionChecker {
 		try {
 			String pro = ProhibitionsSerializer.toJson(prohibitions);
 			log.info("Prohibition:"+pro.length());
+			log.info("Graph Policy:"+ GraphSerializer.toJson(ngacPolicy));
+
 			PReviewDecider decider = new PReviewDecider(ngacPolicy,prohibitions);
 			
 			long targetId = PDSOperations.getNodeID(ngacPolicy, targetAttribute.getAttributeName(), targetAttribute.getAttributeType(), null);
@@ -76,6 +79,8 @@ public static boolean checkPermission(Graph ngacPolicy, Prohibitions prohibition
 			
 			String pro = ProhibitionsSerializer.toJson(prohibitions);
 			log.info("Prohibition:"+pro.length());
+			//log.info("Graph Policy:"+ GraphSerializer.toJson(ngacPolicy));
+
 			PReviewDecider decider = new PReviewDecider(ngacPolicy,prohibitions);
 			
 			long targetId = PDSOperations.getNodeID(ngacPolicy, targetAttribute.getAttributeName(), targetAttribute.getAttributeType(), null);

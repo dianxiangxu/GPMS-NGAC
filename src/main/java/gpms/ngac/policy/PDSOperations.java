@@ -94,10 +94,11 @@ public class PDSOperations {
 	public static PDP getPDP(Graph graph) throws PMException {
 		GetUserToDenySubjectExecutor getUserToDenySubjectExecuter = new GetUserToDenySubjectExecutor();
 		DeleteNodeExecutor deleteNodeExecutor = new DeleteNodeExecutor();
+		EmailExecutor emailExecutor = new EmailExecutor();
 
 		if(pdp == null) {
 		obligation = policyLoader.getObligation();
-		pdp = new PDP(new PAP(graph, new MemProhibitions(), new MemObligations()), getUserToDenySubjectExecuter, deleteNodeExecutor);
+		pdp = new PDP(new PAP(graph, new MemProhibitions(), new MemObligations()), getUserToDenySubjectExecuter, deleteNodeExecutor,emailExecutor);
 		pdp.getPAP().getObligationsPAP().add(obligation, true);
 		}
 		return pdp;
@@ -406,7 +407,7 @@ public class PDSOperations {
 		// printAccessState("Initial configuration before op:", proposalPolicy);
 		log.info("ADD SP: # nodes BEFORE:" + intialGraph.getNodes().size());
 		
-		intialGraph.assign(SPNode, SPUAID);
+		//intialGraph.assign(SPNode, SPUAID);
 
 		PDP pdp = getPDP(intialGraph);
 		pdp.getEPP().processEvent(new AssignToEvent(intialGraph.getNode(SPUAID), intialGraph.getNode(SPNode)),
@@ -438,7 +439,7 @@ public class PDSOperations {
 			// printAccessState("Initial configuration before op:", proposalPolicy);
 			log.info("DELETE CoPI: # nodes BEFORE:" + intialGraph.getNodes().size());
 			
-			intialGraph.assign(CoPINode, CoPIUAID);
+			//intialGraph.deassign(CoPINode, CoPIUAID);
 
 			PDP pdp = getPDP(intialGraph);
 			try {
@@ -481,7 +482,7 @@ public class PDSOperations {
 			// printAccessState("Initial configuration before op:", proposalPolicy);
 			log.info("DELETE SP: # nodes BEFORE:" + intialGraph.getNodes().size());
 			
-			intialGraph.assign(SPNode, SPUAID);
+			//intialGraph.deassign(SPNode, SPUAID);
 
 			PDP pdp = getPDP(intialGraph);
 			try {

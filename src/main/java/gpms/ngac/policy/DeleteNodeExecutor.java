@@ -56,6 +56,7 @@ public class DeleteNodeExecutor implements FunctionExecutor{
 	        }
 
 	        Set<Node> search = pdp.getPAP().getGraphPAP().search(name, type, props);
+	        if(search.isEmpty()) return null;
 	        Node node = search.iterator().next();
 	        pdp.getPAP().getGraphPAP().deleteNode(node.getID());
 	        return node;
