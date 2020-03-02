@@ -300,7 +300,7 @@ public class NotificationDAO extends BasicDAO<NotificationLog, String> {
 		OutboundEvent event = eventBuilder.name("notification")
 				.mediaType(MediaType.TEXT_PLAIN_TYPE).data(String.class, "1")
 				.build();
-		NotificationService.BROADCASTER.broadcast(event);
+	//	NotificationService.BROADCASTER.broadcast(event);
 	}
 
 	/**
@@ -367,7 +367,7 @@ public class NotificationDAO extends BasicDAO<NotificationLog, String> {
 		OutboundEvent event = eventBuilder.name("notification")
 				.mediaType(MediaType.TEXT_PLAIN_TYPE).data(String.class, "1")
 				.build();
-		NotificationService.BROADCASTER.broadcast(event);
+	//	NotificationService.BROADCASTER.broadcast(event);
 	}
 
 	/***
@@ -468,7 +468,7 @@ public class NotificationDAO extends BasicDAO<NotificationLog, String> {
 		save(notification);
 		//investigator.getUserRef().
 		String email = investigator.getUserRef().getWorkEmails().get(0);
-		emailUtil.sendSimpleEmail(email, "GPMS-NGAC Notification", "Dear Sir/Madam,<br>GPMS-NGAC proposal : '"+projectTitle+"' has been updated.<br>Please login GPMS-NGAC for details.<br>Regards,<Br><b>GPMS-NGAC Team</b>");
+		//emailUtil.sendSimpleEmail(email, "GPMS-NGAC Notification", "Dear Sir/Madam,<br>GPMS-NGAC proposal : '"+projectTitle+"' has been updated.<br>Please login GPMS-NGAC for details.<br>Regards,<Br><b>GPMS-NGAC Team</b>");
 	}
 
 	public void createNotificationForAUser(String proposalID,
@@ -559,7 +559,7 @@ public class NotificationDAO extends BasicDAO<NotificationLog, String> {
 		OutboundEvent event = eventBuilder.name("notification")
 				.mediaType(MediaType.TEXT_PLAIN_TYPE).data(String.class, "1")
 				.build();
-		NotificationService.BROADCASTER.broadcast(event);
+		//NotificationService.BROADCASTER.broadcast(event);
 	}
 
 	/**

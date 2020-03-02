@@ -524,7 +524,7 @@ public class UserService {
 			OutboundEvent event = eventBuilder.name("notification")
 					.mediaType(MediaType.TEXT_PLAIN_TYPE)
 					.data(String.class, "1").build();
-			NotificationService.BROADCASTER.broadcast(event);
+		//	NotificationService.BROADCASTER.broadcast(event);
 			return Response
 					.status(Response.Status.OK)
 					.entity(mapper.writerWithDefaultPrettyPrinter()
@@ -581,7 +581,7 @@ public class UserService {
 			OutboundEvent event = eventBuilder.name("notification")
 					.mediaType(MediaType.TEXT_PLAIN_TYPE)
 					.data(String.class, "1").build();
-			NotificationService.BROADCASTER.broadcast(event);
+			//NotificationService.BROADCASTER.broadcast(event);
 			return Response
 					.status(Response.Status.OK)
 					.entity(mapper.writerWithDefaultPrettyPrinter()
@@ -826,7 +826,7 @@ public class UserService {
 			OutboundEvent event = eventBuilder.name("notification")
 					.mediaType(MediaType.TEXT_PLAIN_TYPE)
 					.data(String.class, "1").build();
-			NotificationService.BROADCASTER.broadcast(event);
+		//	NotificationService.BROADCASTER.broadcast(event);
 			return Response
 					.status(Response.Status.OK)
 					.entity(mapper.writerWithDefaultPrettyPrinter()
@@ -1266,6 +1266,6 @@ public class UserService {
 		OutboundEvent event = eventBuilder.name("notification")
 				.mediaType(MediaType.TEXT_PLAIN_TYPE).data(String.class, "1")
 				.build();
-		NotificationService.BROADCASTER.broadcast(event);
+		//NotificationService.BROADCASTER.broadcast(event);
 	}
 }

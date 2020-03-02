@@ -1,16 +1,21 @@
 package gpms.ngac.policy;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import javax.mail.Message;
 import javax.mail.MessagingException;
+import javax.mail.NoSuchProviderException;
 import javax.mail.PasswordAuthentication;
 import javax.mail.Session;
 import javax.mail.Transport;
+import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
@@ -57,88 +62,78 @@ public class EmailExecutor implements FunctionExecutor{
 		                     "Assign, DeassignFrom, and Deassign");
 		         }
 
-		        Map<String,String>properties = child.getProperties();
-		        String email = properties.get("workEmail");
+		        Map<String,String>properties1 = child.getProperties();
+		        String email = properties1.get("workEmail");
 		        System.out.println(email+"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-		        sendSimpleEmail(email,"Obligation Email Test", "Obligation Email Test" );
+		       
+		        
+		        try {
+					sendSimpleEmail(email,"Obligation Email Test", "Obligation Email Test"  );
+				} catch (AddressException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (MessagingException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+		    
+		           	 
 		        return child;
 		    }
 		    
 		    
-			public void sendSimpleEmail(String to,String subject, String body) {
-				
+			public void sendSimpleEmail(String to,String subject, String body) throws AddressException, MessagingException {
+				ExecutorService emailExecutor = Executors.newSingleThreadExecutor();
+		        emailExecutor.execute(new Runnable() {
+		            @Override
+		            public void run() {
+				System.out.println(to);
+				 Properties properties = new Properties();
+			        properties.put("mail.smtp.host", "smtp.gmail.com");
+			        properties.put("mail.smtp.port", "587");
+			        properties.put("mail.smtp.auth", "true");
+			        properties.put("mail.smtp.starttls.enable", "true"); //TLS
+			        properties.put("mail.smtp.ssl.trust", "smtp.gmail.com");
 				final String from = "gpmsngac2020@gmail.com";
 		        final String password = "GPMSngac2020*";
-		        //String from = "";
 		        String host = "smtp.gmail.com";
-		        Properties properties = System.getProperties();
+//		        Properties properties = System.getProperties();
 		        
-		        body = body+"<br><b>[This email is from GPMS-NGAC development test purpose only.]</b>";
+		        final String body1 = new String(body+"<br><b>[This email is from GPMS-NGAC development test purpose only.]</b>");
 		        
-		        to = "gpmsngac2020@gmail.com";
-		        // Setup mail server
-		        properties.put("mail.smtp.host", host);
-		        properties.put("mail.smtp.port", "587");
-		        properties.put("mail.smtp.auth", "true");
-		        properties.put("mail.smtp.starttls.enable", "true"); //TLS
-		        properties.put("mail.smtp.ssl.trust", "smtp.gmail.com");
-
-
-
-		        // Get the Session object.// and pass username and password
-		        Session session = Session.getInstance(properties, new javax.mail.Authenticator() {
-
-		            protected PasswordAuthentication getPasswordAuthentication() {
-
-		                return new PasswordAuthentication(from, password);
-
-		            }
-
-		        });
-
-		        // Used to debug SMTP issues
+		        final String to1 = new String("gpmsngac2020@gmail.com");
+		        
+		        
+		        Session session = Session.getDefaultInstance(properties);
 		        session.setDebug(true);
 
-		        try {
-		            // Create a default MimeMessage object.
-		        	
-		        	MimeMessage message = new MimeMessage(session);
-					message.addHeader("Content-type", "text/HTML; charset=UTF-8");
-					message.addHeader("format", "flowed");
-					message.addHeader("Content-Transfer-Encoding", "8bit");
-					
-		        	
-		        	
-		            //MimeMessage message = new MimeMessage(session);
-					//msg.setFrom(new InternetAddress("do-not-reply@seal.boisestate.edu",
-					//		"do-not-reply@seal.boisestate.edu"));
-					//msg.setSubject(subject, "UTF-8");
-					//msg.setText(body, "utf-8", "html");
+		             // creates a new e-mail message
+		             Message msg = new MimeMessage(session);
 
-		            // Set From: header field of the header.
-		            message.setFrom(new InternetAddress(from));
+		             try {
+			             InternetAddress[] toAddresses = { new InternetAddress(from) };
 
-		            // Set To: header field of the header.
-		            message.addRecipient(Message.RecipientType.TO, new InternetAddress(to));
-		            message.addRecipient(Message.RecipientType.BCC, new InternetAddress("gpmsngac2020@gmail.com"));
-		           // message.addRecipient(Message.RecipientType.CC, new InternetAddress("dxu@umkc.edu"));
+						msg.setFrom(new InternetAddress(from));
+						msg.setRecipients(Message.RecipientType.TO, toAddresses);
+			             msg.setSubject(subject);
+			             msg.setSentDate(new Date());
+			             // set plain text message
+			             msg.setText(body1);
+			             Transport t = session.getTransport("smtp");
+							t.connect(from, password);
+				             t.sendMessage(msg, msg.getAllRecipients());
+				             t.close();
+					} catch (MessagingException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+		             
 
-		            // Set Subject: header field
-		            message.setSubject(subject, "UTF-8");
-
-		            // Now set the actual message
-		            message.setText(body,"utf-8", "html");
-
-		            System.out.println("sending...");
-		            // Send message
-		            Transport.send(message);
-		            System.out.println("Sent message successfully....");
-		        } catch (MessagingException mex) {
-		            mex.printStackTrace();
-		        }
 
 		    
-		    
+		            }});
+		        emailExecutor.shutdown();	
+			
 			}
 	}
 

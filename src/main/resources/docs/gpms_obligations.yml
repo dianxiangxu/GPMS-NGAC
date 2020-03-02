@@ -181,7 +181,7 @@ rules:
                         name: get_node_name 
                         args:
                           - function:
-                              name: child_of_assign
+                              name: email
                     - O
             where:
               - name: CoPI-Info
