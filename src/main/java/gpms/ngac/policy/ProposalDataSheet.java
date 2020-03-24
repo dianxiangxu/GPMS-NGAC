@@ -222,7 +222,7 @@ public class ProposalDataSheet {
 			Set<Long> childIds = proposalPolicy.getChildren(userAttNodeID);
 			log.info("Chair Clear:" + childIds.size());
 			for (long id : childIds) {
-				proposalPolicy.deassign(id, userAttNodeID);
+				//proposalPolicy.deassign(id, userAttNodeID);
 			}
 
 			long userAttBmNodeID = PDSOperations.getNodeID(proposalPolicy, Constants.BM_UA, NodeType.UA, null);
@@ -230,7 +230,7 @@ public class ProposalDataSheet {
 			childIds = proposalPolicy.getChildren(userAttBmNodeID);
 			log.info("BM Clear:" + childIds.size());
 			for (long id : childIds) {
-				proposalPolicy.deassign(id, userAttBmNodeID);
+				//proposalPolicy.deassign(id, userAttBmNodeID);
 			}
 
 			long userAttDeanNodeID = PDSOperations.getNodeID(proposalPolicy, Constants.DEAN_UA, NodeType.UA, null);
@@ -238,7 +238,7 @@ public class ProposalDataSheet {
 			childIds = proposalPolicy.getChildren(userAttDeanNodeID);
 			log.info("Dean Clear:" + childIds.size());
 			for (long id : childIds) {
-				proposalPolicy.deassign(id, userAttDeanNodeID);
+				//proposalPolicy.deassign(id, userAttDeanNodeID);
 			}
 
 			long userAttIrbNodeID = PDSOperations.getNodeID(proposalPolicy, Constants.IRB_UA, NodeType.UA, null);
@@ -578,9 +578,9 @@ public class ProposalDataSheet {
 				long deptDeanUser = PDSOperations.getNodeID(proposalPolicy, DepartmentsPositionsCollection.adminUsers
 						.get(DepartmentsPositionsCollection.departmentNames.get(dept) + "DEAN"), NodeType.U, null);
 
-				proposalPolicy.assign(deptChairUser, userAttNodeID);
-				proposalPolicy.assign(deptBMUser, userBmAttNodeID);
-				proposalPolicy.assign(deptDeanUser, userDeanAttNodeID);
+				//proposalPolicy.assign(deptChairUser, userAttNodeID);
+				//proposalPolicy.assign(deptBMUser, userBmAttNodeID);
+				//proposalPolicy.assign(deptDeanUser, userDeanAttNodeID);
 			}
 
 			long userIrbAttNodeID = PDSOperations.getNodeID(proposalPolicy, Constants.IRB_UA, NodeType.UA, null);
@@ -749,6 +749,12 @@ public class ProposalDataSheet {
 			coPiName = investPos.getUserRef().getUserAccount().getUserName();
 			List<String> emails = investPos.getUserRef().getWorkEmails();
 			log.info(coPiName);
+			String chairDept = DepartmentsPositionsCollection.adminUsers
+					.get(DepartmentsPositionsCollection.departmentNames.get(investPos.getDepartment()) + "CHAIR");
+			String deanDept = DepartmentsPositionsCollection.adminUsers
+					.get(DepartmentsPositionsCollection.departmentNames.get(investPos.getDepartment()) + "DEAN");
+			String bmDept = DepartmentsPositionsCollection.adminUsers
+					.get(DepartmentsPositionsCollection.departmentNames.get(investPos.getDepartment()) + "BM");
 			if (updateDept) {
 				involvedDepartments.add(investPos.getDepartment());
 			}
@@ -774,7 +780,10 @@ public class ProposalDataSheet {
 				if(emails.size()>0) {
 				properties.put("workEmail", emails.get(0));
 				}
-				
+				properties.put("departmentChair", chairDept);
+				properties.put("departmentDean", deanDept);
+				properties.put("departmentBM", bmDept);
+
 				proposalPolicy.updateNode(copiUNodeId, null, properties);
 				PDSOperations.addCoPI(actor, copiUNodeId, coPiUANode, proposalPolicy);
 				log.info("CoPI added.");
