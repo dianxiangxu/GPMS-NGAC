@@ -578,15 +578,10 @@ public class ProposalDataSheet {
 				long deptDeanUser = PDSOperations.getNodeID(proposalPolicy, DepartmentsPositionsCollection.adminUsers
 						.get(DepartmentsPositionsCollection.departmentNames.get(dept) + "DEAN"), NodeType.U, null);
 
-<<<<<<< HEAD
-				proposalPolicy.assign(deptChairUser, userAttNodeID);
-				proposalPolicy.assign(deptBMUser, userBmAttNodeID);
-				proposalPolicy.assign(deptDeanUser, userDeanAttNodeID);				
-=======
+
 				//proposalPolicy.assign(deptChairUser, userAttNodeID);
 				//proposalPolicy.assign(deptBMUser, userBmAttNodeID);
 				//proposalPolicy.assign(deptDeanUser, userDeanAttNodeID);
->>>>>>> branch 'vlad-branch' of https://github.com/dianxiangxu/GPMS-NGAC.git
 			}
 
 			long userIrbAttNodeID = PDSOperations.getNodeID(proposalPolicy, Constants.IRB_UA, NodeType.UA, null);

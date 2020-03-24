@@ -96,21 +96,16 @@ public class PDSOperations {
 		GetUserToDenySubjectExecutor getUserToDenySubjectExecuter = new GetUserToDenySubjectExecutor();
 		DeleteNodeExecutor deleteNodeExecutor = new DeleteNodeExecutor();
 		EmailExecutor emailExecutor = new EmailExecutor();
-<<<<<<< HEAD
 		IsAllowedToBeCoPIExecutor isAllowedToBeCoPIExecutor = new IsAllowedToBeCoPIExecutor();
-=======
 		FindChairForCoPIExecutor findChairForCoPIExecutor = new FindChairForCoPIExecutor();
 		FindDeanForCoPIExecutor findDeanForCoPIExecutor = new FindDeanForCoPIExecutor();
 		FindBMForCoPIExecutor findBMForCoPIExecutor = new FindBMForCoPIExecutor();
->>>>>>> branch 'vlad-branch' of https://github.com/dianxiangxu/GPMS-NGAC.git
 
 		obligation = policyLoader.getObligation();
-<<<<<<< HEAD
-		pdp = new PDP(new PAP(graph, new MemProhibitions(), new MemObligations()), getUserToDenySubjectExecuter, deleteNodeExecutor,emailExecutor,isAllowedToBeCoPIExecutor);
-=======
+
 		pdp = new PDP(new PAP(graph, new MemProhibitions(), new MemObligations()), getUserToDenySubjectExecuter,
-				deleteNodeExecutor, emailExecutor, findChairForCoPIExecutor, findDeanForCoPIExecutor,findBMForCoPIExecutor);
->>>>>>> branch 'vlad-branch' of https://github.com/dianxiangxu/GPMS-NGAC.git
+				deleteNodeExecutor, emailExecutor, findChairForCoPIExecutor, findDeanForCoPIExecutor,findBMForCoPIExecutor,isAllowedToBeCoPIExecutor);
+
 		pdp.getPAP().getObligationsPAP().add(obligation, true);
 
 		return pdp;
@@ -513,7 +508,6 @@ public class PDSOperations {
 
 		// get all of the users in the graph
 	}
-<<<<<<< HEAD
 		public static void addApprovalEntity(Long ChairU, long ChairUA, Graph intialGraph) throws PMException {
 			// log.info("ID:" + randomId);
 			// long CoPIOAID = getNodeID(intialGraph, Constants.CO_PI_OA_LBL, OA, null);
@@ -538,9 +532,7 @@ public class PDSOperations {
 //				log.info("Children: " + intialGraph.getNode(parent).getName());
 //			}
 		}
-=======
 
->>>>>>> branch 'vlad-branch' of https://github.com/dianxiangxu/GPMS-NGAC.git
 	private String createProposalId(long id) {
 		return "PDS" + id;
 	}

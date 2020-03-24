@@ -135,13 +135,8 @@ rules:
     event:
       subject:
         anyUser:
-<<<<<<< HEAD
       policyClass:
         policyClass: Editing Policy
-=======
-      policyClass: 
-         policyClass: Editing Policy       
->>>>>>> branch 'vlad-branch' of https://github.com/dianxiangxu/GPMS-NGAC.git
       operations:
         - assign to
       target:
