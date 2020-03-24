@@ -44,6 +44,9 @@ public class NGACPolicyConfigurationLoader {
 	private static String jsonApprovalPolicy = "";	
 	private static File obligationFile = null;
 	String jsonProhibitionPolicy = "";
+	public String jsonProposalCreation;
+	public String jsonSuper;
+
 	
 	public void init() {
 		if (ngacPolicy == null) {
@@ -55,8 +58,6 @@ public class NGACPolicyConfigurationLoader {
 			File prohibitionFile = getFileFromResources(Constants.PROHIBITION_POST_SUBMISSION); 
 			
 			obligationFile = getFileFromResources(Constants.OBLIGATION_TEMPLATE_PROPOSAL_CREATION); 
-			String jsonSuper;
-			String jsonProposalCreation;
 			String jsonUnivOrg;
 
 			try {

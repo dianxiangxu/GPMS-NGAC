@@ -15,7 +15,10 @@ import gpms.model.UserDetail;
 import gpms.model.UserInfo;
 import gpms.model.UserProfile;
 import gpms.model.UserProposalCount;
+import gpms.ngac.policy.NGACPolicyConfigurationLoader;
 import gpms.utils.EmailUtil;
+
+import static gov.nist.csd.pm.pip.graph.model.nodes.NodeType.U;
 
 import java.io.File;
 import java.net.URISyntaxException;
@@ -26,7 +29,11 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.Stack;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -49,6 +56,13 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoException;
+
+import gov.nist.csd.pm.exceptions.PMException;
+import gov.nist.csd.pm.pip.graph.Graph;
+import gov.nist.csd.pm.pip.graph.GraphSerializer;
+import gov.nist.csd.pm.pip.graph.MemGraph;
+import gov.nist.csd.pm.pip.graph.model.nodes.Node;
+import static gov.nist.csd.pm.pip.graph.model.nodes.NodeType.UA;
 
 public class UserProfileDAO extends BasicDAO<UserProfile, String> {
 	private static final String DBNAME = "db_gpms";
@@ -241,7 +255,49 @@ public class UserProfileDAO extends BasicDAO<UserProfile, String> {
 		return profileQuery.retrievedFields(true, "_id", "first name",
 				"middle name", "last name").asList();
 	}
+	
+	private List<String> getPositionTypesWithAccessPI() throws PMException{
+		List<String> arrayOfElegiblePIs = new ArrayList<String>();
+		NGACPolicyConfigurationLoader loader = new NGACPolicyConfigurationLoader();
+		loader.init();
+		String proposalCreationPolicy = loader.jsonProposalCreation;
+		Graph graph = GraphSerializer.fromJson(new MemGraph(), proposalCreationPolicy);
+		Set<Node> piSet = graph.search("PI-Eligible Faculty","UA", null);
+		Node[] piArray= piSet.toArray(
+				new Node[graph.getNodes().size()]);
+		Node piNode = piArray[0];
+		
+		Map<String, String> visited = new HashMap<String, String>();
+		visited.put("isVisited", "yes");
 
+		Stack<Node> stack = new Stack<Node>();
+		stack.push(piNode);
+		System.out.println(piNode);
+
+		while (!stack.isEmpty()) {
+
+			Node newRoot = stack.pop();
+			Set<Long> children= graph.getChildren(piNode.getID());
+		
+			for (Long userAttNode : children) {
+				Node child = graph.getNode(userAttNode);
+				if (!child.getProperties().equals(visited)) {
+					stack.push(child);
+				}
+			}
+			if (newRoot.getProperties().equals(visited)
+					|| newRoot.getType() != UA) {
+
+				continue;
+			}
+			arrayOfElegiblePIs.add(newRoot.getName());
+			graph.updateNode(newRoot.getID(), newRoot.getName(), visited);
+
+		}
+		
+		return null;
+	}
+	
 	/***
 	 * Finds All records For User Grid
 	 * 

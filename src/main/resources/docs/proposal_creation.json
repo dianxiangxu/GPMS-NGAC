@@ -138,7 +138,13 @@
       "name": "edmund",
       "type": "U",
       "properties": {}
-    },    
+    },  
+    {
+      "id": 38,
+      "name": "vlad",
+      "type": "U",
+      "properties": {}
+    },   
     {
       "id": 34,
       "name": "tamanna",
@@ -201,6 +207,10 @@
     {
       "sourceID": 31, 
       "targetID": 805864067506006996  
+    },
+    {
+      "sourceID": 38, 
+      "targetID": 5249339139420720573  
     },
 	{
       "sourceID": 6809429203704967195, 

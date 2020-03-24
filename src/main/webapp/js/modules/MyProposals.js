@@ -1256,6 +1256,7 @@ $(function() {
 		CheckUserPermissionForInvestigator : function(buttonType,
 				proposalSection, config) {
 			var attributeArray = [];
+
 			var currentProposalRoles = config.proposalRoles.split(', ');
 			if (($.inArray("PI", currentProposalRoles) !== -1 || ($.inArray(
 					"Co-PI", currentProposalRoles) !== -1 && config.readyForSubmitionByPI == "False"))

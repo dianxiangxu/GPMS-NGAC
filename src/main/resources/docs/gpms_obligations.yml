@@ -124,46 +124,19 @@ rules:
                   - UA
             operations:
                - Save
-            target:
-              complement: false
-              containers:
-                - name: PDSs
-                  type: OA
-        - deny:
-            label: deny7
-            subject:
-              function: 
-                name: get_user_to_deny_subject
-                args: 
-                  - PI
-                  - UA
-            operations:
                - Delete
-            target:
-              complement: false
-              containers:
-                - name: PDSs
-                  type: OA
-        - deny:
-            label: deny8
-            subject:
-              function: 
-                name: get_user_to_deny_subject
-                args: 
-                  - PI
-                  - UA
-            operations:
                - Submit
             target:
               complement: false
               containers:
                 - name: PDSs
-                  type: OA    
-                  
+                  type: OA  
   - label: add_copi
     event:
       subject:
         anyUser:
+      policyClass:
+        policyClass: Editing Policy
       operations:
         - assign to
       target:
@@ -171,6 +144,9 @@ rules:
           - name: CoPI
             type: UA
     response:
+      condition:
+        - function:
+            name: isAllowedToBeCoPI
       actions:
         - create:
             what:
@@ -292,5 +268,23 @@ rules:
                                 name: child_of_assign
                       - O
         
-                
+  - label: add_approval_entity
+    event:
+      subject:
+        anyUser:
+      operations:
+        - assign to
+      target:
+        policyElements:
+          - name: Current Users
+            type: UA
+    response:
+      actions:
+        - assign:
+            what:
+              - function:
+                  name: child_of_assign
+            where:
+              - name: Current Users
+                type: UA            
                     

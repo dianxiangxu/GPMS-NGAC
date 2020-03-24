@@ -2164,7 +2164,7 @@ input.cssClassButtonSubmit {
 .sfBtn[class*="icon-"]:before, .sfBtn span[class*="icon-"]:before,
 	.sfBtn i[class*="icon-"]:before {
 	margin-right: 5px;
-	color: #f27337;
+	color: #1c94c4;
 	font-size: 14px;
 }
 
@@ -5307,7 +5307,7 @@ p.sfDisplayName span.sfFormlabel.sfDefaultName {
 
 a.cssRssImage:before {
 	content: "\e760";
-	color: #F27337;
+	color: #1c94c4;
 	font-family: "aspx";
 	font-style: normal !important;
 	font-weight: normal !important;

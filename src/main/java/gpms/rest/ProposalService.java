@@ -1314,7 +1314,7 @@ public class ProposalService {
 						.build();
 			}
 			return Response.status(403).type(MediaType.APPLICATION_JSON)
-					.entity("No User Permission Attributes are send!").build();
+					.entity("The chosen CoPI does not have the rights to be CoPI!").build();
 		} catch (Exception e) {
 			e.printStackTrace();
 			log.error("Could not save a New Proposal or update an existing Proposal error e=", e);
@@ -1773,6 +1773,7 @@ public class ProposalService {
 			if (proposalId.equals("0")) {
 
 				log.info("Existing Proposal : inside sendSaveUpdateNotification ");
+				projectProposal.updateCoPI(userName, false);
 
 				proposalIsChanged = saveProposal(message, existingProposal, null, authorProfile, isAdminUser,
 						proposalId, null, irbApprovalRequired, null, action);
@@ -1809,6 +1810,7 @@ public class ProposalService {
 				} catch (PMException e) {
 					log.info("Exception : inside sendSaveUpdateNotification");
 					e.printStackTrace();
+					return false;
 				}
 			} else {
 				log.info("Inside sendSaveUpdateNotification: projectProposal is NULL ");

@@ -14,6 +14,7 @@ import gov.nist.csd.pm.pip.graph.MemGraph;
 import gov.nist.csd.pm.pip.graph.model.nodes.Node;
 import gov.nist.csd.pm.pip.graph.model.nodes.NodeType;
 import gov.nist.csd.pm.pip.obligations.MemObligations;
+import gov.nist.csd.pm.pip.obligations.evr.EVRException;
 import gov.nist.csd.pm.pip.obligations.evr.EVRParser;
 import gov.nist.csd.pm.pip.obligations.model.Obligation;
 import gov.nist.csd.pm.pip.obligations.model.functions.Function;
@@ -95,9 +96,10 @@ public class PDSOperations {
 		GetUserToDenySubjectExecutor getUserToDenySubjectExecuter = new GetUserToDenySubjectExecutor();
 		DeleteNodeExecutor deleteNodeExecutor = new DeleteNodeExecutor();
 		EmailExecutor emailExecutor = new EmailExecutor();
+		IsAllowedToBeCoPIExecutor isAllowedToBeCoPIExecutor = new IsAllowedToBeCoPIExecutor();
 
 		obligation = policyLoader.getObligation();
-		pdp = new PDP(new PAP(graph, new MemProhibitions(), new MemObligations()), getUserToDenySubjectExecuter, deleteNodeExecutor,emailExecutor);
+		pdp = new PDP(new PAP(graph, new MemProhibitions(), new MemObligations()), getUserToDenySubjectExecuter, deleteNodeExecutor,emailExecutor,isAllowedToBeCoPIExecutor);
 		pdp.getPAP().getObligationsPAP().add(obligation, true);
 		
 		return pdp;
@@ -383,8 +385,10 @@ public class PDSOperations {
 		//intialGraph.assign(CoPINode, CoPIUAID);
 
 		PDP pdp = getPDP(intialGraph);
+		
 		pdp.getEPP().processEvent(new AssignToEvent(intialGraph.getNode(CoPIUAID), intialGraph.getNode(CoPINode)),
 				userID, getID());
+		
 		log.info("User Name " + intialGraph.getNode(userID).getName());
 		log.info("ADD CoPI: # nodes AFTER:" + intialGraph.getNodes().size());
 		log.info("CoPIU Name" + intialGraph.getNode(CoPINode).getName());
@@ -505,7 +509,30 @@ public class PDSOperations {
 		
 		// get all of the users in the graph
 	}
-	
+		public static void addApprovalEntity(Long ChairU, long ChairUA, Graph intialGraph) throws PMException {
+			// log.info("ID:" + randomId);
+			// long CoPIOAID = getNodeID(intialGraph, Constants.CO_PI_OA_LBL, OA, null);
+			// long CoPIID = getNodeID(intialGraph, CoPINode, U, null);
+
+			// printAccessState("Initial configuration before op:", proposalPolicy);
+			log.info("ADD SP: # nodes BEFORE:" + intialGraph.getNodes().size());
+			
+			//intialGraph.assign(SPNode, SPUAID);
+			Node user = intialGraph.createNode(getID(), "userForChair", U, null);
+			PDP pdp = getPDP(intialGraph);
+			pdp.getEPP().processEvent(new AssignToEvent(intialGraph.getNode(ChairUA), intialGraph.getNode(ChairU)),
+					user.getID(), getID());
+			
+			intialGraph.deleteNode(user.getID());
+			//log.info("User Name " + intialGraph.getNode(userID).getName());
+			log.info("ADD SP: # nodes AFTER:" + intialGraph.getNodes().size());
+			//log.info("CoPIU Name" + intialGraph.getNode(SPNode).getName());
+			// System.out.println(GraphSerializer.toJson(intialGraph));
+			
+//			for (Long parent : intialGraph.getParents(SPNode)) {
+//				log.info("Children: " + intialGraph.getNode(parent).getName());
+//			}
+		}
 	private String createProposalId(long id) {
 		return "PDS" + id;
 	}

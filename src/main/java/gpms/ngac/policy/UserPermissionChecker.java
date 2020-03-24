@@ -78,7 +78,7 @@ public static boolean checkPermission(Graph ngacPolicy, Prohibitions prohibition
 		try {
 			
 			String pro = ProhibitionsSerializer.toJson(prohibitions);
-			log.info("Prohibition:"+pro.length());
+			log.info("Prohibition:"+pro);
 			//log.info("Graph Policy:"+ GraphSerializer.toJson(ngacPolicy));
 
 			PReviewDecider decider = new PReviewDecider(ngacPolicy,prohibitions);
