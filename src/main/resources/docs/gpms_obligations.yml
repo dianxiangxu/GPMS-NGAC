@@ -135,8 +135,13 @@ rules:
     event:
       subject:
         anyUser:
+<<<<<<< HEAD
       policyClass:
         policyClass: Editing Policy
+=======
+      policyClass: 
+         policyClass: Editing Policy       
+>>>>>>> branch 'vlad-branch' of https://github.com/dianxiangxu/GPMS-NGAC.git
       operations:
         - assign to
       target:
@@ -168,7 +173,38 @@ rules:
                   name: child_of_assign
             where:
               - name: CoPI
+                type: UA  
+        - assign:
+            what:
+              - function:
+                  name: findChairForCoPI
+                  args: 
+                    - function:
+                        name: child_of_assign              
+            where:
+              - name: Chair
+                type: UA
+        - assign:
+            what:
+              - function:
+                  name: findDeanForCoPI
+                  args: 
+                    - function:
+                        name: child_of_assign              
+            where:
+              - name: Dean
+                type: UA
+        - assign:
+            what:
+              - function:
+                  name: findBMForCoPI
+                  args: 
+                    - function:
+                        name: child_of_assign              
+            where:
+              - name: Business-Manager
                 type: UA                
+                      
   - label: add_sp
     event:
       subject:
