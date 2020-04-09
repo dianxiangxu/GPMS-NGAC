@@ -27,7 +27,7 @@ public class FindBMForCoPIExecutor implements FunctionExecutor{
     }
 
     @Override
-    public Node exec(EventContext eventCtx, long userID, long processID, PDP pdp, Function function, FunctionEvaluator functionEvaluator) throws PMException {
+    public Node exec(EventContext eventCtx, String userID, String processID, PDP pdp, Function function, FunctionEvaluator functionEvaluator) throws PMException {
         List<Arg> args = function.getArgs();
         if (args == null || args.size() < numParams() || args.size() > numParams()) {
             throw new PMException(getFunctionName() + " expected at least two arguments (name and type) but found none");
@@ -42,9 +42,7 @@ public class FindBMForCoPIExecutor implements FunctionExecutor{
         Node node = functionEvaluator.evalNode(eventCtx, userID, processID, pdp, argFunction);
       
         String departmentBM = node.getProperties().get("departmentBM");
-        
-        Set<Node> nodes = pdp.getPAP().getGraphPAP().search(departmentBM, "U", null);
-        
-        return nodes.iterator().next();
+                
+        return pdp.getPAP().getGraphPAP().getNode(departmentBM);
     }
 }

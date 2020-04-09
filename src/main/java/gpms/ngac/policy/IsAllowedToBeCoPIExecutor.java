@@ -40,7 +40,7 @@ public class IsAllowedToBeCoPIExecutor implements FunctionExecutor{
 	    }
 
 	    @Override
-	    public Boolean exec(EventContext eventCtx, long userID, long processID, PDP pdp, Function function, FunctionEvaluator functionEvaluator) throws PMException {
+	    public Boolean exec(EventContext eventCtx, String userID, String processID, PDP pdp, Function function, FunctionEvaluator functionEvaluator) throws PMException {
 	    	 Node child;
 	         if(eventCtx instanceof AssignToEvent) {
 	             child = ((AssignToEvent) eventCtx).getChildNode();
@@ -85,9 +85,9 @@ public class IsAllowedToBeCoPIExecutor implements FunctionExecutor{
 			while (!stack.isEmpty()) {
 
 				Node newRoot = stack.pop();
-				Set<Long> children = graph.getParents(newRoot.getID());
+				Set<String> children = graph.getParents(newRoot.getName());
 
-				for (Long userAttNode : children) {
+				for (String userAttNode : children) {
 					Node child = graph.getNode(userAttNode);
 					if (!child.getProperties().equals(visited)) {
 						stack.push(child);
@@ -107,8 +107,7 @@ public class IsAllowedToBeCoPIExecutor implements FunctionExecutor{
 
 					arrayOfElegiblePIs.add(newRoot.getName());
 				}
-				graph.updateNode(newRoot.getID(), newRoot.getName(), visited);
-
+				graph.updateNode(newRoot.getName(), visited);
 			}
 
 			return false;

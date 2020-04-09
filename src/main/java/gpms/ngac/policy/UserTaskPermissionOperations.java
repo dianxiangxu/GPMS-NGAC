@@ -96,13 +96,12 @@ public class UserTaskPermissionOperations {
         PReviewDecider decider = new PReviewDecider(graph);
 
         // get all of the users in the graph
-        Set<Node> search = graph.search(userName, U.toString(), null);
-        for(Node user : search) {   //get the user with the userName; potentially will get one
+        Node user = graph.getNode(userName);
            
         	log.info("UserTaskPermissionOperations: "+user.getName());
             // get all of the nodes accessible for the current user
-            Map<Long, Set<String>> accessibleNodes = decider.getAccessibleNodes(user.getID(),123);
-            for(long objectID : accessibleNodes.keySet()) {
+            Map<String, Set<String>> accessibleNodes = decider.getCapabilityList(userName,"");
+            for(String objectID : accessibleNodes.keySet()) {
                 Node obj = graph.getNode(objectID);
                 log.info("\t" + obj.getName() + obj.getType().name()+" -> " + accessibleNodes.get(objectID));
                 
@@ -119,7 +118,7 @@ public class UserTaskPermissionOperations {
     				allAccessRights.put(key,set);
     			}
             }
-        }
+        
         log.info("############### End Access state for " + userName + "############");
         log.info(allAccessRights);
         return allAccessRights;

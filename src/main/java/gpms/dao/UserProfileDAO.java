@@ -261,11 +261,9 @@ public class UserProfileDAO extends BasicDAO<UserProfile, String> {
 		NGACPolicyConfigurationLoader loader = new NGACPolicyConfigurationLoader();
 		loader.init();
 		String proposalCreationPolicy = loader.jsonProposalCreation;
-		Graph graph = GraphSerializer.fromJson(new MemGraph(), proposalCreationPolicy);
-		Set<Node> piSet = graph.search("PI-Eligible Faculty","UA", null);
-		Node[] piArray= piSet.toArray(
-				new Node[graph.getNodes().size()]);
-		Node piNode = piArray[0];
+		Graph graph = new MemGraph();
+		GraphSerializer.fromJson(graph, proposalCreationPolicy);
+		Node piNode = graph.getNode("PI-Eligible Faculty");
 		
 		Map<String, String> visited = new HashMap<String, String>();
 		visited.put("isVisited", "yes");
@@ -277,9 +275,9 @@ public class UserProfileDAO extends BasicDAO<UserProfile, String> {
 		while (!stack.isEmpty()) {
 
 			Node newRoot = stack.pop();
-			Set<Long> children= graph.getChildren(piNode.getID());
+			Set<String> children= graph.getChildren(piNode.getName());
 		
-			for (Long userAttNode : children) {
+			for (String userAttNode : children) {
 				Node child = graph.getNode(userAttNode);
 				if (!child.getProperties().equals(visited)) {
 					stack.push(child);
@@ -291,7 +289,7 @@ public class UserProfileDAO extends BasicDAO<UserProfile, String> {
 				continue;
 			}
 			arrayOfElegiblePIs.add(newRoot.getName());
-			graph.updateNode(newRoot.getID(), newRoot.getName(), visited);
+			graph.updateNode(newRoot.getName(), visited);
 
 		}
 		

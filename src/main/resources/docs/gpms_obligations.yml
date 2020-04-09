@@ -157,7 +157,7 @@ rules:
                         name: get_node_name 
                         args:
                           - function:
-                              name: email
+                              name: child_of_assign
                     - O
             where:
               - name: CoPI-Info

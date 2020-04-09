@@ -27,7 +27,7 @@ public class DeleteNodeExecutor implements FunctionExecutor{
 	    }
 
 	    @Override
-	    public Node exec(EventContext eventCtx, long userID, long processID, PDP pdp, Function function, FunctionEvaluator functionEvaluator) throws PMException {
+	    public Boolean exec(EventContext eventCtx, String userID, String processID, PDP pdp, Function function, FunctionEvaluator functionEvaluator) throws PMException {
 	        List<Arg> args = function.getArgs();
 	        if (args == null || args.size() < numParams() || args.size() > numParams()) {
 	            throw new PMException(getFunctionName() + " expected at least two arguments (name and type) but found none");
@@ -54,11 +54,11 @@ public class DeleteNodeExecutor implements FunctionExecutor{
 	                props = (Map) functionEvaluator.evalMap(eventCtx, userID, processID, pdp, arg.getFunction());
 	            }
 	        }
-
-	        Set<Node> search = pdp.getPAP().getGraphPAP().search(name, type, props);
-	        if(search.isEmpty()) return null;
-	        Node node = search.iterator().next();
-	        pdp.getPAP().getGraphPAP().deleteNode(node.getID());
-	        return node;
+	        try {
+	        pdp.getPAP().getGraphPAP().deleteNode(name);}
+	        catch(PMException e) {
+	        	System.out.println(e);
+	        }
+	        return true;
 	    }
 }

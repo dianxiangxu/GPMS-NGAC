@@ -5,7 +5,6 @@ import static gov.nist.csd.pm.pip.graph.model.nodes.NodeType.O;
 import static gov.nist.csd.pm.pip.graph.model.nodes.NodeType.OA;
 import static gov.nist.csd.pm.pip.graph.model.nodes.NodeType.U;
 import static gov.nist.csd.pm.pip.graph.model.nodes.NodeType.UA;
-import static gpms.ngac.policy.PDSOperations.getNodeID;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -39,31 +38,25 @@ public class UserPermissionChecker {
 
 			PReviewDecider decider = new PReviewDecider(ngacPolicy,prohibitions);
 			
-			long targetId = PDSOperations.getNodeID(ngacPolicy, targetAttribute.getAttributeName(), targetAttribute.getAttributeType(), null);
+			//long targetId = PDSOperations.getNodeID(ngacPolicy, targetAttribute.getAttributeName(), targetAttribute.getAttributeType(), null);
 			
 			// get all of the users in the graph
-	        Set<Node> userSet = ngacPolicy.search(userOrAttributeName, type, null);
+	        Node user = ngacPolicy.getNode(userOrAttributeName);
 	        
 	        //Set<Node> uaSet = ngacPolicy.search(userName, UA.toString(), null);
 	        
-	        if(userSet.size() ==1)   // expect to get only one user
-	        {
+	        
 	        	String[] requiredAccessRights = objects.toArray(new String[0]) ;//Arrays.copyOf(objects, objects.size(), String[].class);
 	   		    //objects.to
 	        	
-	        	 for(Node user : userSet) {
 	        		 log.info("UserPermissionChecker: "+user.getName()+"|"+requiredAccessRights.toString());
 	        		 System.out.println("UserPermissionChecker: "+user.getName()+"|"+targetAttribute.toString()+"|"+Arrays.toString(requiredAccessRights));
-	        		 hasPermission = decider.check(user.getID(), NGACPolicyConfigurationLoader.getID() ,targetId, requiredAccessRights);
+	        		 hasPermission = decider.check(userOrAttributeName, "process" ,targetAttribute.getAttributeName(), requiredAccessRights);
 	        		 
 	        		 log.info(hasPermission);
 	        		 System.out.println("Permission:"+hasPermission);
-	        	 }
-	        }
-	        else
-	        {
-	        	log.info("User set size:"+userSet.size());
-	        }
+	        	 
+
         } catch(PMException pme) {
         	log.debug("PM Exception:"+pme.getMessage());
         	pme.printStackTrace();
@@ -83,27 +76,15 @@ public static boolean checkPermission(Graph ngacPolicy, Prohibitions prohibition
 
 			PReviewDecider decider = new PReviewDecider(ngacPolicy,prohibitions);
 			
-			long targetId = PDSOperations.getNodeID(ngacPolicy, targetAttribute.getAttributeName(), targetAttribute.getAttributeType(), null);
+			//long targetId = PDSOperations.getNodeID(ngacPolicy, targetAttribute.getAttributeName(), targetAttribute.getAttributeType(), null);
 			
 			// get all of the users in the graph
-	        Set<Node> userSet = ngacPolicy.search(userName, U.toString(), null);
-	        
-	        if(userSet.size() ==1)   // expect to get only one user
-	        {
-	        	//String[] requiredAccessRights = Arrays.copyOf(objects, objects.length, String[].class);
-	   		 
-	        	 for(Node user : userSet) {
-	        		 log.info("UserPermissionChecker: "+user.getName()+"|"+objects.toString());
-	        		 System.out.println("UserPermissionChecker: "+user.getName()+"|"+targetAttribute.toString()+"|"+Arrays.toString(objects));
-	        		 hasPermission = decider.check(user.getID(), NGACPolicyConfigurationLoader.getID() ,targetId, objects);
-	        		 log.info(hasPermission);
-	        		
-	        	 }
-	        }
-	        else
-	        {
-	        	log.info("User set size:"+userSet.size());
-	        }
+	        Node user = ngacPolicy.getNode(userName);	        	        
+	        	//String[] requiredAccessRights = Arrays.copyOf(objects, objects.length, String[].class);	   		 	        	
+		    log.info("UserPermissionChecker: "+user.getName()+"|"+objects.toString());
+    		System.out.println("UserPermissionChecker: "+user.getName()+"|"+targetAttribute.toString()+"|"+Arrays.toString(objects));
+    	    hasPermission = decider.check(userName, "process" , targetAttribute.getAttributeName(), objects);
+    		log.info(hasPermission);	        
         } catch(PMException pme) {
         	log.debug("PM Exception:"+pme.getMessage());
         	pme.printStackTrace();

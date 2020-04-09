@@ -47,7 +47,7 @@ public class EmailExecutor implements FunctionExecutor{
 		    }
 
 		    @Override
-		    public Node exec(EventContext eventCtx, long userID, long processID, PDP pdp, Function function, FunctionEvaluator functionEvaluator) throws PMException {
+		    public Node exec(EventContext eventCtx, String userID, String processID, PDP pdp, Function function, FunctionEvaluator functionEvaluator) throws PMException {
 		    	 Node child;
 		         if(eventCtx instanceof AssignToEvent) {
 		             child = ((AssignToEvent) eventCtx).getChildNode();

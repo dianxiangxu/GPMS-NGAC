@@ -76,9 +76,10 @@ public class NGACPolicyConfigurationLoader {
 					log.info("Obligation ready.");
 				}
 				try {
-					ngacPolicy = GraphSerializer.fromJson(new MemGraph(), jsonSuper);
-					ngacPolicy = GraphSerializer.fromJson(ngacPolicy, jsonProposalCreation);
-					ngacPolicy = GraphSerializer.fromJson(ngacPolicy, jsonUnivOrg);
+					ngacPolicy = new MemGraph();
+					GraphSerializer.fromJson(ngacPolicy, jsonSuper);
+					GraphSerializer.fromJson(ngacPolicy, jsonProposalCreation);
+					GraphSerializer.fromJson(ngacPolicy, jsonUnivOrg);
 				} catch (PMException e) {
 					log.debug("PM Exception: InitialConfigurationLoader : while loading NGAC base configuration. "
 							+ e.toString());
@@ -114,9 +115,10 @@ public class NGACPolicyConfigurationLoader {
 				jsonProposalCreation = new String(Files.readAllBytes(Paths.get(file_proposal_creation.getAbsolutePath())));
 				jsonUnivOrg = new String(Files.readAllBytes(Paths.get(file_university_org.getAbsolutePath())));
 				try {
-					basicPlicy = GraphSerializer.fromJson(new MemGraph(), jsonSuper);
-					basicPlicy = GraphSerializer.fromJson(basicPlicy, jsonProposalCreation);
-					basicPlicy = GraphSerializer.fromJson(basicPlicy, jsonUnivOrg);
+					basicPlicy = new MemGraph();
+					GraphSerializer.fromJson(basicPlicy, jsonSuper);
+				    GraphSerializer.fromJson(basicPlicy, jsonProposalCreation);
+					GraphSerializer.fromJson(basicPlicy, jsonUnivOrg);
 				} catch (PMException e) {
 					log.debug("PM Exception: Basic InitialConfigurationLoader : while loading NGAC base configuration. "
 							+ e.toString());
@@ -143,7 +145,7 @@ public class NGACPolicyConfigurationLoader {
 			log.info("Basic Policy :No of Nodes:" + policy.getNodes().size());
 			try {
 
-				policy = GraphSerializer.fromJson(policy, jsonProposalPolicy);
+				GraphSerializer.fromJson(policy, jsonProposalPolicy);
 				log.info("Combined policy: No of Nodes:" + policy.getNodes().size());
 
 				if (policy != null) {
@@ -165,7 +167,7 @@ public class NGACPolicyConfigurationLoader {
 			log.info("Basic Policy :No of Nodes:" + policy.getNodes().size());
 			try {
 
-				policy = GraphSerializer.fromJson(policy, jsonApprovalPolicy);
+				GraphSerializer.fromJson(policy, jsonApprovalPolicy);
 				log.info("Combined with approval policy: No of Nodes:" + policy.getNodes().size());
 
 				if (policy != null) {
