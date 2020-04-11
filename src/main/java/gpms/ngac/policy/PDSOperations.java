@@ -27,6 +27,8 @@ import static gov.nist.csd.pm.pip.graph.model.nodes.NodeType.O;
 import static gov.nist.csd.pm.pip.graph.model.nodes.NodeType.OA;
 import static gov.nist.csd.pm.pip.graph.model.nodes.NodeType.U;
 import static gov.nist.csd.pm.pip.graph.model.nodes.NodeType.UA;
+import static gov.nist.csd.pm.pip.graph.model.nodes.Properties.NAMESPACE_PROPERTY;
+
 import gov.nist.csd.pm.epp.EPPOptions;
 
 import gpms.DAL.DepartmentsPositionsCollection;
@@ -98,9 +100,11 @@ public class PDSOperations {
 		FindChairForCoPIExecutor findChairForCoPIExecutor = new FindChairForCoPIExecutor();
 		FindDeanForCoPIExecutor findDeanForCoPIExecutor = new FindDeanForCoPIExecutor();
 		FindBMForCoPIExecutor findBMForCoPIExecutor = new FindBMForCoPIExecutor();
+		CreateNodeExecutor1 createNodeExecutor1 = new CreateNodeExecutor1();
+		ConcatExecutor concatExecutor = new ConcatExecutor();
 
 		obligation = policyLoader.getObligation();
-		EPPOptions eppOptions = new EPPOptions(deleteNodeExecutor, emailExecutor, findChairForCoPIExecutor, findDeanForCoPIExecutor,findBMForCoPIExecutor,isAllowedToBeCoPIExecutor);
+		EPPOptions eppOptions = new EPPOptions(deleteNodeExecutor, emailExecutor, findChairForCoPIExecutor, findDeanForCoPIExecutor,findBMForCoPIExecutor,isAllowedToBeCoPIExecutor, createNodeExecutor1, concatExecutor);
 		pdp = new PDP(new PAP(graph, new MemProhibitions(), new MemObligations()),eppOptions);
 		pdp.getPAP().getObligationsPAP().add(obligation, true);
 
@@ -313,7 +317,9 @@ public class PDSOperations {
 			proposalPolicy = policyLoader.reloadBasicConfig();
 			proposalPolicy = policyLoader.createAProposalGraph(proposalPolicy); // loads editing policy
 			proposalPolicy = policyLoader.createAprovalGraph(proposalPolicy); // loads editing policy
+			System.out.println("GRAPH!!!!!!!!!!!!!"+GraphSerializer.toJson(proposalPolicy));
 
+			//System.out.println("GRAPH!!!!!!!!!!!!!"+GraphSerializer.toJson(proposalPolicy));
 			Node pdsNode = proposalPolicy.createNode("" + randomId, OA, null, Constants.PDS_ORIGINATING_OA);
 			// log.info("ID:" + randomId);
 			//long pdsOriginationOAID = getNodeID(proposalPolicy, Constants.PDS_ORIGINATING_OA, OA, null);
@@ -339,9 +345,8 @@ public class PDSOperations {
 			PDSOperations.proposalPolicies.put(randomId, proposalPolicy);
 			// printAccessState("Initial configuration after op:", proposalPolicy);
 			log.info("CREATE PROPOSAL: # nodes AFTER:" + proposalPolicy.getNodes().size());
-
 		} catch (Exception e) {
-			log.info("Exception:" + e.toString());
+			 e.printStackTrace();
 		}
 		return randomId;
 	}
@@ -382,9 +387,11 @@ public class PDSOperations {
 
 		// printAccessState("Initial configuration before op:", proposalPolicy);
 		log.info("ADD CoPI: # nodes BEFORE:" + intialGraph.getNodes().size());
-
+		if (intialGraph.exists("super_pc_rep")) {
+			intialGraph.deleteNode("super_pc_rep");
+        }
 		// intialGraph.assign(CoPINode, CoPIUAID);
-
+		System.out.println("SIZE:"+intialGraph.getNodes().size());
 		PDP pdp = getPDP(intialGraph);
 		
 		pdp.getEPP().processEvent(new AssignToEvent(intialGraph.getNode(CoPIUAID), intialGraph.getNode(CoPINode)),

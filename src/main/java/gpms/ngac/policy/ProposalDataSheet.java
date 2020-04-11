@@ -743,23 +743,24 @@ public class ProposalDataSheet {
 //		long PiUANode = PDSOperations.getNodeID(proposalPolicy, Constants.PI_UA_LBL, UA, null);
 //
 //		long piUNodeId = 0;
-		try {
+	//	try {
 			//piUNodeId = PDSOperations.getNodeID(proposalPolicy, userName, U, null);
-			Node piName = proposalPolicy.createNode(userName+"info", O, null, Constants.PI_OA_LBL);
+			//Node piName = proposalPolicy.createNode(userName+"info", O, null, Constants.PI_OA_LBL);
 
-			proposalPolicy.assign(userName, Constants.PI_UA_LBL);
+			//proposalPolicy.assign(userName, Constants.PI_UA_LBL);
 			//proposalPolicy.assign(piName.getID(), PiOANode);
-			log.info("PI added.");
+			//log.info("PI added.");
 			PDSOperations.proposalPolicies.put(proposalData.getNgacId(), proposalPolicy);
-		} catch (PMException e) {
-			e.printStackTrace();
-		}
+		//} catch (PMException e) {
+		//	e.printStackTrace();
+		//}
 	}
 
 	public void updateCoPI(String actor, boolean updateDept) throws PMException {
 		
-		
-		
+		System.out.println("HELLO WORLD 11111");
+		System.out.println("GRAPH:"+ proposalData.getPolicyGraph());
+
 		
 		// InvestigatorRefAndPosition
 		InvestigatorInfo investigatorInfo = proposalData.getInvestigatorInfo();
@@ -790,14 +791,13 @@ public class ProposalDataSheet {
 
 			//long copiUNodeId = 0;
 				//copiUNodeId = PDSOperations.getNodeID(proposalPolicy, coPiName, U, null);
-			try {
-				Node search = proposalPolicy.getNode(coPiName);
+			
+			if(proposalPolicy.exists(coPiName+"CoPI")) {
+				System.out.println("HELLO WORLD 22222");
 				CoPItoPreserve.add(coPiName);
-				continue;
+				continue;				
 			}
-			catch(PMException e){
-				log.info(e);
-			}
+
 				
 				// Node coPINode =proposalPolicy.createNode(PDSOperations.getID(),coPiName, U,
 				// null);
@@ -815,12 +815,12 @@ public class ProposalDataSheet {
 				properties.put("departmentChair", chairDept);
 				properties.put("departmentDean", deanDept);
 				properties.put("departmentBM", bmDept);
+				System.out.println("HELLO WORLD 33333");
 
 				proposalPolicy.updateNode(coPiName, properties);
 				PDSOperations.addCoPI(actor, coPiName, Constants.CO_PI_UA_LBL, proposalPolicy);
 				log.info("CoPI added.");
 				log.info("SUBMIT PROPOSAL: # nodes AFTER:" + proposalPolicy.getNodes().size());
-
 				PDSOperations.proposalPolicies.put(proposalData.getNgacId(), proposalPolicy);
 				CoPItoPreserve.add(coPiName);
 			

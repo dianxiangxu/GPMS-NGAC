@@ -4,7 +4,6 @@ import gov.nist.csd.pm.exceptions.PMException;
 import gov.nist.csd.pm.pap.PAP;
 import gov.nist.csd.pm.pdp.PDP;
 import gov.nist.csd.pm.pip.graph.Graph;
-import gov.nist.csd.pm.pip.graph.GraphSerializer;
 import gov.nist.csd.pm.pip.graph.MemGraph;
 import gov.nist.csd.pm.pip.obligations.MemObligations;
 import gov.nist.csd.pm.pip.obligations.evr.EVRParser;
@@ -156,6 +155,7 @@ public class NGACPolicyConfigurationLoader {
 			}
 		} catch (Exception e) {
 			log.debug("I/O Exception : createAProposalGraph : while loading PDS base configuration." + e.toString());
+			e.printStackTrace();
 		}
 
 		return policy;
@@ -175,9 +175,11 @@ public class NGACPolicyConfigurationLoader {
 				}
 			} catch (PMException e) {
 				log.debug("PM Exception: createAprovalGraph : while loading PDS base configuration. " + e.toString());
+				e.printStackTrace();
 			}
 		} catch (Exception e) {
 			log.debug("I/O Exception : createAprovalGraph : while loading PDS base configuration." + e.toString());
+			e.printStackTrace();
 		}
 
 		return policy;
