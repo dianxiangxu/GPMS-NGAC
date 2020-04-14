@@ -1,4 +1,4 @@
-package gpms.ngac.policy;
+package gpms.ngac.policy.customFunctions;
 
 import java.util.HashMap;
 import java.util.List;

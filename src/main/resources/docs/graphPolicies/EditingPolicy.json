@@ -491,6 +491,9 @@
      }, {
        "source": "CoPI-Info", 
        "target": "EligibilityPolicyClass"  
+     }, {
+       "source": "SP-Info", 
+       "target": "EligibilityPolicyClass"  
      }
     
  ],

@@ -1,4 +1,4 @@
-package gpms.ngac.policy;
+package gpms.ngac.policy.customFunctions;
 
 import gov.nist.csd.pm.epp.FunctionEvaluator;
 import gov.nist.csd.pm.epp.events.EventContext;
@@ -79,7 +79,7 @@ public class CreateNodeExecutor1 implements FunctionExecutor {
         }
 
         Graph graph = pdp.getPAP().getGraphPAP();
-
+        //System.out.println(GraphSerializer.toJson(graph));
         Node parentNode;
         if (parentName != null) {
             parentNode = graph.getNode(parentName);

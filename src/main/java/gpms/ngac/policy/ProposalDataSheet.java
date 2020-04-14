@@ -20,6 +20,8 @@ import org.apache.log4j.Logger;
 import gov.nist.csd.pm.exceptions.PMException;
 import gov.nist.csd.pm.pdp.decider.PReviewDecider;
 import gov.nist.csd.pm.pip.graph.Graph;
+import gov.nist.csd.pm.pip.graph.GraphSerializer;
+import gov.nist.csd.pm.pip.graph.MemGraph;
 import gov.nist.csd.pm.pip.graph.model.nodes.Node;
 import gov.nist.csd.pm.pip.graph.model.nodes.NodeType;
 import gov.nist.csd.pm.pip.prohibitions.MemProhibitions;
@@ -288,9 +290,10 @@ public class ProposalDataSheet {
 	public void updatePostSubmissionchanges(ProposalDAO proposalDao) {
 		String stage = getApprovalStage();
 		updatePostSubmissionUsers();
+		associateApprovalRelation(stage);
+
 		updatePostSubmissionCurrentApprovalUsers(proposalDao, stage);
 		// associate relations
-//		associateApprovalRelation(stage);
 		// load create approval PC
 
 		testUsersAfterSubmission();
@@ -317,8 +320,8 @@ public class ProposalDataSheet {
 //				long oaSignatureInfoAttNodeID = PDSOperations.getNodeID(proposalPolicy, Constants.SIGNATURE_INFOL,
 //						NodeType.OA, null);
 
-				proposalPolicy.associate(Constants.CHAIR_UA, Constants.CHAIR_APPROVAL, ops1);
-				proposalPolicy.associate(Constants.CHAIR_UA, Constants.SIGNATURE_INFOL, ops2);
+				//proposalPolicy.associate(Constants.CHAIR_UA, Constants.CHAIR_APPROVAL, ops1);
+			//	proposalPolicy.associate(Constants.CHAIR_UA, Constants.SIGNATURE_INFOL, ops2);
 
 			} else if (stage.equals(Constants.STATE_BM)) {
 //				long userAttNodeID = PDSOperations.getNodeID(proposalPolicy, Constants.BM_UA, NodeType.UA, null);
@@ -588,9 +591,9 @@ public class ProposalDataSheet {
 					//	.get(DepartmentsPositionsCollection.departmentNames.get(dept) + "DEAN"), NodeType.U, null);
 
 
-				//proposalPolicy.assign(deptChairUser, userAttNodeID);
-				//proposalPolicy.assign(deptBMUser, userBmAttNodeID);
-				//proposalPolicy.assign(deptDeanUser, userDeanAttNodeID);
+//				proposalPolicy.assign(deptChairUser, userAttNodeID);
+//				proposalPolicy.assign(deptBMUser, userBmAttNodeID);
+//				proposalPolicy.assign(deptDeanUser, userDeanAttNodeID);
 			}
 
 			//long userIrbAttNodeID = PDSOperations.getNodeID(proposalPolicy, Constants.IRB_UA, NodeType.UA, null);
@@ -756,10 +759,10 @@ public class ProposalDataSheet {
 		//}
 	}
 
-	public void updateCoPI(String actor, boolean updateDept) throws PMException {
+	public void updateCoPI(String actor, boolean updateDept) throws Exception {
 		
-		System.out.println("HELLO WORLD 11111");
-		System.out.println("GRAPH:"+ proposalData.getPolicyGraph());
+		//System.out.println("HELLO WORLD 11111");
+		//System.out.println("GRAPH:"+ proposalData.getPolicyGraph());
 
 		
 		// InvestigatorRefAndPosition
@@ -781,6 +784,7 @@ public class ProposalDataSheet {
 			log.info(coPiName);
 			String chairDept = DepartmentsPositionsCollection.adminUsers
 					.get(DepartmentsPositionsCollection.departmentNames.get(investPos.getDepartment()) + "CHAIR");
+			System.out.println("DEPT2!"+investPos.getDepartment());
 			String deanDept = DepartmentsPositionsCollection.adminUsers
 					.get(DepartmentsPositionsCollection.departmentNames.get(investPos.getDepartment()) + "DEAN");
 			String bmDept = DepartmentsPositionsCollection.adminUsers
@@ -793,7 +797,6 @@ public class ProposalDataSheet {
 				//copiUNodeId = PDSOperations.getNodeID(proposalPolicy, coPiName, U, null);
 			
 			if(proposalPolicy.exists(coPiName+"CoPI")) {
-				System.out.println("HELLO WORLD 22222");
 				CoPItoPreserve.add(coPiName);
 				continue;				
 			}
@@ -815,7 +818,7 @@ public class ProposalDataSheet {
 				properties.put("departmentChair", chairDept);
 				properties.put("departmentDean", deanDept);
 				properties.put("departmentBM", bmDept);
-				System.out.println("HELLO WORLD 33333");
+			//	System.out.println("HELLO WORLD 33333");
 
 				proposalPolicy.updateNode(coPiName, properties);
 				PDSOperations.addCoPI(actor, coPiName, Constants.CO_PI_UA_LBL, proposalPolicy);
@@ -836,7 +839,7 @@ public class ProposalDataSheet {
 		}
 	}
 
-	public void updateSP(String actor, boolean updateDept) throws PMException {
+	public void updateSP(String actor, boolean updateDept) throws Exception {
 		// InvestigatorRefAndPosition
 		InvestigatorInfo investigatorInfo = proposalData.getInvestigatorInfo();
 		ArrayList<InvestigatorRefAndPosition> investList = new ArrayList(investigatorInfo.getSeniorPersonnel());
@@ -863,14 +866,9 @@ public class ProposalDataSheet {
 			try {
 				//spUNodeId = PDSOperations.getNodeID(proposalPolicy, spName, U, null);
 				
-				
-				try {
-					Node search = proposalPolicy.getNode(spName);
+				if(proposalPolicy.exists(spName+"SP")) {
 					SPtoPreserve.add(spName);
 					continue;
-				}
-				catch(PMException e){
-					log.info(e);
 				}
 
 				// Node spNode =proposalPolicy.createNode(PDSOperations.getID(),spName, U,
@@ -904,7 +902,7 @@ public class ProposalDataSheet {
 	public String getPolicyDecision(PDSOperations pdsOps, String username, String action, String objectAtt)
 			throws PMException {
 
-		log.info("userName:" + username + "| Action:" + action + "|OA:" + objectAtt);
+		log.info("userName1:" + username + "| Action:" + action + "|OA:" + objectAtt);
 		String decision = "";
 		String[] operations = { action };
 		ArrayList<String> ops = new ArrayList<String>();
@@ -918,7 +916,15 @@ public class ProposalDataSheet {
 			else
 				decision = "Deny";
 		} else {
-			boolean hasPermission = UserPermissionChecker.checkPermission(proposalPolicy,
+			Graph graphFromDB = new MemGraph();
+			GraphSerializer.fromJson(graphFromDB, getProposal().getPolicyGraph());
+			
+			PReviewDecider decider = new PReviewDecider(graphFromDB, ProhibitionsSerializer.fromJson(new MemProhibitions(), getProposal().getProhibitions()));
+			  
+			  for(String s: graphFromDB.getChildren("Chair")) {
+					System.out.println("CHILDREN DURING CHECK"+s+decider.check("Chair", "process" , "Signature-Info", "w"));
+				}
+			boolean hasPermission = UserPermissionChecker.checkPermission(graphFromDB,
 					ProhibitionsSerializer.fromJson(new MemProhibitions(), getProposal().getProhibitions()), username,
 					att, operations);
 
@@ -934,7 +940,7 @@ public class ProposalDataSheet {
 	public String getPolicyDecisionAnyType(PDSOperations pdsOps, String subject, String type, String action,
 			String objectAtt) {
 
-		log.info("Subject:" + subject + "|type:" + type + " Action:" + action + "|OA:" + objectAtt);
+		log.info("Subject2:" + subject + "|type:" + type + " Action:" + action + "|OA:" + objectAtt);
 		String decision = "";
 		String[] operations = { action };
 		ArrayList<String> ops = new ArrayList<String>();

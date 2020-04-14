@@ -1,4 +1,4 @@
-package gpms.ngac.policy;
+package gpms.ngac.policy.customFunctions;
 
 import java.util.HashMap;
 import java.util.List;
@@ -15,10 +15,10 @@ import gov.nist.csd.pm.pip.obligations.model.functions.Arg;
 import gov.nist.csd.pm.pip.obligations.model.functions.Function;
 import static gov.nist.csd.pm.pip.graph.model.nodes.NodeType.U;
 
-public class FindDeanForCoPIExecutor implements FunctionExecutor{
+public class ChairForExecutor implements FunctionExecutor{
 	@Override
     public String getFunctionName() {
-        return "findDeanForCoPI";
+        return "chair_for";
     }
 
     @Override
@@ -30,7 +30,7 @@ public class FindDeanForCoPIExecutor implements FunctionExecutor{
     public Node exec(EventContext eventCtx, String userID, String processID, PDP pdp, Function function, FunctionEvaluator functionEvaluator) throws PMException {
         List<Arg> args = function.getArgs();
         if (args == null || args.size() < numParams() || args.size() > numParams()) {
-            throw new PMException(getFunctionName() + " expected at least two arguments (name and type) but found none");
+            throw new PMException(getFunctionName() + " expected at least one arguments (name and type) but found none");
         }
 
         Arg arg = args.get(0);
@@ -41,8 +41,8 @@ public class FindDeanForCoPIExecutor implements FunctionExecutor{
 
         Node node = functionEvaluator.evalNode(eventCtx, userID, processID, pdp, argFunction);
       
-        String departmentBM = node.getProperties().get("departmentDean");
+        String departmentChair = node.getProperties().get("departmentChair");
                 
-        return pdp.getPAP().getGraphPAP().getNode(departmentBM);
+        return pdp.getPAP().getGraphPAP().getNode(departmentChair);
     }
 }

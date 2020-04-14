@@ -204,7 +204,7 @@ rules:
     response:
       actions:
         - function:
-            name: create_node
+            name: create_node1
             args:
               - SP-Info
               - OA 
@@ -241,18 +241,18 @@ rules:
               where:
                 - name: CoPI
                   type: UA
-        - delete:
-            create:
-              what: 
-                - function:
-                    name: delete_node
-                    args: 
-                      - function:
-                          name: get_node_name 
-                          args:
-                            - function:
-                                name: child_of_assign
-                      - O
+        - function:
+            name: delete_node
+            args:
+              - function:
+                  name: concat_strings
+                  args:
+                    - function:
+                        name: get_node_name
+                        args:
+                          - function:
+                              name: child_of_assign
+                    - CoPI
                               
   - label: delete_sp
     event:

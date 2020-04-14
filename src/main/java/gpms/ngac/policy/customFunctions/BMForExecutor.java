@@ -1,4 +1,4 @@
-package gpms.ngac.policy;
+package gpms.ngac.policy.customFunctions;
 
 import java.util.HashMap;
 import java.util.List;
@@ -15,10 +15,10 @@ import gov.nist.csd.pm.pip.obligations.model.functions.Arg;
 import gov.nist.csd.pm.pip.obligations.model.functions.Function;
 import static gov.nist.csd.pm.pip.graph.model.nodes.NodeType.U;
 
-public class FindChairForCoPIExecutor implements FunctionExecutor{
+public class BMForExecutor implements FunctionExecutor{
 	@Override
     public String getFunctionName() {
-        return "findChairForCoPI";
+        return "bm_for";
     }
 
     @Override
@@ -41,8 +41,8 @@ public class FindChairForCoPIExecutor implements FunctionExecutor{
 
         Node node = functionEvaluator.evalNode(eventCtx, userID, processID, pdp, argFunction);
       
-        String departmentChair = node.getProperties().get("departmentChair");
+        String departmentBM = node.getProperties().get("departmentBM");
                 
-        return pdp.getPAP().getGraphPAP().getNode(departmentChair);
+        return pdp.getPAP().getGraphPAP().getNode(departmentBM);
     }
 }

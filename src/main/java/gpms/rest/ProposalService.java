@@ -77,11 +77,14 @@ import com.google.common.collect.Multimap;
 import com.mongodb.MongoClient;
 
 import gov.nist.csd.pm.exceptions.PMException;
+import gov.nist.csd.pm.pdp.decider.PReviewDecider;
 import gov.nist.csd.pm.pip.graph.Graph;
 import gov.nist.csd.pm.pip.graph.GraphSerializer;
+import gov.nist.csd.pm.pip.graph.MemGraph;
 import gov.nist.csd.pm.pip.prohibitions.MemProhibitions;
 import gov.nist.csd.pm.pip.prohibitions.Prohibitions;
 import gov.nist.csd.pm.pip.prohibitions.ProhibitionsSerializer;
+import gov.nist.csd.pm.pdp.PDP;
 
 @Path("/proposals")
 @Api(value = "/proposals", description = "Manage Proposals")
@@ -567,6 +570,8 @@ public class ProposalService {
 				log.info("NN: Proposal NGAC Id:" + proposalNgacId);
 
 				Graph proposalPolicy = null;
+				
+				
 				setPolicyState(projectProposal, existingProposal, proposalPolicy, userInfo.getUserName(), false);
 
 				String stage = projectProposal.getApprovalStage();
@@ -994,8 +999,16 @@ public class ProposalService {
 	}
 
 	private void setPolicyState(ProposalDataSheet projectProposal, Proposal existingProposal, Graph proposalPolicy,
-			String userName, boolean firstSave) throws PMException {
-
+			String userName, boolean firstSave) throws Exception {
+		Graph test = new MemGraph();
+		if(existingProposal!=null&&existingProposal.getPolicyGraph()!=null&&existingProposal.getPolicyGraph().length()>20) {			
+			GraphSerializer.fromJson(test, existingProposal.getPolicyGraph());
+			PReviewDecider decider = new PReviewDecider(test);
+			if(test.exists("Chair")) {
+			System.out.println("RESULT3: "+ decider.check("Chair", "process" , "Signature-Info", "w"));
+			System.out.println("RESULT4: "+ decider.check("chaircomputerscience", "process" , "Signature-Info", "w"));}}
+		
+		
 		projectProposal.setProposal(existingProposal);
 		log.info("NGAC ID found :" + existingProposal.getNgacId());
 
@@ -1012,7 +1025,11 @@ public class ProposalService {
 			proposalPolicy = pdsOperations.getBacicNGACPolicy();
 			proposalPolicy = loader.createAProposalGraph(proposalPolicy);
 			proposalPolicy = loader.createAprovalGraph(proposalPolicy);
-			projectProposal.setProposalPolicy(proposalPolicy);
+			if(test.getNodes().size()>10) {
+			projectProposal.setProposalPolicy(test);}
+			else {
+				projectProposal.setProposalPolicy(proposalPolicy);
+			}
 
 		}
 
@@ -1082,7 +1099,7 @@ public class ProposalService {
 						oldProposal = SerializationHelper.cloneThroughSerialize(existingProposal);
 					}
 				}
-
+				System.out.println("Policy Graph Length!: "+existingProposal.getPolicyGraph().length());
 				String proposalRoles = "";
 				if (root != null && root.has("proposalRoles")) {
 					proposalRoles = root.get("proposalRoles").textValue();
@@ -1176,13 +1193,15 @@ public class ProposalService {
 											.entity("Proposal is not ready to be submitted.").build();
 
 								}
-								String json = ProhibitionsSerializer
-										.toJson(pdsOperations.submitAProposal(userInfo.getUserName()));
-								existingProposal.setProhibitions(json);
-								
-								existingProposal.setPolicyGraph(GraphSerializer.toJson(projectProposal.getProposalPolicy()));
-							}
+								PDP pdp = pdsOperations.submitAProposal(userInfo.getUserName(),existingProposal.getPolicyGraph() );
+							    existingProposal.setPolicyGraph(GraphSerializer.toJson(pdp.getPAP().getGraphPAP()));
 
+								existingProposal.setProhibitions(ProhibitionsSerializer.toJson(pdp.getPAP().getProhibitionsPAP()));
+								
+							}
+							if(action.equals("Save")) {
+							existingProposal.setPolicyGraph(GraphSerializer.toJson(projectProposal.getProposalPolicy()));
+							}
 						} else if (action.equals("Approve") || action.equals("Disapprove")) {
 							List<String> actions = null;
 							String objectAtt = Constants.APPROVAL_CONTENT;
@@ -1264,7 +1283,8 @@ public class ProposalService {
 									projectProposal.updatePI(true);
 									projectProposal.updateCoPI(userInfo.getUserName(), true);
 									projectProposal.updateSP(userInfo.getUserName(), true);
-									
+									existingProposal.setPolicyGraph(GraphSerializer.toJson(projectProposal.getProposalPolicy()));
+
 									projectProposal.updatePostSubmissionchanges(proposalDAO);
 									PDSOperations.proposalPolicies.put(existingProposal.getNgacId(), proposalPolicy);
 									ApprovalStagePost = projectProposal.getApprovalStage();
@@ -1287,7 +1307,7 @@ public class ProposalService {
 										log.info("Action:" + action + "|Differ PRE and POST Stage!" + ApprovalStagePre
 												+ "|" + ApprovalStagePost);
 										projectProposal.updatePostSubmissionchanges(proposalDAO);
-										projectProposal.disassociateApprovalRelation(ApprovalStagePre);
+										//projectProposal.disassociateApprovalRelation(ApprovalStagePre);
 										projectProposal.associateApprovalRelation(ApprovalStagePost);
 									} else {
 										log.info("Same PRE and POST Stage!" + ApprovalStagePre + "|"
@@ -1314,7 +1334,7 @@ public class ProposalService {
 						.build();
 			}
 			return Response.status(403).type(MediaType.APPLICATION_JSON)
-					.entity("The chosen CoPI does not have the rights to be CoPI!").build();
+					.entity("The chosen Entity does not have the rights to be that Entity!").build();
 		} catch (Exception e) {
 			e.printStackTrace();
 			log.error("Could not save a New Proposal or update an existing Proposal error e=", e);
@@ -1493,13 +1513,18 @@ public class ProposalService {
 					log.info("Attribute Map PM:" + attrMapPm);
 
 					// pdsOperations.testUsersAccessights_Proposal_not_created();
-
 					boolean hasPermission = false;
 					hasPermission = pdsOperations.hasPermissionToCreateAProposal(userInfo.getUserName(),
 							new MemProhibitions());
-
+					ObjectId od = new ObjectId(userInfo.getUserProfileID());
+					String email = "";
+					if(userProfileDAO.findUserDetailsByProfileID(od).getWorkEmails().size()>0) {
+						
+						email = userProfileDAO.findUserDetailsByProfileID(od).getWorkEmails().get(0);
+					}
+					
 					if (hasPermission) {
-						long proposalId = pdsOperations.createAProposal(userInfo.getUserName());
+						long proposalId = pdsOperations.createAProposal(userInfo.getUserName(), userInfo.getUserDepartment(), email);
 
 						log.info("New policy id:" + proposalId + "|"
 								+ PDSOperations.proposalPolicies.get(proposalId).getNodes().size());
@@ -1774,6 +1799,7 @@ public class ProposalService {
 
 				log.info("Existing Proposal : inside sendSaveUpdateNotification ");
 				projectProposal.updateCoPI(userName, false);
+				projectProposal.updateSP(userName, false);
 
 				proposalIsChanged = saveProposal(message, existingProposal, null, authorProfile, isAdminUser,
 						proposalId, null, irbApprovalRequired, null, action);
@@ -1796,8 +1822,14 @@ public class ProposalService {
 					if (!projectProposal.isProposalSubmitted()) {
 						projectProposal.clearIngestigator();
 						projectProposal.updatePI(false);
+						try {
 						projectProposal.updateCoPI(userName, false);
 						projectProposal.updateSP(userName, false);
+
+						}
+						catch(Exception e) {
+							return false;
+						}
 
 						// projectProposal.updateCoPI(userName,false);
 						// projectProposal.updateSP(userName,false);
