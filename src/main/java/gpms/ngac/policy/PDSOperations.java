@@ -35,6 +35,9 @@ import gov.nist.csd.pm.epp.EPPOptions;
 import gpms.DAL.DepartmentsPositionsCollection;
 import gpms.model.GPMSCommonInfo;
 import gpms.model.InvestigatorInfo;
+import gpms.ngac.policy.customEvents.ApproveEvent;
+import gpms.ngac.policy.customEvents.CreateoaEvent;
+import gpms.ngac.policy.customEvents.SubmitEvent;
 import gpms.ngac.policy.customFunctions.BMForExecutor;
 import gpms.ngac.policy.customFunctions.ChairForExecutor;
 import gpms.ngac.policy.customFunctions.ConcatExecutor;
@@ -342,14 +345,14 @@ public class PDSOperations {
 			proposalPolicy.updateNode(userName, properties);
 			
 			//System.out.println("GRAPH!!!!!!!!!!!!!"+GraphSerializer.toJson(proposalPolicy));
-			Node pdsNode = proposalPolicy.createNode("" + randomId, OA, null, Constants.PDS_ORIGINATING_OA);
+			//Node pdsNode = proposalPolicy.createNode("" + randomId, OA, null, Constants.PDS_ORIGINATING_OA);
 			// log.info("ID:" + randomId);
 			//long pdsOriginationOAID = getNodeID(proposalPolicy, Constants.PDS_ORIGINATING_OA, OA, null);
 			//long userID = getNodeID(proposalPolicy, userName, U, null);
 			// printAccessState("Initial configuration before op:", proposalPolicy);
 			log.info("CREATE PROPOSAL: # nodes BEFORE:" + proposalPolicy.getNodes().size());
 			getPDP(proposalPolicy).getEPP().processEvent(
-					new AssignToEvent(proposalPolicy.getNode(Constants.PDS_ORIGINATING_OA), pdsNode), userName, "process");
+					new CreateoaEvent(proposalPolicy.getNode(Constants.PDS_ORIGINATING_OA)), userName, "process");
 
 			/*
 			 * long COPIUAID = getNodeID(proposalPolicy, Constants.CO_PI_UA_LBL, UA, null);
@@ -388,7 +391,7 @@ public class PDSOperations {
 		proposalPolicy = policyLoader.reloadBasicConfig();
 		proposalPolicy = policyLoader.createAProposalGraph(proposalPolicy); // loads editing policy
 		proposalPolicy = policyLoader.createAprovalGraph(proposalPolicy); // loads editing policy
-		Node pdsNode = proposalPolicy.createNode("" + randomId, OA, null,Constants.SUBMISSION_INFO_OA_LBL);
+		//Node pdsNode = proposalPolicy.createNode("" + randomId, OA, null,Constants.SUBMISSION_INFO_OA_LBL);
 		// log.info("ID:" + randomId);
 		//long pdsOriginationOAID = getNodeID(proposalPolicy, Constants.SUBMISSION_INFO_OA_LBL, OA, null);
 		//long userID = getNodeID(proposalPolicy, userName, U, null);
@@ -397,7 +400,7 @@ public class PDSOperations {
 		log.info("SUBMIT PROPOSAL: # nodes BEFORE:" + graph.getNodes().size());
 
 		PDP pdp = getPDP(graph);
-		pdp.getEPP().processEvent(new AssignToEvent(proposalPolicy.getNode(Constants.SUBMISSION_INFO_OA_LBL), pdsNode), userName,
+		pdp.getEPP().processEvent(new SubmitEvent(proposalPolicy.getNode(Constants.SUBMISSION_INFO_OA_LBL)), userName,
 				"process");
 
 		log.info("SUBMIT PROPOSAL: # nodes AFTER:" + graph.getNodes().size());
@@ -590,7 +593,36 @@ public class PDSOperations {
 //				log.info("Children: " + intialGraph.getNode(parent).getName());
 //			}
 		}
+		public PDP chairApprove(String userName, String JSONGraph) throws PMException {
+			Graph graph = new MemGraph();
+			GraphSerializer.fromJson(graph, JSONGraph);
+			// proposalPolicy = policyLoader.createAProposalGraph(ngacPolicy); //loads
+			// editing policy
+			if (graph.exists("super_pc_rep")) {
+				graph.deleteNode("super_pc_rep");
+	        }
+			//Node pdsNode = proposalPolicy.createNode("" + randomId, OA, null,Constants.SUBMISSION_INFO_OA_LBL);
+			// log.info("ID:" + randomId);
+			//long pdsOriginationOAID = getNodeID(proposalPolicy, Constants.SUBMISSION_INFO_OA_LBL, OA, null);
+			//long userID = getNodeID(proposalPolicy, userName, U, null);
 
+			// printAccessState("Initial configuration before op:", proposalPolicy);
+			log.info("SUBMIT PROPOSAL: # nodes BEFORE:" + graph.getNodes().size());
+
+			PDP pdp = getPDP(graph);
+			pdp.getEPP().processEvent(new ApproveEvent(graph.getNode(Constants.CHAIR_APPROVAL)), userName,
+					"process");
+
+			log.info("SUBMIT PROPOSAL: # nodes AFTER:" + graph.getNodes().size());
+			
+			
+			
+			PReviewDecider decider = new PReviewDecider(pdp.getPAP().getGraphPAP(),pdp.getPAP().getProhibitionsPAP());
+			System.out.println("RESULT1: "+ decider.check("Chair", "process" , "Signature-Info", "w"));
+			System.out.println("RESULT2: "+ decider.check("chaircomputerscience", "process" , "Signature-Info", "w"));
+
+			return pdp;
+		}
 	private String createProposalId(long id) {
 		return "PDS" + id;
 	}

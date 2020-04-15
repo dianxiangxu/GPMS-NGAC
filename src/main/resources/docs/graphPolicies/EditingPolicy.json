@@ -582,6 +582,13 @@
         ],
        "source": "PI", 
        "target": "Log" 
+     },          
+     {
+       "operations": [
+         "approve"
+        ],
+       "source": "Chair", 
+       "target": "Chair-Approval" 
      }   
  ]
  

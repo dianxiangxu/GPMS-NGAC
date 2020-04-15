@@ -386,21 +386,20 @@ public class ProposalService {
 					projectProposal.setProposal(existingProposal);
 					setPolicyState(projectProposal, existingProposal, null, userInfo.getUserName(), false);
 
-					
-					
 					String decisionString = projectProposal.getPolicyDecisionAnyType(pdsOperations,
 							userInfo.getUserName(), "U", "Delete", objectAtt);
 					boolean isDeleted = false;
 					if (decisionString.equals("Permit")) {
 						isDeleted = proposalDAO.deleteProposal(existingProposal, proposalRoles, proposalUserTitle,
 								authorProfile);
-						
-						if(isDeleted == false) {
+
+						if (isDeleted == false) {
 							decisionString = projectProposal.getPolicyDecisionAnyType(pdsOperations,
 									userInfo.getUserName(), "U", "Del", objectAtt);
 							return Response.status(403).type(MediaType.APPLICATION_JSON)
-								.entity("Your permission is: " + "Deny").build();}
-						
+									.entity("Your permission is: " + "Deny").build();
+						}
+
 						log.info("D:" + decisionString + "Access Granted" + isDeleted);
 						return Response.status(200).type(MediaType.APPLICATION_JSON)
 								.entity(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(true)).build();
@@ -570,8 +569,7 @@ public class ProposalService {
 				log.info("NN: Proposal NGAC Id:" + proposalNgacId);
 
 				Graph proposalPolicy = null;
-				
-				
+
 				setPolicyState(projectProposal, existingProposal, proposalPolicy, userInfo.getUserName(), false);
 
 				String stage = projectProposal.getApprovalStage();
@@ -1001,14 +999,17 @@ public class ProposalService {
 	private void setPolicyState(ProposalDataSheet projectProposal, Proposal existingProposal, Graph proposalPolicy,
 			String userName, boolean firstSave) throws Exception {
 		Graph test = new MemGraph();
-		if(existingProposal!=null&&existingProposal.getPolicyGraph()!=null&&existingProposal.getPolicyGraph().length()>20) {			
+		if (existingProposal != null && existingProposal.getPolicyGraph() != null
+				&& existingProposal.getPolicyGraph().length() > 20) {
 			GraphSerializer.fromJson(test, existingProposal.getPolicyGraph());
 			PReviewDecider decider = new PReviewDecider(test);
-			if(test.exists("Chair")) {
-			System.out.println("RESULT3: "+ decider.check("Chair", "process" , "Signature-Info", "w"));
-			System.out.println("RESULT4: "+ decider.check("chaircomputerscience", "process" , "Signature-Info", "w"));}}
-		
-		
+			if (test.exists("Chair")) {
+				System.out.println("RESULT3: " + decider.check("Chair", "process", "Signature-Info", "w"));
+				System.out
+						.println("RESULT4: " + decider.check("chaircomputerscience", "process", "Signature-Info", "w"));
+			}
+		}
+
 		projectProposal.setProposal(existingProposal);
 		log.info("NGAC ID found :" + existingProposal.getNgacId());
 
@@ -1025,9 +1026,9 @@ public class ProposalService {
 			proposalPolicy = pdsOperations.getBacicNGACPolicy();
 			proposalPolicy = loader.createAProposalGraph(proposalPolicy);
 			proposalPolicy = loader.createAprovalGraph(proposalPolicy);
-			if(test.getNodes().size()>10) {
-			projectProposal.setProposalPolicy(test);}
-			else {
+			if (test.getNodes().size() > 10) {
+				projectProposal.setProposalPolicy(test);
+			} else {
 				projectProposal.setProposalPolicy(proposalPolicy);
 			}
 
@@ -1099,7 +1100,7 @@ public class ProposalService {
 						oldProposal = SerializationHelper.cloneThroughSerialize(existingProposal);
 					}
 				}
-				System.out.println("Policy Graph Length!: "+existingProposal.getPolicyGraph().length());
+				System.out.println("Policy Graph Length!: " + existingProposal.getPolicyGraph().length());
 				String proposalRoles = "";
 				if (root != null && root.has("proposalRoles")) {
 					proposalRoles = root.get("proposalRoles").textValue();
@@ -1193,14 +1194,17 @@ public class ProposalService {
 											.entity("Proposal is not ready to be submitted.").build();
 
 								}
-								PDP pdp = pdsOperations.submitAProposal(userInfo.getUserName(),existingProposal.getPolicyGraph() );
-							    existingProposal.setPolicyGraph(GraphSerializer.toJson(pdp.getPAP().getGraphPAP()));
+								PDP pdp = pdsOperations.submitAProposal(userInfo.getUserName(),
+										existingProposal.getPolicyGraph());
+								existingProposal.setPolicyGraph(GraphSerializer.toJson(pdp.getPAP().getGraphPAP()));
 
-								existingProposal.setProhibitions(ProhibitionsSerializer.toJson(pdp.getPAP().getProhibitionsPAP()));
-								
+								existingProposal.setProhibitions(
+										ProhibitionsSerializer.toJson(pdp.getPAP().getProhibitionsPAP()));
+
 							}
-							if(action.equals("Save")) {
-							existingProposal.setPolicyGraph(GraphSerializer.toJson(projectProposal.getProposalPolicy()));
+							if (action.equals("Save")) {
+								existingProposal
+										.setPolicyGraph(GraphSerializer.toJson(projectProposal.getProposalPolicy()));
 							}
 						} else if (action.equals("Approve") || action.equals("Disapprove")) {
 							List<String> actions = null;
@@ -1210,6 +1214,11 @@ public class ProposalService {
 							log.info("objectAtt:" + objectAtt);
 							actions = projectProposal.getPermittedActions(pdsOperations, userInfo.getUserName(),
 									Constants.APPROVAL_CONTENT);
+							if (action.equals("Approve") && projectProposal.getApprovalStage().equals(Constants.STATE_CHAIR)) {
+								PDP pdp = pdsOperations.chairApprove(userInfo.getUserName(), existingProposal.getPolicyGraph());
+								existingProposal.setPolicyGraph(GraphSerializer.toJson(pdp.getPAP().getGraphPAP()));
+							}
+
 							if (action.equals("Disapprove")) {
 								prohibitions = new MemProhibitions();
 								Proposal current = projectProposal.getProposal();
@@ -1218,7 +1227,8 @@ public class ProposalService {
 							}
 							// decisionString = projectProposal.getPolicyDecisionAnyType(pdsOperations,
 							// userInfo.getUserName(),"U", acRight, objectAtt);
-							existingProposal.setPolicyGraph(GraphSerializer.toJson(projectProposal.getProposalPolicy()));
+							existingProposal
+									.setPolicyGraph(GraphSerializer.toJson(projectProposal.getProposalPolicy()));
 							if (actions.contains(action))
 								decisionString = "Permit";
 							else
@@ -1283,7 +1293,8 @@ public class ProposalService {
 									projectProposal.updatePI(true);
 									projectProposal.updateCoPI(userInfo.getUserName(), true);
 									projectProposal.updateSP(userInfo.getUserName(), true);
-									existingProposal.setPolicyGraph(GraphSerializer.toJson(projectProposal.getProposalPolicy()));
+									existingProposal.setPolicyGraph(
+											GraphSerializer.toJson(projectProposal.getProposalPolicy()));
 
 									projectProposal.updatePostSubmissionchanges(proposalDAO);
 									PDSOperations.proposalPolicies.put(existingProposal.getNgacId(), proposalPolicy);
@@ -1307,7 +1318,7 @@ public class ProposalService {
 										log.info("Action:" + action + "|Differ PRE and POST Stage!" + ApprovalStagePre
 												+ "|" + ApprovalStagePost);
 										projectProposal.updatePostSubmissionchanges(proposalDAO);
-										//projectProposal.disassociateApprovalRelation(ApprovalStagePre);
+										// projectProposal.disassociateApprovalRelation(ApprovalStagePre);
 										projectProposal.associateApprovalRelation(ApprovalStagePost);
 									} else {
 										log.info("Same PRE and POST Stage!" + ApprovalStagePre + "|"
@@ -1315,8 +1326,8 @@ public class ProposalService {
 									}
 								}
 
-								//System.out.println(GraphSerializer.toJson(projectProposal.getProposalPolicy()));
-								 //pdsOperations.printGraph(projectProposal.getProposalPolicy());
+								// System.out.println(GraphSerializer.toJson(projectProposal.getProposalPolicy()));
+								// pdsOperations.printGraph(projectProposal.getProposalPolicy());
 
 								return Response.status(200).type(MediaType.APPLICATION_JSON)
 										.entity(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(true))
@@ -1454,7 +1465,7 @@ public class ProposalService {
 					} else if (action.equalsIgnoreCase("View")) {
 						decision = projectProposal.getPolicyDecision(pdsOperations, userInfo.getUserName(), "View",
 								"Log");
-						log.info("Decisiong for viewing log: "+  decision);
+						log.info("Decisiong for viewing log: " + decision);
 					} else {
 						BalanaConnector ac = new BalanaConnector();
 						decision = ac.getXACMLdecision(attrMap);
@@ -1518,13 +1529,14 @@ public class ProposalService {
 							new MemProhibitions());
 					ObjectId od = new ObjectId(userInfo.getUserProfileID());
 					String email = "";
-					if(userProfileDAO.findUserDetailsByProfileID(od).getWorkEmails().size()>0) {
-						
+					if (userProfileDAO.findUserDetailsByProfileID(od).getWorkEmails().size() > 0) {
+
 						email = userProfileDAO.findUserDetailsByProfileID(od).getWorkEmails().get(0);
 					}
-					
+
 					if (hasPermission) {
-						long proposalId = pdsOperations.createAProposal(userInfo.getUserName(), userInfo.getUserDepartment(), email);
+						long proposalId = pdsOperations.createAProposal(userInfo.getUserName(),
+								userInfo.getUserDepartment(), email);
 
 						log.info("New policy id:" + proposalId + "|"
 								+ PDSOperations.proposalPolicies.get(proposalId).getNodes().size());
@@ -1563,7 +1575,7 @@ public class ProposalService {
 		Builder eventBuilder = new Builder();
 		OutboundEvent event = eventBuilder.name("notification").mediaType(MediaType.TEXT_PLAIN_TYPE)
 				.data(String.class, "1").build();
-		//NotificationService.BROADCASTER.broadcast(event);
+		// NotificationService.BROADCASTER.broadcast(event);
 	}
 
 	/***
@@ -1823,11 +1835,10 @@ public class ProposalService {
 						projectProposal.clearIngestigator();
 						projectProposal.updatePI(false);
 						try {
-						projectProposal.updateCoPI(userName, false);
-						projectProposal.updateSP(userName, false);
+							projectProposal.updateCoPI(userName, false);
+							projectProposal.updateSP(userName, false);
 
-						}
-						catch(Exception e) {
+						} catch (Exception e) {
 							return false;
 						}
 

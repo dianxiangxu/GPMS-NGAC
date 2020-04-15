@@ -5,7 +5,7 @@ rules:
       subject:
         anyUser:
       operations:
-        - assign to
+        - create-oa
       target:
         policyElements:
           - name: PDS
@@ -185,7 +185,7 @@ rules:
     event:
       subject:
       operations:
-        - assign to
+        - submit
       target:
         policyElements:
           - name: Submission-Info
@@ -397,7 +397,54 @@ rules:
                         args:
                           - function:
                               name: child_of_assign
-                    - SP
+                    - SP                    
+
+  - label: chair_approve
+    event:
+      subject:
+        anyUser:
+      operations:
+        - approve
+      target:
+        policyElements:
+          - name: Chair-Approval
+            type: OA
+    response:
+      actions:
+        - delete:
+            associations:
+              - subject:
+                  name: Chair
+                  type: UA
+                target:
+                  name: Chair-Approval
+                  type: OA
+        - delete:
+            associations:
+              - subject:
+                  name: Chair
+                  type: UA
+                target:
+                  name: Signature-Info
+                  type: OA
+        - grant:
+            subject:
+              name: Business-Manager
+              type: UA
+            operations:
+              - w
+            target:
+              name: Signature-Info
+              type: OA 
+        - grant:
+            subject:
+              name: Business-Manager
+              type: UA
+            operations:
+              - assign-o
+            target:
+              name: BM-Approval
+              type: OA 
   - label: add_approval_entity
     event:
       subject:
