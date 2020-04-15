@@ -1219,16 +1219,20 @@ public class ProposalService {
 								existingProposal.setPolicyGraph(GraphSerializer.toJson(pdp.getPAP().getGraphPAP()));
 							}
 
-							if (action.equals("Disapprove")) {
+							if (action.equals("Disapprove")&& projectProposal.getApprovalStage().equals(Constants.STATE_CHAIR)) {
+								PDP pdp = pdsOperations.chairDisapprove(userInfo.getUserName(), existingProposal.getPolicyGraph());
 								prohibitions = new MemProhibitions();
-								Proposal current = projectProposal.getProposal();
-								current.setProhibitions(ProhibitionsSerializer.toJson(prohibitions));
-								projectProposal.setProposal(current);
+								//Proposal current = projectProposal.getProposal();
+								existingProposal.setPolicyGraph(GraphSerializer.toJson(pdp.getPAP().getGraphPAP()));
+								existingProposal.setProhibitions(
+										ProhibitionsSerializer.toJson(pdp.getPAP().getProhibitionsPAP()));
+								//current.setProhibitions(ProhibitionsSerializer.toJson(prohibitions));
+								//projectProposal.setProposal(current);
 							}
 							// decisionString = projectProposal.getPolicyDecisionAnyType(pdsOperations,
 							// userInfo.getUserName(),"U", acRight, objectAtt);
-							existingProposal
-									.setPolicyGraph(GraphSerializer.toJson(projectProposal.getProposalPolicy()));
+							//existingProposal
+							//		.setPolicyGraph(GraphSerializer.toJson(projectProposal.getProposalPolicy()));
 							if (actions.contains(action))
 								decisionString = "Permit";
 							else

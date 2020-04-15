@@ -445,6 +445,42 @@ rules:
             target:
               name: BM-Approval
               type: OA 
+  - label: chair_approve
+    event:
+      subject:
+        anyUser:
+      operations:
+        - disapprove
+      target:
+        policyElements:
+          - name: Chair-Approval
+            type: OA
+    response:
+      actions:
+        - delete:
+            associations:
+              - subject:
+                  name: Chair
+                  type: UA
+                target:
+                  name: Chair-Approval
+                  type: OA
+        - delete:
+            associations:
+              - subject:
+                  name: Chair
+                  type: UA
+                target:
+                  name: Signature-Info
+                  type: OA
+        - delete:
+            prohibitions:
+              - deny1
+              - deny2
+              - deny3
+              - deny4
+              - deny5
+              - deny6         
   - label: add_approval_entity
     event:
       subject:

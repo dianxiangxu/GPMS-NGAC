@@ -37,6 +37,7 @@ import gpms.model.GPMSCommonInfo;
 import gpms.model.InvestigatorInfo;
 import gpms.ngac.policy.customEvents.ApproveEvent;
 import gpms.ngac.policy.customEvents.CreateoaEvent;
+import gpms.ngac.policy.customEvents.DisapproveEvent;
 import gpms.ngac.policy.customEvents.SubmitEvent;
 import gpms.ngac.policy.customFunctions.BMForExecutor;
 import gpms.ngac.policy.customFunctions.ChairForExecutor;
@@ -614,6 +615,38 @@ public class PDSOperations {
 					"process");
 
 			log.info("SUBMIT PROPOSAL: # nodes AFTER:" + graph.getNodes().size());
+			
+			
+			
+			
+			PReviewDecider decider = new PReviewDecider(pdp.getPAP().getGraphPAP(),pdp.getPAP().getProhibitionsPAP());
+			System.out.println("RESULT1: "+ decider.check("Chair", "process" , "Signature-Info", "w"));
+			System.out.println("RESULT2: "+ decider.check("chaircomputerscience", "process" , "Signature-Info", "w"));
+
+			return pdp;
+		}
+		public PDP chairDisapprove(String userName, String JSONGraph) throws PMException {
+			Graph graph = new MemGraph();
+			GraphSerializer.fromJson(graph, JSONGraph);
+			// proposalPolicy = policyLoader.createAProposalGraph(ngacPolicy); //loads
+			// editing policy
+			if (graph.exists("super_pc_rep")) {
+				graph.deleteNode("super_pc_rep");
+	        }
+			//Node pdsNode = proposalPolicy.createNode("" + randomId, OA, null,Constants.SUBMISSION_INFO_OA_LBL);
+			// log.info("ID:" + randomId);
+			//long pdsOriginationOAID = getNodeID(proposalPolicy, Constants.SUBMISSION_INFO_OA_LBL, OA, null);
+			//long userID = getNodeID(proposalPolicy, userName, U, null);
+
+			// printAccessState("Initial configuration before op:", proposalPolicy);
+			log.info("SUBMIT PROPOSAL: # nodes BEFORE:" + graph.getNodes().size());
+
+			PDP pdp = getPDP(graph);
+			pdp.getEPP().processEvent(new DisapproveEvent(graph.getNode(Constants.CHAIR_APPROVAL)), userName,
+					"process");
+
+			log.info("SUBMIT PROPOSAL: # nodes AFTER:" + graph.getNodes().size());
+			
 			
 			
 			

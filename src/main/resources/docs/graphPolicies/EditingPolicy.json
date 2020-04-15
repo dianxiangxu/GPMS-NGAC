@@ -589,7 +589,15 @@
         ],
        "source": "Chair", 
        "target": "Chair-Approval" 
-     }   
+     } 
+     ,          
+     {
+       "operations": [
+         "disapprove"
+        ],
+       "source": "Chair", 
+       "target": "Chair-Approval" 
+     }     
  ]
  
 } 
