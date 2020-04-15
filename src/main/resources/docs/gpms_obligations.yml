@@ -365,7 +365,54 @@ rules:
                         args:
                           - function:
                               name: child_of_assign
-                    - CoPI            
+                    - CoPI 
+        - condition!:
+            - function:
+                name: is_node_in_list
+                args:
+                  - function:
+                      name: chair_for
+                      args:
+                        - function:
+                            name: child_of_assign
+                  - function:
+                      name: chairs_for
+                      args:
+                        - function:
+                            name: get_children
+                            args:
+                              - CoPI
+                              - UA 
+            - function:
+                name: compare_node_names
+                args:
+                  - function:
+                      name: get_node_name
+                      args:
+                        - function:
+                            name: chair_for
+                            args: 
+                              - function:
+                                  name: child_of_assign    
+                  - function:
+                      name: get_node_name
+                      args:
+                        - function:
+                            name: chair_for
+                            args: 
+                              - function:
+                                  name: current_user        
+          delete:
+            assignments:
+              - what:
+                  function:
+                    name: chair_for
+                    args: 
+                      - function:
+                          name: child_of_assign              
+                where:
+                  name: Chair
+                  type: UA      
   - label: delete_sp
     event:
       subject:

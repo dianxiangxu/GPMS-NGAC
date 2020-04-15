@@ -1843,6 +1843,7 @@ public class ProposalService {
 							projectProposal.updateSP(userName, false);
 
 						} catch (Exception e) {
+							e.printStackTrace();
 							return false;
 						}
 

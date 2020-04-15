@@ -39,8 +39,11 @@ import gpms.ngac.policy.customEvents.ApproveEvent;
 import gpms.ngac.policy.customEvents.CreateoaEvent;
 import gpms.ngac.policy.customEvents.DisapproveEvent;
 import gpms.ngac.policy.customEvents.SubmitEvent;
+import gpms.ngac.policy.customFunctions.IsNodeInListExecutor;
 import gpms.ngac.policy.customFunctions.BMForExecutor;
 import gpms.ngac.policy.customFunctions.ChairForExecutor;
+import gpms.ngac.policy.customFunctions.ChairsForExecutor;
+import gpms.ngac.policy.customFunctions.CompareNodeNamesExecutor;
 import gpms.ngac.policy.customFunctions.ConcatExecutor;
 import gpms.ngac.policy.customFunctions.CreateNodeExecutor1;
 import gpms.ngac.policy.customFunctions.DeanForExecutor;
@@ -115,9 +118,11 @@ public class PDSOperations {
 		BMForExecutor bmForExecutor = new BMForExecutor();
 		CreateNodeExecutor1 createNodeExecutor1 = new CreateNodeExecutor1();
 		ConcatExecutor concatExecutor = new ConcatExecutor();
-
+		ChairsForExecutor chairsForExecutor = new ChairsForExecutor();
+		IsNodeInListExecutor areSomeNodesContainedInExecutor = new IsNodeInListExecutor();
+		CompareNodeNamesExecutor compareNodesExecutor= new CompareNodeNamesExecutor();
 		obligation = policyLoader.getObligation();
-		EPPOptions eppOptions = new EPPOptions(deleteNodeExecutor, emailExecutor, chairForExecutor, deanForExecutor,bmForExecutor,isAllowedToBeCoPIExecutor, createNodeExecutor1, concatExecutor);
+		EPPOptions eppOptions = new EPPOptions(deleteNodeExecutor, emailExecutor, chairForExecutor, deanForExecutor,bmForExecutor,isAllowedToBeCoPIExecutor, createNodeExecutor1, concatExecutor,chairsForExecutor, areSomeNodesContainedInExecutor, compareNodesExecutor);
 		pdp = new PDP(new PAP(graph, new MemProhibitions(), new MemObligations()),eppOptions);
 		pdp.getPAP().getObligationsPAP().add(obligation, true);
 
@@ -521,7 +526,12 @@ public class PDSOperations {
 		for (String parent : intialGraph.getParents(CoPIUAID)) {
 			log.info("Parents: " + intialGraph.getNode(parent).getName());
 		}
+		PReviewDecider decider = new PReviewDecider(pdp.getPAP().getGraphPAP(),pdp.getPAP().getProhibitionsPAP());
 
+		//System.out.println("RESULT2: "+ decider.check("chairchemistry", "process" , "Signature-Info", "w"));
+		for(String s: pdp.getPAP().getGraphPAP().getChildren("Chair")) {
+			System.out.println("CHILDREN DELETE COPI"+ s);
+		}
 		// get all of the users in the graph
 	}
 
