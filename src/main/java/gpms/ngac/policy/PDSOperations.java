@@ -35,14 +35,25 @@ import gov.nist.csd.pm.epp.EPPOptions;
 import gpms.DAL.DepartmentsPositionsCollection;
 import gpms.model.GPMSCommonInfo;
 import gpms.model.InvestigatorInfo;
+import gpms.ngac.policy.customEvents.AddCoPIEvent;
+import gpms.ngac.policy.customEvents.AddSPEvent;
 import gpms.ngac.policy.customEvents.ApproveEvent;
-import gpms.ngac.policy.customEvents.CreateoaEvent;
+import gpms.ngac.policy.customEvents.CreateEvent;
+import gpms.ngac.policy.customEvents.DeleteCoPIEvent;
+import gpms.ngac.policy.customEvents.DeleteSPEvent;
 import gpms.ngac.policy.customEvents.DisapproveEvent;
 import gpms.ngac.policy.customEvents.SubmitEvent;
 import gpms.ngac.policy.customFunctions.IsNodeInListExecutor;
+import gpms.ngac.policy.customFunctions.RemovePropertyFromChildrenExecutor;
+import gpms.ngac.policy.customFunctions.SPToAddExecutor;
+import gpms.ngac.policy.customFunctions.SPToDeleteExecutor;
+import gpms.ngac.policy.customFunctions.AddPropertiesToNodeExecutor;
+import gpms.ngac.policy.customFunctions.AllChildrenHavePropertiesExecutor;
 import gpms.ngac.policy.customFunctions.BMForExecutor;
 import gpms.ngac.policy.customFunctions.ChairForExecutor;
 import gpms.ngac.policy.customFunctions.ChairsForExecutor;
+import gpms.ngac.policy.customFunctions.CoPIToAddExecutor;
+import gpms.ngac.policy.customFunctions.CoPIToDeleteExecutor;
 import gpms.ngac.policy.customFunctions.CompareNodeNamesExecutor;
 import gpms.ngac.policy.customFunctions.ConcatExecutor;
 import gpms.ngac.policy.customFunctions.CreateNodeExecutor1;
@@ -120,10 +131,21 @@ public class PDSOperations {
 		ConcatExecutor concatExecutor = new ConcatExecutor();
 		ChairsForExecutor chairsForExecutor = new ChairsForExecutor();
 		IsNodeInListExecutor areSomeNodesContainedInExecutor = new IsNodeInListExecutor();
-		CompareNodeNamesExecutor compareNodesExecutor= new CompareNodeNamesExecutor();
+		CompareNodeNamesExecutor compareNodesExecutor = new CompareNodeNamesExecutor();
+		CoPIToAddExecutor coPIToAddExecutor = new CoPIToAddExecutor();
+		SPToAddExecutor spToAddExecutor = new SPToAddExecutor();
+		CoPIToDeleteExecutor coPIToDeleteExecutor = new CoPIToDeleteExecutor();
+		SPToDeleteExecutor spToDeleteExecutor = new SPToDeleteExecutor();
+		AddPropertiesToNodeExecutor addPropertiesToNodeExecutor = new AddPropertiesToNodeExecutor();
+		RemovePropertyFromChildrenExecutor removePropertiesFromChildrenExecutor = new RemovePropertyFromChildrenExecutor();
+		AllChildrenHavePropertiesExecutor allChildrenHavePropertiesExecutor = new AllChildrenHavePropertiesExecutor();
 		obligation = policyLoader.getObligation();
-		EPPOptions eppOptions = new EPPOptions(deleteNodeExecutor, emailExecutor, chairForExecutor, deanForExecutor,bmForExecutor,isAllowedToBeCoPIExecutor, createNodeExecutor1, concatExecutor,chairsForExecutor, areSomeNodesContainedInExecutor, compareNodesExecutor);
-		pdp = new PDP(new PAP(graph, new MemProhibitions(), new MemObligations()),eppOptions);
+		EPPOptions eppOptions = new EPPOptions(deleteNodeExecutor, emailExecutor, chairForExecutor, deanForExecutor,
+				bmForExecutor, isAllowedToBeCoPIExecutor, createNodeExecutor1, concatExecutor, chairsForExecutor,
+				areSomeNodesContainedInExecutor, compareNodesExecutor, coPIToAddExecutor, spToAddExecutor,
+				coPIToDeleteExecutor, spToDeleteExecutor, addPropertiesToNodeExecutor,
+				removePropertiesFromChildrenExecutor, allChildrenHavePropertiesExecutor);
+		pdp = new PDP(new PAP(graph, new MemProhibitions(), new MemObligations()), eppOptions);
 		pdp.getPAP().getObligationsPAP().add(obligation, true);
 
 		return pdp;
@@ -330,7 +352,7 @@ public class PDSOperations {
 		try {
 			String chairDept = DepartmentsPositionsCollection.adminUsers
 					.get(DepartmentsPositionsCollection.departmentNames.get(department) + "CHAIR");
-			System.out.println("DEPT2!"+department);
+			System.out.println("DEPT2!" + department);
 			String deanDept = DepartmentsPositionsCollection.adminUsers
 					.get(DepartmentsPositionsCollection.departmentNames.get(department) + "DEAN");
 			String bmDept = DepartmentsPositionsCollection.adminUsers
@@ -341,24 +363,26 @@ public class PDSOperations {
 			proposalPolicy = policyLoader.reloadBasicConfig();
 			proposalPolicy = policyLoader.createAProposalGraph(proposalPolicy); // loads editing policy
 			proposalPolicy = policyLoader.createAprovalGraph(proposalPolicy); // loads editing policy
-			//System.out.println("GRAPH!!!!!!!!!!!!!"+GraphSerializer.toJson(proposalPolicy));
-			Map<String, String> properties = new HashMap<String,String>();
-			properties.put("workEmail", email);			
+			// System.out.println("GRAPH!!!!!!!!!!!!!"+GraphSerializer.toJson(proposalPolicy));
+			Map<String, String> properties = new HashMap<String, String>();
+			properties.put("workEmail", email);
 			properties.put("departmentChair", chairDept);
 			properties.put("departmentDean", deanDept);
 			properties.put("departmentBM", bmDept);
 
 			proposalPolicy.updateNode(userName, properties);
-			
-			//System.out.println("GRAPH!!!!!!!!!!!!!"+GraphSerializer.toJson(proposalPolicy));
-			//Node pdsNode = proposalPolicy.createNode("" + randomId, OA, null, Constants.PDS_ORIGINATING_OA);
+
+			// System.out.println("GRAPH!!!!!!!!!!!!!"+GraphSerializer.toJson(proposalPolicy));
+			// Node pdsNode = proposalPolicy.createNode("" + randomId, OA, null,
+			// Constants.PDS_ORIGINATING_OA);
 			// log.info("ID:" + randomId);
-			//long pdsOriginationOAID = getNodeID(proposalPolicy, Constants.PDS_ORIGINATING_OA, OA, null);
-			//long userID = getNodeID(proposalPolicy, userName, U, null);
+			// long pdsOriginationOAID = getNodeID(proposalPolicy,
+			// Constants.PDS_ORIGINATING_OA, OA, null);
+			// long userID = getNodeID(proposalPolicy, userName, U, null);
 			// printAccessState("Initial configuration before op:", proposalPolicy);
 			log.info("CREATE PROPOSAL: # nodes BEFORE:" + proposalPolicy.getNodes().size());
 			getPDP(proposalPolicy).getEPP().processEvent(
-					new CreateoaEvent(proposalPolicy.getNode(Constants.PDS_ORIGINATING_OA)), userName, "process");
+					new CreateEvent(proposalPolicy.getNode(Constants.PDS_ORIGINATING_OA)), userName, "process");
 
 			/*
 			 * long COPIUAID = getNodeID(proposalPolicy, Constants.CO_PI_UA_LBL, UA, null);
@@ -377,7 +401,7 @@ public class PDSOperations {
 			// printAccessState("Initial configuration after op:", proposalPolicy);
 			log.info("CREATE PROPOSAL: # nodes AFTER:" + proposalPolicy.getNodes().size());
 		} catch (Exception e) {
-			 e.printStackTrace();
+			e.printStackTrace();
 		}
 		return randomId;
 	}
@@ -393,14 +417,16 @@ public class PDSOperations {
 		// editing policy
 		if (graph.exists("super_pc_rep")) {
 			graph.deleteNode("super_pc_rep");
-        }
+		}
 		proposalPolicy = policyLoader.reloadBasicConfig();
 		proposalPolicy = policyLoader.createAProposalGraph(proposalPolicy); // loads editing policy
 		proposalPolicy = policyLoader.createAprovalGraph(proposalPolicy); // loads editing policy
-		//Node pdsNode = proposalPolicy.createNode("" + randomId, OA, null,Constants.SUBMISSION_INFO_OA_LBL);
+		// Node pdsNode = proposalPolicy.createNode("" + randomId, OA,
+		// null,Constants.SUBMISSION_INFO_OA_LBL);
 		// log.info("ID:" + randomId);
-		//long pdsOriginationOAID = getNodeID(proposalPolicy, Constants.SUBMISSION_INFO_OA_LBL, OA, null);
-		//long userID = getNodeID(proposalPolicy, userName, U, null);
+		// long pdsOriginationOAID = getNodeID(proposalPolicy,
+		// Constants.SUBMISSION_INFO_OA_LBL, OA, null);
+		// long userID = getNodeID(proposalPolicy, userName, U, null);
 
 		// printAccessState("Initial configuration before op:", proposalPolicy);
 		log.info("SUBMIT PROPOSAL: # nodes BEFORE:" + graph.getNodes().size());
@@ -412,10 +438,10 @@ public class PDSOperations {
 		log.info("SUBMIT PROPOSAL: # nodes AFTER:" + graph.getNodes().size());
 		list.add(GraphSerializer.toJson(pdp.getPAP().getGraphPAP()));
 		list.add(ProhibitionsSerializer.toJson(pdp.getPAP().getProhibitionsPAP()));
-		
-		PReviewDecider decider = new PReviewDecider(pdp.getPAP().getGraphPAP(),pdp.getPAP().getProhibitionsPAP());
-		System.out.println("RESULT1: "+ decider.check("Chair", "process" , "Signature-Info", "w"));
-		System.out.println("RESULT2: "+ decider.check("chaircomputerscience", "process" , "Signature-Info", "w"));
+
+		PReviewDecider decider = new PReviewDecider(pdp.getPAP().getGraphPAP(), pdp.getPAP().getProhibitionsPAP());
+		System.out.println("RESULT1: " + decider.check("Chair", "process", "Signature-Info", "w"));
+		System.out.println("RESULT2: " + decider.check("chaircomputerscience", "process", "Signature-Info", "w"));
 
 		return pdp;
 	}
@@ -423,25 +449,25 @@ public class PDSOperations {
 	public static void addCoPI(String userName, String CoPINode, String CoPIUAID, Graph intialGraph) throws Exception {
 		// log.info("ID:" + randomId);
 		// long CoPIOAID = getNodeID(intialGraph, Constants.CO_PI_OA_LBL, OA, null);
-		//long userID = getNodeID(intialGraph, userName, U, null);
+		// long userID = getNodeID(intialGraph, userName, U, null);
 		// long CoPIID = getNodeID(intialGraph, CoPINode, U, null);
 
 		// printAccessState("Initial configuration before op:", proposalPolicy);
 		log.info("ADD CoPI: # nodes BEFORE:" + intialGraph.getNodes().size());
 		if (intialGraph.exists("super_pc_rep")) {
 			intialGraph.deleteNode("super_pc_rep");
-        }
+		}
 		// intialGraph.assign(CoPINode, CoPIUAID);
-		System.out.println("SIZE:"+intialGraph.getNodes().size());
+		System.out.println("SIZE:" + intialGraph.getNodes().size());
 		PDP pdp = getPDP(intialGraph);
-		pdp.getEPP().processEvent(new AssignToEvent(intialGraph.getNode(CoPIUAID), intialGraph.getNode(CoPINode)),
+		pdp.getEPP().processEvent(new AddCoPIEvent(intialGraph.getNode(CoPIUAID), intialGraph.getNode(CoPINode)),
 				userName, "process");
-		
+
 		log.info("User Name " + intialGraph.getNode(userName).getName());
 		log.info("ADD CoPI: # nodes AFTER:" + intialGraph.getNodes().size());
 		log.info("CoPIU Name" + intialGraph.getNode(CoPINode).getName());
 		// System.out.println(GraphSerializer.toJson(intialGraph));
-		if(!intialGraph.getParents(CoPINode).contains("CoPI")) {
+		if (!intialGraph.getParents(CoPINode).contains("CoPI")) {
 			throw new Exception();
 		}
 		for (String parent : intialGraph.getParents(CoPINode)) {
@@ -454,24 +480,24 @@ public class PDSOperations {
 	public static void addSP(String userName, String SPNode, String SPUAID, Graph intialGraph) throws Exception {
 		// log.info("ID:" + randomId);
 		// long CoPIOAID = getNodeID(intialGraph, Constants.CO_PI_OA_LBL, OA, null);
-		//long userID = getNodeID(intialGraph, userName, U, null);
+		// long userID = getNodeID(intialGraph, userName, U, null);
 		// long CoPIID = getNodeID(intialGraph, CoPINode, U, null);
 		if (intialGraph.exists("super_pc_rep")) {
 			intialGraph.deleteNode("super_pc_rep");
-        }
+		}
 		// printAccessState("Initial configuration before op:", proposalPolicy);
 		log.info("ADD SP: # nodes BEFORE:" + intialGraph.getNodes().size());
 
 		// intialGraph.assign(SPNode, SPUAID);
 
 		PDP pdp = getPDP(intialGraph);
-		pdp.getEPP().processEvent(new AssignToEvent(intialGraph.getNode(SPUAID), intialGraph.getNode(SPNode)), userName,
+		pdp.getEPP().processEvent(new AddSPEvent(intialGraph.getNode(SPUAID), intialGraph.getNode(SPNode)), userName,
 				"process");
 		log.info("User Name " + intialGraph.getNode(userName).getName());
 		log.info("ADD SP: # nodes AFTER:" + intialGraph.getNodes().size());
 		log.info("CoPIU Name" + intialGraph.getNode(SPNode).getName());
 		// System.out.println(GraphSerializer.toJson(intialGraph));
-		if(!intialGraph.getParents(SPNode).contains("SP")) {
+		if (!intialGraph.getParents(SPNode).contains("SP")) {
 			throw new Exception();
 		}
 		for (String parent : intialGraph.getParents(SPNode)) {
@@ -482,18 +508,19 @@ public class PDSOperations {
 		}
 	}
 
-	public static void deleteCoPI(String userName, String CoPINode, String CoPIUAID, Graph intialGraph) throws PMException {
+	public static void deleteCoPI(String userName, String CoPINode, String CoPIUAID, Graph intialGraph)
+			throws PMException {
 
 		// log.info("ID:" + randomId);
 		// long CoPIOAID = getNodeID(intialGraph, Constants.CO_PI_OA_LBL, OA, null);
 		long userID = 0;
-		//try {
-			//userID = getNodeID(intialGraph, userName, U, null);
-		//} catch (PMException e) {
-		//	String string = "node was not found: " + e.getMessage();
-			//log.info(string);
-			//return;
-		//}
+		// try {
+		// userID = getNodeID(intialGraph, userName, U, null);
+		// } catch (PMException e) {
+		// String string = "node was not found: " + e.getMessage();
+		// log.info(string);
+		// return;
+		// }
 		// long CoPIID = getNodeID(intialGraph, CoPINode, U, null);
 
 		// printAccessState("Initial configuration before op:", proposalPolicy);
@@ -502,35 +529,36 @@ public class PDSOperations {
 		// intialGraph.deassign(CoPINode, CoPIUAID);
 		if (intialGraph.exists("super_pc_rep")) {
 			intialGraph.deleteNode("super_pc_rep");
-        }
-		for(String s:intialGraph.getChildren("CoPI")) {
-			System.out.println("Children before: "+s);
+		}
+		for (String s : intialGraph.getChildren("CoPI")) {
+			System.out.println("Children before: " + s);
 		}
 		PDP pdp = getPDP(intialGraph);
 		try {
 			System.out.println();
-			pdp.getEPP().processEvent(
-					new DeassignFromEvent(intialGraph.getNode(CoPIUAID), intialGraph.getNode(CoPINode)), userName,
-					"process");
-			//log.info("Found so many nodes: " + intialGraph.search("tomtom", "O", new HashMap<String, String>()).size());
+			pdp.getEPP().processEvent(new DeleteCoPIEvent(intialGraph.getNode(CoPIUAID), intialGraph.getNode(CoPINode)),
+					userName, "process");
+			// log.info("Found so many nodes: " + intialGraph.search("tomtom", "O", new
+			// HashMap<String, String>()).size());
 		} catch (NoSuchElementException ex) {
 			ex.printStackTrace();
 		}
-		//log.info("User Name " + intialGraph.getNode(userID).getName());
+		// log.info("User Name " + intialGraph.getNode(userID).getName());
 		log.info("DELETE CoPI: # nodes AFTER:" + intialGraph.getNodes().size());
 		log.info("CoPIU Name" + intialGraph.getNode(CoPINode).getName());
 		// System.out.println(GraphSerializer.toJson(intialGraph));
-		for(String s:intialGraph.getChildren("CoPI")) {
-			System.out.println("Children after: "+s);
+		for (String s : intialGraph.getChildren("CoPI")) {
+			System.out.println("Children after: " + s);
 		}
 		for (String parent : intialGraph.getParents(CoPIUAID)) {
 			log.info("Parents: " + intialGraph.getNode(parent).getName());
 		}
-		PReviewDecider decider = new PReviewDecider(pdp.getPAP().getGraphPAP(),pdp.getPAP().getProhibitionsPAP());
+		PReviewDecider decider = new PReviewDecider(pdp.getPAP().getGraphPAP(), pdp.getPAP().getProhibitionsPAP());
 
-		//System.out.println("RESULT2: "+ decider.check("chairchemistry", "process" , "Signature-Info", "w"));
-		for(String s: pdp.getPAP().getGraphPAP().getChildren("Chair")) {
-			System.out.println("CHILDREN DELETE COPI"+ s);
+		// System.out.println("RESULT2: "+ decider.check("chairchemistry", "process" ,
+		// "Signature-Info", "w"));
+		for (String s : pdp.getPAP().getGraphPAP().getChildren("Chair")) {
+			System.out.println("CHILDREN DELETE COPI" + s);
 		}
 		// get all of the users in the graph
 	}
@@ -538,36 +566,37 @@ public class PDSOperations {
 	public static void deleteSP(String userName, String SPNode, String SPUAID, Graph intialGraph) throws PMException {
 		// log.info("ID:" + randomId);
 		// long CoPIOAID = getNodeID(intialGraph, Constants.CO_PI_OA_LBL, OA, null);
-		//long userID = 0;
-		//try {
-			//userID = getNodeID(intialGraph, userName, U, null);
-		//} catch (PMException e) {
-			//String string = "node was not found: " + e.getMessage();
-			//log.info(string);
-			//return;
-		//}
+		// long userID = 0;
+		// try {
+		// userID = getNodeID(intialGraph, userName, U, null);
+		// } catch (PMException e) {
+		// String string = "node was not found: " + e.getMessage();
+		// log.info(string);
+		// return;
+		// }
 		// long CoPIID = getNodeID(intialGraph, CoPINode, U, null);
 
 		// printAccessState("Initial configuration before op:", proposalPolicy);
 		log.info("DELETE SP: # nodes BEFORE:" + intialGraph.getNodes().size());
 		if (intialGraph.exists("super_pc_rep")) {
 			intialGraph.deleteNode("super_pc_rep");
-        }
+		}
 		// intialGraph.deassign(SPNode, SPUAID);
-		for(String s:intialGraph.getChildren("SP")) {
-			System.out.println("Children before: "+s);
+		for (String s : intialGraph.getChildren("SP")) {
+			System.out.println("Children before: " + s);
 		}
 		PDP pdp = getPDP(intialGraph);
 		try {
-			pdp.getEPP().processEvent(new DeassignFromEvent(intialGraph.getNode(SPUAID), intialGraph.getNode(SPNode)),
+			pdp.getEPP().processEvent(new DeleteSPEvent(intialGraph.getNode(SPUAID), intialGraph.getNode(SPNode)),
 					userName, "process");
-			//log.info(
-				//	"Found so many nodes: " + intialGraph.search("liliana", "O", new HashMap<String, String>()).size());
+			// log.info(
+			// "Found so many nodes: " + intialGraph.search("liliana", "O", new
+			// HashMap<String, String>()).size());
 		} catch (NoSuchElementException ex) {
 			ex.printStackTrace();
 		}
-		for(String s:intialGraph.getChildren("SP")) {
-			System.out.println("Children after: "+s);
+		for (String s : intialGraph.getChildren("SP")) {
+			System.out.println("Children after: " + s);
 		}
 		log.info("User Name " + intialGraph.getNode(userName).getName());
 		log.info("DELETE SP: # nodes AFTER:" + intialGraph.getNodes().size());
@@ -580,92 +609,92 @@ public class PDSOperations {
 
 		// get all of the users in the graph
 	}
-		public static void addApprovalEntity(String ChairU, String ChairUA, Graph intialGraph) throws PMException {
-			// log.info("ID:" + randomId);
-			// long CoPIOAID = getNodeID(intialGraph, Constants.CO_PI_OA_LBL, OA, null);
-			// long CoPIID = getNodeID(intialGraph, CoPINode, U, null);
 
-			// printAccessState("Initial configuration before op:", proposalPolicy);
-			log.info("ADD SP: # nodes BEFORE:" + intialGraph.getNodes().size());
-			
-			//intialGraph.assign(SPNode, SPUAID);
-			Node user = intialGraph.createNode("userForChair", U, null, ChairUA);
-			PDP pdp = getPDP(intialGraph);
-			pdp.getEPP().processEvent(new AssignToEvent(intialGraph.getNode(ChairUA), intialGraph.getNode(ChairU)),
-					"userForChair","process");
-			
-			intialGraph.deleteNode("userForChair");
-			//log.info("User Name " + intialGraph.getNode(userID).getName());
-			log.info("ADD SP: # nodes AFTER:" + intialGraph.getNodes().size());
-			//log.info("CoPIU Name" + intialGraph.getNode(SPNode).getName());
-			// System.out.println(GraphSerializer.toJson(intialGraph));
-			
+	public static void addApprovalEntity(String ChairU, String ChairUA, Graph intialGraph) throws PMException {
+		// log.info("ID:" + randomId);
+		// long CoPIOAID = getNodeID(intialGraph, Constants.CO_PI_OA_LBL, OA, null);
+		// long CoPIID = getNodeID(intialGraph, CoPINode, U, null);
+
+		// printAccessState("Initial configuration before op:", proposalPolicy);
+		log.info("ADD SP: # nodes BEFORE:" + intialGraph.getNodes().size());
+
+		// intialGraph.assign(SPNode, SPUAID);
+		Node user = intialGraph.createNode("userForChair", U, null, ChairUA);
+		PDP pdp = getPDP(intialGraph);
+		pdp.getEPP().processEvent(new AssignToEvent(intialGraph.getNode(ChairUA), intialGraph.getNode(ChairU)),
+				"userForChair", "process");
+
+		intialGraph.deleteNode("userForChair");
+		// log.info("User Name " + intialGraph.getNode(userID).getName());
+		log.info("ADD SP: # nodes AFTER:" + intialGraph.getNodes().size());
+		// log.info("CoPIU Name" + intialGraph.getNode(SPNode).getName());
+		// System.out.println(GraphSerializer.toJson(intialGraph));
+
 //			for (Long parent : intialGraph.getParents(SPNode)) {
 //				log.info("Children: " + intialGraph.getNode(parent).getName());
 //			}
+	}
+
+	public PDP chairApprove(String userName, String JSONGraph) throws PMException {
+		Graph graph = new MemGraph();
+		GraphSerializer.fromJson(graph, JSONGraph);
+		// proposalPolicy = policyLoader.createAProposalGraph(ngacPolicy); //loads
+		// editing policy
+		if (graph.exists("super_pc_rep")) {
+			graph.deleteNode("super_pc_rep");
 		}
-		public PDP chairApprove(String userName, String JSONGraph) throws PMException {
-			Graph graph = new MemGraph();
-			GraphSerializer.fromJson(graph, JSONGraph);
-			// proposalPolicy = policyLoader.createAProposalGraph(ngacPolicy); //loads
-			// editing policy
-			if (graph.exists("super_pc_rep")) {
-				graph.deleteNode("super_pc_rep");
-	        }
-			//Node pdsNode = proposalPolicy.createNode("" + randomId, OA, null,Constants.SUBMISSION_INFO_OA_LBL);
-			// log.info("ID:" + randomId);
-			//long pdsOriginationOAID = getNodeID(proposalPolicy, Constants.SUBMISSION_INFO_OA_LBL, OA, null);
-			//long userID = getNodeID(proposalPolicy, userName, U, null);
+		// Node pdsNode = proposalPolicy.createNode("" + randomId, OA,
+		// null,Constants.SUBMISSION_INFO_OA_LBL);
+		// log.info("ID:" + randomId);
+		// long pdsOriginationOAID = getNodeID(proposalPolicy,
+		// Constants.SUBMISSION_INFO_OA_LBL, OA, null);
+		// long userID = getNodeID(proposalPolicy, userName, U, null);
 
-			// printAccessState("Initial configuration before op:", proposalPolicy);
-			log.info("SUBMIT PROPOSAL: # nodes BEFORE:" + graph.getNodes().size());
+		// printAccessState("Initial configuration before op:", proposalPolicy);
+		log.info("SUBMIT PROPOSAL: # nodes BEFORE:" + graph.getNodes().size());
 
-			PDP pdp = getPDP(graph);
-			pdp.getEPP().processEvent(new ApproveEvent(graph.getNode(Constants.CHAIR_APPROVAL)), userName,
-					"process");
+		PDP pdp = getPDP(graph);
+		pdp.getEPP().processEvent(new ApproveEvent(graph.getNode(Constants.CHAIR_APPROVAL)), userName, "process");
 
-			log.info("SUBMIT PROPOSAL: # nodes AFTER:" + graph.getNodes().size());
-			
-			
-			
-			
-			PReviewDecider decider = new PReviewDecider(pdp.getPAP().getGraphPAP(),pdp.getPAP().getProhibitionsPAP());
-			System.out.println("RESULT1: "+ decider.check("Chair", "process" , "Signature-Info", "w"));
-			System.out.println("RESULT2: "+ decider.check("chaircomputerscience", "process" , "Signature-Info", "w"));
+		log.info("SUBMIT PROPOSAL: # nodes AFTER:" + graph.getNodes().size());
 
-			return pdp;
+		PReviewDecider decider = new PReviewDecider(pdp.getPAP().getGraphPAP(), pdp.getPAP().getProhibitionsPAP());
+		System.out.println("RESULT1: " + decider.check("Chair", "process", "Signature-Info", "w"));
+		System.out.println("RESULT2: " + decider.check("chaircomputerscience", "process", "Signature-Info", "w"));
+
+		return pdp;
+	}
+
+	public PDP chairDisapprove(String userName, String JSONGraph) throws PMException {
+		Graph graph = new MemGraph();
+		GraphSerializer.fromJson(graph, JSONGraph);
+		// proposalPolicy = policyLoader.createAProposalGraph(ngacPolicy); //loads
+		// editing policy
+		if (graph.exists("super_pc_rep")) {
+			graph.deleteNode("super_pc_rep");
 		}
-		public PDP chairDisapprove(String userName, String JSONGraph) throws PMException {
-			Graph graph = new MemGraph();
-			GraphSerializer.fromJson(graph, JSONGraph);
-			// proposalPolicy = policyLoader.createAProposalGraph(ngacPolicy); //loads
-			// editing policy
-			if (graph.exists("super_pc_rep")) {
-				graph.deleteNode("super_pc_rep");
-	        }
-			//Node pdsNode = proposalPolicy.createNode("" + randomId, OA, null,Constants.SUBMISSION_INFO_OA_LBL);
-			// log.info("ID:" + randomId);
-			//long pdsOriginationOAID = getNodeID(proposalPolicy, Constants.SUBMISSION_INFO_OA_LBL, OA, null);
-			//long userID = getNodeID(proposalPolicy, userName, U, null);
+		// Node pdsNode = proposalPolicy.createNode("" + randomId, OA,
+		// null,Constants.SUBMISSION_INFO_OA_LBL);
+		// log.info("ID:" + randomId);
+		// long pdsOriginationOAID = getNodeID(proposalPolicy,
+		// Constants.SUBMISSION_INFO_OA_LBL, OA, null);
+		// long userID = getNodeID(proposalPolicy, userName, U, null);
 
-			// printAccessState("Initial configuration before op:", proposalPolicy);
-			log.info("SUBMIT PROPOSAL: # nodes BEFORE:" + graph.getNodes().size());
+		// printAccessState("Initial configuration before op:", proposalPolicy);
+		log.info("SUBMIT PROPOSAL: # nodes BEFORE:" + graph.getNodes().size());
 
-			PDP pdp = getPDP(graph);
-			pdp.getEPP().processEvent(new DisapproveEvent(graph.getNode(Constants.CHAIR_APPROVAL)), userName,
-					"process");
+		PDP pdp = getPDP(graph);
+		pdp.getEPP().processEvent(new DisapproveEvent(graph.getNode(Constants.CHAIR_APPROVAL)), userName, "process");
 
-			log.info("SUBMIT PROPOSAL: # nodes AFTER:" + graph.getNodes().size());
-			
-			
-			
-			
-			PReviewDecider decider = new PReviewDecider(pdp.getPAP().getGraphPAP(),pdp.getPAP().getProhibitionsPAP());
-			System.out.println("RESULT1: "+ decider.check("Chair", "process" , "Signature-Info", "w"));
-			System.out.println("RESULT2: "+ decider.check("chaircomputerscience", "process" , "Signature-Info", "w"));
+		log.info("SUBMIT PROPOSAL: # nodes AFTER:" + graph.getNodes().size());
 
-			return pdp;
-		}
+		PReviewDecider decider = new PReviewDecider(pdp.getPAP().getGraphPAP(), pdp.getPAP().getProhibitionsPAP());
+		System.out.println("RESULT1: " + decider.check("Chair", "process", "Signature-Info", "w"));
+		System.out.println("RESULT2: " + decider.check("chaircomputerscience", "process", "Signature-Info", "w"));
+
+		return pdp;
+	}
+
 	private String createProposalId(long id) {
 		return "PDS" + id;
 	}
@@ -767,79 +796,84 @@ public class PDSOperations {
 		// get all of the users in the graph
 		Node userAttNode = policy.getNode(parent);
 
-		//System.out.println(search.size());
+		// System.out.println(search.size());
 
-		//for (Node userAttNode : search) {
+		// for (Node userAttNode : search) {
 
-			Set<String> childIds = policy.getChildren(userAttNode.getName());
-			log.info("No of Children Assigned on " + parent + " :" + childIds.size() + "|" + childIds);
+		Set<String> childIds = policy.getChildren(userAttNode.getName());
+		log.info("No of Children Assigned on " + parent + " :" + childIds.size() + "|" + childIds);
 
-			//long sourceNode = getNodeID(policy, name, U, null);
+		// long sourceNode = getNodeID(policy, name, U, null);
 
-			log.info("We are looking for:" + name);
+		log.info("We are looking for:" + name);
 
-			if (childIds.contains(name)) {
-				found = true;
-				log.info("found");
-			} else {
-				log.info("not found");
-			}
-		//}
+		if (childIds.contains(name)) {
+			found = true;
+			log.info("found");
+		} else {
+			log.info("not found");
+		}
+		// }
 		return found;
 
 	}
 
 	public void testUsersAccessights_Proposal_created(Graph proposalPolicy) {
-		
-			//long userIdNazmul = PDSOperations.getNodeID(proposalPolicy, "nazmul", NodeType.U, null); // tanure track +
-																										// cs
-			//long userIdAmy = PDSOperations.getNodeID(proposalPolicy, "amy", NodeType.U, null); // adjunct
-			//long userIdtom = PDSOperations.getNodeID(proposalPolicy, "tomtom", NodeType.U, null); // adjunct
-			//long userIdSamer = PDSOperations.getNodeID(proposalPolicy, "samer", NodeType.U, null); // CE
 
-			//long userIdCSChair = PDSOperations.getNodeID(proposalPolicy,
-			//		DepartmentsPositionsCollection.adminUsers.get("CSCHAIR"), NodeType.U, null);
+		// long userIdNazmul = PDSOperations.getNodeID(proposalPolicy, "nazmul",
+		// NodeType.U, null); // tanure track +
+		// cs
+		// long userIdAmy = PDSOperations.getNodeID(proposalPolicy, "amy", NodeType.U,
+		// null); // adjunct
+		// long userIdtom = PDSOperations.getNodeID(proposalPolicy, "tomtom",
+		// NodeType.U, null); // adjunct
+		// long userIdSamer = PDSOperations.getNodeID(proposalPolicy, "samer",
+		// NodeType.U, null); // CE
 
-			log.info("************Start**************");
-			Attribute att = new Attribute("Budget-Info", NodeType.OA);
-			String[] ops = new String[] { "w" };
-			boolean hasPermission = UserPermissionChecker.checkPermissionAnyType(proposalPolicy, new MemProhibitions(),
-					"nazmul", "U", att, Arrays.asList(ops));
-			log.info("Nazmul:Budget-Info(w):" + hasPermission);
+		// long userIdCSChair = PDSOperations.getNodeID(proposalPolicy,
+		// DepartmentsPositionsCollection.adminUsers.get("CSCHAIR"), NodeType.U, null);
 
-			att = new Attribute("Budget-Info", NodeType.OA);
-			ops = new String[] { "w" };
-			String userName = "tomtom";
-			hasPermission = UserPermissionChecker.checkPermissionAnyType(proposalPolicy, new MemProhibitions(),
-					userName, "U", att, Arrays.asList(ops));
-			log.info("tomtom:Budget-Info(w):" + hasPermission);
+		log.info("************Start**************");
+		Attribute att = new Attribute("Budget-Info", NodeType.OA);
+		String[] ops = new String[] { "w" };
+		boolean hasPermission = UserPermissionChecker.checkPermissionAnyType(proposalPolicy, new MemProhibitions(),
+				"nazmul", "U", att, Arrays.asList(ops));
+		log.info("Nazmul:Budget-Info(w):" + hasPermission);
 
-			att = new Attribute("Project-Info", NodeType.OA);
-			ops = new String[] { "r" };
-			userName = "tomtom";
-			hasPermission = UserPermissionChecker.checkPermissionAnyType(proposalPolicy, new MemProhibitions(),
-					userName, "U", att, Arrays.asList(ops));
-			log.info("Project-Info(w):" + hasPermission);
-			log.info("**************End************");
+		att = new Attribute("Budget-Info", NodeType.OA);
+		ops = new String[] { "w" };
+		String userName = "tomtom";
+		hasPermission = UserPermissionChecker.checkPermissionAnyType(proposalPolicy, new MemProhibitions(), userName,
+				"U", att, Arrays.asList(ops));
+		log.info("tomtom:Budget-Info(w):" + hasPermission);
 
-		
+		att = new Attribute("Project-Info", NodeType.OA);
+		ops = new String[] { "r" };
+		userName = "tomtom";
+		hasPermission = UserPermissionChecker.checkPermissionAnyType(proposalPolicy, new MemProhibitions(), userName,
+				"U", att, Arrays.asList(ops));
+		log.info("Project-Info(w):" + hasPermission);
+		log.info("**************End************");
+
 	}
 
 	public void testUsersAccessights_Proposal_not_created() {
-		
-			log.info("************Start**************");
-			//long userIdNazmul = PDSOperations.getNodeID(ngacPolicy, "nazmul", NodeType.U, null); // tanure track + cs
-			//long userIdAmy = PDSOperations.getNodeID(ngacPolicy, "amy", NodeType.U, null); // adjunct
-			Attribute att = new Attribute("PDS", NodeType.OA);
-			String[] ops = new String[] { "create-oa" };
-			boolean hasPermission = UserPermissionChecker.checkPermissionAnyType(ngacPolicy, new MemProhibitions(),
-					"nazmul", "U", att, Arrays.asList(ops));
-			log.info("Nazmul:Create Proposal:" + hasPermission);
-			hasPermission = UserPermissionChecker.checkPermissionAnyType(ngacPolicy, new MemProhibitions(), "amy", "U",
-					att, Arrays.asList(ops));
-			log.info("Amy:Create Proposal:" + hasPermission);
-			log.info("************End**************");
-		
+
+		log.info("************Start**************");
+		// long userIdNazmul = PDSOperations.getNodeID(ngacPolicy, "nazmul", NodeType.U,
+		// null); // tanure track + cs
+		// long userIdAmy = PDSOperations.getNodeID(ngacPolicy, "amy", NodeType.U,
+		// null); // adjunct
+		Attribute att = new Attribute("PDS", NodeType.OA);
+		String[] ops = new String[] { "create-oa" };
+		boolean hasPermission = UserPermissionChecker.checkPermissionAnyType(ngacPolicy, new MemProhibitions(),
+				"nazmul", "U", att, Arrays.asList(ops));
+		log.info("Nazmul:Create Proposal:" + hasPermission);
+		hasPermission = UserPermissionChecker.checkPermissionAnyType(ngacPolicy, new MemProhibitions(), "amy", "U", att,
+				Arrays.asList(ops));
+		log.info("Amy:Create Proposal:" + hasPermission);
+		log.info("************End**************");
+
 	}
 
 }

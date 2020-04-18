@@ -48,6 +48,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
@@ -77,6 +78,7 @@ import com.google.common.collect.Multimap;
 import com.mongodb.MongoClient;
 
 import gov.nist.csd.pm.exceptions.PMException;
+import gov.nist.csd.pm.operations.OperationSet;
 import gov.nist.csd.pm.pdp.decider.PReviewDecider;
 import gov.nist.csd.pm.pip.graph.Graph;
 import gov.nist.csd.pm.pip.graph.GraphSerializer;
@@ -1019,6 +1021,12 @@ public class ProposalService {
 			projectProposal.setProposalPolicy(PDSOperations.proposalPolicies.get(existingProposal.getNgacId()));
 			proposalPolicy = projectProposal.getProposalPolicy();
 			log.info("33333333");
+			if (test.getNodes().size() > 10) {
+				projectProposal.setProposalPolicy(test);
+				log.info("USING GRAPH FROM DATABASE");
+			} else {
+				projectProposal.setProposalPolicy(proposalPolicy);
+			}
 		} else {
 			log.info("Policy re-created.");
 			log.info("44444444444");
@@ -1026,8 +1034,11 @@ public class ProposalService {
 			proposalPolicy = pdsOperations.getBacicNGACPolicy();
 			proposalPolicy = loader.createAProposalGraph(proposalPolicy);
 			proposalPolicy = loader.createAprovalGraph(proposalPolicy);
+			
+			
 			if (test.getNodes().size() > 10) {
 				projectProposal.setProposalPolicy(test);
+				log.info("USING GRAPH FROM DATABASE");
 			} else {
 				projectProposal.setProposalPolicy(proposalPolicy);
 			}
@@ -1057,6 +1068,17 @@ public class ProposalService {
 		}
 		proposalPolicy = projectProposal.getProposalPolicy();
 		PDSOperations.proposalPolicies.put(existingProposal.getNgacId(), proposalPolicy);
+		if(existingProposal.getProhibitions().length()>30) {
+			log.info("USING PROHIBITIONS FROM DATABASE");
+
+			prohibitions = new MemProhibitions();
+			projectProposal.setProhibitions(ProhibitionsSerializer.fromJson(prohibitions,existingProposal.getProhibitions()));
+		}
+		
+		
+//		for(String s: test.getChildren("PI")) {
+//			log.info("CHILDREN OF PI IN SET POLICY: "+s);
+//		}
 	}
 
 	@POST
@@ -1217,6 +1239,9 @@ public class ProposalService {
 							if (action.equals("Approve") && projectProposal.getApprovalStage().equals(Constants.STATE_CHAIR)) {
 								PDP pdp = pdsOperations.chairApprove(userInfo.getUserName(), existingProposal.getPolicyGraph());
 								existingProposal.setPolicyGraph(GraphSerializer.toJson(pdp.getPAP().getGraphPAP()));
+								Map<String, OperationSet> assoc = pdp.getPAP().getGraphPAP().getTargetAssociations("Approval Content");
+								for(String s : assoc.keySet()){
+								System.out.println("ASSOCIATIONS: "+s);}
 							}
 
 							if (action.equals("Disapprove")&& projectProposal.getApprovalStage().equals(Constants.STATE_CHAIR)) {
@@ -1226,9 +1251,14 @@ public class ProposalService {
 								existingProposal.setPolicyGraph(GraphSerializer.toJson(pdp.getPAP().getGraphPAP()));
 								existingProposal.setProhibitions(
 										ProhibitionsSerializer.toJson(pdp.getPAP().getProhibitionsPAP()));
+								for(String s: pdp.getPAP().getGraphPAP().getChildren("PI")) {
+									log.info("CHILDREN OF PI: "+s);
+								}
+								
 								//current.setProhibitions(ProhibitionsSerializer.toJson(prohibitions));
 								//projectProposal.setProposal(current);
 							}
+
 							// decisionString = projectProposal.getPolicyDecisionAnyType(pdsOperations,
 							// userInfo.getUserName(),"U", acRight, objectAtt);
 							//existingProposal
@@ -1420,12 +1450,16 @@ public class ProposalService {
 					Graph proposalPolicy = null;
 
 					setPolicyState(projectProposal, existingProposal, proposalPolicy, userInfo.getUserName(), false);
-
+					for(String s : projectProposal.getProposalPolicy().getChildren("PI")) {
+						log.info("CheckUserPERMISSION: "+s);
+					}
+					
+					
 					String decision = "";
 
 					if (action.equalsIgnoreCase("Edit")) {
 						String objectAtt = "";
-						String acRight = "w";
+						String acRight = "write";
 						objectAtt = projectProposal.setSection(proposalSection);
 						log.info("objectAtt:" + objectAtt);
 						decision = projectProposal.getPolicyDecision(pdsOperations, userInfo.getUserName(), acRight,

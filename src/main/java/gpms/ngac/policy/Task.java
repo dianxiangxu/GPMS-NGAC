@@ -24,7 +24,7 @@ public enum Task
 	{
 		HashMap<Attribute, HashSet> permissionsSet = new HashMap<Attribute,HashSet>();
 		
-		String[] operationsCreateProposal = {"create-oa"};
+		String[] operationsCreateProposal = {"create"};
 		String[] operationsAddCoPi_on_Faculty = {"create-o","create-o-to-oa"};
 		
 		switch(this)  

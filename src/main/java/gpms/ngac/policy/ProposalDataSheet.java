@@ -638,7 +638,7 @@ public class ProposalDataSheet {
 							.get(DepartmentsPositionsCollection.departmentNames.get(dept) + "CHAIR");
 					if (!profileIds.contains(DepartmentsPositionsCollection.userIdNameMap.get(name))) {
 						//long deptChairUser = PDSOperations.getNodeID(proposalPolicy, name, NodeType.U, null);
-						proposalPolicy.assign(name, Constants.CURRENT_USERS_UA);
+						//proposalPolicy.assign(name, Constants.CURRENT_USERS_UA);
 						
 						//PDSOperations.addApprovalEntity(deptChairUser,currentuserAttNodeID, proposalPolicy);
 						
@@ -654,7 +654,7 @@ public class ProposalDataSheet {
 							.get(DepartmentsPositionsCollection.departmentNames.get(dept) + "BM");
 					if (!profileIds.contains(DepartmentsPositionsCollection.userIdNameMap.get(name))) {
 						//long deptBMUser = PDSOperations.getNodeID(proposalPolicy, name, NodeType.U, null);
-						proposalPolicy.assign(name, Constants.CURRENT_USERS_UA);
+						//proposalPolicy.assign(name, Constants.CURRENT_USERS_UA);
 						//PDSOperations.addApprovalEntity(deptBMUser,currentuserAttNodeID, proposalPolicy);
 
 					}

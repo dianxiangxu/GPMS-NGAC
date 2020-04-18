@@ -303,7 +303,7 @@
  
     {
       "operations": [
-        "create-oa"
+        "create"
       ],
       "source": "PI-Eligible Faculty", 
       "target": "PDS"  

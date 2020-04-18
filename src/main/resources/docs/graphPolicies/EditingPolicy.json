@@ -502,7 +502,7 @@
  
   {
     "operations": [
-         "w"
+         "write"
         ],
        "source": "PI", 
        "target": "PI-Editable-Data"  
@@ -541,7 +541,7 @@
      
      {
        "operations": [
-         "w"
+         "write"
         ],
        "source": "CoPI", 
        "target": "CoPI-Editable-Data"  
@@ -582,22 +582,7 @@
         ],
        "source": "PI", 
        "target": "Log" 
-     },          
-     {
-       "operations": [
-         "approve"
-        ],
-       "source": "Chair", 
-       "target": "Chair-Approval" 
-     } 
-     ,          
-     {
-       "operations": [
-         "disapprove"
-        ],
-       "source": "Chair", 
-       "target": "Chair-Approval" 
-     }     
+     }
  ]
  
 } 

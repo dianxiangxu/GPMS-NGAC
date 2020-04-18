@@ -5,7 +5,7 @@ rules:
       subject:
         anyUser:
       operations:
-        - create-oa
+        - create
       target:
         policyElements:
           - name: PDS
@@ -69,7 +69,7 @@ rules:
       subject:
         anyUser:
       operations:
-        - assign to
+        - add-copi
       target:
         policyElements:
           - name: CoPI
@@ -80,7 +80,7 @@ rules:
             name: is_node_contained_in
             args:
               - function:
-                  name: child_of_assign
+                  name: copi_to_add
               - function:
                   name: get_node
                   args:
@@ -99,13 +99,13 @@ rules:
                         name: get_node_name
                         args:
                           - function:
-                              name: child_of_assign
+                              name: copi_to_add
                     - CoPI
               - O                    
         - assign:
             - what:
                 function:
-                  name: child_of_assign
+                  name: copi_to_add
               where:
                 name: CoPI
                 type: UA
@@ -117,7 +117,7 @@ rules:
                       name: chair_for
                       args:
                         - function:
-                            name: child_of_assign 
+                            name: copi_to_add 
                   - function:
                       name: get_node
                       args:
@@ -129,7 +129,7 @@ rules:
                   name: chair_for
                   args: 
                     - function:
-                        name: child_of_assign              
+                        name: copi_to_add              
               where:
                 name: Chair
                 type: UA
@@ -141,7 +141,7 @@ rules:
                       name: dean_for
                       args:
                         - function:
-                            name: child_of_assign 
+                            name: copi_to_add 
                   - function:
                       name: get_node
                       args:
@@ -153,7 +153,7 @@ rules:
                   name: dean_for
                   args: 
                     - function:
-                        name: child_of_assign              
+                        name: copi_to_add              
               where:
                 name: Dean
                 type: UA
@@ -165,7 +165,7 @@ rules:
                       name: bm_for
                       args:
                         - function:
-                            name: child_of_assign 
+                            name: copi_to_add 
                   - function:
                       name: get_node
                       args:
@@ -177,7 +177,7 @@ rules:
                   name: bm_for
                   args: 
                     - function:
-                        name: child_of_assign              
+                        name: copi_to_add              
               where:
                 name: Business-Manager
                 type: UA                
@@ -201,7 +201,7 @@ rules:
                   - function:
                       name: current_user
             operations:
-               - w
+               - write
             target:
               complement: false
               containers:
@@ -213,7 +213,7 @@ rules:
               name: CoPI
               type: UA                 
             operations:
-               - w
+               - write
             target:
               complement: false
               containers:
@@ -277,7 +277,7 @@ rules:
               name: Chair
               type: UA
             operations:
-              - w
+              - write
             target:
               name: Signature-Info
               type: OA 
@@ -286,16 +286,18 @@ rules:
               name: Chair
               type: UA
             operations:
-              - assign-o
+              - Approve
+              - Disapprove
             target:
-              name: Chair-Approval
-              type: OA                                                             
+              name: Approval Content
+              type: OA 
+                                                           
   - label: add_sp
     event:
       subject:
         anyUser:
       operations:
-        - assign to
+        - add-sp
       target:
         policyElements:
           - name: SP
@@ -306,7 +308,7 @@ rules:
             name: is_node_contained_in
             args:
               - function:
-                  name: child_of_assign
+                  name: sp_to_add
               - function:
                   name: get_node
                   args:
@@ -325,13 +327,13 @@ rules:
                         name: get_node_name
                         args:
                           - function:
-                              name: child_of_assign
+                              name: sp_to_add
                     - SP
               - O
         - assign:
             - what:
                 function:
-                  name: child_of_assign
+                  name: sp_to_add
               where:
                 name: SP
                 type: UA  
@@ -339,7 +341,7 @@ rules:
     event:
       subject:
       operations:
-        - deassign from
+        - delete-copi
       target:
         policyElements:
           - name: CoPI
@@ -350,7 +352,7 @@ rules:
             assignments:
               - what:
                   function:
-                    name: child_of_assign
+                    name: copi_to_delete
                 where:
                   name: CoPI
                   type: UA
@@ -364,7 +366,7 @@ rules:
                         name: get_node_name
                         args:
                           - function:
-                              name: child_of_assign
+                              name: copi_to_delete
                     - CoPI 
         - condition!:
             - function:
@@ -374,7 +376,7 @@ rules:
                       name: chair_for
                       args:
                         - function:
-                            name: child_of_assign
+                            name: copi_to_delete
                   - function:
                       name: chairs_for
                       args:
@@ -393,7 +395,7 @@ rules:
                             name: chair_for
                             args: 
                               - function:
-                                  name: child_of_assign    
+                                  name: copi_to_delete    
                   - function:
                       name: get_node_name
                       args:
@@ -409,7 +411,7 @@ rules:
                     name: chair_for
                     args: 
                       - function:
-                          name: child_of_assign              
+                          name: copi_to_delete              
                 where:
                   name: Chair
                   type: UA      
@@ -418,7 +420,7 @@ rules:
       subject:
         anyUser:
       operations:
-        - deassign from
+        - delete-sp
       target:
         policyElements:
           - name: SP
@@ -429,7 +431,7 @@ rules:
             assignments:
               - what:
                   function:
-                    name: child_of_assign
+                    name: sp_to_delete
                 where:
                   name: SP
                   type: UA
@@ -443,7 +445,7 @@ rules:
                         name: get_node_name
                         args:
                           - function:
-                              name: child_of_assign
+                              name: sp_to_delete
                     - SP                    
 
   - label: chair_approve
@@ -458,15 +460,50 @@ rules:
             type: OA
     response:
       actions:
-        - delete:
+        - function:
+            name: add_properties_to_node
+            args:
+              - function:
+                  name: current_user
+              - function:
+                  name: to_props
+                  args:
+                    - approved=true 
+        - condition:
+            - function:
+                name: all_children_have_properties
+                args:
+                  - function:
+                      name: get_node
+                      args:
+                        - Chair
+                        - UA
+                  - function:
+                      name: to_props
+                      args:
+                        - approved=true          
+          delete:
             associations:
               - subject:
                   name: Chair
                   type: UA
                 target:
-                  name: Chair-Approval
+                  name: Approval Content
                   type: OA
-        - delete:
+        - condition:
+            - function:
+                name: all_children_have_properties
+                args:
+                  - function:
+                      name: get_node
+                      args:
+                        - Chair
+                        - UA
+                  - function:
+                      name: to_props
+                      args:
+                        - approved=true     
+          delete:
             associations:
               - subject:
                   name: Chair
@@ -474,25 +511,52 @@ rules:
                 target:
                   name: Signature-Info
                   type: OA
-        - grant:
+        - condition:
+            - function:
+                name: all_children_have_properties
+                args:
+                  - function:
+                      name: get_node
+                      args:
+                        - Chair
+                        - UA
+                  - function:
+                      name: to_props
+                      args:
+                        - approved=true 
+          grant:
             subject:
               name: Business-Manager
               type: UA
             operations:
-              - w
+              - write
             target:
               name: Signature-Info
               type: OA 
-        - grant:
+        - condition:
+            - function:
+                name: all_children_have_properties
+                args:
+                  - function:
+                      name: get_node
+                      args:
+                        - Chair
+                        - UA
+                  - function:
+                      name: to_props
+                      args:
+                        - approved=true 
+          grant:
             subject:
               name: Business-Manager
               type: UA
             operations:
-              - assign-o
+              - Approve
+              - Disapprove
             target:
-              name: BM-Approval
-              type: OA 
-  - label: chair_approve
+              name: Approval Content
+              type: OA                  
+  - label: chair_disapprove
     event:
       subject:
         anyUser:
@@ -510,7 +574,7 @@ rules:
                   name: Chair
                   type: UA
                 target:
-                  name: Chair-Approval
+                  name: Approval Content
                   type: OA
         - delete:
             associations:
@@ -527,7 +591,19 @@ rules:
               - deny3
               - deny4
               - deny5
-              - deny6         
+              - deny6
+        - function:
+            name: remove_properties_from_children
+            args:
+              - function:
+                  name: get_node
+                  args:
+                    - Chair
+                    - UA
+              - function:
+                  name: to_props
+                  args:
+                    - approved=true          
   - label: add_approval_entity
     event:
       subject:
