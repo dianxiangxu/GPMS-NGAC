@@ -347,6 +347,9 @@
     {
       "source": "COAS",  
       "target": "colleges"  
+    },    {
+      "source": "irbglobal",  
+      "target": "colleges"  
     },
  
  {
@@ -483,12 +486,7 @@
  {
       "source": "directorcomputerscience",  
       "target": "Research Director" 
-    },
- {
-      "source": "irbglobal",  
-      "target": "IRB"
-    }
- 
+    } 
  ],
  
  "associations":

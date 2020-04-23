@@ -43,6 +43,7 @@ import gpms.ngac.policy.customEvents.DeleteCoPIEvent;
 import gpms.ngac.policy.customEvents.DeleteSPEvent;
 import gpms.ngac.policy.customEvents.DisapproveEvent;
 import gpms.ngac.policy.customEvents.SubmitEvent;
+import gpms.ngac.policy.customEvents.SubmitRAEvent;
 import gpms.ngac.policy.customFunctions.IsNodeInListExecutor;
 import gpms.ngac.policy.customFunctions.RemovePropertyFromChildrenExecutor;
 import gpms.ngac.policy.customFunctions.SPToAddExecutor;
@@ -60,6 +61,8 @@ import gpms.ngac.policy.customFunctions.CreateNodeExecutor1;
 import gpms.ngac.policy.customFunctions.DeanForExecutor;
 import gpms.ngac.policy.customFunctions.DeleteNodeExecutor;
 import gpms.ngac.policy.customFunctions.EmailExecutor;
+import gpms.ngac.policy.customFunctions.HasChildrenExecutor;
+import gpms.ngac.policy.customFunctions.IRBApprovalRequired;
 import gpms.rest.UserService;
 
 import java.io.File;
@@ -139,12 +142,14 @@ public class PDSOperations {
 		AddPropertiesToNodeExecutor addPropertiesToNodeExecutor = new AddPropertiesToNodeExecutor();
 		RemovePropertyFromChildrenExecutor removePropertiesFromChildrenExecutor = new RemovePropertyFromChildrenExecutor();
 		AllChildrenHavePropertiesExecutor allChildrenHavePropertiesExecutor = new AllChildrenHavePropertiesExecutor();
+		HasChildrenExecutor hasChildrenExecutor = new HasChildrenExecutor();
+		IRBApprovalRequired iRBApprovalRequired = new IRBApprovalRequired();
 		obligation = policyLoader.getObligation();
 		EPPOptions eppOptions = new EPPOptions(deleteNodeExecutor, emailExecutor, chairForExecutor, deanForExecutor,
 				bmForExecutor, isAllowedToBeCoPIExecutor, createNodeExecutor1, concatExecutor, chairsForExecutor,
 				areSomeNodesContainedInExecutor, compareNodesExecutor, coPIToAddExecutor, spToAddExecutor,
 				coPIToDeleteExecutor, spToDeleteExecutor, addPropertiesToNodeExecutor,
-				removePropertiesFromChildrenExecutor, allChildrenHavePropertiesExecutor);
+				removePropertiesFromChildrenExecutor, allChildrenHavePropertiesExecutor,hasChildrenExecutor,iRBApprovalRequired);
 		pdp = new PDP(new PAP(graph, new MemProhibitions(), new MemObligations()), eppOptions);
 		pdp.getPAP().getObligationsPAP().add(obligation, true);
 
@@ -406,7 +411,7 @@ public class PDSOperations {
 		return randomId;
 	}
 
-	public PDP submitAProposal(String userName, String JSONGraph) throws PMException {
+	public PDP submitAProposal(String userName, String JSONGraph, Boolean irbApprovalRequired) throws PMException {
 		List<String> list = new ArrayList<String>();
 		long randomId = getID();
 		Prohibitions prohibitions = new MemProhibitions();
@@ -432,7 +437,7 @@ public class PDSOperations {
 		log.info("SUBMIT PROPOSAL: # nodes BEFORE:" + graph.getNodes().size());
 
 		PDP pdp = getPDP(graph);
-		pdp.getEPP().processEvent(new SubmitEvent(proposalPolicy.getNode(Constants.SUBMISSION_INFO_OA_LBL)), userName,
+		pdp.getEPP().processEvent(new SubmitEvent(proposalPolicy.getNode(Constants.SUBMISSION_INFO_OA_LBL),irbApprovalRequired), userName,
 				"process");
 
 		log.info("SUBMIT PROPOSAL: # nodes AFTER:" + graph.getNodes().size());
@@ -827,7 +832,7 @@ public class PDSOperations {
 		log.info("SUBMIT PROPOSAL: # nodes BEFORE:" + graph.getNodes().size());
 
 		PDP pdp = getPDP(graph);
-		pdp.getEPP().processEvent(new ApproveEvent(graph.getNode(Constants.DEAN_APPROVAL)), userName, "process");
+		pdp.getEPP().processEvent(new ApproveEvent(graph.getNode(Constants.IRB_APPROVAL)), userName, "process");
 
 		log.info("SUBMIT PROPOSAL: # nodes AFTER:" + graph.getNodes().size());
 
@@ -855,7 +860,150 @@ public class PDSOperations {
 		log.info("SUBMIT PROPOSAL: # nodes BEFORE:" + graph.getNodes().size());
 
 		PDP pdp = getPDP(graph);
-		pdp.getEPP().processEvent(new DisapproveEvent(graph.getNode(Constants.DEAN_APPROVAL)), userName, "process");
+		pdp.getEPP().processEvent(new DisapproveEvent(graph.getNode(Constants.IRB_APPROVAL)), userName, "process");
+
+		log.info("SUBMIT PROPOSAL: # nodes AFTER:" + graph.getNodes().size());
+
+		PReviewDecider decider = new PReviewDecider(pdp.getPAP().getGraphPAP(), pdp.getPAP().getProhibitionsPAP());
+		System.out.println("RESULT1: " + decider.check("Chair", "process", "Signature-Info", "w"));
+		System.out.println("RESULT2: " + decider.check("chaircomputerscience", "process", "Signature-Info", "w"));
+
+		return pdp;
+	}
+	public PDP raApprove(String userName, String JSONGraph) throws PMException {
+		Graph graph = new MemGraph();
+		GraphSerializer.fromJson(graph, JSONGraph);
+		// proposalPolicy = policyLoader.createAProposalGraph(ngacPolicy); //loads
+		// editing policy
+		if (graph.exists("super_pc_rep")) {
+			graph.deleteNode("super_pc_rep");
+		}
+		// Node pdsNode = proposalPolicy.createNode("" + randomId, OA,
+		// null,Constants.SUBMISSION_INFO_OA_LBL);
+		// log.info("ID:" + randomId);
+		// long pdsOriginationOAID = getNodeID(proposalPolicy,
+		// Constants.SUBMISSION_INFO_OA_LBL, OA, null);
+		// long userID = getNodeID(proposalPolicy, userName, U, null);
+
+		// printAccessState("Initial configuration before op:", proposalPolicy);
+		log.info("SUBMIT PROPOSAL: # nodes BEFORE:" + graph.getNodes().size());
+
+		PDP pdp = getPDP(graph);
+		pdp.getEPP().processEvent(new ApproveEvent(graph.getNode(Constants.RA_APPROVAL)), userName, "process");
+
+		log.info("SUBMIT PROPOSAL: # nodes AFTER:" + graph.getNodes().size());
+
+		PReviewDecider decider = new PReviewDecider(pdp.getPAP().getGraphPAP(), pdp.getPAP().getProhibitionsPAP());
+		
+
+		return pdp;
+	}
+	public PDP raDisapprove(String userName, String JSONGraph) throws PMException {
+		Graph graph = new MemGraph();
+		GraphSerializer.fromJson(graph, JSONGraph);
+		// proposalPolicy = policyLoader.createAProposalGraph(ngacPolicy); //loads
+		// editing policy
+		if (graph.exists("super_pc_rep")) {
+			graph.deleteNode("super_pc_rep");
+		}
+		// Node pdsNode = proposalPolicy.createNode("" + randomId, OA,
+		// null,Constants.SUBMISSION_INFO_OA_LBL);
+		// log.info("ID:" + randomId);
+		// long pdsOriginationOAID = getNodeID(proposalPolicy,
+		// Constants.SUBMISSION_INFO_OA_LBL, OA, null);
+		// long userID = getNodeID(proposalPolicy, userName, U, null);
+
+		// printAccessState("Initial configuration before op:", proposalPolicy);
+		log.info("SUBMIT PROPOSAL: # nodes BEFORE:" + graph.getNodes().size());
+
+		PDP pdp = getPDP(graph);
+		pdp.getEPP().processEvent(new DisapproveEvent(graph.getNode(Constants.RA_APPROVAL)), userName, "process");
+
+		log.info("SUBMIT PROPOSAL: # nodes AFTER:" + graph.getNodes().size());
+
+		PReviewDecider decider = new PReviewDecider(pdp.getPAP().getGraphPAP(), pdp.getPAP().getProhibitionsPAP());
+		System.out.println("RESULT1: " + decider.check("Chair", "process", "Signature-Info", "w"));
+		System.out.println("RESULT2: " + decider.check("chaircomputerscience", "process", "Signature-Info", "w"));
+
+		return pdp;
+	}
+	public PDP rdApprove(String userName, String JSONGraph) throws PMException {
+		Graph graph = new MemGraph();
+		GraphSerializer.fromJson(graph, JSONGraph);
+		// proposalPolicy = policyLoader.createAProposalGraph(ngacPolicy); //loads
+		// editing policy
+		if (graph.exists("super_pc_rep")) {
+			graph.deleteNode("super_pc_rep");
+		}
+		// Node pdsNode = proposalPolicy.createNode("" + randomId, OA,
+		// null,Constants.SUBMISSION_INFO_OA_LBL);
+		// log.info("ID:" + randomId);
+		// long pdsOriginationOAID = getNodeID(proposalPolicy,
+		// Constants.SUBMISSION_INFO_OA_LBL, OA, null);
+		// long userID = getNodeID(proposalPolicy, userName, U, null);
+
+		// printAccessState("Initial configuration before op:", proposalPolicy);
+		log.info("SUBMIT PROPOSAL: # nodes BEFORE:" + graph.getNodes().size());
+
+		PDP pdp = getPDP(graph);
+		pdp.getEPP().processEvent(new ApproveEvent(graph.getNode(Constants.RD_APPROVAL)), userName, "process");
+
+		log.info("SUBMIT PROPOSAL: # nodes AFTER:" + graph.getNodes().size());
+
+		PReviewDecider decider = new PReviewDecider(pdp.getPAP().getGraphPAP(), pdp.getPAP().getProhibitionsPAP());
+		
+
+		return pdp;
+	}
+	public PDP rdDisapprove(String userName, String JSONGraph) throws PMException {
+		Graph graph = new MemGraph();
+		GraphSerializer.fromJson(graph, JSONGraph);
+		// proposalPolicy = policyLoader.createAProposalGraph(ngacPolicy); //loads
+		// editing policy
+		if (graph.exists("super_pc_rep")) {
+			graph.deleteNode("super_pc_rep");
+		}
+		// Node pdsNode = proposalPolicy.createNode("" + randomId, OA,
+		// null,Constants.SUBMISSION_INFO_OA_LBL);
+		// log.info("ID:" + randomId);
+		// long pdsOriginationOAID = getNodeID(proposalPolicy,
+		// Constants.SUBMISSION_INFO_OA_LBL, OA, null);
+		// long userID = getNodeID(proposalPolicy, userName, U, null);
+
+		// printAccessState("Initial configuration before op:", proposalPolicy);
+		log.info("SUBMIT PROPOSAL: # nodes BEFORE:" + graph.getNodes().size());
+
+		PDP pdp = getPDP(graph);
+		pdp.getEPP().processEvent(new DisapproveEvent(graph.getNode(Constants.RD_APPROVAL)), userName, "process");
+
+		log.info("SUBMIT PROPOSAL: # nodes AFTER:" + graph.getNodes().size());
+
+		PReviewDecider decider = new PReviewDecider(pdp.getPAP().getGraphPAP(), pdp.getPAP().getProhibitionsPAP());
+		System.out.println("RESULT1: " + decider.check("Chair", "process", "Signature-Info", "w"));
+		System.out.println("RESULT2: " + decider.check("chaircomputerscience", "process", "Signature-Info", "w"));
+
+		return pdp;
+	}
+	public PDP raSubmit(String userName, String JSONGraph) throws PMException {
+		Graph graph = new MemGraph();
+		GraphSerializer.fromJson(graph, JSONGraph);
+		// proposalPolicy = policyLoader.createAProposalGraph(ngacPolicy); //loads
+		// editing policy
+		if (graph.exists("super_pc_rep")) {
+			graph.deleteNode("super_pc_rep");
+		}
+		// Node pdsNode = proposalPolicy.createNode("" + randomId, OA,
+		// null,Constants.SUBMISSION_INFO_OA_LBL);
+		// log.info("ID:" + randomId);
+		// long pdsOriginationOAID = getNodeID(proposalPolicy,
+		// Constants.SUBMISSION_INFO_OA_LBL, OA, null);
+		// long userID = getNodeID(proposalPolicy, userName, U, null);
+
+		// printAccessState("Initial configuration before op:", proposalPolicy);
+		log.info("SUBMIT PROPOSAL: # nodes BEFORE:" + graph.getNodes().size());
+
+		PDP pdp = getPDP(graph);
+		pdp.getEPP().processEvent(new SubmitRAEvent(graph.getNode(Constants.SUBMISSION_INFO_OA_LBL)), userName, "process");
 
 		log.info("SUBMIT PROPOSAL: # nodes AFTER:" + graph.getNodes().size());
 

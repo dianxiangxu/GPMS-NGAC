@@ -301,7 +301,7 @@ public class ProposalDataSheet {
 	}
 
 	public void associateApprovalRelation(String stage) {
-		try {
+		//try {
 			OperationSet ops1 = new OperationSet("assign-o");
 			OperationSet ops2 = new OperationSet("w");
 			OperationSet ops3 = new OperationSet("Approve", "Disapprove", "Withdraw");
@@ -373,7 +373,7 @@ public class ProposalDataSheet {
 
 //				long oaOSPAttNodeID = PDSOperations.getNodeID(proposalPolicy, Constants.OSP_SECTION_INFO_OA_LBL,
 //						NodeType.OA, null);
-				proposalPolicy.associate( Constants.RA_UA, Constants.OSP_SECTION_INFO_OA_LBL, ops2);
+				//proposalPolicy.associate( Constants.RA_UA, Constants.OSP_SECTION_INFO_OA_LBL, ops2);
 
 			} else if (stage.equals(Constants.STATE_RD)) {
 //				long userAttNodeID = PDSOperations.getNodeID(proposalPolicy, Constants.RD_UA, NodeType.UA, null);
@@ -382,37 +382,37 @@ public class ProposalDataSheet {
 //				long oaSignatureInfoAttNodeID = PDSOperations.getNodeID(proposalPolicy, Constants.SIGNATURE_INFOL,
 //						NodeType.OA, null);
 
-				proposalPolicy.associate(Constants.RD_UA, Constants.RD_APPROVAL, ops1);
-				proposalPolicy.associate(Constants.RD_UA, Constants.SIGNATURE_INFOL, ops2);
+				//proposalPolicy.associate(Constants.RD_UA, Constants.RD_APPROVAL, ops1);
+				//proposalPolicy.associate(Constants.RD_UA, Constants.SIGNATURE_INFOL, ops2);
 
 //				long currentUserAttNodeID = PDSOperations.getNodeID(proposalPolicy, Constants.CURRENT_USERS_UA,
 //						NodeType.UA, null);
 //				long oaApprovalContentAttNodeID = PDSOperations.getNodeID(proposalPolicy, Constants.APPROVAL_CONTENT,
 //						NodeType.OA, null);
-				proposalPolicy.associate(Constants.CURRENT_USERS_UA, Constants.APPROVAL_CONTENT,
-						ops4);
+				//proposalPolicy.associate(Constants.CURRENT_USERS_UA, Constants.APPROVAL_CONTENT,
+				//		ops4);
 
 			} else if (stage.equals(Constants.STATE_READY_FOR_SUBMISSION)) {
 //				long currentUserAttNodeID = PDSOperations.getNodeID(proposalPolicy, Constants.CURRENT_USERS_UA,
 //						NodeType.UA, null);
 //				long oaApprovalContentAttNodeID = PDSOperations.getNodeID(proposalPolicy, Constants.APPROVAL_CONTENT,
 //						NodeType.OA, null);
-				proposalPolicy.associate(Constants.CURRENT_USERS_UA, Constants.APPROVAL_CONTENT,
-						ops5);
+				//proposalPolicy.associate(Constants.CURRENT_USERS_UA, Constants.APPROVAL_CONTENT,
+				//		ops5);
 
 			} else if (stage.equals(Constants.STATE_SUBMITTED_BY_RA)) {
 //				long currentUserAttNodeID = PDSOperations.getNodeID(proposalPolicy, Constants.CURRENT_USERS_UA,
 //						NodeType.UA, null);
 //				long oaApprovalContentAttNodeID = PDSOperations.getNodeID(proposalPolicy, Constants.APPROVAL_CONTENT,
 //						NodeType.OA, null);
-				proposalPolicy.associate(Constants.CURRENT_USERS_UA, Constants.APPROVAL_CONTENT,
-						ops6);
+			//	proposalPolicy.associate(Constants.CURRENT_USERS_UA, Constants.APPROVAL_CONTENT,
+					//	ops6);
 
 			}
 
-		} catch (PMException e) {
-			e.printStackTrace();
-		}
+//		} catch (PMException e) {
+//			e.printStackTrace();
+//		}
 	}
 
 	public void disassociateApprovalRelation(String stage) {
@@ -629,7 +629,7 @@ public class ProposalDataSheet {
 		clearUsersFromCurrentApproval();
 
 		Set<String> profileIds = new HashSet<String>();
-		try {
+		//try {
 			//long currentuserAttNodeID = PDSOperations.getNodeID(proposalPolicy, Constants.CURRENT_USERS_UA, NodeType.UA,
 			//		null);
 
@@ -716,7 +716,7 @@ public class ProposalDataSheet {
 				// if(!profileIds.contains(DepartmentsPositionsCollection.userIdNameMap.get(name)
 				// )) {
 				//long raUser = PDSOperations.getNodeID(proposalPolicy, name, NodeType.U, null);
-				proposalPolicy.assign(name, Constants.CURRENT_USERS_UA);
+				//proposalPolicy.assign(name, Constants.CURRENT_USERS_UA);
 				//PDSOperations.addApprovalEntity(raUser,currentuserAttNodeID, proposalPolicy);
 
 				// }
@@ -728,15 +728,15 @@ public class ProposalDataSheet {
 				// if(!profileIds.contains(DepartmentsPositionsCollection.userIdNameMap.get(name)
 				// )) {
 				//long raUser = PDSOperations.getNodeID(proposalPolicy, name, NodeType.U, null);
-				proposalPolicy.assign(name, Constants.CURRENT_USERS_UA);
+				//proposalPolicy.assign(name, Constants.CURRENT_USERS_UA);
 				//PDSOperations.addApprovalEntity(raUser,currentuserAttNodeID, proposalPolicy);
 
 				// }
 			}
 
-		} catch (PMException e) {
-			e.printStackTrace();
-		}
+//		} catch (PMException e) {
+//			e.printStackTrace();
+//		}
 
 	}
 

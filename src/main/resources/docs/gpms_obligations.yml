@@ -291,7 +291,21 @@ rules:
             target:
               name: Approval Content
               type: OA 
-                                                           
+        - condition:
+            - function:
+                name: irb_approval_required    
+          function:
+            name: add_properties_to_node
+            args:
+              - function:
+                  name: get_node
+                  args:
+                    - irbglobal
+                    - U
+              - function:
+                  name: to_props
+                  args:
+                    - required=true                                                    
   - label: add_sp
     event:
       subject:
@@ -600,7 +614,28 @@ rules:
               - Disapprove
             target:
               name: Approval Content
-              type: OA                   
+              type: OA   
+        - condition:
+            - function:
+                name: all_children_have_properties
+                args:
+                  - function:
+                      name: get_node
+                      args:
+                        - Chair
+                        - UA
+                  - function:
+                      name: to_props
+                      args:
+                        - approved=true               
+          assign:
+            - what:
+                name: irbglobal
+                type: U
+              where:
+                name: IRB
+                type: UA              
+                              
   - label: chair_disapprove
     event:
       subject:
@@ -1017,6 +1052,178 @@ rules:
             target:
               name: Signature-Info
               type: OA  
+        - condition:
+            - function:
+                name: all_children_have_properties
+                args:
+                  - function:
+                      name: get_node
+                      args:
+                        - Dean
+                        - UA
+                  - function:
+                      name: to_props
+                      args:
+                        - approved=true 
+            - function:
+                name: all_children_have_properties
+                args:
+                  - function:
+                      name: get_node
+                      args:
+                        - IRB
+                        - UA
+                  - function:
+                      name: to_props
+                      args:
+                        - required=true 
+          assign:
+            - what:
+                name: racomputerscience
+                type: U
+              where:
+                name: Research-Admin
+                type: UA
+        - condition:
+            - function:
+                name: all_children_have_properties
+                args:
+                  - function:
+                      name: get_node
+                      args:
+                        - Dean
+                        - UA
+                  - function:
+                      name: to_props
+                      args:
+                        - approved=true 
+          condition!:
+            - function:
+                name: all_children_have_properties
+                args:
+                  - function:
+                      name: get_node
+                      args:
+                        - IRB
+                        - UA
+                  - function:
+                      name: to_props
+                      args:
+                        - required=true 
+          grant:
+            subject:
+              name: Research-Admin
+              type: UA
+            operations:
+              - Approve
+              - Disapprove
+              - Withdraw
+            target:
+              name: Approval Content
+              type: OA 
+        - condition:
+            - function:
+                name: all_children_have_properties
+                args:
+                  - function:
+                      name: get_node
+                      args:
+                        - Dean
+                        - UA
+                  - function:
+                      name: to_props
+                      args:
+                        - approved=true 
+          condition!:
+            - function:
+                name: all_children_have_properties
+                args:
+                  - function:
+                      name: get_node
+                      args:
+                        - IRB
+                        - UA
+                  - function:
+                      name: to_props
+                      args:
+                        - required=true 
+          grant:
+            subject:
+              name: Research-Admin
+              type: UA
+            operations:
+              - write
+            target:
+              name: OSP-Section-Info
+              type: OA 
+        - condition:
+            - function:
+                name: all_children_have_properties
+                args:
+                  - function:
+                      name: get_node
+                      args:
+                        - Dean
+                        - UA
+                  - function:
+                      name: to_props
+                      args:
+                        - approved=true 
+          condition!:
+            - function:
+                name: all_children_have_properties
+                args:
+                  - function:
+                      name: get_node
+                      args:
+                        - IRB
+                        - UA
+                  - function:
+                      name: to_props
+                      args:
+                        - required=true 
+          assign:
+            - what:
+                name: racomputerscience
+                type: U
+              where:
+                name: Research-Admin
+                type: UA 
+        - condition:
+            - function:
+                name: all_children_have_properties
+                args:
+                  - function:
+                      name: get_node
+                      args:
+                        - Dean
+                        - UA
+                  - function:
+                      name: to_props
+                      args:
+                        - approved=true 
+          condition!:
+            - function:
+                name: all_children_have_properties
+                args:
+                  - function:
+                      name: get_node
+                      args:
+                        - IRB
+                        - UA
+                  - function:
+                      name: to_props
+                      args:
+                        - required=true                 
+          grant:
+            subject:
+              name: Research-Admin
+              type: UA
+            operations:
+              - write
+            target:
+              name: Signature-Info
+              type: OA                  
   - label: dean_disapprove
     event:
       subject:
@@ -1127,49 +1334,6 @@ rules:
                 target:
                   name: Approval Content
                   type: OA
-        - condition:
-            - function:
-                name: all_children_have_properties
-                args:
-                  - function:
-                      name: get_node
-                      args:
-                        - Dean
-                        - UA
-                  - function:
-                      name: to_props
-                      args:
-                        - approved=true 
-          grant:
-            subject:
-              name: IRB
-              type: UA
-            operations:
-              - Approve
-              - Disapprove
-            target:
-              name: Approval Content
-              type: OA 
-        - condition:
-            - function:
-                name: all_children_have_properties
-                args:
-                  - function:
-                      name: get_node
-                      args:
-                        - Dean
-                        - UA
-                  - function:
-                      name: to_props
-                      args:
-                        - approved=true 
-          assign:
-            - what:
-                name: racomputerscience
-                type: U
-              where:
-                name: Research-Admin
-                type: UA
         - condition:
             - function:
                 name: all_children_have_properties
@@ -1354,4 +1518,335 @@ rules:
                 target:
                   name: Signature-Info
                   type: OA                         
-                 
+
+  - label: ra_approve
+    event:
+      subject:
+        anyUser:
+      operations:
+        - approve
+      target:
+        policyElements:
+          - name: Research-Admin-Approval
+            type: OA
+    response:
+      actions:
+        - delete:
+            associations:
+              - subject:
+                  name: Research-Admin
+                  type: UA
+                target:
+                  name: Signature-Info
+                  type: OA
+        - delete:
+            associations:
+              - subject:
+                  name: Research-Admin
+                  type: UA
+                target:
+                  name: Approval Content
+                  type: OA
+        - delete:
+            associations:
+              - subject:
+                  name: Research-Admin
+                  type: UA
+                target:
+                  name: OSP-Section-Info
+                  type: OA
+        - assign:
+            - what:
+                name: directorcomputerscience
+                type: U
+              where:
+                name: Research-Director
+                type: UA
+        - grant:
+            subject:
+              name: Research-Director
+              type: UA
+            operations:
+              - Approve
+              - Disapprove
+              - Delete
+            target:
+              name: Approval Content
+              type: OA 
+        - grant:
+            subject:
+              name: Research-Director
+              type: UA
+            operations:
+              - write
+            target:
+              name: Signature-Info
+              type: OA 
+  - label: ra_disapprove
+    event:
+      subject:
+        anyUser:
+      operations:
+        - disapprove
+      target:
+        policyElements:
+          - name: Research-Admin-Approval
+            type: OA
+    response:
+      actions:
+        - delete:
+            associations:
+              - subject:
+                  name: Research-Admin
+                  type: UA
+                target:
+                  name: Signature-Info
+                  type: OA
+        - delete:
+            associations:
+              - subject:
+                  name: Research-Admin
+                  type: UA
+                target:
+                  name: Approval Content
+                  type: OA
+        - delete:
+            associations:
+              - subject:
+                  name: Research-Admin
+                  type: UA
+                target:
+                  name: OSP-Section-Info
+                  type: OA
+        - delete:
+            prohibitions:
+              - deny1
+              - deny2
+              - deny3
+              - deny4
+              - deny5
+              - deny6
+        - function:
+            name: remove_properties_from_children
+            args:
+              - function:
+                  name: get_node
+                  args:
+                    - Dean
+                    - UA
+              - function:
+                  name: to_props
+                  args:
+                    - approved=true                                         
+        - function:
+            name: remove_properties_from_children
+            args:
+              - function:
+                  name: get_node
+                  args:
+                    - Business-Manager
+                    - UA
+              - function:
+                  name: to_props
+                  args:
+                    - approved=true  
+        - function:
+            name: remove_properties_from_children
+            args:
+              - function:
+                  name: get_node
+                  args:
+                    - Chair
+                    - UA
+              - function:
+                  name: to_props
+                  args:
+                    - approved=true  
+        - function:
+            name: remove_properties_from_children
+            args:
+              - function:
+                  name: get_node
+                  args:
+                    - IRB
+                    - UA
+              - function:
+                  name: to_props
+                  args:
+                    - approved=true     
+  - label: rd_approve
+    event:
+      subject:
+        anyUser:
+      operations:
+        - approve
+      target:
+        policyElements:
+          - name: Research-Director-Approval
+            type: OA
+    response:
+      actions:
+        - delete:
+            associations:
+              - subject:
+                  name: Research-Director
+                  type: UA
+                target:
+                  name: Signature-Info
+                  type: OA
+        - delete:
+            associations:
+              - subject:
+                  name: Research-Director
+                  type: UA
+                target:
+                  name: Approval Content
+                  type: OA
+        - grant:
+            subject:
+              name: Research-Admin
+              type: UA
+            operations:
+              - Submit
+            target:
+              name: Approval Content
+              type: OA 
+        - grant:
+            subject:
+              name: Research-Admin
+              type: UA
+            operations:
+              - write
+            target:
+              name: Signature-Info
+              type: OA 
+  - label: rd_disapprove
+    event:
+      subject:
+        anyUser:
+      operations:
+        - disapprove
+      target:
+        policyElements:
+          - name: Research-Director-Approval
+            type: OA
+    response:
+      actions:
+        - delete:
+            associations:
+              - subject:
+                  name: Research-Director
+                  type: UA
+                target:
+                  name: Signature-Info
+                  type: OA
+        - delete:
+            associations:
+              - subject:
+                  name: Research-Director
+                  type: UA
+                target:
+                  name: Approval Content
+                  type: OA
+        - delete:
+            prohibitions:
+              - deny1
+              - deny2
+              - deny3
+              - deny4
+              - deny5
+              - deny6
+        - function:
+            name: remove_properties_from_children
+            args:
+              - function:
+                  name: get_node
+                  args:
+                    - Dean
+                    - UA
+              - function:
+                  name: to_props
+                  args:
+                    - approved=true                                         
+        - function:
+            name: remove_properties_from_children
+            args:
+              - function:
+                  name: get_node
+                  args:
+                    - Business-Manager
+                    - UA
+              - function:
+                  name: to_props
+                  args:
+                    - approved=true  
+        - function:
+            name: remove_properties_from_children
+            args:
+              - function:
+                  name: get_node
+                  args:
+                    - Chair
+                    - UA
+              - function:
+                  name: to_props
+                  args:
+                    - approved=true  
+        - function:
+            name: remove_properties_from_children
+            args:
+              - function:
+                  name: get_node
+                  args:
+                    - IRB
+                    - UA
+              - function:
+                  name: to_props
+                  args:
+                    - approved=true                        
+  - label: ra_submit
+    event:
+      subject:
+        anyUser:
+      operations:
+        - RAsubmit
+      target:
+        policyElements:
+          - name: Submission-Info
+            type: OA
+    response:
+      actions:
+        - delete:
+            associations:
+              - subject:
+                  name: Research-Admin
+                  type: UA
+                target:
+                  name: Signature-Info
+                  type: OA
+        - delete:
+            associations:
+              - subject:
+                  name: Research-Admin
+                  type: UA
+                target:
+                  name: Approval Content
+                  type: OA
+        - grant:
+            subject:
+              name: Research-Director
+              type: UA
+            operations:
+              - Archive
+            target:
+              name: Approval Content
+              type: OA 
+        - grant:
+            subject:
+              name: Research-Director
+              type: UA
+            operations:
+              - write
+            target:
+              name: Signature-Info
+              type: OA                                   
