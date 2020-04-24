@@ -1576,6 +1576,9 @@ public class ProposalService {
 					
 					
 					String decision = "";
+					
+					
+					System.out.println(projectProposal.getProposal().getPolicyGraph());
 
 					if (action.equalsIgnoreCase("Edit")) {
 						String objectAtt = "";
@@ -1586,21 +1589,29 @@ public class ProposalService {
 								objectAtt);
 						log.info("D:" + decision);
 					} else if (action.equalsIgnoreCase("Add Co-PI")) {
-						Boolean hasPermission = pdsOperations.hasPermissionToAddAsCoPI(
+						String objectAtt = "CoPI";
+						String acRight = "assign-u-to";
+						decision = projectProposal.getPolicyDecision(pdsOperations, userInfo.getUserName(), acRight,
+								objectAtt);
+						/*Boolean hasPermission = pdsOperations.hasPermissionToAddAsCoPI(
 								projectProposal.getProposalPolicy(), userInfo.getUserName(), "",
 								projectProposal.getProhibitions());
 						if (hasPermission)
 							decision = "Permit";
 						else
-							decision = "Deny";
+							decision = "Deny";*/
 					} else if (action.equalsIgnoreCase("Add Senior Personnel")) {
-						Boolean hasPermission = pdsOperations.hasPermissionToAddAsSP(
-								projectProposal.getProposalPolicy(), userInfo.getUserName(), "",
-								projectProposal.getProhibitions());
-						if (hasPermission)
-							decision = "Permit";
-						else
-							decision = "Deny";
+						String objectAtt = "SP";
+						String acRight = "assign-u-to";
+						decision = projectProposal.getPolicyDecision(pdsOperations, userInfo.getUserName(), acRight,
+								objectAtt);
+//						Boolean hasPermission = pdsOperations.hasPermissionToAddAsSP(
+//								projectProposal.getProposalPolicy(), userInfo.getUserName(), "",
+//								projectProposal.getProhibitions());
+//						if (hasPermission)
+//							decision = "Permit";
+//						else
+//							decision = "Deny";
 					} else if (action.equalsIgnoreCase("Delete")
 							&& proposalSection.equalsIgnoreCase("InvestigatorInformation.Co-PI")) {
 						Boolean hasPermission = pdsOperations.hasPermissionToDeleteCoPI(

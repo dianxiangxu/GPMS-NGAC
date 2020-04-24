@@ -39,7 +39,7 @@ public class PIDeletesFileAttatchment {
 		System.setProperty("webdriver.chrome.driver", seleniumDriverLocation
 				+ File.separator + "chromedriver.exe");
 		driver = new ChromeDriver();
-		baseUrl = "http://localhost:8181/";
+		baseUrl = "http://localhost:8080/";
 		driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
 
 		String uploadFolderName = "/uploads";
@@ -51,7 +51,7 @@ public class PIDeletesFileAttatchment {
 
 	@Test
 	public void testPIdeletesAttatchment() throws Exception {
-		driver.get(baseUrl + "GPMS/");
+		driver.get(baseUrl + "GPMS-NGAC/");
 		driver.findElement(By.id("user_email")).clear();
 		driver.findElement(By.id("user_email")).sendKeys(
 				"nicholas1234@gmail.com");

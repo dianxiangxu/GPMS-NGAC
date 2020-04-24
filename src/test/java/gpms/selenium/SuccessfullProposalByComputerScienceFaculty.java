@@ -33,7 +33,7 @@ public class SuccessfullProposalByComputerScienceFaculty {
 		System.setProperty("webdriver.chrome.driver", seleniumDriverLocation
 				+ File.separator + "chromedriver.exe");
 		driver = new ChromeDriver();
-		baseUrl = "http://localhost:8181/";
+		baseUrl = "http://localhost:8080/";
 		driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
 
 		String uploadFolderName = "/uploads";
@@ -46,7 +46,7 @@ public class SuccessfullProposalByComputerScienceFaculty {
 	@Test
 	public void test() throws Exception {
 		// Add Proposal with Computer Science
-		driver.get(baseUrl + "GPMS/");
+		driver.get(baseUrl + "GPMS-NGAC/");
 		driver.findElement(By.id("user_email")).clear();
 		driver.findElement(By.id("user_email")).sendKeys("milson");
 		driver.findElement(By.id("user_password")).clear();
@@ -329,7 +329,7 @@ public class SuccessfullProposalByComputerScienceFaculty {
 		Thread.sleep(1000);
 
 		// Chair approval
-		driver.get(baseUrl + "GPMS/");
+		driver.get(baseUrl + "GPMS-NGAC/");
 		driver.findElement(By.id("user_email")).clear();
 		driver.findElement(By.id("user_email")).sendKeys(
 				"chaircomputerscience@gmail.com");
@@ -381,7 +381,7 @@ public class SuccessfullProposalByComputerScienceFaculty {
 		Thread.sleep(1500);
 
 		// Business manager approval
-		driver.get(baseUrl + "GPMS/");
+		driver.get(baseUrl + "GPMS-NGAC/");
 		driver.findElement(By.id("user_email")).clear();
 		driver.findElement(By.id("user_email")).sendKeys(
 				"bmcomputerscience@gmail.com");
@@ -434,10 +434,10 @@ public class SuccessfullProposalByComputerScienceFaculty {
 		Thread.sleep(1500);
 
 		// 1st IRB Approval
-		driver.get(baseUrl + "GPMS/");
+		driver.get(baseUrl + "GPMS-NGAC/");
 		driver.findElement(By.id("user_email")).clear();
 		driver.findElement(By.id("user_email")).sendKeys(
-				"irbcomputerscience@gmail.com");
+				"irbglobal");
 		driver.findElement(By.id("user_password")).clear();
 		driver.findElement(By.id("user_password")).sendKeys("gpmspassword");
 		Thread.sleep(200);
@@ -451,19 +451,21 @@ public class SuccessfullProposalByComputerScienceFaculty {
 		Thread.sleep(500);
 		driver.findElement(By.id("ui-id-21")).click();
 		Thread.sleep(500);
-		driver.findElement(By.name("5745fca7bcbb29192ce0d449IRB")).clear();
+		driver.findElement(By.name("5cddd0cf2edd2f0d3c61c176IRB")).clear();
 		Thread.sleep(200);
-		driver.findElement(By.name("5745fca7bcbb29192ce0d449IRB")).sendKeys(
+		driver.findElement(By.name("5cddd0cf2edd2f0d3c61c176IRB")).sendKeys(
 				"IRB");
+
 		Thread.sleep(200);
 		driver.findElement(By.xpath("//table[@id='trSignIRB']/tbody/tr/td[3]"))
 				.click();
 		Thread.sleep(200);
-		driver.findElement(By.name("proposalNotes5745fca7bcbb29192ce0d449IRB"))
+		driver.findElement(By.name("proposalNotes5cddd0cf2edd2f0d3c61c176IRB"))
 				.clear();
 		Thread.sleep(200);
-		driver.findElement(By.name("proposalNotes5745fca7bcbb29192ce0d449IRB"))
+		driver.findElement(By.name("proposalNotes5cddd0cf2edd2f0d3c61c176IRB"))
 				.sendKeys("Test");
+		
 		Thread.sleep(200);
 		driver.findElement(By.id("btnApproveProposal")).click();
 		Thread.sleep(500);
@@ -481,56 +483,10 @@ public class SuccessfullProposalByComputerScienceFaculty {
 		driver.findElement(By.linkText("Log Out")).click();
 		Thread.sleep(1500);
 
-		// 2nd IRB Approval
-		driver.findElement(By.id("user_email")).clear();
-		driver.findElement(By.id("user_email")).sendKeys(
-				"irbelectricalengineering@gmail.com");
-		driver.findElement(By.id("user_password")).clear();
-		driver.findElement(By.id("user_password")).sendKeys("gpmspassword");
-		Thread.sleep(200);
-		driver.findElement(By.name("commit")).click();
-		Thread.sleep(200);
-		driver.findElement(By.linkText("My Proposals")).click();
-		Thread.sleep(200);
-
-		((JavascriptExecutor) driver)
-				.executeScript("var s=document.getElementById('edit0');s.click();");
-		Thread.sleep(500);
-		driver.findElement(By.id("ui-id-21")).click();
-		Thread.sleep(500);
-		driver.findElement(By.name("574604fabcbb29192ce0d46aIRB")).clear();
-		Thread.sleep(200);
-		driver.findElement(By.name("574604fabcbb29192ce0d46aIRB")).sendKeys(
-				"IRB");
-		Thread.sleep(200);
-		driver.findElement(
-				By.xpath("//table[@id='trSignIRB']/tbody/tr[2]/td[3]")).click();
-		Thread.sleep(200);
-		driver.findElement(By.name("proposalNotes574604fabcbb29192ce0d46aIRB"))
-				.clear();
-		Thread.sleep(200);
-		driver.findElement(By.name("proposalNotes574604fabcbb29192ce0d46aIRB"))
-				.sendKeys("Test");
-
-		Thread.sleep(200);
-		driver.findElement(By.id("btnApproveProposal")).click();
-		Thread.sleep(500);
-		driver.findElement(By.id("BoxConfirmBtnOk")).click();
-		Thread.sleep(200);
-
-		assertTrue(driver.findElement(By.cssSelector("BODY")).getText()
-				.matches("^[\\s\\S]*$"));
-		Thread.sleep(200);
-		driver.findElement(By.id("BoxAlertBtnOk")).click();
-		Thread.sleep(200);
-		driver.findElement(By.cssSelector("span.myProfile.icon-arrow-s"))
-				.click();
-		Thread.sleep(200);
-		driver.findElement(By.linkText("Log Out")).click();
-		Thread.sleep(1500);
+		
 
 		// Dean approval
-		driver.get(baseUrl + "GPMS/");
+		driver.get(baseUrl + "GPMS-NGAC/");
 		driver.findElement(By.id("user_email")).clear();
 		driver.findElement(By.id("user_email")).sendKeys(
 				"deancomputerscience@gmail.com");
@@ -578,7 +534,7 @@ public class SuccessfullProposalByComputerScienceFaculty {
 		Thread.sleep(1500);
 
 		// Research Administration approval
-		driver.get(baseUrl + "GPMS/");
+		driver.get(baseUrl + "GPMS-NGAC/");
 		driver.findElement(By.id("user_email")).clear();
 		driver.findElement(By.id("user_email")).sendKeys(
 				"racomputerscience@gmail.com");
@@ -778,7 +734,7 @@ public class SuccessfullProposalByComputerScienceFaculty {
 		Thread.sleep(1500);
 
 		// Research Director Approval
-		driver.get(baseUrl + "GPMS/");
+		driver.get(baseUrl + "GPMS-NGAC/");
 		driver.findElement(By.id("user_email")).clear();
 		driver.findElement(By.id("user_email")).sendKeys(
 				"directorcomputerscience@gmail.com");
@@ -834,7 +790,7 @@ public class SuccessfullProposalByComputerScienceFaculty {
 		Thread.sleep(1500);
 
 		// Research Administrator submission
-		driver.get(baseUrl + "GPMS/");
+		driver.get(baseUrl + "GPMS-NGAC/");
 		driver.findElement(By.id("user_email")).clear();
 		driver.findElement(By.id("user_email")).sendKeys(
 				"racomputerscience@gmail.com");
@@ -865,7 +821,7 @@ public class SuccessfullProposalByComputerScienceFaculty {
 		Thread.sleep(1500);
 
 		// Research Director Archive
-		driver.get(baseUrl + "GPMS/");
+		driver.get(baseUrl + "GPMS-NGAC/");
 		driver.findElement(By.id("user_email")).clear();
 		driver.findElement(By.id("user_email")).sendKeys(
 				"directorcomputerscience@gmail.com");

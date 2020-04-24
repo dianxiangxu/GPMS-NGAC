@@ -29,14 +29,14 @@ public class DelegationByChair {
 		System.setProperty("webdriver.chrome.driver", seleniumDriverLocation
 				+ File.separator + "chromedriver.exe");
 		driver = new ChromeDriver();
-		baseUrl = "http://localhost:8181/";
+		baseUrl = "http://localhost:8080/";
 		driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
 	}
 
 	@Test
 	public void testWeb() throws Exception {
 		// Add Proposal with Computer Science
-		driver.get(baseUrl + "GPMS/");
+		driver.get(baseUrl + "GPMS-NGAC/");
 		driver.findElement(By.id("user_email")).clear();
 		driver.findElement(By.id("user_email")).sendKeys("milson");
 		driver.findElement(By.id("user_password")).clear();

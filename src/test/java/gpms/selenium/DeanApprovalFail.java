@@ -35,16 +35,16 @@ public class DeanApprovalFail {
 		System.setProperty("webdriver.chrome.driver", seleniumDriverLocation
 				+ File.separator + "chromedriver.exe");
 		driver = new ChromeDriver();
-		baseUrl = "http://localhost:8181/";
+		baseUrl = "http://localhost:8080/";
 		driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
 	}
 
 	@Test
 	public void testNewProposal() throws Exception {
-		driver.get(baseUrl + "GPMS/");
+		driver.get(baseUrl + "GPMS-NGAC/");
 		driver.findElement(By.id("user_email")).clear();
 		driver.findElement(By.id("user_email")).sendKeys(
-				"nicholas1234@gmail.com");
+				"nazmul");
 		driver.findElement(By.id("user_password")).clear();
 		driver.findElement(By.id("user_password")).sendKeys("gpmspassword");
 		Thread.sleep(200);
@@ -253,10 +253,10 @@ public class DeanApprovalFail {
 		driver.findElement(
 				By.xpath("//table[@id='trSignPICOPI']/tbody/tr/td[3]")).click();
 		Thread.sleep(200);
-		driver.findElement(By.name("proposalNotes574f7adb65dbb34d17834b57PI"))
+		driver.findElement(By.name("proposalNotes5cddc20d2edd2f0d3c61c120PI"))
 				.clear();
 		Thread.sleep(200);
-		driver.findElement(By.name("proposalNotes574f7adb65dbb34d17834b57PI"))
+		driver.findElement(By.name("proposalNotes5cddc20d2edd2f0d3c61c120PI"))
 				.sendKeys("Test");
 		Thread.sleep(200);
 		driver.findElement(By.id("ui-id-25")).click();
@@ -277,7 +277,7 @@ public class DeanApprovalFail {
 		Thread.sleep(2000);
 
 		// Dean approval fail
-		driver.get(baseUrl + "GPMS/");
+		driver.get(baseUrl + "GPMS-NGAC/");
 		driver.findElement(By.id("user_email")).clear();
 		driver.findElement(By.id("user_email")).sendKeys(
 				"deanchemistry1@gmail.com");
@@ -301,7 +301,7 @@ public class DeanApprovalFail {
 		Thread.sleep(500);
 
 		WebElement txtSign = driver.findElement(By
-				.name("57460657bcbb29192ce0d483Dean"));
+				.name("5745f5ebbcbb29192ce0d438Dean"));
 		((JavascriptExecutor) driver)
 				.executeScript(
 						"arguments[0].readonly = false;arguments[0].removeAttribute('disabled');",
@@ -310,7 +310,7 @@ public class DeanApprovalFail {
 		Thread.sleep(500);
 
 		WebElement txtDate = driver.findElement(By
-				.name("signaturedate57460657bcbb29192ce0d483Dean"));
+				.name("signaturedate5745f5ebbcbb29192ce0d438Dean"));
 		((JavascriptExecutor) driver)
 				.executeScript(
 						"arguments[0].readonly = false;arguments[0].removeAttribute('disabled');",
@@ -319,7 +319,7 @@ public class DeanApprovalFail {
 		Thread.sleep(500);
 
 		WebElement txtNote = driver.findElement(By
-				.name("proposalNotes57460657bcbb29192ce0d483Dean"));
+				.name("proposalNotes5745f5ebbcbb29192ce0d438Dean"));
 		((JavascriptExecutor) driver)
 				.executeScript(
 						"arguments[0].readonly = false;arguments[0].removeAttribute('disabled');",
@@ -327,19 +327,19 @@ public class DeanApprovalFail {
 
 		Thread.sleep(1000);
 
-		driver.findElement(By.name("57460657bcbb29192ce0d483Dean")).sendKeys(
+		driver.findElement(By.name("5745f5ebbcbb29192ce0d438Dean")).sendKeys(
 				"dean");
 		Thread.sleep(200);
-		driver.findElement(By.name("signaturedate57460657bcbb29192ce0d483Dean"))
+		driver.findElement(By.name("signaturedate5745f5ebbcbb29192ce0d438Dean"))
 				.click();
 		Thread.sleep(200);
 		driver.findElement(By.xpath("//table[@id='trSignDean']/tbody/tr/td[3]"))
 				.click();
 		Thread.sleep(200);
-		driver.findElement(By.name("proposalNotes57460657bcbb29192ce0d483Dean"))
+		driver.findElement(By.name("proposalNotes5745f5ebbcbb29192ce0d438Dean"))
 				.clear();
 		Thread.sleep(200);
-		driver.findElement(By.name("proposalNotes57460657bcbb29192ce0d483Dean"))
+		driver.findElement(By.name("proposalNotes5745f5ebbcbb29192ce0d438Dean"))
 				.sendKeys("Test");
 		Thread.sleep(200);
 

@@ -542,7 +542,20 @@
        "source": "PI", 
        "target": "SP"  
      },
-     
+          {
+    "operations": [
+         "assign-u-from"
+        ],
+       "source": "PI", 
+       "target": "CoPI-Eligible Faculty"  
+     },
+          {
+    "operations": [
+         "assign-u-to"
+        ],
+       "source": "PI", 
+       "target": "CoPI"  
+     },
      {
        "operations": [
          "write"

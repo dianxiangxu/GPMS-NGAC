@@ -35,16 +35,16 @@ public class ChairApprovalFail {
 		System.setProperty("webdriver.chrome.driver", seleniumDriverLocation
 				+ File.separator + "chromedriver.exe");
 		driver = new ChromeDriver();
-		baseUrl = "http://localhost:8181/";
+		baseUrl = "http://localhost:8080/";
 		driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
 	}
 
 	@Test
 	public void testNewProposal() throws Exception {
-		driver.get(baseUrl + "GPMS/");
+		driver.get(baseUrl + "GPMS-NGAC/");
 		driver.findElement(By.id("user_email")).clear();
 		driver.findElement(By.id("user_email")).sendKeys(
-				"nicholas1234@gmail.com");
+				"nazmul");
 		driver.findElement(By.id("user_password")).clear();
 		driver.findElement(By.id("user_password")).sendKeys("gpmspassword");
 		Thread.sleep(500);
@@ -249,10 +249,10 @@ public class ChairApprovalFail {
 		driver.findElement(
 				By.xpath("//table[@id='trSignPICOPI']/tbody/tr/td[3]")).click();
 		Thread.sleep(500);
-		driver.findElement(By.name("proposalNotes574f7adb65dbb34d17834b57PI"))
+		driver.findElement(By.name("proposalNotes5cddc20d2edd2f0d3c61c120PI"))
 				.clear();
 		Thread.sleep(500);
-		driver.findElement(By.name("proposalNotes574f7adb65dbb34d17834b57PI"))
+		driver.findElement(By.name("proposalNotes5cddc20d2edd2f0d3c61c120PI"))
 				.sendKeys("Test");
 		Thread.sleep(500);
 		driver.findElement(By.id("ui-id-25")).click();
@@ -273,7 +273,7 @@ public class ChairApprovalFail {
 		Thread.sleep(2000);
 
 		// Chair approval
-		driver.get(baseUrl + "GPMS/");
+		driver.get(baseUrl + "GPMS-NGAC/");
 		driver.findElement(By.id("user_email")).clear();
 		driver.findElement(By.id("user_email")).sendKeys(
 				"chairchemistry@gmail.com");

@@ -40,7 +40,7 @@ public class DeanDeletesAttatchmentFail {
 		System.setProperty("webdriver.chrome.driver", seleniumDriverLocation
 				+ File.separator + "chromedriver.exe");
 		driver = new ChromeDriver();
-		baseUrl = "http://localhost:8181/";
+		baseUrl = "http://localhost:8080/";
 		driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
 
 		String uploadFolderName = "/uploads";
@@ -52,10 +52,10 @@ public class DeanDeletesAttatchmentFail {
 
 	@Test
 	public void testPIdeletesAttatchment() throws Exception {
-		driver.get(baseUrl + "GPMS/");
+		driver.get(baseUrl + "GPMS-NGAC/");
 		driver.findElement(By.id("user_email")).clear();
 		driver.findElement(By.id("user_email")).sendKeys(
-				"nicholas1234@gmail.com");
+				"nazmul");
 		driver.findElement(By.id("user_password")).clear();
 		driver.findElement(By.id("user_password")).sendKeys("gpmspassword");
 		Thread.sleep(200);
@@ -267,10 +267,10 @@ public class DeanDeletesAttatchmentFail {
 		driver.findElement(
 				By.xpath("//table[@id='trSignPICOPI']/tbody/tr/td[3]")).click();
 		Thread.sleep(200);
-		driver.findElement(By.name("proposalNotes574f7adb65dbb34d17834b57PI"))
+		driver.findElement(By.name("proposalNotes5cddc20d2edd2f0d3c61c120PI"))
 				.clear();
 		Thread.sleep(200);
-		driver.findElement(By.name("proposalNotes574f7adb65dbb34d17834b57PI"))
+		driver.findElement(By.name("proposalNotes5cddc20d2edd2f0d3c61c120PI"))
 				.sendKeys("Test");
 		Thread.sleep(200);
 		driver.findElement(By.id("ui-id-25")).click();
@@ -345,7 +345,7 @@ public class DeanDeletesAttatchmentFail {
 		driver.findElement(By.linkText("Log Out")).click();
 		Thread.sleep(1000);
 
-		driver.get(baseUrl + "GPMS/");
+		driver.get(baseUrl + "GPMS-NGAC/");
 		driver.findElement(By.id("user_password")).clear();
 		driver.findElement(By.id("user_password")).sendKeys("gpmspassword");
 		driver.findElement(By.id("user_email")).clear();
