@@ -41,7 +41,7 @@ public class ResearchAdminProposalWithdrawn {
 		driver.get(baseUrl + "GPMS-NGAC/");
 		driver.findElement(By.id("user_email")).clear();
 		driver.findElement(By.id("user_email")).sendKeys(
-				"nicholas1234@gmail.com");
+				"nazmul");
 		driver.findElement(By.id("user_password")).clear();
 		driver.findElement(By.id("user_password")).sendKeys("gpmspassword");
 		Thread.sleep(500);
@@ -253,10 +253,10 @@ public class ResearchAdminProposalWithdrawn {
 		driver.findElement(
 				By.xpath("//table[@id='trSignPICOPI']/tbody/tr/td[3]")).click();
 		Thread.sleep(500);
-		driver.findElement(By.name("proposalNotes574f7adb65dbb34d17834b57PI"))
+		driver.findElement(By.name("proposalNotes5cddc20d2edd2f0d3c61c120PI"))
 				.clear();
 		Thread.sleep(500);
-		driver.findElement(By.name("proposalNotes574f7adb65dbb34d17834b57PI"))
+		driver.findElement(By.name("proposalNotes5cddc20d2edd2f0d3c61c120PI"))
 				.sendKeys("Test");
 		Thread.sleep(500);
 		driver.findElement(By.id("ui-id-25")).click();
@@ -289,10 +289,10 @@ public class ResearchAdminProposalWithdrawn {
 		Thread.sleep(7000);
 
 		// Chair approval
-		driver.get(baseUrl + "GPMS/");
+		driver.get(baseUrl + "GPMS-NGAC/");
 		driver.findElement(By.id("user_email")).clear();
 		driver.findElement(By.id("user_email")).sendKeys(
-				"chairchemistry@gmail.com");
+				"chaircomputerscience");
 		driver.findElement(By.id("user_password")).clear();
 		driver.findElement(By.id("user_password")).sendKeys("gpmspassword");
 		Thread.sleep(500);
@@ -309,28 +309,28 @@ public class ResearchAdminProposalWithdrawn {
 		Thread.sleep(500);
 		driver.findElement(By.id("ui-id-21")).click();
 		Thread.sleep(500);
-		driver.findElement(By.name("5745f29ebcbb29192ce0d42fDepartment_Chair"))
+		driver.findElement(By.name("5745f0f7bcbb29192ce0d405Department_Chair"))
 				.click();
 		Thread.sleep(500);
-		driver.findElement(By.name("5745f29ebcbb29192ce0d42fDepartment_Chair"))
+		driver.findElement(By.name("5745f0f7bcbb29192ce0d405Department_Chair"))
 				.clear();
 		Thread.sleep(500);
-		driver.findElement(By.name("5745f29ebcbb29192ce0d42fDepartment_Chair"))
+		driver.findElement(By.name("5745f0f7bcbb29192ce0d405Department_Chair"))
 				.sendKeys("chair");
 		Thread.sleep(500);
 		driver.findElement(
-				By.name("signaturedate5745f29ebcbb29192ce0d42fDepartment_Chair"))
+				By.name("signaturedate5745f0f7bcbb29192ce0d405Department_Chair"))
 				.click();
 		Thread.sleep(500);
 		driver.findElement(
 				By.xpath("//table[@id='trSignChair']/tbody/tr/td[3]")).click();
 		Thread.sleep(500);
 		driver.findElement(
-				By.name("proposalNotes5745f29ebcbb29192ce0d42fDepartment_Chair"))
+				By.name("proposalNotes5745f0f7bcbb29192ce0d405Department_Chair"))
 				.clear();
 		Thread.sleep(500);
 		driver.findElement(
-				By.name("proposalNotes5745f29ebcbb29192ce0d42fDepartment_Chair"))
+				By.name("proposalNotes5745f0f7bcbb29192ce0d405Department_Chair"))
 				.sendKeys("Test");
 		Thread.sleep(500);
 		driver.findElement(By.id("btnApproveProposal")).click();
@@ -350,10 +350,10 @@ public class ResearchAdminProposalWithdrawn {
 		driver.findElement(By.linkText("Log Out")).click();
 
 		// Business manager approval
-		driver.get(baseUrl + "GPMS/");
+		driver.get(baseUrl + "GPMS-NGAC/");
 		driver.findElement(By.id("user_email")).clear();
 		driver.findElement(By.id("user_email")).sendKeys(
-				"bmchemistry1@gmail.com");
+				"bmcomputerscience");
 		driver.findElement(By.id("user_password")).clear();
 		driver.findElement(By.id("user_password")).sendKeys("gpmspassword");
 		Thread.sleep(500);
@@ -374,22 +374,22 @@ public class ResearchAdminProposalWithdrawn {
 		Thread.sleep(500);
 		driver.findElement(By.id("ui-id-21")).click();
 		Thread.sleep(500);
-		driver.findElement(By.name("574620c6bcbb29150487642aBusiness_Manager"))
+		driver.findElement(By.name("5745f147bcbb29192ce0d40dBusiness_Manager"))
 				.clear();
 		Thread.sleep(500);
-		driver.findElement(By.name("574620c6bcbb29150487642aBusiness_Manager"))
+		driver.findElement(By.name("5745f147bcbb29192ce0d40dBusiness_Manager"))
 				.sendKeys("Business Manager");
 		Thread.sleep(500);
 		driver.findElement(
-				By.name("proposalNotes574620c6bcbb29150487642aBusiness_Manager"))
+				By.name("proposalNotes5745f147bcbb29192ce0d40dBusiness_Manager"))
 				.clear();
 		Thread.sleep(500);
 		driver.findElement(
-				By.name("proposalNotes574620c6bcbb29150487642aBusiness_Manager"))
+				By.name("proposalNotes5745f147bcbb29192ce0d40dBusiness_Manager"))
 				.sendKeys("Test");
 		Thread.sleep(500);
 		driver.findElement(
-				By.name("signaturedate574620c6bcbb29150487642aBusiness_Manager"))
+				By.name("signaturedate5745f147bcbb29192ce0d40dBusiness_Manager"))
 				.click();
 		Thread.sleep(500);
 		driver.findElement(
@@ -412,10 +412,10 @@ public class ResearchAdminProposalWithdrawn {
 		Thread.sleep(7000);
 
 		// Dean approval
-		driver.get(baseUrl + "GPMS/");
+		driver.get(baseUrl + "GPMS-NGAC/");
 		driver.findElement(By.id("user_email")).clear();
 		driver.findElement(By.id("user_email")).sendKeys(
-				"deanchemistry1@gmail.com");
+				"deancomputerscience");
 		driver.findElement(By.id("user_password")).clear();
 		driver.findElement(By.id("user_password")).sendKeys("gpmspassword");
 		Thread.sleep(500);
@@ -428,21 +428,21 @@ public class ResearchAdminProposalWithdrawn {
 		Thread.sleep(500);
 		driver.findElement(By.id("btnApproveProposal")).click();
 		Thread.sleep(500);
-		driver.findElement(By.name("57460657bcbb29192ce0d483Dean")).clear();
+		driver.findElement(By.name("5745f5ebbcbb29192ce0d438Dean")).clear();
 		Thread.sleep(500);
-		driver.findElement(By.name("57460657bcbb29192ce0d483Dean")).sendKeys(
+		driver.findElement(By.name("5745f5ebbcbb29192ce0d438Dean")).sendKeys(
 				"Dean");
 		Thread.sleep(500);
-		driver.findElement(By.name("proposalNotes57460657bcbb29192ce0d483Dean"))
+		driver.findElement(By.name("proposalNotes5745f5ebbcbb29192ce0d438Dean"))
 				.clear();
 		Thread.sleep(500);
-		driver.findElement(By.name("proposalNotes57460657bcbb29192ce0d483Dean"))
+		driver.findElement(By.name("proposalNotes5745f5ebbcbb29192ce0d438Dean"))
 				.sendKeys("Test");
 		Thread.sleep(500);
 		driver.findElement(By.xpath("//table[@id='trSignDean']/tbody/tr/td[3]"))
 				.click();
 		Thread.sleep(500);
-		driver.findElement(By.name("signaturedate57460657bcbb29192ce0d483Dean"))
+		driver.findElement(By.name("signaturedate5745f5ebbcbb29192ce0d438Dean"))
 				.click();
 		Thread.sleep(500);
 		driver.findElement(
@@ -465,7 +465,7 @@ public class ResearchAdminProposalWithdrawn {
 		Thread.sleep(500);
 
 		// Research admin Withdraws proposal
-		driver.get(baseUrl + "GPMS/");
+		driver.get(baseUrl + "GPMS-NGAC/");
 		driver.findElement(By.id("user_password")).clear();
 		driver.findElement(By.id("user_password")).sendKeys("gpmspassword");
 		driver.findElement(By.id("user_email")).clear();
@@ -487,7 +487,7 @@ public class ResearchAdminProposalWithdrawn {
 				.matches("^[\\s\\S]*$"));
 		Thread.sleep(500);
 		driver.findElement(By.id("BoxAlertBtnOk")).click();
-		Thread.sleep(500);
+		Thread.sleep(200);
 		driver.findElement(By.cssSelector("span.myProfile.icon-arrow-s"))
 				.click();
 		Thread.sleep(500);

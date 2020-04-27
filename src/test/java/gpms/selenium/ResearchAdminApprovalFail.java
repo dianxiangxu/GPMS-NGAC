@@ -44,7 +44,7 @@ public class ResearchAdminApprovalFail {
 		driver.get(baseUrl + "GPMS-NGAC/");
 		driver.findElement(By.id("user_email")).clear();
 		driver.findElement(By.id("user_email")).sendKeys(
-				"nicholas1234@gmail.com");
+				"nazmul");
 		driver.findElement(By.id("user_password")).clear();
 		driver.findElement(By.id("user_password")).sendKeys("gpmspassword");
 		Thread.sleep(200);
@@ -252,18 +252,18 @@ public class ResearchAdminApprovalFail {
 		driver.findElement(
 				By.xpath("//table[@id='trSignPICOPI']/tbody/tr/td[3]")).click();
 		Thread.sleep(200);
-		driver.findElement(By.name("proposalNotes574f7adb65dbb34d17834b57PI"))
+		driver.findElement(By.name("proposalNotes5cddc20d2edd2f0d3c61c120PI"))
 				.clear();
 		Thread.sleep(200);
-		driver.findElement(By.name("proposalNotes574f7adb65dbb34d17834b57PI"))
+		driver.findElement(By.name("proposalNotes5cddc20d2edd2f0d3c61c120PI"))
 				.sendKeys("Test");
 		Thread.sleep(200);
 		driver.findElement(By.id("ui-id-25")).click();
-		Thread.sleep(200);
+		Thread.sleep(500);
 		driver.findElement(By.id("btnSaveProposal")).click();
-		Thread.sleep(200);
+		Thread.sleep(500);
 		driver.findElement(By.id("BoxConfirmBtnOk")).click();
-		Thread.sleep(200);
+		Thread.sleep(500);
 		assertTrue(driver.findElement(By.cssSelector("BODY")).getText()
 				.matches("^[\\s\\S]*$"));
 		Thread.sleep(200);
@@ -276,7 +276,7 @@ public class ResearchAdminApprovalFail {
 		Thread.sleep(2000);
 
 		// Research Admin approval fail
-		driver.get(baseUrl + "GPMS/");
+		driver.get(baseUrl + "GPMS-NGAC/");
 		driver.findElement(By.id("user_email")).clear();
 		driver.findElement(By.id("user_email")).sendKeys(
 				"racomputerscience@gmail.com");
@@ -352,168 +352,180 @@ public class ResearchAdminApprovalFail {
 		((JavascriptExecutor) driver)
 				.executeScript("var s=document.getElementById('btnApproveProposal');s.click();");
 		Thread.sleep(500);
+		driver.findElement(By.id("BoxConfirmBtnOk")).click();
+		Thread.sleep(700);
+		assertTrue(driver.findElement(By.cssSelector("div.BoxError"))
+				.isDisplayed());
+		Thread.sleep(500);
+
+		driver.findElement(By.id("BoxAlertBtnOk")).click();
+		Thread.sleep(1500);
+		driver.findElement(By.id("ui-id-23")).click();
+		Thread.sleep(1000);
+		driver.findElement(By.id("ui-id-24")).click();
+		Thread.sleep(1000);
 
 		// Fill up OSP Section
 		((JavascriptExecutor) driver)
 				.executeScript("$('#ui-id-24').find('input, select, textarea').each(function() {$(this).prop('disabled', false);});");
-		Thread.sleep(1000);
+		Thread.sleep(1500);
 
 		driver.findElement(By.id("txtAgencyList")).clear();
-		Thread.sleep(200);
+		Thread.sleep(500);
 
 		driver.findElement(By.id("txtAgencyList")).sendKeys("Some agency");
-		Thread.sleep(200);
+		Thread.sleep(500);
 
 		driver.findElement(By.id("chkFederal")).click();
-		Thread.sleep(200);
+		Thread.sleep(500);
 
 		driver.findElement(By.id("chkNonProfitOrganization")).click();
-		Thread.sleep(200);
+		Thread.sleep(500);
 
 		driver.findElement(By.id("chkNonIdahoLocalEntity")).click();
-		Thread.sleep(200);
+		Thread.sleep(500);
 
 		driver.findElement(By.id("txtCFDANo")).clear();
-		Thread.sleep(200);
+		Thread.sleep(500);
 
 		driver.findElement(By.id("txtCFDANo")).sendKeys("55555555");
-		Thread.sleep(200);
+		Thread.sleep(500);
 
 		driver.findElement(By.id("txtProgramNo")).click();
-		Thread.sleep(200);
+		Thread.sleep(500);
 
 		driver.findElement(By.id("txtProgramNo")).clear();
-		Thread.sleep(200);
+		Thread.sleep(500);
 		driver.findElement(By.id("txtProgramNo")).sendKeys("47");
-		Thread.sleep(200);
+		Thread.sleep(500);
 		driver.findElement(By.id("txtProgramTitle")).click();
-		Thread.sleep(200);
+		Thread.sleep(500);
 
 		driver.findElement(By.id("txtProgramTitle")).clear();
-		Thread.sleep(200);
+		Thread.sleep(500);
 
 		driver.findElement(By.id("txtProgramTitle")).sendKeys("2");
-		Thread.sleep(200);
+		Thread.sleep(500);
 
 		driver.findElement(By.id("chkNoRecoveryNormal")).click();
-		Thread.sleep(200);
+		Thread.sleep(500);
 
 		driver.findElement(By.id("chkTC")).click();
-		Thread.sleep(200);
+		Thread.sleep(500);
 
 		new Select(driver.findElement(By.id("ddlPISalaryIncluded")))
 				.selectByVisibleText("Yes");
-		Thread.sleep(200);
+		Thread.sleep(500);
 
 		driver.findElement(
 				By.cssSelector("#ddlPISalaryIncluded > option[value=\"1\"]"))
 				.click();
-		Thread.sleep(200);
+		Thread.sleep(500);
 
 		driver.findElement(By.id("txtPISalary")).clear();
-		Thread.sleep(200);
+		Thread.sleep(500);
 
 		driver.findElement(By.id("txtPISalary")).sendKeys("1000000");
-		Thread.sleep(200);
+		Thread.sleep(500);
 
 		driver.findElement(By.id("txtPIFringe")).clear();
-		Thread.sleep(200);
+		Thread.sleep(500);
 
 		driver.findElement(By.id("txtPIFringe")).sendKeys("1");
-		Thread.sleep(200);
+		Thread.sleep(500);
 
 		driver.findElement(By.id("txtDepartmentID")).clear();
-		Thread.sleep(200);
+		Thread.sleep(500);
 
 		driver.findElement(By.id("txtDepartmentID")).sendKeys("10");
-		Thread.sleep(200);
+		Thread.sleep(500);
 
 		driver.findElement(
 				By.xpath("//div[@id='ui-id-24']/table/tbody/tr[13]/td[2]"))
 				.click();
-		Thread.sleep(200);
+		Thread.sleep(500);
 
 		driver.findElement(By.id("ddlInstitutionalCostDocumented")).click();
-		Thread.sleep(200);
+		Thread.sleep(500);
 
 		new Select(driver.findElement(By.id("ddlInstitutionalCostDocumented")))
 				.selectByVisibleText("Yes");
-		Thread.sleep(200);
+		Thread.sleep(500);
 
 		driver.findElement(
 				By.cssSelector("#ddlInstitutionalCostDocumented > option[value=\"1\"]"))
 				.click();
-		Thread.sleep(200);
+		Thread.sleep(500);
 
 		driver.findElement(By.id("ddlThirdPartyCostDocumented")).click();
-		Thread.sleep(200);
+		Thread.sleep(500);
 
 		new Select(driver.findElement(By.id("ddlThirdPartyCostDocumented")))
 				.selectByVisibleText("Yes");
-		Thread.sleep(200);
+		Thread.sleep(500);
 
 		driver.findElement(
 				By.cssSelector("#ddlThirdPartyCostDocumented > option[value=\"1\"]"))
 				.click();
-		Thread.sleep(200);
+		Thread.sleep(500);
 
 		driver.findElement(By.id("ddlPIEligibilityWaiver")).click();
-		Thread.sleep(200);
+		Thread.sleep(500);
 
 		new Select(driver.findElement(By.id("ddlPIEligibilityWaiver")))
 				.selectByVisibleText("Yes");
-		Thread.sleep(200);
+		Thread.sleep(500);
 
 		driver.findElement(
 				By.cssSelector("#ddlPIEligibilityWaiver > option[value=\"1\"]"))
 				.click();
-		Thread.sleep(200);
+		Thread.sleep(500);
 
 		driver.findElement(By.id("ddlCOIForms")).click();
-		Thread.sleep(200);
+		Thread.sleep(500);
 
 		new Select(driver.findElement(By.id("ddlCOIForms")))
 				.selectByVisibleText("No");
-		Thread.sleep(200);
+		Thread.sleep(500);
 
 		driver.findElement(By.cssSelector("#ddlCOIForms > option[value=\"2\"]"))
 				.click();
-		Thread.sleep(200);
+		Thread.sleep(500);
 
 		driver.findElement(By.id("ddlCOIForms")).click();
-		Thread.sleep(200);
+		Thread.sleep(500);
 
 		new Select(driver.findElement(By.id("ddlCOIForms")))
 				.selectByVisibleText("Yes");
-		Thread.sleep(200);
+		Thread.sleep(500);
 		driver.findElement(By.cssSelector("#ddlCOIForms > option[value=\"1\"]"))
 				.click();
-		Thread.sleep(200);
+		Thread.sleep(500);
 
 		driver.findElement(By.id("ddlCheckedExcludedPartyList")).click();
-		Thread.sleep(200);
+		Thread.sleep(500);
 
 		new Select(driver.findElement(By.id("ddlCheckedExcludedPartyList")))
 				.selectByVisibleText("Yes");
-		Thread.sleep(200);
+		Thread.sleep(500);
 
 		driver.findElement(
 				By.cssSelector("#ddlCheckedExcludedPartyList > option[value=\"1\"]"))
 				.click();
-		Thread.sleep(200);
+		Thread.sleep(500);
 
 		((JavascriptExecutor) driver)
 				.executeScript("var s=document.getElementById('btnApproveProposal');s.click();");
 		Thread.sleep(500);
 		driver.findElement(By.id("BoxConfirmBtnOk")).click();
-		Thread.sleep(200);
+		Thread.sleep(500);
 		assertTrue(driver.findElement(By.cssSelector("BODY")).getText()
 				.matches("^[\\s\\S]*$"));
-		Thread.sleep(200);
+		Thread.sleep(500);
 
 		assertTrue(driver.findElement(By.cssSelector("div.BoxError"))
 				.isDisplayed());
-		Thread.sleep(200);
+		Thread.sleep(500);
 
 		driver.findElement(By.id("BoxAlertBtnOk")).click();
 		Thread.sleep(200);

@@ -256,7 +256,7 @@ public class PDSOperations {
 			Map.Entry<Attribute, HashSet> entry = itr.next();
 			log.info("Container = " + entry.getKey() + ", permission set = " + entry.getValue());
 			System.out.println("Container = " + entry.getKey() + ", permission set = " + entry.getValue());
-			hasPermission = hasPermission && UserPermissionChecker.checkPermissionAnyType(policy, prohibitions, "PI",
+			hasPermission = hasPermission && UserPermissionChecker.checkPermissionAnyType(policy, prohibitions,userName ,
 					UA.toString(), (Attribute) entry.getKey(), new ArrayList<String>(entry.getValue()));
 		}
 //        try {
@@ -282,7 +282,7 @@ public class PDSOperations {
 			Map.Entry<Attribute, HashSet> entry = itr.next();
 			log.info("Container = " + entry.getKey() + ", permission set = " + entry.getValue());
 			System.out.println("Container = " + entry.getKey() + ", permission set = " + entry.getValue());
-			hasPermission = hasPermission && UserPermissionChecker.checkPermissionAnyType(policy, prohibitions, "PI",
+			hasPermission = hasPermission && UserPermissionChecker.checkPermissionAnyType(policy, prohibitions, userName,
 					UA.toString(), (Attribute) entry.getKey(), new ArrayList<String>(entry.getValue()));
 		}
 //        try {

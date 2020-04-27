@@ -43,38 +43,38 @@ public class CoPIattemptsProposalDeletion {
 		driver.findElement(By.id("user_password")).sendKeys("gpmspassword");
 		driver.findElement(By.id("user_email")).clear();
 		driver.findElement(By.id("user_email")).sendKeys("liliana");
-		Thread.sleep(200);
+		Thread.sleep(500);
 		driver.findElement(By.name("commit")).click();
-		Thread.sleep(200);
+		Thread.sleep(500);
 		driver.findElement(By.linkText("My Proposals")).click();
-		Thread.sleep(200);
+		Thread.sleep(500);
 
 		((JavascriptExecutor) driver)
 				.executeScript("var s=document.getElementById('edit0');s.click();");
 
-		Thread.sleep(200);
+		Thread.sleep(500);
 		WebElement btnDelete = driver.findElement(By.id("btnDeleteProposal"));
 		((JavascriptExecutor) driver).executeScript(
 				"arguments[0].style.display='block';", btnDelete);
 		Thread.sleep(500);
 
 		driver.findElement(By.id("btnDeleteProposal")).click();
-		Thread.sleep(200);
+		Thread.sleep(500);
 		driver.findElement(By.id("BoxConfirmBtnOk")).click();
-		Thread.sleep(200);
+		Thread.sleep(500);
 		assertTrue(driver.findElement(By.cssSelector("BODY")).getText()
 				.matches("^[\\s\\S]*$"));
-		Thread.sleep(200);
+		Thread.sleep(500);
 
 		assertTrue(driver.findElement(By.cssSelector("div.BoxError"))
 				.isDisplayed());
-		Thread.sleep(200);
+		Thread.sleep(500);
 
 		driver.findElement(By.id("BoxAlertBtnOk")).click();
-		Thread.sleep(200);
+		Thread.sleep(500);
 		driver.findElement(By.cssSelector("span.myProfile.icon-arrow-s"))
 				.click();
-		Thread.sleep(200);
+		Thread.sleep(500);
 		driver.findElement(By.linkText("Log Out")).click();
 		Thread.sleep(1000);
 	}

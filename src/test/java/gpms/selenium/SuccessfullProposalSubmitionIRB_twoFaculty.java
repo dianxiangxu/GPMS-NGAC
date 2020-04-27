@@ -8,6 +8,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.File;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.After;
@@ -16,6 +17,7 @@ import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.support.ui.Select;
 
@@ -41,7 +43,7 @@ public class SuccessfullProposalSubmitionIRB_twoFaculty {
 		driver.get(baseUrl + "GPMS-NGAC/");
 		driver.findElement(By.id("user_email")).clear();
 		driver.findElement(By.id("user_email")).sendKeys(
-				"nicholas1234@gmail.com");
+				"nazmul");
 		driver.findElement(By.id("user_password")).clear();
 		driver.findElement(By.id("user_password")).sendKeys("gpmspassword");
 		Thread.sleep(500);
@@ -53,7 +55,14 @@ public class SuccessfullProposalSubmitionIRB_twoFaculty {
 		driver.findElement(By.id("btnAddNew")).click();
 		Thread.sleep(500);
 		driver.findElement(By.name("AddCoPI")).click();
-		Thread.sleep(500);
+		Thread.sleep(1000);
+		//new Select(driver.findElement(By.cssSelector("sfListmenu valid"))).selectByVisibleText("Tom Tom");
+		//driver.findElement(By.className("valid")).click();
+		 List<WebElement> selectors = driver.findElements(By.cssSelector("select[name='ddlName']"));
+		 new Select(selectors.get(1)).selectByVisibleText("Tom Tom");
+
+		Thread.sleep(1000);
+		
 		driver.findElement(By.cssSelector("i.sidebarExpand")).click();
 		Thread.sleep(500);
 		driver.findElement(By.id("lblSection2")).click();
@@ -257,10 +266,10 @@ public class SuccessfullProposalSubmitionIRB_twoFaculty {
 		driver.findElement(
 				By.xpath("//table[@id='trSignPICOPI']/tbody/tr/td[3]")).click();
 		Thread.sleep(500);
-		driver.findElement(By.name("proposalNotes574f7adb65dbb34d17834b57PI"))
+		driver.findElement(By.name("proposalNotes5cddc20d2edd2f0d3c61c120PI"))
 				.clear();
 		Thread.sleep(500);
-		driver.findElement(By.name("proposalNotes574f7adb65dbb34d17834b57PI"))
+		driver.findElement(By.name("proposalNotes5cddc20d2edd2f0d3c61c120PI"))
 				.sendKeys("Test");
 		Thread.sleep(500);
 		driver.findElement(By.id("ui-id-25")).click();
@@ -282,11 +291,11 @@ public class SuccessfullProposalSubmitionIRB_twoFaculty {
 		Thread.sleep(2000);
 
 		// CoPI signs
-		driver.get(baseUrl + "GPMS/");
+		driver.get(baseUrl + "GPMS-NGAC/");
 		driver.findElement(By.id("user_password")).clear();
 		driver.findElement(By.id("user_password")).sendKeys("gpmspassword");
 		driver.findElement(By.id("user_email")).clear();
-		driver.findElement(By.id("user_email")).sendKeys("liliana");
+		driver.findElement(By.id("user_email")).sendKeys("tomtom");
 		Thread.sleep(500);
 		driver.findElement(By.name("commit")).click();
 		Thread.sleep(500);
@@ -297,20 +306,20 @@ public class SuccessfullProposalSubmitionIRB_twoFaculty {
 		Thread.sleep(500);
 		driver.findElement(By.id("ui-id-21")).click();
 		Thread.sleep(500);
-		driver.findElement(By.name("574f638565dbb34d17834b33Co-PI")).clear();
+		driver.findElement(By.name("5dd3619d3cb94b3ef0ae07eeCo-PI")).clear();
 		Thread.sleep(500);
-		driver.findElement(By.name("574f638565dbb34d17834b33Co-PI")).sendKeys(
+		driver.findElement(By.name("5dd3619d3cb94b3ef0ae07eeCo-PI")).sendKeys(
 				"Liliana");
 		Thread.sleep(500);
 		driver.findElement(
-				By.name("proposalNotes574f638565dbb34d17834b33Co-PI")).clear();
+				By.name("proposalNotes5dd3619d3cb94b3ef0ae07eeCo-PI")).clear();
 		Thread.sleep(500);
 		driver.findElement(
-				By.name("proposalNotes574f638565dbb34d17834b33Co-PI"))
+				By.name("proposalNotes5dd3619d3cb94b3ef0ae07eeCo-PI"))
 				.sendKeys("Test");
 		Thread.sleep(500);
 		driver.findElement(
-				By.name("signaturedate574f638565dbb34d17834b33Co-PI")).click();
+				By.name("signaturedate5dd3619d3cb94b3ef0ae07eeCo-PI")).click();
 		Thread.sleep(500);
 		driver.findElement(
 				By.xpath("//table[@id='trSignPICOPI']/tbody/tr[2]/td[3]"))
@@ -333,10 +342,10 @@ public class SuccessfullProposalSubmitionIRB_twoFaculty {
 		Thread.sleep(2000);
 
 		// PI submits Proposal
-		driver.get(baseUrl + "GPMS/");
+		driver.get(baseUrl + "GPMS-NGAC/");
 		driver.findElement(By.id("user_email")).clear();
 		driver.findElement(By.id("user_email")).sendKeys(
-				"nicholas1234@gmail.com");
+				"nazmul");
 		driver.findElement(By.id("user_password")).clear();
 		driver.findElement(By.id("user_password")).sendKeys("gpmspassword");
 		Thread.sleep(500);
@@ -368,7 +377,7 @@ public class SuccessfullProposalSubmitionIRB_twoFaculty {
 		Thread.sleep(2000);
 
 		// Chemistry Chair approval
-		driver.get(baseUrl + "GPMS/");
+		driver.get(baseUrl + "GPMS-NGAC/");
 		driver.findElement(By.id("user_email")).clear();
 		driver.findElement(By.id("user_email")).sendKeys(
 				"chairchemistry@gmail.com");
@@ -431,7 +440,7 @@ public class SuccessfullProposalSubmitionIRB_twoFaculty {
 		driver.findElement(By.linkText("Log Out")).click();
 
 		// Computer Science Chair approval
-		driver.get(baseUrl + "GPMS/");
+		driver.get(baseUrl + "GPMS-NGAC/");
 		driver.findElement(By.id("user_email")).clear();
 		driver.findElement(By.id("user_email")).sendKeys(
 				"chaircomputerscience@gmail.com");
@@ -496,7 +505,7 @@ public class SuccessfullProposalSubmitionIRB_twoFaculty {
 		driver.findElement(By.linkText("Log Out")).click();
 
 		// Chemistry Business manager approval
-		driver.get(baseUrl + "GPMS/");
+		driver.get(baseUrl + "GPMS-NGAC/");
 		driver.findElement(By.id("user_email")).clear();
 		driver.findElement(By.id("user_email")).sendKeys(
 				"bmchemistry1@gmail.com");
@@ -561,7 +570,7 @@ public class SuccessfullProposalSubmitionIRB_twoFaculty {
 		Thread.sleep(1500);
 
 		// Computer Science Business manager approval
-		driver.get(baseUrl + "GPMS/");
+		driver.get(baseUrl + "GPMS-NGAC/");
 		driver.findElement(By.id("user_email")).clear();
 		driver.findElement(By.id("user_email")).sendKeys(
 				"bmcomputerscience@gmail.com");
@@ -622,7 +631,7 @@ public class SuccessfullProposalSubmitionIRB_twoFaculty {
 		Thread.sleep(1500);
 
 		// // IRB approval
-		// driver.get(baseUrl + "GPMS/");
+		// driver.get(baseUrl + "GPMS-NGAC/");
 		// driver.findElement(By.id("user_password")).clear();
 		// driver.findElement(By.id("user_password")).sendKeys("gpmspassword");
 		// driver.findElement(By.id("user_email")).clear();
@@ -724,7 +733,7 @@ public class SuccessfullProposalSubmitionIRB_twoFaculty {
 		// Thread.sleep(500);
 
 		// Chemistry Dean approval
-		driver.get(baseUrl + "GPMS/");
+		driver.get(baseUrl + "GPMS-NGAC/");
 		driver.findElement(By.id("user_email")).clear();
 		driver.findElement(By.id("user_email")).sendKeys(
 				"deanchemistry1@gmail.com");
@@ -781,7 +790,7 @@ public class SuccessfullProposalSubmitionIRB_twoFaculty {
 		Thread.sleep(500);
 
 		// Computer science Dean approval
-		driver.get(baseUrl + "GPMS/");
+		driver.get(baseUrl + "GPMS-NGAC/");
 		driver.findElement(By.id("user_email")).clear();
 		driver.findElement(By.id("user_email")).sendKeys(
 				"deancomputerscience@gmail.com");
@@ -834,7 +843,7 @@ public class SuccessfullProposalSubmitionIRB_twoFaculty {
 		Thread.sleep(500);
 
 		// Research Administration approval
-		driver.get(baseUrl + "GPMS/");
+		driver.get(baseUrl + "GPMS-NGAC/");
 		driver.findElement(By.id("user_email")).clear();
 		driver.findElement(By.id("user_email")).sendKeys(
 				"racomputerscience@gmail.com");
@@ -880,6 +889,23 @@ public class SuccessfullProposalSubmitionIRB_twoFaculty {
 		Thread.sleep(500);
 		driver.findElement(By.id("btnApproveProposal")).click();
 		Thread.sleep(500);
+		Thread.sleep(500);
+		driver.findElement(By.id("BoxConfirmBtnOk")).click();
+		Thread.sleep(700);
+		assertTrue(driver.findElement(By.cssSelector("div.BoxError"))
+				.isDisplayed());
+		Thread.sleep(1000);
+
+		driver.findElement(By.id("BoxAlertBtnOk")).click();
+		Thread.sleep(700);
+
+		Thread.sleep(1500);
+		driver.findElement(By.id("ui-id-23")).click();
+		Thread.sleep(1000);
+		driver.findElement(By.id("ui-id-24")).click();
+		
+		Thread.sleep(500);
+
 		driver.findElement(By.id("txtAgencyList")).clear();
 		Thread.sleep(500);
 		driver.findElement(By.id("txtAgencyList")).sendKeys("Some agency");
@@ -1001,7 +1027,7 @@ public class SuccessfullProposalSubmitionIRB_twoFaculty {
 		Thread.sleep(500);
 
 		// Research Director Approval
-		driver.get(baseUrl + "GPMS/");
+		driver.get(baseUrl + "GPMS-NGAC/");
 		driver.findElement(By.id("user_email")).clear();
 		driver.findElement(By.id("user_email")).sendKeys(
 				"directorcomputerscience@gmail.com");
@@ -1068,7 +1094,7 @@ public class SuccessfullProposalSubmitionIRB_twoFaculty {
 		Thread.sleep(5000);
 
 		// Research Administrator submission
-		driver.get(baseUrl + "GPMS/");
+		driver.get(baseUrl + "GPMS-NGAC/");
 		driver.findElement(By.id("user_email")).clear();
 		driver.findElement(By.id("user_email")).sendKeys(
 				"racomputerscience@gmail.com");

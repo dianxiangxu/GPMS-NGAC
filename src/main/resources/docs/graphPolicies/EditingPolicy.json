@@ -549,13 +549,6 @@
        "source": "PI", 
        "target": "CoPI-Eligible Faculty"  
      },
-          {
-    "operations": [
-         "assign-u-to"
-        ],
-       "source": "PI", 
-       "target": "CoPI"  
-     },
      {
        "operations": [
          "write"

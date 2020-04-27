@@ -882,7 +882,24 @@ public class ProposalService {
 						log.info("D:" + decision);
 
 					}
+					if (action.equals("Withdraw")) {
 
+						ProposalDataSheet projectProposal = new ProposalDataSheet();
+						long proposalNgacId = existingProposal.getNgacId();
+						log.info("NN: Proposal NGAC Id:" + proposalNgacId);
+
+						Graph proposalPolicy = null;
+						setPolicyState(projectProposal, existingProposal, proposalPolicy, userInfo.getUserName(),
+								false);
+
+						String stage = projectProposal.getApprovalStage();
+						log.info("Stage:" + stage);
+
+						decision = projectProposal.getPolicyDecision(pdsOperations, userInfo.getUserName(), action,
+								Constants.APPROVAL_CONTENT);
+						log.info("D:" + decision);
+
+					}
 //					Set<AbstractResult> set = ac
 //							.getXACMLdecisionWithObligations(attrMap,
 //									contentProfile);

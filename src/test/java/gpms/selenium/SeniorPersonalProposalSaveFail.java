@@ -43,7 +43,7 @@ public class SeniorPersonalProposalSaveFail {
 		driver.get(baseUrl + "GPMS-NGAC/");
 		driver.findElement(By.id("user_email")).clear();
 		driver.findElement(By.id("user_email")).sendKeys(
-				"nicholas1234@gmail.com");
+				"nazmul");
 		driver.findElement(By.id("user_password")).clear();
 		driver.findElement(By.id("user_password")).sendKeys("gpmspassword");
 		Thread.sleep(200);
@@ -251,22 +251,22 @@ public class SeniorPersonalProposalSaveFail {
 		Thread.sleep(200);
 		driver.findElement(By.id("pi_signature")).clear();
 		driver.findElement(By.id("pi_signature")).sendKeys("Nicholas chapa");
-		Thread.sleep(200);
+		Thread.sleep(500);
 		driver.findElement(By.id("pi_signaturedate")).click();
-		Thread.sleep(200);
+		Thread.sleep(500);
 		driver.findElement(
 				By.xpath("//table[@id='trSignPICOPI']/tbody/tr/td[3]")).click();
-		Thread.sleep(200);
-		driver.findElement(By.name("proposalNotes574f7adb65dbb34d17834b57PI"))
+		Thread.sleep(500);
+		driver.findElement(By.name("proposalNotes5cddc20d2edd2f0d3c61c120PI"))
 				.clear();
-		Thread.sleep(200);
-		driver.findElement(By.name("proposalNotes574f7adb65dbb34d17834b57PI"))
+		Thread.sleep(500);
+		driver.findElement(By.name("proposalNotes5cddc20d2edd2f0d3c61c120PI"))
 				.sendKeys("Test");
-		Thread.sleep(200);
+		Thread.sleep(500);
 		driver.findElement(By.id("ui-id-25")).click();
-		Thread.sleep(200);
+		Thread.sleep(500);
 		driver.findElement(By.id("btnSaveProposal")).click();
-		Thread.sleep(200);
+		Thread.sleep(500);
 		driver.findElement(By.id("BoxConfirmBtnOk")).click();
 		Thread.sleep(2000);
 		assertTrue(driver.findElement(By.cssSelector("BODY")).getText()
@@ -278,24 +278,24 @@ public class SeniorPersonalProposalSaveFail {
 		Thread.sleep(2000);
 		((JavascriptExecutor) driver)
 				.executeScript("var s=document.getElementById('edit0');s.click();");
-		Thread.sleep(200);
+		Thread.sleep(500);
 		driver.findElement(By.id("btnSubmitProposal")).click();
-		Thread.sleep(200);
+		Thread.sleep(500);
 		driver.findElement(By.id("BoxConfirmBtnOk")).click();
-		Thread.sleep(200);
+		Thread.sleep(500);
 		assertTrue(driver.findElement(By.cssSelector("BODY")).getText()
 				.matches("^[\\s\\S]*$"));
-		Thread.sleep(200);
+		Thread.sleep(500);
 		driver.findElement(By.id("BoxAlertBtnOk")).click();
-		Thread.sleep(200);
+		Thread.sleep(500);
 		driver.findElement(By.cssSelector("span.myProfile.icon-arrow-s"))
 				.click();
-		Thread.sleep(200);
+		Thread.sleep(500);
 		driver.findElement(By.linkText("Log Out")).click();
 		Thread.sleep(5000);
 
 		// Senior Personal attempts saving proposal
-		driver.get(baseUrl + "GPMS/");
+		driver.get(baseUrl + "GPMS-NGAC/");
 		driver.findElement(By.id("user_email")).clear();
 		driver.findElement(By.id("user_email")).sendKeys("liliana");
 		driver.findElement(By.id("user_password")).clear();
@@ -314,22 +314,22 @@ public class SeniorPersonalProposalSaveFail {
 
 		Thread.sleep(500);
 		driver.findElement(By.id("BoxConfirmBtnOk")).click();
-		Thread.sleep(200);
+		Thread.sleep(500);
 		assertTrue(driver.findElement(By.cssSelector("BODY")).getText()
 				.matches("^[\\s\\S]*$"));
-		Thread.sleep(200);
+		Thread.sleep(500);
 
 		assertTrue(driver.findElement(By.cssSelector("div.BoxError"))
 				.isDisplayed());
-		Thread.sleep(200);
+		Thread.sleep(500);
 
 		driver.findElement(By.id("BoxAlertBtnOk")).click();
-		Thread.sleep(200);
+		Thread.sleep(500);
 
-		Thread.sleep(200);
+		Thread.sleep(500);
 		driver.findElement(By.cssSelector("span.myProfile.icon-arrow-s"))
 				.click();
-		Thread.sleep(200);
+		Thread.sleep(500);
 		driver.findElement(By.linkText("Log Out")).click();
 		Thread.sleep(1000);
 	}

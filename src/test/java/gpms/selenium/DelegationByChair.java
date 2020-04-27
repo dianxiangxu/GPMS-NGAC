@@ -38,7 +38,7 @@ public class DelegationByChair {
 		// Add Proposal with Computer Science
 		driver.get(baseUrl + "GPMS-NGAC/");
 		driver.findElement(By.id("user_email")).clear();
-		driver.findElement(By.id("user_email")).sendKeys("milson");
+		driver.findElement(By.id("user_email")).sendKeys("nazmul");
 		driver.findElement(By.id("user_password")).clear();
 		driver.findElement(By.id("user_password")).sendKeys("gpmspassword");
 		Thread.sleep(200);
@@ -246,10 +246,10 @@ public class DelegationByChair {
 		driver.findElement(
 				By.xpath("//table[@id='trSignPICOPI']/tbody/tr/td[3]")).click();
 		Thread.sleep(200);
-		driver.findElement(By.name("proposalNotes57489f2565dbb306cef6702cPI"))
+		driver.findElement(By.name("proposalNotes5cddc20d2edd2f0d3c61c120PI"))
 				.clear();
 		Thread.sleep(200);
-		driver.findElement(By.name("proposalNotes57489f2565dbb306cef6702cPI"))
+		driver.findElement(By.name("proposalNotes5cddc20d2edd2f0d3c61c120PI"))
 				.sendKeys("Test");
 		Thread.sleep(200);
 		driver.findElement(By.id("ui-id-25")).click();
@@ -283,9 +283,9 @@ public class DelegationByChair {
 		Thread.sleep(1000);
 
 		// Associate Chair Approve Failure
-		driver.get(baseUrl + "GPMS/");
+		driver.get(baseUrl + "GPMS-NGAC/");
 		driver.findElement(By.id("user_email")).clear();
-		driver.findElement(By.id("user_email")).sendKeys("edmund");
+		driver.findElement(By.id("user_email")).sendKeys("liliana");
 		driver.findElement(By.id("user_password")).clear();
 		driver.findElement(By.id("user_password")).sendKeys("gpmspassword");
 		Thread.sleep(200);
@@ -312,7 +312,7 @@ public class DelegationByChair {
 		Thread.sleep(500);
 
 		// Chair Delegate Associate Chair
-		driver.get(baseUrl + "GPMS/");
+		driver.get(baseUrl + "GPMS-NGAC/");
 		driver.findElement(By.id("user_email")).clear();
 		driver.findElement(By.id("user_email"))
 				.sendKeys("chaircomputerscience");
@@ -359,9 +359,9 @@ public class DelegationByChair {
 		Thread.sleep(1000);
 
 		// Associate Chair Approve Success
-		driver.get(baseUrl + "GPMS/");
+		driver.get(baseUrl + "GPMS-NGAC/");
 		driver.findElement(By.id("user_email")).clear();
-		driver.findElement(By.id("user_email")).sendKeys("edmund");
+		driver.findElement(By.id("user_email")).sendKeys("liliana");
 		driver.findElement(By.id("user_password")).clear();
 		driver.findElement(By.id("user_password")).sendKeys("gpmspassword");
 		Thread.sleep(200);
@@ -409,7 +409,7 @@ public class DelegationByChair {
 		Thread.sleep(1000);
 
 		// Revocation by Chair
-		driver.get(baseUrl + "GPMS/");
+		driver.get(baseUrl + "GPMS-NGAC/");
 		driver.findElement(By.id("user_email")).clear();
 		driver.findElement(By.id("user_email"))
 				.sendKeys("chaircomputerscience");

@@ -43,7 +43,7 @@ public class DeanUploadsAttatchmentFail {
 		driver.findElement(By.id("user_password")).sendKeys("gpmspassword");
 		driver.findElement(By.id("user_email")).clear();
 		driver.findElement(By.id("user_email")).sendKeys(
-				"deanchemistry1@gmail.com");
+				"deancomputerscience");
 		Thread.sleep(200);
 		driver.findElement(By.name("commit")).click();
 		Thread.sleep(200);
