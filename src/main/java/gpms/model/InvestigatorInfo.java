@@ -30,12 +30,28 @@ public class InvestigatorInfo implements Serializable {
 		return pi;
 	}
 
+	public InvestigatorRefAndPosition getPIByName(String name) {
+		if (name.equals(pi.getUserRef().getUserAccount().getUserName())) {
+			return pi;
+		}
+		return null;
+	}
+
 	public void setPi(InvestigatorRefAndPosition pi) {
 		this.pi = pi;
 	}
 
 	public List<InvestigatorRefAndPosition> getCo_pi() {
 		return co_pi;
+	}
+
+	public InvestigatorRefAndPosition getCoPIByName(String name) {
+		for (InvestigatorRefAndPosition copi : co_pi) {
+			if (name.equals(copi.getUserRef().getUserAccount().getUserName())) {
+				return copi;
+			}
+		}
+		return null;
 	}
 
 	public void setCo_pi(List<InvestigatorRefAndPosition> co_pi) {
@@ -46,15 +62,13 @@ public class InvestigatorInfo implements Serializable {
 		return seniorPersonnel;
 	}
 
-	public void setSeniorPersonnel(
-			List<InvestigatorRefAndPosition> seniorPersonnel) {
+	public void setSeniorPersonnel(List<InvestigatorRefAndPosition> seniorPersonnel) {
 		this.seniorPersonnel = seniorPersonnel;
 	}
 
 	@Override
 	public String toString() {
-		return "InvestigatorInfo [pi=" + pi + ", co_pi=" + co_pi
-				+ ", seniorPersonnel=" + seniorPersonnel + "]";
+		return "InvestigatorInfo [pi=" + pi + ", co_pi=" + co_pi + ", seniorPersonnel=" + seniorPersonnel + "]";
 	}
 
 	@Override
@@ -63,8 +77,7 @@ public class InvestigatorInfo implements Serializable {
 		int result = 1;
 		result = prime * result + ((co_pi == null) ? 0 : co_pi.hashCode());
 		result = prime * result + ((pi == null) ? 0 : pi.hashCode());
-		result = prime * result
-				+ ((seniorPersonnel == null) ? 0 : seniorPersonnel.hashCode());
+		result = prime * result + ((seniorPersonnel == null) ? 0 : seniorPersonnel.hashCode());
 		return result;
 	}
 

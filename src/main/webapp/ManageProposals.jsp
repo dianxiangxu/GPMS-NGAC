@@ -340,7 +340,7 @@
 																<th></th>
 															</tr>
 														</thead>
-														<tbody>
+														<tbody id="CoPITable">
 															<tr>
 																<td><select title="Choose Role" class="sfListmenu"
 																	name="ddlRole" style="width: 55px;" required="true">

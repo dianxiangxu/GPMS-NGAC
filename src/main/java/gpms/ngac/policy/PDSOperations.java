@@ -12,6 +12,9 @@ import gov.nist.csd.pm.pdp.decider.PReviewDecider;
 import gov.nist.csd.pm.pip.graph.Graph;
 import gov.nist.csd.pm.pip.graph.GraphSerializer;
 import gov.nist.csd.pm.pip.graph.MemGraph;
+import gov.nist.csd.pm.pip.graph.dag.searcher.DepthFirstSearcher;
+import gov.nist.csd.pm.pip.graph.dag.searcher.Direction;
+import gov.nist.csd.pm.pip.graph.dag.visitor.Visitor;
 import gov.nist.csd.pm.pip.graph.model.nodes.Node;
 import gov.nist.csd.pm.pip.graph.model.nodes.NodeType;
 import gov.nist.csd.pm.pip.obligations.MemObligations;
@@ -61,6 +64,8 @@ import gpms.ngac.policy.customFunctions.CreateNodeExecutor1;
 import gpms.ngac.policy.customFunctions.DeanForExecutor;
 import gpms.ngac.policy.customFunctions.DeleteNodeExecutor;
 import gpms.ngac.policy.customFunctions.EmailExecutor;
+import gpms.ngac.policy.customFunctions.GetAncestorInPCExecutor;
+import gpms.ngac.policy.customFunctions.GetChildInPCExecutor;
 import gpms.ngac.policy.customFunctions.HasChildrenExecutor;
 import gpms.ngac.policy.customFunctions.IRBApprovalRequired;
 import gpms.rest.UserService;
@@ -144,13 +149,15 @@ public class PDSOperations {
 		AllChildrenHavePropertiesExecutor allChildrenHavePropertiesExecutor = new AllChildrenHavePropertiesExecutor();
 		HasChildrenExecutor hasChildrenExecutor = new HasChildrenExecutor();
 		IRBApprovalRequired iRBApprovalRequired = new IRBApprovalRequired();
+		GetAncestorInPCExecutor getAncestorInPCExecutor = new GetAncestorInPCExecutor();
+		GetChildInPCExecutor getChildInPCExecutor = new GetChildInPCExecutor();
 		obligation = policyLoader.getObligation();
 		EPPOptions eppOptions = new EPPOptions(deleteNodeExecutor, emailExecutor, chairForExecutor, deanForExecutor,
 				bmForExecutor, isAllowedToBeCoPIExecutor, createNodeExecutor1, concatExecutor, chairsForExecutor,
 				areSomeNodesContainedInExecutor, compareNodesExecutor, coPIToAddExecutor, spToAddExecutor,
 				coPIToDeleteExecutor, spToDeleteExecutor, addPropertiesToNodeExecutor,
 				removePropertiesFromChildrenExecutor, allChildrenHavePropertiesExecutor, hasChildrenExecutor,
-				iRBApprovalRequired);
+				iRBApprovalRequired, getAncestorInPCExecutor, getChildInPCExecutor);
 		pdp = new PDP(new PAP(graph, new MemProhibitions(), new MemObligations()), eppOptions);
 		pdp.getPAP().getObligationsPAP().add(obligation, true);
 
@@ -298,14 +305,79 @@ public class PDSOperations {
 		return hasPermission;
 	}
 
+	public static Set<String> getElegibleUsers(String parent) throws PMException {
+		Graph graph = null;
+
+		graph = policyLoader.reloadBasicConfig();
+		graph = policyLoader.createAProposalGraph(graph); // loads editing policy
+		graph = policyLoader.createAprovalGraph(graph); // loads editing policy
+
+		Node parentNode = graph.getNode(parent);
+		DepthFirstSearcher dfs = new DepthFirstSearcher(graph);
+		Set<String> nodes = new HashSet<>();
+		Visitor visitor = node -> {
+			if (node.getType().toString().equals("U"))
+				nodes.add(node.getName());
+		};
+		dfs.traverse(parentNode, (c, p) -> {
+		}, visitor, Direction.CHILDREN);
+
+		return nodes;
+	}
+
+	public static List<String> getUserChildrenInGraph(String parent, Graph graph) throws PMException {
+		List<String> listOfChildren = new ArrayList<String>();
+
+		List<String> listOfChildrenUsers = new ArrayList<String>();
+
+		listOfChildren.addAll(graph.getChildren(parent));
+
+		for (String nodeName : listOfChildren) {
+			if(graph.getNode(nodeName).getType().toString().equals("U")) {
+				listOfChildrenUsers.add(nodeName);
+				System.out.println("ADDED: "+nodeName);
+			}
+		}
+
+		return listOfChildrenUsers;
+	}
+
+	public static List<String> getAcademicAdminUserAttributes() {
+
+		List<String> listOfAdmins = new ArrayList<String>();
+
+		listOfAdmins.add("Chair");
+		listOfAdmins.add("Dean");
+		listOfAdmins.add("Business-Manager");
+		listOfAdmins.add("Research-Admin");
+		listOfAdmins.add("Research-Director");
+
+		return listOfAdmins;
+	}
+
+	public static List<String> getAdministrationAdminUsers() {
+
+		List<String> listOfAdmins = new ArrayList<String>();
+		listOfAdmins.add("irbglobal");
+
+		listOfAdmins.add("racomputerscience");
+		listOfAdmins.add("directorcomputerscience");
+		return listOfAdmins;
+	}
+
+	public static boolean isContainedIn() {
+
+		return false;
+	}
+
 	/**
 	 * This function checks whether a user has permission to add another user as SP
 	 * 
 	 * @param userName           the performer
 	 * @param spApproachableUser the intended user to be a SP
 	 * @return true/false
+	 * @throws PMException
 	 */
-
 	public boolean hasPermissionToAddAsSP(Graph policy, String userName, String spApproachableUser,
 			Prohibitions prohibitions) {
 		boolean hasPermission = true;
@@ -330,7 +402,6 @@ public class PDSOperations {
 
 		return hasPermission;
 	}
-
 
 	public long createAProposal(String PI, String department, String email) throws PMException {
 
@@ -568,8 +639,7 @@ public class PDSOperations {
 			graph.deleteNode("super_pc_rep");
 		}
 		PDP pdp = getPDP(graph);
-		pdp.getEPP().processEvent(new SubmitRAEvent(graph.getNode(Constants.SUBMISSION_INFO_OA_LBL)), ra,
-				"process");
+		pdp.getEPP().processEvent(new SubmitRAEvent(graph.getNode(Constants.SUBMISSION_INFO_OA_LBL)), ra, "process");
 		return pdp;
 	}
 

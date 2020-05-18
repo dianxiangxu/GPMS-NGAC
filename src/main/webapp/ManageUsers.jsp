@@ -282,7 +282,7 @@
 														<li><a href="#fragment-1"> <span
 																id="lblTabTitle1">General Information</span>
 														</a></li>
-														<li><a href="#fragment-2"> <span
+														<li><a href="#fragment-2" onclick="hide();"> <span
 																id="lblTabTitle2">User Position Details</span>
 														</a></li>
 														<li><a href="#fragment-3"> <span
@@ -526,8 +526,8 @@
 																					<tr>
 																						<th><span class="cssClassLabel">College:</span>
 																							<span class="cssClassRequired">*</span></th>
-																						<th><span class="cssClassLabel">Department:</span>
-																							<span class="cssClassRequired">*</span></th>
+																						<th><span class="cssClassLabel" id="departmentLabel">Department:</span>
+																							<span class="cssClassRequired" id="departmentLabelStar">*</span></th>
 																						<th><span class="cssClassLabel">Position
 																								Type:</span> <span class="cssClassRequired">*</span></th>
 																						<th><span class="cssClassLabel">Position
@@ -540,16 +540,16 @@
 																				<tbody>
 																					<tr>
 																						<td><select title="Choose College Name"
-																							class="sfListmenu" name="ddlCollege">
+																							class="sfListmenu" name="ddlCollege" id="collegeName">
 																						</select></td>
 																						<td><select title="Choose Department Name"
-																							class="sfListmenu" name="ddlDepartment">
+																							class="sfListmenu" name="ddlDepartment" id="department">
 																						</select></td>
 																						<td><select title="Choose Position Type"
-																							class="sfListmenu" name="ddlPositionType">
+																							class="sfListmenu" name="ddlPositionType" id="positionType">
 																						</select></td>
 																						<td><select title="Choose Position Title"
-																							class="sfListmenu" name="ddlPositionTitle">
+																							class="sfListmenu" name="ddlPositionTitle" id="positionTitle">
 																						</select></td>
 																						<td><input type="radio"
 																							title="Choose Default Position"
@@ -718,5 +718,53 @@
 			</div>
 		</div>
 	</form>
+<script type="text/javascript">
+function hide() {
+	  if ($('#positionTitle').val() == "Dean") {
+	    $('#departmentLabel').hide();
+	    $('#department').hide();
+	    $('#departmentLabelStar').hide();
+	  } else {
+		  $('#departmentLabel').show();
+		  $('#department').show();
+		  $('#departmentLabelStar').show();
+	  }
+	}
+$("#positionTitle").change(function() {
+	  if ($(this).val() == "Dean") {
+	    $('#departmentLabel').hide();
+	    $('#department').hide();
+	    $('#departmentLabelStar').hide();
+	  } else {
+		  $('#departmentLabel').show();
+		  $('#department').show();
+		  $('#departmentLabelStar').show();
+	  }
+	});
+$("#positionTitle").trigger("change");
+
+$("#collegeName").change(function() {
+	  if ($('#positionTitle').val() == "Dean") {
+	    $('#departmentLabel').hide();
+	    $('#department').hide();
+	    $('#departmentLabelStar').hide();
+	  } else {
+		  $('#departmentLabel').show();
+		  $('#department').show();
+		  $('#departmentLabelStar').show();
+	  }
+	});
+	//$("#collegeName").trigger("change");
+$('#collegeName').on('change', function (e) {
+		  $('#departmentLabel').show();
+		  $('#department').show();
+		  $('#departmentLabelStar').show();
+    });
+$('#positionType').on('change', function (e) {
+	  $('#departmentLabel').show();
+	  $('#department').show();
+	  $('#departmentLabelStar').show();
+});
+</script>
 </body>
 </html>

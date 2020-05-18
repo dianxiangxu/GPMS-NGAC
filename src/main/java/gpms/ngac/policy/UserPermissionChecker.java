@@ -28,7 +28,7 @@ public class UserPermissionChecker {
 	
 	private static final Logger log = Logger.getLogger(UserPermissionChecker.class.getName());
 	
-	public static boolean checkPermissionAnyType(Graph ngacPolicy, Prohibitions prohibitions, String userOrAttributeName,String type,Attribute targetAttribute, List<String> objects) {
+	public static boolean checkPermissionAnyType(Graph graph, Prohibitions prohibitions, String userOrAttributeName,String type,Attribute targetAttribute, List<String> objects) {
 		
 		boolean hasPermission = false;
 		try {
@@ -36,12 +36,12 @@ public class UserPermissionChecker {
 			log.info("Prohibition:"+pro.length());
 			//log.info("Graph Policy:"+ GraphSerializer.toJson(ngacPolicy));
 
-			PReviewDecider decider = new PReviewDecider(ngacPolicy,prohibitions);
+			PReviewDecider decider = new PReviewDecider(graph,prohibitions);
 			
 			//long targetId = PDSOperations.getNodeID(ngacPolicy, targetAttribute.getAttributeName(), targetAttribute.getAttributeType(), null);
 			
 			// get all of the users in the graph
-	        Node user = ngacPolicy.getNode(userOrAttributeName);
+	        Node user = graph.getNode(userOrAttributeName);
 	        
 	        //Set<Node> uaSet = ngacPolicy.search(userName, UA.toString(), null);
 	        
@@ -65,7 +65,7 @@ public class UserPermissionChecker {
 		return hasPermission;
 	}
 	
-public static boolean checkPermission(Graph ngacPolicy, Prohibitions prohibitions, String userName,Attribute targetAttribute, String[] objects) {
+public static boolean checkPermission(Graph graph, Prohibitions prohibitions, String userName,Attribute targetAttribute, String[] objects) {
 		
 		boolean hasPermission = false;
 		try {
@@ -74,12 +74,12 @@ public static boolean checkPermission(Graph ngacPolicy, Prohibitions prohibition
 			log.info("Prohibition:"+pro);
 			//log.info("Graph Policy:"+ GraphSerializer.toJson(ngacPolicy));
 
-			PReviewDecider decider = new PReviewDecider(ngacPolicy,prohibitions);
+			PReviewDecider decider = new PReviewDecider(graph,prohibitions);
 			
 			//long targetId = PDSOperations.getNodeID(ngacPolicy, targetAttribute.getAttributeName(), targetAttribute.getAttributeType(), null);
 			
 			// get all of the users in the graph
-	        Node user = ngacPolicy.getNode(userName);	        	        
+	        Node user = graph.getNode(userName);	        	        
 	        	//String[] requiredAccessRights = Arrays.copyOf(objects, objects.length, String[].class);	   		 	        	
 		    log.info("UserPermissionChecker: "+user.getName()+"|"+objects.toString());
     		System.out.println("UserPermissionChecker: "+user.getName()+"|"+targetAttribute.toString()+"|"+Arrays.toString(objects));

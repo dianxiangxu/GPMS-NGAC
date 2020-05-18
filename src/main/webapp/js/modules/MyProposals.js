@@ -2548,7 +2548,9 @@ $(function() {
 			});
 
 			$(cloneRow).find("select").each(
+					
 					function(j) {
+
 						$(this).removeProp("disabled");
 						$(this).removeProp("required");
 						// Remove PI
@@ -2556,13 +2558,17 @@ $(function() {
 						// after first
 						// row
 						if (j == 0) {
+
 							$(this).find('option:first').remove();
 							$(this).find('option:last').remove();
 							$(this).prop("disabled", true);
+
 						} else if (j == 1) {
+
 							$(this).prop("disabled", false);
 							$('#ui-id-2').find("select[name='ddlName']").each(
 									function(k) {
+
 										$(cloneRow).find(
 												'option[value=' + $(this).val()
 														+ ']').remove();
@@ -2574,7 +2580,8 @@ $(function() {
 			if ($(cloneRow).find("select[name='ddlName'] option").length > 0) {
 				$('#dataTable tr:last').find("select[name='ddlName']").prop(
 						"disabled", true);
-
+				//$(cloneRow).find("td[name='CoPInameDDL']");
+				//$(cloneRow).find("td[name='SPnameDDL']").css('display','none');
 				$(cloneRow).appendTo("#dataTable").hide().fadeIn(1200);
 
 				rowIndex = $('#dataTable > tbody tr').size() - 1;
@@ -2598,9 +2605,10 @@ $(function() {
 					$(this).remove();
 				}
 			});
-
 			$(cloneRow).find("select").each(
 					function(j) {
+						console.log("hello");
+
 						$(this).removeProp("disabled");
 						$(this).removeProp("required");
 						// Remove PI
@@ -2615,7 +2623,8 @@ $(function() {
 							$(this).prop("disabled", false);
 							$('#ui-id-2').find("select[name='ddlName']").each(
 									function(k) {
-										$(cloneRow).find(
+										console.log($(this).val());
+										$("#trSP").find(
 												'option[value=' + $(this).val()
 														+ ']').remove();
 									});
@@ -2623,11 +2632,17 @@ $(function() {
 						$(this).find("option").removeProp("selected");
 					});
 
+
 			if ($(cloneRow).find("select[name='ddlName'] option").length > 0) {
 				$('#dataTable tr:last').find("select[name='ddlName']").prop(
 						"disabled", true);
 
 				$(cloneRow).appendTo("#dataTable").hide().fadeIn(1200);
+				//$(cloneRow).find("select[name='ddlName']").value = $('select[id="ddlName"]').get(0);
+				$(cloneRow).find("select[name='ddlName']").get(0).innerHTML = $('select[id="ddlName"]').get(0).innerHTML;
+
+
+				//$(cloneRow).find("td[name='SPnameDDL']").css('display','block');
 
 				rowIndex = $('#dataTable > tbody tr').size() - 1;
 				myProposal.BindDefaultUserPosition(rowIndex);
@@ -3964,7 +3979,15 @@ $(function() {
 			this.ajaxCall(this.config);
 			return false;
 		},
-
+		BindSPUserDropDown : function() {
+			// Used User REST API instead Proposal
+			this.config.url = this.config.rootURL + "users/"
+					+ "GetAllSPUserDropdown";
+			this.config.data = "{}";
+			this.config.ajaxCallMode = 105;
+			this.ajaxCall(this.config);
+			return false;
+		},
 		BindAllUsersAndPositions : function() {
 			// Used User REST API instead Proposal
 			this.config.url = this.config.rootURL + "users/" + "GetAllUserList";
@@ -4337,7 +4360,7 @@ $(function() {
 			// $("#accordion").accordion("option", "active", 0);
 			break;
 
-		case 5: // Bind User List for Investigator Info
+		case 5: // Bind CoPI user list for Investigator Info
 			$('select[name="ddlName"]').get(rowIndex).options.length = 0;
 			$('select[name="ddlCollege"]').get(rowIndex).options.length = 0;
 			$('select[name="ddlDepartment"]').get(rowIndex).options.length = 0;
@@ -4355,7 +4378,25 @@ $(function() {
 								value, item);
 							});
 			break;
+		case 105: // Bind SP user list for Investigator Info
+			$('select[id="ddlName"]').get(rowIndex).options.length = 0;
+//			$('select[name="ddlCollege"]').get(rowIndex).options.length = 0;
+//			$('select[name="ddlDepartment"]').get(rowIndex).options.length = 0;
+//			$('select[name="ddlPositionType"]').get(rowIndex).options.length = 0;
+//			$('select[name="ddlPositionTitle"]').get(rowIndex).options.length = 0;
+//			$('input[name="txtPhoneNo"]').eq(rowIndex).val('');
 
+			$
+					.each(
+							msg,
+							function(item, value) {
+								console.log(value)
+								$('select[id="ddlName"]').get(rowIndex).options[$(
+										'select[id="ddlName"]').get(rowIndex).options.length] = new Option(
+								// value.fullName, value.id);
+								value, item);
+							});
+			break;
 		case 6: // Bind User Position Details on dropdown selection change
 			positionsDetails = [];
 			$.merge(positionsDetails, msg);
@@ -4820,9 +4861,12 @@ $(function() {
 				break;
 			case 5:
 				csscody.error('<h2>' + 'Error Message' + '</h2><p>'
-						+ 'Failed to load user list.' + '</p>');
+						+ 'Failed to load CoPI user list.' + '</p>');
 				break;
-
+			case 105:
+				csscody.error('<h2>' + 'Error Message' + '</h2><p>'
+						+ 'Failed to load SP user list.' + '</p>');
+				break;
 			case 6:
 				csscody.error("<h2>" + 'Error Message' + "</h2><p>"
 						+ 'Failed to load user\'s position details.' + "</p>");
@@ -5107,6 +5151,7 @@ $(function() {
 			// myProposal.BindAllUsersAndPositions();
 
 			myProposal.BindUserDropDown();
+			myProposal.BindSPUserDropDown();
 
 			// Form Position details Drop downs
 			$('select[name="ddlName"]').on("change", function() {

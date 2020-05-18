@@ -343,7 +343,7 @@
 																<th><span class="cssClassLabelTitle">Phone #:</span> <span
 																	class="cssClassRequired">*</span></th>
 																<th></th>
-															</tr>
+															</tr>		
 														</thead>
 														<tbody>
 															<tr>
@@ -353,10 +353,10 @@
 																		<option value="1">Co-PI</option>
 																		<option value="2">Senior Personnel</option>
 																</select></td>
-																<td><select title="Choose Full Name"
-																	class="sfListmenu" name="ddlName" style="width: 140px;"
+																<td name="CoPInameDDL"><select title="Choose Full Name"
+																	class="sfListmenu" name="ddlName" id="ddlnameeach" style="width: 140px;"
 																	required="true">
-																</select></td>
+																</select></td>																
 																<td><select title="Choose College Name"
 																	class="sfListmenu" name="ddlCollege"
 																	style="width: 90px;" required="true">
@@ -380,8 +380,8 @@
 																<td><input type="Button" value="Add Co-PI"
 																	name="AddCoPI" class="AddCoPI cssClassButtonSubmit" /></td>
 																<td><input type="Button" value="Add Senior Personnel"
-																	name="AddSenior" class="AddSenior cssClassButtonSubmit" /></td>
-															</tr>
+																	name="AddSenior" class="AddSenior cssClassButtonSubmit" /></td>															    
+															</tr>																												
 														</tbody>
 													</table>
 												</div>
@@ -467,6 +467,12 @@
 																	id="txtProjectPeriodTo" class="sfInputbox"
 																	name="projectPeriodTo" placeholder="To" /></td>
 															</tr>
+															<tr id = "trSP" style="display:none;">
+															<td name="SPnameDDL" style="display:none"><select title="Choose Full Name"
+																	class="sfListmenu" name="ddlName" id="ddlName" style="width: 140px;"
+																	required="true">
+																</select></td>
+															</tr>	
 														</tbody>
 													</table>
 												</div>

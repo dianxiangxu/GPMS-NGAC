@@ -1,7 +1,7 @@
 ﻿var usersManage = '';
 
 $(function() {
-
+	
 	if (isAdmin == "false") {
 		if (userProfileId == "null") {
 			window.location = 'Login.jsp';
@@ -17,7 +17,7 @@ $(function() {
 	jQuery.fn.exists = function() {
 		return this.length > 0;
 	}
-
+	
 	// $.validator.unobtrusive.parse(#form1);
 	$.validator.setDefaults({
 		ignore : []

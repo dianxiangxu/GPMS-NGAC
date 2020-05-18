@@ -78,8 +78,14 @@ public class NGACPolicyConfigurationLoader {
 				try {
 					ngacPolicy = new MemGraph();
 					GraphSerializer.fromJson(ngacPolicy, jsonSuper);
+					log.info("1");
+
 					GraphSerializer.fromJson(ngacPolicy, jsonProposalCreation);
+					log.info("2");
+
 					GraphSerializer.fromJson(ngacPolicy, jsonUnivOrg);
+					log.info("3");
+
 				} catch (PMException e) {
 					log.debug("PM Exception: InitialConfigurationLoader : while loading NGAC base configuration. "
 							+ e.toString());

@@ -43,8 +43,10 @@ import gpms.model.Status;
 import gpms.model.SubmitType;
 import gpms.model.TypeOfRequest;
 import gpms.model.UniversityCommitments;
+import gpms.model.UserAccount;
 import gpms.model.UserProfile;
 import gpms.model.WithdrawType;
+import gpms.ngac.policy.PDSOperations;
 import gpms.utils.EmailUtil;
 
 import java.io.File;
@@ -91,6 +93,11 @@ import com.google.common.collect.Multimap;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoException;
 
+import gov.nist.csd.pm.exceptions.PMException;
+import gov.nist.csd.pm.pip.graph.Graph;
+import gov.nist.csd.pm.pip.graph.GraphSerializer;
+import gov.nist.csd.pm.pip.graph.MemGraph;
+
 public class ProposalDAO extends BasicDAO<Proposal, String> {
 	private static final String DBNAME = "db_gpms";
 	public static final String COLLECTION_NAME = "proposal";
@@ -100,8 +107,7 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	private AuditLog audit = new AuditLog();
 	private DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 
-	private static Morphia getMorphia() throws UnknownHostException,
-			MongoException {
+	private static Morphia getMorphia() throws UnknownHostException, MongoException {
 		if (morphia == null) {
 			morphia = new Morphia().map(Proposal.class);
 		}
@@ -112,8 +118,7 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	public Datastore getDatastore() {
 		if (ds == null) {
 			try {
-				ds = getMorphia().createDatastore(MongoDBConnector.getMongo(),
-						DBNAME);
+				ds = getMorphia().createDatastore(MongoDBConnector.getMongo(), DBNAME);
 			} catch (UnknownHostException | MongoException e) {
 				e.printStackTrace();
 			}
@@ -125,97 +130,87 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 		super(mongo, morphia, dbName);
 	}
 
-	public Proposal findProposalByProposalID(ObjectId id)
-			throws UnknownHostException {
+	public Proposal findProposalByProposalID(ObjectId id) throws UnknownHostException {
 		Datastore ds = getDatastore();
 		return ds.createQuery(Proposal.class).field("_id").equal(id).get();
 	}
 
-	public Proposal findNextProposalWithSameProjectTitle(ObjectId id,
-			String newProjectTitle) {
+	public Proposal findNextProposalWithSameProjectTitle(ObjectId id, String newProjectTitle) {
 		Datastore ds = getDatastore();
 		Query<Proposal> proposalQuery = ds.createQuery(Proposal.class);
 		proposalQuery.and(proposalQuery.criteria("_id").notEqual(id),
-				proposalQuery.criteria("project info.project title")
-						.equalIgnoreCase(newProjectTitle));
+				proposalQuery.criteria("project info.project title").equalIgnoreCase(newProjectTitle));
 		return proposalQuery.get();
 	}
 
 	public Proposal findAnyProposalWithSameProjectTitle(String newProjectTitle) {
 		Datastore ds = getDatastore();
 		Query<Proposal> proposalQuery = ds.createQuery(Proposal.class);
-		proposalQuery.criteria("project info.project title").equalIgnoreCase(
-				newProjectTitle);
+		proposalQuery.criteria("project info.project title").equalIgnoreCase(newProjectTitle);
 		return proposalQuery.get();
 	}
 
 	public void saveProposal(Proposal newProposal, UserProfile authorProfile) {
 		Datastore ds = getDatastore();
-		audit = new AuditLog(authorProfile, "Created proposal by "
-				+ authorProfile.getUserAccount().getUserName(), new Date());
+		audit = new AuditLog(authorProfile, "Created proposal by " + authorProfile.getUserAccount().getUserName(),
+				new Date());
 		newProposal.getAuditLog().add(audit);
 		ds.save(newProposal);
 	}
 
-	public void updateProposal(Proposal existingProposal,
-			UserProfile authorProfile) {
+	public void updateProposal(Proposal existingProposal, UserProfile authorProfile) {
 		Datastore ds = getDatastore();
-		audit = new AuditLog(authorProfile, "Updated proposal by "
-				+ authorProfile.getUserAccount().getUserName(), new Date());
+		audit = new AuditLog(authorProfile, "Updated proposal by " + authorProfile.getUserAccount().getUserName(),
+				new Date());
 		existingProposal.getAuditLog().add(audit);
 		ds.save(existingProposal);
 	}
 
-	public boolean updateProposalStatus(Proposal existingProposal,
-			UserProfile authorProfile) {
+	public boolean updateProposalStatus(Proposal existingProposal, UserProfile authorProfile) {
 		Datastore ds = getDatastore();
 		boolean isStatusUpdated = false;
-		audit = new AuditLog(authorProfile, "Updated proposal by "
-				+ authorProfile.getUserAccount().getUserName(), new Date());
+		audit = new AuditLog(authorProfile, "Updated proposal by " + authorProfile.getUserAccount().getUserName(),
+				new Date());
 		existingProposal.getAuditLog().add(audit);
 		ds.save(existingProposal);
 		isStatusUpdated = true;
 		return isStatusUpdated;
 	}
 
-	public boolean deleteProposalByAdmin(Proposal proposal,
-			UserProfile authorProfile) {
+	public boolean deleteProposalByAdmin(Proposal proposal, UserProfile authorProfile) {
 		Datastore ds = getDatastore();
 		proposal.setResearchDirectorDeletion(DeleteType.DELETED);
 		proposal.getProposalStatus().clear();
 		proposal.getProposalStatus().add(Status.DELETEDBYADMIN);
-		AuditLog entry = new AuditLog(authorProfile, "Deleted Proposal by "
-				+ authorProfile.getUserAccount().getUserName(), new Date());
+		AuditLog entry = new AuditLog(authorProfile,
+				"Deleted Proposal by " + authorProfile.getUserAccount().getUserName(), new Date());
 		proposal.getAuditLog().add(entry);
 		ds.save(proposal);
 		return true;
 	}
 
-	public boolean deleteProposal(Proposal proposal, String proposalRoles,
-			String proposalUserTitle, UserProfile authorProfile) {
+	public boolean deleteProposal(Proposal proposal, String proposalRoles, String proposalUserTitle,
+			UserProfile authorProfile) {
 		Datastore ds = getDatastore();
-		if (proposal.getSubmittedByPI() == SubmitType.NOTSUBMITTED
-				&& proposal.getDeletedByPI() == DeleteType.NOTDELETED
-				&& proposalRoles.equals("PI")
-				&& !proposalUserTitle.equals("University Research Director")) {
+		if (proposal.getSubmittedByPI() == SubmitType.NOTSUBMITTED && proposal.getDeletedByPI() == DeleteType.NOTDELETED
+				&& proposalRoles.equals("PI") && !proposalUserTitle.equals("University Research Director")) {
 			proposal.setDeletedByPI(DeleteType.DELETED);
 			proposal.getProposalStatus().clear();
 			proposal.getProposalStatus().add(Status.DELETEDBYPI);
-			AuditLog entry = new AuditLog(authorProfile, "Deleted Proposal by "
-					+ authorProfile.getUserAccount().getUserName(), new Date());
+			AuditLog entry = new AuditLog(authorProfile,
+					"Deleted Proposal by " + authorProfile.getUserAccount().getUserName(), new Date());
 			proposal.getAuditLog().add(entry);
 			ds.save(proposal);
 			return true;
 		} else if (proposal.getResearchDirectorDeletion() == DeleteType.NOTDELETED
 				&& proposal.getResearchDirectorApproval() == ApprovalType.READYFORAPPROVAL
-				&& !proposalRoles.equals("PI")
-				&& proposalUserTitle.equals("University Research Director")) {
+				&& !proposalRoles.equals("PI") && proposalUserTitle.equals("University Research Director")) {
 			proposal.setResearchDirectorDeletion(DeleteType.DELETED);
 			proposal.setResearchDirectorApproval(ApprovalType.NOTREADYFORAPPROVAL);
 			proposal.getProposalStatus().clear();
 			proposal.getProposalStatus().add(Status.DELETEDBYRESEARCHDIRECTOR);
-			AuditLog entry = new AuditLog(authorProfile, "Deleted Proposal by "
-					+ authorProfile.getUserAccount().getUserName(), new Date());
+			AuditLog entry = new AuditLog(authorProfile,
+					"Deleted Proposal by " + authorProfile.getUserAccount().getUserName(), new Date());
 			proposal.getAuditLog().add(entry);
 			ds.save(proposal);
 			return true;
@@ -232,8 +227,8 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	}
 
 	public boolean verifyValidFileExtension(String extension) {
-		List<String> list = Arrays.asList("jpg", "png", "gif", "jpeg", "bmp",
-				"png", "pdf", "doc", "docx", "xls", "xlsx", "txt");
+		List<String> list = Arrays.asList("jpg", "png", "gif", "jpeg", "bmp", "png", "pdf", "doc", "docx", "xls",
+				"xlsx", "txt");
 		if (list.contains(extension)) {
 			return true;
 		} else {
@@ -258,14 +253,12 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @return
 	 * @throws ParseException
 	 */
-	public List<ProposalInfo> findAllProposalsForGrid(int offset, int limit,
-			ProposalCommonInfo proposalInfo) throws ParseException {
+	public List<ProposalInfo> findAllProposalsForGrid(int offset, int limit, ProposalCommonInfo proposalInfo)
+			throws ParseException {
 		Query<Proposal> proposalQuery = getUserProposalSearchCriteria(proposalInfo);
-		List<Proposal> allCurrentLoginUserProposalsList = proposalQuery
-				.offset(offset - 1).limit(limit)
+		List<Proposal> allCurrentLoginUserProposalsList = proposalQuery.offset(offset - 1).limit(limit)
 				.order("-audit log.activity on").asList();
-		return getUserProposalGrid(proposalQuery.asList().size(),
-				allCurrentLoginUserProposalsList);
+		return getUserProposalGrid(proposalQuery.asList().size(), allCurrentLoginUserProposalsList);
 	}
 
 	/***
@@ -275,56 +268,39 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @return
 	 * @throws ParseException
 	 */
-	private Query<Proposal> getUserProposalSearchCriteria(
-			ProposalCommonInfo proposalInfo) throws ParseException {
+	private Query<Proposal> getUserProposalSearchCriteria(ProposalCommonInfo proposalInfo) throws ParseException {
 		Datastore ds = getDatastore();
 		Query<Proposal> proposalQuery = ds.createQuery(Proposal.class);
 		if (proposalInfo.getProjectTitle() != null) {
-			proposalQuery.field("project info.project title")
-					.containsIgnoreCase(proposalInfo.getProjectTitle());
+			proposalQuery.field("project info.project title").containsIgnoreCase(proposalInfo.getProjectTitle());
 		}
-		if (proposalInfo.getSubmittedOnFrom() != null
-				&& !proposalInfo.getSubmittedOnFrom().isEmpty()) {
-			Date receivedOnF = formatter.parse(proposalInfo
-					.getSubmittedOnFrom());
+		if (proposalInfo.getSubmittedOnFrom() != null && !proposalInfo.getSubmittedOnFrom().isEmpty()) {
+			Date receivedOnF = formatter.parse(proposalInfo.getSubmittedOnFrom());
 			proposalQuery.field("date submitted").greaterThanOrEq(receivedOnF);
 		}
-		if (proposalInfo.getSubmittedOnTo() != null
-				&& !proposalInfo.getSubmittedOnTo().isEmpty()) {
+		if (proposalInfo.getSubmittedOnTo() != null && !proposalInfo.getSubmittedOnTo().isEmpty()) {
 			Date receivedOnT = formatter.parse(proposalInfo.getSubmittedOnTo());
 			proposalQuery.field("date submitted").lessThanOrEq(receivedOnT);
 		}
-		if (proposalInfo.getTotalCostsFrom() != null
-				&& proposalInfo.getTotalCostsFrom() != 0.0) {
+		if (proposalInfo.getTotalCostsFrom() != null && proposalInfo.getTotalCostsFrom() != 0.0) {
 			proposalQuery.field("sponsor and budget info.total costs")
 					.greaterThanOrEq(proposalInfo.getTotalCostsFrom());
 		}
-		if (proposalInfo.getTotalCostsTo() != null
-				&& proposalInfo.getTotalCostsTo() != 0.0) {
-			proposalQuery.field("sponsor and budget info.total costs")
-					.lessThanOrEq(proposalInfo.getTotalCostsTo());
+		if (proposalInfo.getTotalCostsTo() != null && proposalInfo.getTotalCostsTo() != 0.0) {
+			proposalQuery.field("sponsor and budget info.total costs").lessThanOrEq(proposalInfo.getTotalCostsTo());
 		}
 		if (proposalInfo.getProposalStatus() != null) {
-			proposalQuery.field("proposal status").contains(
-					proposalInfo.getProposalStatus());
+			proposalQuery.field("proposal status").contains(proposalInfo.getProposalStatus());
 		}
 		String usernameBy = proposalInfo.getUsernameBy();
 		if (usernameBy != null) {
 			Query<UserProfile> profileQuery = ds.createQuery(UserProfile.class);
-			profileQuery.or(
-					profileQuery.criteria("first name").containsIgnoreCase(
-							usernameBy),
-					profileQuery.criteria("middle name").containsIgnoreCase(
-							usernameBy), profileQuery.criteria("last name")
-							.containsIgnoreCase(usernameBy));
-			proposalQuery.or(
-					proposalQuery.criteria("investigator info.pi.user profile")
-							.in(profileQuery.asKeyList()),
-					proposalQuery.criteria(
-							"investigator info.co_pi.user profile").in(
-							profileQuery.asKeyList()),
-					proposalQuery.criteria(
-							"investigator info.senior personnel.user profile")
+			profileQuery.or(profileQuery.criteria("first name").containsIgnoreCase(usernameBy),
+					profileQuery.criteria("middle name").containsIgnoreCase(usernameBy),
+					profileQuery.criteria("last name").containsIgnoreCase(usernameBy));
+			proposalQuery.or(proposalQuery.criteria("investigator info.pi.user profile").in(profileQuery.asKeyList()),
+					proposalQuery.criteria("investigator info.co_pi.user profile").in(profileQuery.asKeyList()),
+					proposalQuery.criteria("investigator info.senior personnel.user profile")
 							.in(profileQuery.asKeyList()));
 		}
 		return proposalQuery;
@@ -337,8 +313,7 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param allCurrentLoginUserProposalsList
 	 * @return
 	 */
-	private List<ProposalInfo> getUserProposalGrid(int rowTotal,
-			List<Proposal> allCurrentLoginUserProposalsList) {
+	private List<ProposalInfo> getUserProposalGrid(int rowTotal, List<Proposal> allCurrentLoginUserProposalsList) {
 		List<ProposalInfo> proposalsGridInfoList = new ArrayList<ProposalInfo>();
 		for (Proposal userProposal : allCurrentLoginUserProposalsList) {
 			ProposalInfo proposalGridInfo = new ProposalInfo();
@@ -374,10 +349,8 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param userProposal
 	 * @param proposalGridInfo
 	 */
-	private void setProposalSeniorsInfo(Proposal userProposal,
-			ProposalInfo proposalGridInfo) {
-		List<InvestigatorRefAndPosition> allSeniors = userProposal
-				.getInvestigatorInfo().getSeniorPersonnel();
+	private void setProposalSeniorsInfo(Proposal userProposal, ProposalInfo proposalGridInfo) {
+		List<InvestigatorRefAndPosition> allSeniors = userProposal.getInvestigatorInfo().getSeniorPersonnel();
 		for (InvestigatorRefAndPosition senior : allSeniors) {
 			String seniorUser = senior.getUserProfileId();
 			proposalGridInfo.getSeniorUsers().add(seniorUser);
@@ -393,10 +366,8 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param userProposal
 	 * @param proposalGridInfo
 	 */
-	private void setPropsalCoPIsInfo(Proposal userProposal,
-			ProposalInfo proposalGridInfo) {
-		List<InvestigatorRefAndPosition> allCoPI = userProposal
-				.getInvestigatorInfo().getCo_pi();
+	private void setPropsalCoPIsInfo(Proposal userProposal, ProposalInfo proposalGridInfo) {
+		List<InvestigatorRefAndPosition> allCoPI = userProposal.getInvestigatorInfo().getCo_pi();
 		for (InvestigatorRefAndPosition coPI : allCoPI) {
 			String coPIUser = coPI.getUserProfileId();
 			proposalGridInfo.getCopiUsers().add(coPIUser);
@@ -412,10 +383,8 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param userProposal
 	 * @param proposalGridInfo
 	 */
-	private void setProposalPIInfo(Proposal userProposal,
-			ProposalInfo proposalGridInfo) {
-		String piUserId = userProposal.getInvestigatorInfo().getPi()
-				.getUserProfileId();
+	private void setProposalPIInfo(Proposal userProposal, ProposalInfo proposalGridInfo) {
+		String piUserId = userProposal.getInvestigatorInfo().getPi().getUserProfileId();
 		proposalGridInfo.setPiUser(piUserId);
 		if (!proposalGridInfo.getAllUsers().contains(piUserId)) {
 			proposalGridInfo.getAllUsers().add(piUserId);
@@ -428,15 +397,13 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param userProposal
 	 * @param proposalGridInfo
 	 */
-	private void getRecentProposalAuditLog(Proposal userProposal,
-			ProposalInfo proposalGridInfo) {
+	private void getRecentProposalAuditLog(Proposal userProposal, ProposalInfo proposalGridInfo) {
 		Date lastAudited = null;
 		String lastAuditedBy = new String();
 		String lastAuditAction = new String();
 		int auditLogCount = userProposal.getAuditLog().size();
 		if (userProposal.getAuditLog() != null && auditLogCount != 0) {
-			AuditLog auditLog = userProposal.getAuditLog().get(
-					auditLogCount - 1);
+			AuditLog auditLog = userProposal.getAuditLog().get(auditLogCount - 1);
 			lastAudited = auditLog.getActivityDate();
 			lastAuditedBy = auditLog.getUserProfile().getFullName();
 			lastAuditAction = auditLog.getAction();
@@ -452,44 +419,33 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param userProposal
 	 * @param proposalGridInfo
 	 */
-	private void setCurrentProposalStatusAttributes(Proposal userProposal,
-			ProposalInfo proposalGridInfo) {
+	private void setCurrentProposalStatusAttributes(Proposal userProposal, ProposalInfo proposalGridInfo) {
 		for (Status status : userProposal.getProposalStatus()) {
 			proposalGridInfo.getProposalStatus().add(status.toString());
 		}
 		// PI
 		proposalGridInfo.setSubmittedByPI(userProposal.getSubmittedByPI());
-		proposalGridInfo.setReadyForSubmissionByPI(userProposal
-				.isReadyForSubmissionByPI());
+		proposalGridInfo.setReadyForSubmissionByPI(userProposal.isReadyForSubmissionByPI());
 		proposalGridInfo.setDeletedByPI(userProposal.getDeletedByPI());
 		// Chair
 		proposalGridInfo.setChairApproval(userProposal.getChairApproval());
 		// Business Manager
-		proposalGridInfo.setBusinessManagerApproval(userProposal
-				.getBusinessManagerApproval());
+		proposalGridInfo.setBusinessManagerApproval(userProposal.getBusinessManagerApproval());
 		// IRB
 		proposalGridInfo.setIrbApproval(userProposal.getIrbApproval());
 		// Dean
 		proposalGridInfo.setDeanApproval(userProposal.getDeanApproval());
 		// University Research Administrator
-		proposalGridInfo.setResearchAdministratorApproval(userProposal
-				.getResearchAdministratorApproval());
-		proposalGridInfo.setResearchAdministratorWithdraw(userProposal
-				.getResearchAdministratorWithdraw());
-		proposalGridInfo.setResearchAdministratorSubmission(userProposal
-				.getResearchAdministratorSubmission());
+		proposalGridInfo.setResearchAdministratorApproval(userProposal.getResearchAdministratorApproval());
+		proposalGridInfo.setResearchAdministratorWithdraw(userProposal.getResearchAdministratorWithdraw());
+		proposalGridInfo.setResearchAdministratorSubmission(userProposal.getResearchAdministratorSubmission());
 		// University Research Director
-		proposalGridInfo.setResearchDirectorApproval(userProposal
-				.getResearchDirectorApproval());
-		proposalGridInfo.setResearchDirectorDeletion(userProposal
-				.getResearchDirectorDeletion());
-		proposalGridInfo.setResearchDirectorArchived(userProposal
-				.getResearchDirectorArchived());
-		proposalGridInfo.setIrbApprovalRequired(userProposal
-				.isIrbApprovalRequired());
+		proposalGridInfo.setResearchDirectorApproval(userProposal.getResearchDirectorApproval());
+		proposalGridInfo.setResearchDirectorDeletion(userProposal.getResearchDirectorDeletion());
+		proposalGridInfo.setResearchDirectorArchived(userProposal.getResearchDirectorArchived());
+		proposalGridInfo.setIrbApprovalRequired(userProposal.isIrbApprovalRequired());
 		if (userProposal.getDeletedByPI().equals(DeleteType.DELETED)
-				|| userProposal.getResearchDirectorDeletion().equals(
-						DeleteType.DELETED)) {
+				|| userProposal.getResearchDirectorDeletion().equals(DeleteType.DELETED)) {
 			proposalGridInfo.setDeleted(true);
 		}
 	}
@@ -501,12 +457,10 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @return
 	 * @throws ParseException
 	 */
-	public List<ProposalInfo> findAllProposals(ProposalCommonInfo proposalInfo)
-			throws ParseException {
+	public List<ProposalInfo> findAllProposals(ProposalCommonInfo proposalInfo) throws ParseException {
 		Query<Proposal> queryPropsal = getUserProposalSearchCriteria(proposalInfo);
 		int rowTotal = queryPropsal.asList().size();
-		List<Proposal> allProposals = queryPropsal.order(
-				"-audit log.activity on").asList();
+		List<Proposal> allProposals = queryPropsal.order("-audit log.activity on").asList();
 		return getUserProposalGrid(rowTotal, allProposals);
 	}
 
@@ -520,18 +474,16 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @return
 	 * @throws ParseException
 	 */
-	public List<ProposalInfo> findUserProposalGrid(int offset, int limit,
-			ProposalCommonInfo proposalInfo, GPMSCommonInfo userInfo)
-			throws ParseException {
+	public List<ProposalInfo> findUserProposalGrid(int offset, int limit, ProposalCommonInfo proposalInfo,
+			GPMSCommonInfo userInfo) throws ParseException {
 		List<ProposalInfo> proposals = new ArrayList<ProposalInfo>();
 		Query<Proposal> proposalQuery = buildSearchQuery(proposalInfo, userInfo);
 		int rowTotal = proposalQuery.asList().size();
-		List<Proposal> allProposals = proposalQuery.offset(offset - 1)
-				.limit(limit).order("-audit log.activity on").asList();
+		List<Proposal> allProposals = proposalQuery.offset(offset - 1).limit(limit).order("-audit log.activity on")
+				.asList();
 
 		for (Proposal userProposal : allProposals) {
-			ProposalInfo proposal = getProposalInfoForGrid(userInfo, rowTotal,
-					userProposal);
+			ProposalInfo proposal = getProposalInfoForGrid(userInfo, rowTotal, userProposal);
 			proposals.add(proposal);
 		}
 		return proposals;
@@ -545,8 +497,7 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param userProposal
 	 * @return
 	 */
-	private ProposalInfo getProposalInfoForGrid(GPMSCommonInfo userInfo,
-			int rowTotal, Proposal userProposal) {
+	private ProposalInfo getProposalInfoForGrid(GPMSCommonInfo userInfo, int rowTotal, Proposal userProposal) {
 		ProposalInfo proposal = new ProposalInfo();
 		proposal.setRowTotal(rowTotal);
 		proposal.setId(userProposal.getId().toString());
@@ -554,18 +505,12 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 		setProposalSponsorAndBudgetInfo(userProposal, proposal);
 		setCurrentProposalStatusAttributes(userProposal, proposal);
 		getRecentProposalAuditLog(userProposal, proposal);
-		setProposalPIUser(userInfo.getUserProfileID(),
-				userInfo.getUserCollege(), userInfo.getUserDepartment(),
-				userInfo.getUserPositionType(),
-				userInfo.getUserPositionTitle(), userProposal, proposal);
-		setProposalCoPIUsers(userInfo.getUserProfileID(),
-				userInfo.getUserCollege(), userInfo.getUserDepartment(),
-				userInfo.getUserPositionType(),
-				userInfo.getUserPositionTitle(), userProposal, proposal);
-		setProposalSeniorUsers(userInfo.getUserProfileID(),
-				userInfo.getUserCollege(), userInfo.getUserDepartment(),
-				userInfo.getUserPositionType(),
-				userInfo.getUserPositionTitle(), userProposal, proposal);
+		setProposalPIUser(userInfo.getUserProfileID(), userInfo.getUserCollege(), userInfo.getUserDepartment(),
+				userInfo.getUserPositionType(), userInfo.getUserPositionTitle(), userProposal, proposal);
+		setProposalCoPIUsers(userInfo.getUserProfileID(), userInfo.getUserCollege(), userInfo.getUserDepartment(),
+				userInfo.getUserPositionType(), userInfo.getUserPositionTitle(), userProposal, proposal);
+		setProposalSeniorUsers(userInfo.getUserProfileID(), userInfo.getUserCollege(), userInfo.getUserDepartment(),
+				userInfo.getUserPositionType(), userInfo.getUserPositionTitle(), userProposal, proposal);
 		return proposal;
 	}
 
@@ -575,25 +520,17 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param userProposal
 	 * @param proposalGridInfo
 	 */
-	private void setProposalSponsorAndBudgetInfo(Proposal userProposal,
-			ProposalInfo proposalGridInfo) {
-		proposalGridInfo.setGrantingAgencies(userProposal
-				.getSponsorAndBudgetInfo().getGrantingAgency());
-		proposalGridInfo.setDirectCosts(userProposal.getSponsorAndBudgetInfo()
-				.getDirectCosts());
-		proposalGridInfo.setFaCosts(userProposal.getSponsorAndBudgetInfo()
-				.getFaCosts());
-		proposalGridInfo.setTotalCosts(userProposal.getSponsorAndBudgetInfo()
-				.getTotalCosts());
-		proposalGridInfo.setFaRate(userProposal.getSponsorAndBudgetInfo()
-				.getFaRate());
+	private void setProposalSponsorAndBudgetInfo(Proposal userProposal, ProposalInfo proposalGridInfo) {
+		proposalGridInfo.setGrantingAgencies(userProposal.getSponsorAndBudgetInfo().getGrantingAgency());
+		proposalGridInfo.setDirectCosts(userProposal.getSponsorAndBudgetInfo().getDirectCosts());
+		proposalGridInfo.setFaCosts(userProposal.getSponsorAndBudgetInfo().getFaCosts());
+		proposalGridInfo.setTotalCosts(userProposal.getSponsorAndBudgetInfo().getTotalCosts());
+		proposalGridInfo.setFaRate(userProposal.getSponsorAndBudgetInfo().getFaRate());
 		proposalGridInfo.setDateCreated(userProposal.getDateCreated());
 		proposalGridInfo.setDateSubmitted(userProposal.getDateSubmitted());
 		proposalGridInfo.setDueDate(userProposal.getProjectInfo().getDueDate());
-		proposalGridInfo.setProjectPeriodFrom(userProposal.getProjectInfo()
-				.getProjectPeriod().getFrom());
-		proposalGridInfo.setProjectPeriodTo(userProposal.getProjectInfo()
-				.getProjectPeriod().getTo());
+		proposalGridInfo.setProjectPeriodFrom(userProposal.getProjectInfo().getProjectPeriod().getFrom());
+		proposalGridInfo.setProjectPeriodTo(userProposal.getProjectInfo().getProjectPeriod().getTo());
 	}
 
 	/***
@@ -602,12 +539,9 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param userProposal
 	 * @param proposalGridInfo
 	 */
-	private void setProposalProjectInfo(Proposal userProposal,
-			ProposalInfo proposalGridInfo) {
-		proposalGridInfo.setProjectTitle(userProposal.getProjectInfo()
-				.getProjectTitle());
-		ProjectType projectPropsalType = userProposal.getProjectInfo()
-				.getProjectType();
+	private void setProposalProjectInfo(Proposal userProposal, ProposalInfo proposalGridInfo) {
+		proposalGridInfo.setProjectTitle(userProposal.getProjectInfo().getProjectTitle());
+		ProjectType projectPropsalType = userProposal.getProjectInfo().getProjectType();
 		if (projectPropsalType.isResearchBasic()) {
 			proposalGridInfo.setProjectType("Research-basic");
 		} else if (projectPropsalType.isResearchApplied()) {
@@ -620,8 +554,7 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 			proposalGridInfo.setProjectType("Other sponsored activity");
 		}
 
-		TypeOfRequest typeOfRequest = userProposal.getProjectInfo()
-				.getTypeOfRequest();
+		TypeOfRequest typeOfRequest = userProposal.getProjectInfo().getTypeOfRequest();
 		if (typeOfRequest.isPreProposal()) {
 			proposalGridInfo.getTypeOfRequest().add("Pre-proposal");
 		} else if (typeOfRequest.isNewProposal()) {
@@ -651,11 +584,9 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param userProposal
 	 * @param proposal
 	 */
-	private void setProposalSeniorUsers(String userId, String college,
-			String department, String positionType, String positionTitle,
-			Proposal userProposal, ProposalInfo proposal) {
-		List<InvestigatorRefAndPosition> allSeniors = userProposal
-				.getInvestigatorInfo().getSeniorPersonnel();
+	private void setProposalSeniorUsers(String userId, String college, String department, String positionType,
+			String positionTitle, Proposal userProposal, ProposalInfo proposal) {
+		List<InvestigatorRefAndPosition> allSeniors = userProposal.getInvestigatorInfo().getSeniorPersonnel();
 		for (InvestigatorRefAndPosition senior : allSeniors) {
 			String seniorUser = senior.getUserProfileId();
 			String seniorUserCollege = senior.getCollege();
@@ -667,8 +598,7 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 				proposal.getAllUsers().add(seniorUser);
 			}
 			if (seniorUser.equals(userId) && seniorUserCollege.equals(college)
-					&& seniorUserDepartment.equals(department)
-					&& seniorUserPositionType.equals(positionType)
+					&& seniorUserDepartment.equals(department) && seniorUserPositionType.equals(positionType)
 					&& seniorUserPositionTitle.equals(positionTitle)) {
 				proposal.getCurrentuserProposalRoles().add("Senior Personnel");
 			}
@@ -686,11 +616,9 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param userProposal
 	 * @param proposal
 	 */
-	private void setProposalCoPIUsers(String userId, String college,
-			String department, String positionType, String positionTitle,
-			Proposal userProposal, ProposalInfo proposal) {
-		List<InvestigatorRefAndPosition> allCoPI = userProposal
-				.getInvestigatorInfo().getCo_pi();
+	private void setProposalCoPIUsers(String userId, String college, String department, String positionType,
+			String positionTitle, Proposal userProposal, ProposalInfo proposal) {
+		List<InvestigatorRefAndPosition> allCoPI = userProposal.getInvestigatorInfo().getCo_pi();
 		for (InvestigatorRefAndPosition coPI : allCoPI) {
 			String coPIUser = coPI.getUserProfileId();
 			String coPIUserCollege = coPI.getCollege();
@@ -701,10 +629,8 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 			if (!proposal.getAllUsers().contains(coPIUser)) {
 				proposal.getAllUsers().add(coPIUser);
 			}
-			if (coPIUser.equals(userId) && coPIUserCollege.equals(college)
-					&& coPIUserDepartment.equals(department)
-					&& coPIUserPositionType.equals(positionType)
-					&& coPIUserPositionTitle.equals(positionTitle)) {
+			if (coPIUser.equals(userId) && coPIUserCollege.equals(college) && coPIUserDepartment.equals(department)
+					&& coPIUserPositionType.equals(positionType) && coPIUserPositionTitle.equals(positionTitle)) {
 				proposal.getCurrentuserProposalRoles().add("Co-PI");
 			}
 		}
@@ -721,27 +647,19 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param userProposal
 	 * @param proposal
 	 */
-	private void setProposalPIUser(String userId, String college,
-			String department, String positionType, String positionTitle,
-			Proposal userProposal, ProposalInfo proposal) {
-		String piUserId = userProposal.getInvestigatorInfo().getPi()
-				.getUserProfileId();
-		String piUserCollege = userProposal.getInvestigatorInfo().getPi()
-				.getCollege();
-		String piUserDepartment = userProposal.getInvestigatorInfo().getPi()
-				.getDepartment();
-		String piUserPositionType = userProposal.getInvestigatorInfo().getPi()
-				.getPositionType();
-		String piUserPositionTitle = userProposal.getInvestigatorInfo().getPi()
-				.getPositionTitle();
+	private void setProposalPIUser(String userId, String college, String department, String positionType,
+			String positionTitle, Proposal userProposal, ProposalInfo proposal) {
+		String piUserId = userProposal.getInvestigatorInfo().getPi().getUserProfileId();
+		String piUserCollege = userProposal.getInvestigatorInfo().getPi().getCollege();
+		String piUserDepartment = userProposal.getInvestigatorInfo().getPi().getDepartment();
+		String piUserPositionType = userProposal.getInvestigatorInfo().getPi().getPositionType();
+		String piUserPositionTitle = userProposal.getInvestigatorInfo().getPi().getPositionTitle();
 		proposal.setPiUser(piUserId);
 		if (!proposal.getAllUsers().contains(piUserId)) {
 			proposal.getAllUsers().add(piUserId);
 		}
-		if (piUserId.equals(userId) && piUserCollege.equals(college)
-				&& piUserDepartment.equals(department)
-				&& piUserPositionType.equals(positionType)
-				&& piUserPositionTitle.equals(positionTitle)) {
+		if (piUserId.equals(userId) && piUserCollege.equals(college) && piUserDepartment.equals(department)
+				&& piUserPositionType.equals(positionType) && piUserPositionTitle.equals(positionTitle)) {
 			proposal.getCurrentuserProposalRoles().add("PI");
 		}
 	}
@@ -754,73 +672,55 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @return
 	 * @throws ParseException
 	 */
-	private Query<Proposal> buildSearchQuery(ProposalCommonInfo proposalInfo,
-			GPMSCommonInfo userInfo) throws ParseException {
+	private Query<Proposal> buildSearchQuery(ProposalCommonInfo proposalInfo, GPMSCommonInfo userInfo)
+			throws ParseException {
 		Datastore ds = getDatastore();
 		Query<Proposal> proposalQuery = ds.createQuery(Proposal.class);
 		Query<UserProfile> profileQuery = ds.createQuery(UserProfile.class);
 		if (proposalInfo.getProjectTitle() != null) {
-			proposalQuery.field("project info.project title")
-					.containsIgnoreCase(proposalInfo.getProjectTitle());
+			proposalQuery.field("project info.project title").containsIgnoreCase(proposalInfo.getProjectTitle());
 		}
-		if (proposalInfo.getSubmittedOnFrom() != null
-				&& !proposalInfo.getSubmittedOnFrom().isEmpty()) {
-			Date receivedOnF = formatter.parse(proposalInfo
-					.getSubmittedOnFrom());
+		if (proposalInfo.getSubmittedOnFrom() != null && !proposalInfo.getSubmittedOnFrom().isEmpty()) {
+			Date receivedOnF = formatter.parse(proposalInfo.getSubmittedOnFrom());
 			proposalQuery.field("date submitted").greaterThanOrEq(receivedOnF);
 		}
-		if (proposalInfo.getSubmittedOnTo() != null
-				&& !proposalInfo.getSubmittedOnTo().isEmpty()) {
+		if (proposalInfo.getSubmittedOnTo() != null && !proposalInfo.getSubmittedOnTo().isEmpty()) {
 			Date receivedOnT = formatter.parse(proposalInfo.getSubmittedOnTo());
 			proposalQuery.field("date submitted").lessThanOrEq(receivedOnT);
 		}
-		if (proposalInfo.getTotalCostsFrom() != null
-				&& proposalInfo.getTotalCostsFrom() != 0.0) {
+		if (proposalInfo.getTotalCostsFrom() != null && proposalInfo.getTotalCostsFrom() != 0.0) {
 			proposalQuery.field("sponsor and budget info.total costs")
 					.greaterThanOrEq(proposalInfo.getTotalCostsFrom());
 		}
-		if (proposalInfo.getTotalCostsTo() != null
-				&& proposalInfo.getTotalCostsTo() != 0.0) {
-			proposalQuery.field("sponsor and budget info.total costs")
-					.lessThanOrEq(proposalInfo.getTotalCostsTo());
+		if (proposalInfo.getTotalCostsTo() != null && proposalInfo.getTotalCostsTo() != 0.0) {
+			proposalQuery.field("sponsor and budget info.total costs").lessThanOrEq(proposalInfo.getTotalCostsTo());
 		}
 		if (proposalInfo.getProposalStatus() != null) {
-			proposalQuery.field("proposal status").contains(
-					proposalInfo.getProposalStatus());
+			proposalQuery.field("proposal status").contains(proposalInfo.getProposalStatus());
 		}
 		if (!userInfo.getUserPositionTitle().equals("IRB")
-				&& !userInfo.getUserPositionTitle().equals(
-						"University Research Administrator")
-				&& !userInfo.getUserPositionTitle().equals(
-						"University Research Director")) {
+				&& !userInfo.getUserPositionTitle().equals("University Research Administrator")
+				&& !userInfo.getUserPositionTitle().equals("University Research Director")) {
 			if (userInfo.getUserPositionTitle().equals("Dean")
 					|| userInfo.getUserPositionTitle().equals("Associate Dean")) {
 				buildQueryForCollege(userInfo.getUserCollege(), proposalQuery);
-			} else if (userInfo.getUserPositionTitle().equals(
-					"Business Manager")
-					|| userInfo.getUserPositionTitle().equals(
-							"Department Administrative Assistant")
-					|| userInfo.getUserPositionTitle().equals(
-							"Department Chair")
-					|| userInfo.getUserPositionTitle()
-							.equals("Associate Chair")) {
-				buildQueryForCollegeAndDepartment(userInfo.getUserCollege(),
-						userInfo.getUserDepartment(), proposalQuery);
+			} else if (userInfo.getUserPositionTitle().equals("Business Manager")
+					|| userInfo.getUserPositionTitle().equals("Department Administrative Assistant")
+					|| userInfo.getUserPositionTitle().equals("Department Chair")
+					|| userInfo.getUserPositionTitle().equals("Associate Chair")) {
+				buildQueryForCollegeAndDepartment(userInfo.getUserCollege(), userInfo.getUserDepartment(),
+						proposalQuery);
 			} else {
-				buildQueryForCollegeDepartmentAndPosition(
-						userInfo.getUserProfileID(), userInfo.getUserCollege(),
-						userInfo.getUserDepartment(),
-						userInfo.getUserPositionType(),
-						userInfo.getUserPositionTitle(), proposalQuery);
+				buildQueryForCollegeDepartmentAndPosition(userInfo.getUserProfileID(), userInfo.getUserCollege(),
+						userInfo.getUserDepartment(), userInfo.getUserPositionType(), userInfo.getUserPositionTitle(),
+						proposalQuery);
 			}
 		}
 		if (proposalInfo.getUsernameBy() != null) {
-			buildQueryForUserNameBy(proposalInfo.getUsernameBy(),
-					proposalInfo.getUserRole(), proposalQuery, profileQuery);
-		} else if (proposalInfo.getUsernameBy() == null
-				&& proposalInfo.getUserRole() != null) {
-			buildQueryForUserProposalRole(proposalInfo.getUserRole(),
-					userInfo.getUserProfileID(), proposalQuery);
+			buildQueryForUserNameBy(proposalInfo.getUsernameBy(), proposalInfo.getUserRole(), proposalQuery,
+					profileQuery);
+		} else if (proposalInfo.getUsernameBy() == null && proposalInfo.getUserRole() != null) {
+			buildQueryForUserProposalRole(proposalInfo.getUserRole(), userInfo.getUserProfileID(), proposalQuery);
 		}
 		return proposalQuery;
 	}
@@ -832,22 +732,17 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param userId
 	 * @param proposalQuery
 	 */
-	private void buildQueryForUserProposalRole(String userRole, String userId,
-			Query<Proposal> proposalQuery) {
+	private void buildQueryForUserProposalRole(String userRole, String userId, Query<Proposal> proposalQuery) {
 		switch (userRole) {
 		case "PI":
-			proposalQuery.criteria("investigator info.pi.user profile id")
-					.equal(userId);
+			proposalQuery.criteria("investigator info.pi.user profile id").equal(userId);
 			break;
 		case "Co-PI":
-			proposalQuery.criteria("investigator info.co_pi.user profile id")
-					.equal(userId);
+			proposalQuery.criteria("investigator info.co_pi.user profile id").equal(userId);
 			break;
 
 		case "Senior Personnel":
-			proposalQuery.criteria(
-					"investigator info.senior personnel.user profile id")
-					.equal(userId);
+			proposalQuery.criteria("investigator info.senior personnel.user profile id").equal(userId);
 			break;
 
 		default:
@@ -863,42 +758,29 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param proposalQuery
 	 * @param profileQuery
 	 */
-	private void buildQueryForUserNameBy(String usernameBy, String userRole,
-			Query<Proposal> proposalQuery, Query<UserProfile> profileQuery) {
-		profileQuery.or(
-				profileQuery.criteria("first name").containsIgnoreCase(
-						usernameBy),
-				profileQuery.criteria("middle name").containsIgnoreCase(
-						usernameBy),
-				profileQuery.criteria("last name").containsIgnoreCase(
-						usernameBy));
+	private void buildQueryForUserNameBy(String usernameBy, String userRole, Query<Proposal> proposalQuery,
+			Query<UserProfile> profileQuery) {
+		profileQuery.or(profileQuery.criteria("first name").containsIgnoreCase(usernameBy),
+				profileQuery.criteria("middle name").containsIgnoreCase(usernameBy),
+				profileQuery.criteria("last name").containsIgnoreCase(usernameBy));
 		if (userRole != null) {
 			switch (userRole) {
 			case "PI":
-				proposalQuery.criteria("investigator info.pi.user profile").in(
-						profileQuery.asKeyList());
+				proposalQuery.criteria("investigator info.pi.user profile").in(profileQuery.asKeyList());
 				break;
 			case "Co-PI":
-				proposalQuery.criteria("investigator info.co_pi.user profile")
-						.in(profileQuery.asKeyList());
+				proposalQuery.criteria("investigator info.co_pi.user profile").in(profileQuery.asKeyList());
 				break;
 			case "Senior Personnel":
-				proposalQuery.criteria(
-						"investigator info.senior personnel.user profile").in(
-						profileQuery.asKeyList());
+				proposalQuery.criteria("investigator info.senior personnel.user profile").in(profileQuery.asKeyList());
 				break;
 			default:
 				break;
 			}
 		} else {
-			proposalQuery.or(
-					proposalQuery.criteria("investigator info.pi.user profile")
-							.in(profileQuery.asKeyList()),
-					proposalQuery.criteria(
-							"investigator info.co_pi.user profile").in(
-							profileQuery.asKeyList()),
-					proposalQuery.criteria(
-							"investigator info.senior personnel.user profile")
+			proposalQuery.or(proposalQuery.criteria("investigator info.pi.user profile").in(profileQuery.asKeyList()),
+					proposalQuery.criteria("investigator info.co_pi.user profile").in(profileQuery.asKeyList()),
+					proposalQuery.criteria("investigator info.senior personnel.user profile")
 							.in(profileQuery.asKeyList()));
 		}
 	}
@@ -913,47 +795,26 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param positionTitle
 	 * @param proposalQuery
 	 */
-	private void buildQueryForCollegeDepartmentAndPosition(String userId,
-			String college, String department, String positionType,
-			String positionTitle, Query<Proposal> proposalQuery) {
-		proposalQuery.or(proposalQuery.and(
-				proposalQuery.criteria("investigator info.pi.user profile id")
-						.equal(userId),
-				proposalQuery.criteria("investigator info.pi.college").equal(
-						college),
-				proposalQuery.criteria("investigator info.pi.department")
-						.equal(department),
-				proposalQuery.criteria("investigator info.pi.position type")
-						.equal(positionType),
-				proposalQuery.criteria("investigator info.pi.position title")
-						.equal(positionTitle)), proposalQuery.and(
-				proposalQuery.criteria(
-						"investigator info.co_pi.user profile id")
-						.equal(userId),
-				proposalQuery.criteria("investigator info.co_pi.college")
-						.equal(college),
-				proposalQuery.criteria("investigator info.co_pi.department")
-						.equal(department),
-				proposalQuery.criteria("investigator info.co_pi.position type")
-						.equal(positionType),
-				proposalQuery
-						.criteria("investigator info.co_pi.position title")
-						.equal(positionTitle)), proposalQuery.and(
-				proposalQuery.criteria(
-						"investigator info.senior personnel.user profile id")
-						.equal(userId),
-				proposalQuery.criteria(
-						"investigator info.senior personnel.college").equal(
-						college),
-				proposalQuery.criteria(
-						"investigator info.senior personnel.department").equal(
-						department),
-				proposalQuery.criteria(
-						"investigator info.senior personnel.position type")
-						.equal(positionType),
-				proposalQuery.criteria(
-						"investigator info.senior personnel.position title")
-						.equal(positionTitle)));
+	private void buildQueryForCollegeDepartmentAndPosition(String userId, String college, String department,
+			String positionType, String positionTitle, Query<Proposal> proposalQuery) {
+		proposalQuery.or(
+				proposalQuery.and(proposalQuery.criteria("investigator info.pi.user profile id").equal(userId),
+						proposalQuery.criteria("investigator info.pi.college").equal(college),
+						proposalQuery.criteria("investigator info.pi.department").equal(department),
+						proposalQuery.criteria("investigator info.pi.position type").equal(positionType),
+						proposalQuery.criteria("investigator info.pi.position title").equal(positionTitle)),
+				proposalQuery.and(proposalQuery.criteria("investigator info.co_pi.user profile id").equal(userId),
+						proposalQuery.criteria("investigator info.co_pi.college").equal(college),
+						proposalQuery.criteria("investigator info.co_pi.department").equal(department),
+						proposalQuery.criteria("investigator info.co_pi.position type").equal(positionType),
+						proposalQuery.criteria("investigator info.co_pi.position title").equal(positionTitle)),
+				proposalQuery.and(
+						proposalQuery.criteria("investigator info.senior personnel.user profile id").equal(userId),
+						proposalQuery.criteria("investigator info.senior personnel.college").equal(college),
+						proposalQuery.criteria("investigator info.senior personnel.department").equal(department),
+						proposalQuery.criteria("investigator info.senior personnel.position type").equal(positionType),
+						proposalQuery.criteria("investigator info.senior personnel.position title")
+								.equal(positionTitle)));
 	}
 
 	/***
@@ -963,23 +824,14 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param department
 	 * @param proposalQuery
 	 */
-	private void buildQueryForCollegeAndDepartment(String college,
-			String department, Query<Proposal> proposalQuery) {
-		proposalQuery.and(proposalQuery.or(
-				proposalQuery.criteria("investigator info.pi.college").equal(
-						college),
-				proposalQuery.criteria("investigator info.co_pi.college")
-						.equal(college),
-				proposalQuery.criteria(
-						"investigator info.senior personnel.college").equal(
-						college)), proposalQuery.or(
-				proposalQuery.criteria("investigator info.pi.department")
-						.equal(department),
-				proposalQuery.criteria("investigator info.co_pi.department")
-						.equal(department),
-				proposalQuery.criteria(
-						"investigator info.senior personnel.department").equal(
-						department)));
+	private void buildQueryForCollegeAndDepartment(String college, String department, Query<Proposal> proposalQuery) {
+		proposalQuery.and(
+				proposalQuery.or(proposalQuery.criteria("investigator info.pi.college").equal(college),
+						proposalQuery.criteria("investigator info.co_pi.college").equal(college),
+						proposalQuery.criteria("investigator info.senior personnel.college").equal(college)),
+				proposalQuery.or(proposalQuery.criteria("investigator info.pi.department").equal(department),
+						proposalQuery.criteria("investigator info.co_pi.department").equal(department),
+						proposalQuery.criteria("investigator info.senior personnel.department").equal(department)));
 	}
 
 	/***
@@ -988,16 +840,10 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param college
 	 * @param proposalQuery
 	 */
-	private void buildQueryForCollege(String college,
-			Query<Proposal> proposalQuery) {
-		proposalQuery.or(
-				proposalQuery.criteria("investigator info.pi.college").equal(
-						college),
-				proposalQuery.criteria("investigator info.co_pi.college")
-						.equal(college),
-				proposalQuery.criteria(
-						"investigator info.senior personnel.college").equal(
-						college));
+	private void buildQueryForCollege(String college, Query<Proposal> proposalQuery) {
+		proposalQuery.or(proposalQuery.criteria("investigator info.pi.college").equal(college),
+				proposalQuery.criteria("investigator info.co_pi.college").equal(college),
+				proposalQuery.criteria("investigator info.senior personnel.college").equal(college));
 	}
 
 	/***
@@ -1008,19 +854,16 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @return
 	 * @throws ParseException
 	 */
-	public List<ProposalInfo> findAllUserProposalsForExport(
-			ProposalCommonInfo proposalInfo, GPMSCommonInfo userInfo)
+	public List<ProposalInfo> findAllUserProposalsForExport(ProposalCommonInfo proposalInfo, GPMSCommonInfo userInfo)
 			throws ParseException {
 		List<ProposalInfo> proposals = new ArrayList<ProposalInfo>();
 		Query<Proposal> proposalQuery = buildSearchQuery(proposalInfo, userInfo);
 
 		int rowTotal = proposalQuery.asList().size();
-		List<Proposal> allProposals = proposalQuery.order(
-				"-audit log.activity on").asList();
+		List<Proposal> allProposals = proposalQuery.order("-audit log.activity on").asList();
 
 		for (Proposal userProposal : allProposals) {
-			ProposalInfo proposal = getProposalInfoForGrid(userInfo, rowTotal,
-					userProposal);
+			ProposalInfo proposal = getProposalInfoForGrid(userInfo, rowTotal, userProposal);
 			proposals.add(proposal);
 		}
 		return proposals;
@@ -1034,76 +877,98 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @return
 	 * @throws ParseException
 	 */
-	public List<SignatureInfo> getSignaturesOfAProposal(ObjectId id,
-			boolean irbApprovalRequired) throws ParseException {
+	public List<SignatureInfo> getSignaturesOfAProposal(ObjectId id, boolean irbApprovalRequired, String graph)
+			throws ParseException {
 		Datastore ds = getDatastore();
 		List<SignatureInfo> signatures = new ArrayList<SignatureInfo>();
 		List<CollegeDepartmentInfo> investigators = new ArrayList<CollegeDepartmentInfo>();
 
-		Query<Proposal> q1 = ds
-				.createQuery(Proposal.class)
-				.field("_id")
-				.equal(id)
-				.retrievedFields(true, "_id", "investigator info",
-						"signature info", "chair approval",
-						"business manager approval", "dean approval");
+		Query<Proposal> q1 = ds.createQuery(Proposal.class).field("_id").equal(id).retrievedFields(true, "_id",
+				"investigator info", "signature info", "chair approval", "business manager approval", "dean approval");
 
 		Proposal proposal = q1.get();
-		final List<SignatureInfo> proposalSignatures = proposal
-				.getSignatureInfo();
+		final List<SignatureInfo> proposalSignatures = proposal.getSignatureInfo();
 
-		InvestigatorRefAndPosition PI = proposal.getInvestigatorInfo().getPi();
-		addPIAndCoPISignaturesToSignatureList(signatures, investigators,
-				proposalSignatures, PI, "PI");
-		for (InvestigatorRefAndPosition coPI : proposal.getInvestigatorInfo()
-				.getCo_pi()) {
-			addPIAndCoPISignaturesToSignatureList(signatures, investigators,
-					proposalSignatures, coPI, "Co-PI");
+//		InvestigatorRefAndPosition PI = proposal.getInvestigatorInfo().getPi();
+//		addPIAndCoPISignaturesToSignatureList(signatures, investigators, proposalSignatures, PI, "PI");
+//		for (InvestigatorRefAndPosition coPI : proposal.getInvestigatorInfo().getCo_pi()) {
+//			addPIAndCoPISignaturesToSignatureList(signatures, investigators, proposalSignatures, coPI, "Co-PI");
+//		}
+		Graph memGraph = new MemGraph();
+
+		List<UserProfile> userProfiles = new ArrayList<UserProfile>();
+		try {
+			GraphSerializer.fromJson(memGraph, graph);
+			addPIAndCoPISignaturesToSignatureList(signatures, investigators, proposalSignatures, proposal
+					.getInvestigatorInfo().getPIByName(PDSOperations.getUserChildrenInGraph("PI", memGraph).get(0)),
+					"PI");
+			for (String userName : PDSOperations.getUserChildrenInGraph("CoPI", memGraph)) {
+				addPIAndCoPISignaturesToSignatureList(signatures, investigators, proposalSignatures,
+						proposal.getInvestigatorInfo().getCoPIByName(userName), "Co-PI");
+			}
+
+			
+//getPIByName
+//		List<String> positions = new ArrayList<String>();
+//		positions.add("Department Chair");
+//		positions.add("Business Manager");
+//		positions.add("Dean");
+//		positions.add("University Research Administrator");
+//		positions.add("University Research Director");
+//
+//		if (irbApprovalRequired) {
+//			positions.add("IRB");
+//		}
+//
+//		Query<UserProfile> profileQuery = ds.createQuery(UserProfile.class).retrievedFields(true, "_id", "first name",
+//				"middle name", "last name", "details");
+//		profileQuery.and(profileQuery.criteria("deleted").equal(false),
+//				profileQuery.criteria("details.position title").in(positions));
+//		List<UserProfile> userProfile = profileQuery.asList();
+
+			List<String> adminUAs = PDSOperations.getAcademicAdminUserAttributes();
+
+			for (String parent : adminUAs) {
+				List<String> adminUserNames = PDSOperations.getUserChildrenInGraph(parent, memGraph);
+				for (String userName : adminUserNames) {
+					userProfiles.add(getUserProfileByName(userName));
+				}
+			}
+			for (String userName : PDSOperations.getAdministrationAdminUsers()) {
+				userProfiles.add(getUserProfileByName(userName));
+			}
+
+		} catch (PMException e) {
+			e.printStackTrace();
 		}
 
-		List<String> positions = new ArrayList<String>();
-		positions.add("Department Chair");
-		positions.add("Business Manager");
-		positions.add("Dean");
-		positions.add("University Research Administrator");
-		positions.add("University Research Director");
-
-		if (irbApprovalRequired) {
-			positions.add("IRB");
-		}
-
-		Query<UserProfile> profileQuery = ds.createQuery(UserProfile.class)
-				.retrievedFields(true, "_id", "first name", "middle name",
-						"last name", "details");
-		profileQuery.and(profileQuery.criteria("deleted").equal(false),
-				profileQuery.criteria("details.position title").in(positions));
-		List<UserProfile> userProfile = profileQuery.asList();
-		for (UserProfile user : userProfile) {
+		for (UserProfile user : userProfiles) {
 			for (PositionDetails posDetails : user.getDetails()) {
 				for (CollegeDepartmentInfo colDeptInfo : investigators) {
-					addUserSignaturesWithPotentialDelegation(id, signatures,
-							proposal, proposalSignatures, user, posDetails,
-							colDeptInfo);
+					addUserSignaturesWithPotentialDelegation(id, signatures, proposal, proposalSignatures, user,
+							posDetails, colDeptInfo);
 				}
-				if (posDetails.getPositionTitle().equalsIgnoreCase("IRB")
-						&& irbApprovalRequired) {
-					addAdminSignaturesWithoutDelegation(signatures,
-							proposalSignatures, user,
+				if (posDetails.getPositionTitle().equalsIgnoreCase("IRB") && irbApprovalRequired) {
+					addAdminSignaturesWithoutDelegation(signatures, proposalSignatures, user,
 							posDetails.getPositionTitle());
-				} else if (posDetails.getPositionTitle().equalsIgnoreCase(
-						"University Research Administrator")) {
-					addAdminSignaturesWithoutDelegation(signatures,
-							proposalSignatures, user,
+				} else if (posDetails.getPositionTitle().equalsIgnoreCase("University Research Administrator")) {
+					addAdminSignaturesWithoutDelegation(signatures, proposalSignatures, user,
 							posDetails.getPositionTitle());
-				} else if (posDetails.getPositionTitle().equalsIgnoreCase(
-						"University Research Director")) {
-					addAdminSignaturesWithoutDelegation(signatures,
-							proposalSignatures, user,
+				} else if (posDetails.getPositionTitle().equalsIgnoreCase("University Research Director")) {
+					addAdminSignaturesWithoutDelegation(signatures, proposalSignatures, user,
 							posDetails.getPositionTitle());
 				}
 			}
 		}
 		return signatures;
+	}
+
+	private UserProfile getUserProfileByName(String userName) {
+		Query<UserProfile> profileQueryNew = ds.createQuery(UserProfile.class);
+		Query<UserAccount> accountQuery = ds.createQuery(UserAccount.class);
+		accountQuery.criteria("username").equalIgnoreCase(userName);
+		profileQueryNew.criteria("user id").in(accountQuery.asKeyList());
+		return profileQueryNew.get();
 	}
 
 	/***
@@ -1114,21 +979,17 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param user
 	 * @param adminPositionTitle
 	 */
-	private void addAdminSignaturesWithoutDelegation(
-			List<SignatureInfo> signatures,
-			final List<SignatureInfo> proposalSignatures, UserProfile user,
-			String adminPositionTitle) {
+	private void addAdminSignaturesWithoutDelegation(List<SignatureInfo> signatures,
+			final List<SignatureInfo> proposalSignatures, UserProfile user, String adminPositionTitle) {
 		SignatureInfo signatureInfo = new SignatureInfo();
 
 		boolean isAlreadySigned = false;
 		for (SignatureInfo signature : proposalSignatures) {
 			if (user.getId().toString().equals(signature.getUserProfileId())
 					&& signature.getPositionTitle().equals(adminPositionTitle)) {
-				signatureInfo = getUserSignatureInfo(
-						signature.getUserProfileId(), signature.getFullName(),
-						signature.getSignature(), signature.getSignedDate(),
-						signature.getNote(), signature.getPositionTitle(),
-						signature.isDelegated());
+				signatureInfo = getUserSignatureInfo(signature.getUserProfileId(), signature.getFullName(),
+						signature.getSignature(), signature.getSignedDate(), signature.getNote(),
+						signature.getPositionTitle(), signature.isDelegated());
 
 				if (!signatures.contains(signatureInfo)) {
 					signatures.add(signatureInfo);
@@ -1137,8 +998,8 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 			}
 		}
 		if (!isAlreadySigned) {
-			signatureInfo = getUserSignatureInfo(user.getId().toString(),
-					user.getFullName(), "", null, "", adminPositionTitle, false);
+			signatureInfo = getUserSignatureInfo(user.getId().toString(), user.getFullName(), "", null, "",
+					adminPositionTitle, false);
 
 			if (!signatures.contains(signatureInfo)) {
 				signatures.add(signatureInfo);
@@ -1157,32 +1018,20 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param posDetails
 	 * @param colDeptInfo
 	 */
-	private void addUserSignaturesWithPotentialDelegation(ObjectId id,
-			List<SignatureInfo> signatures, Proposal proposal,
-			final List<SignatureInfo> proposalSignatures, UserProfile user,
+	private void addUserSignaturesWithPotentialDelegation(ObjectId id, List<SignatureInfo> signatures,
+			Proposal proposal, final List<SignatureInfo> proposalSignatures, UserProfile user,
 			PositionDetails posDetails, CollegeDepartmentInfo colDeptInfo) {
 		if (posDetails.getCollege().equalsIgnoreCase(colDeptInfo.getCollege())
-				&& posDetails.getDepartment().equalsIgnoreCase(
-						colDeptInfo.getDepartment())
-				&& posDetails.getPositionTitle().equalsIgnoreCase(
-						"Department Chair")) {
-			addAdminUsersSignaturesToSignatureList(id, signatures, proposal,
-					proposalSignatures, user, posDetails);
-		} else if (posDetails.getCollege().equalsIgnoreCase(
-				colDeptInfo.getCollege())
-				&& posDetails.getDepartment().equalsIgnoreCase(
-						colDeptInfo.getDepartment())
-				&& posDetails.getPositionTitle().equalsIgnoreCase(
-						"Business Manager")) {
-			addAdminUsersSignaturesToSignatureList(id, signatures, proposal,
-					proposalSignatures, user, posDetails);
-		} else if (posDetails.getCollege().equalsIgnoreCase(
-				colDeptInfo.getCollege())
-				&& posDetails.getDepartment().equalsIgnoreCase(
-						colDeptInfo.getDepartment())
+				&& posDetails.getDepartment().equalsIgnoreCase(colDeptInfo.getDepartment())
+				&& posDetails.getPositionTitle().equalsIgnoreCase("Department Chair")) {
+			addAdminUsersSignaturesToSignatureList(id, signatures, proposal, proposalSignatures, user, posDetails);
+		} else if (posDetails.getCollege().equalsIgnoreCase(colDeptInfo.getCollege())
+				&& posDetails.getDepartment().equalsIgnoreCase(colDeptInfo.getDepartment())
+				&& posDetails.getPositionTitle().equalsIgnoreCase("Business Manager")) {
+			addAdminUsersSignaturesToSignatureList(id, signatures, proposal, proposalSignatures, user, posDetails);
+		} else if (posDetails.getCollege().equalsIgnoreCase(colDeptInfo.getCollege())
 				&& posDetails.getPositionTitle().equalsIgnoreCase("Dean")) {
-			addAdminUsersSignaturesToSignatureList(id, signatures, proposal,
-					proposalSignatures, user, posDetails);
+			addAdminUsersSignaturesToSignatureList(id, signatures, proposal, proposalSignatures, user, posDetails);
 		}
 	}
 
@@ -1197,10 +1046,8 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param posDetails
 	 * @param adminType
 	 */
-	private void addAdminUsersSignaturesToSignatureList(ObjectId id,
-			List<SignatureInfo> signatures, Proposal proposal,
-			final List<SignatureInfo> proposalSignatures, UserProfile user,
-			PositionDetails posDetails) {
+	private void addAdminUsersSignaturesToSignatureList(ObjectId id, List<SignatureInfo> signatures, Proposal proposal,
+			final List<SignatureInfo> proposalSignatures, UserProfile user, PositionDetails posDetails) {
 		ApprovalType userApproval = null;
 		String adminType = posDetails.getPositionTitle();
 		if (adminType.equals("Department Chair")) {
@@ -1215,14 +1062,12 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 		boolean isAlreadySigned = false;
 
 		for (SignatureInfo signature : proposalSignatures) {
-			if ((user.getId().toString().equals(signature.getUserProfileId()) && signature
-					.getPositionTitle().equals(adminType))
+			if ((user.getId().toString().equals(signature.getUserProfileId())
+					&& signature.getPositionTitle().equals(adminType))
 					|| (signature.getPositionTitle().equals(adminType) && userApproval == ApprovalType.APPROVED)) {
-				signUserInfo = getUserSignatureInfo(
-						signature.getUserProfileId(), signature.getFullName(),
-						signature.getSignature(), signature.getSignedDate(),
-						signature.getNote(), signature.getPositionTitle(),
-						signature.isDelegated());
+				signUserInfo = getUserSignatureInfo(signature.getUserProfileId(), signature.getFullName(),
+						signature.getSignature(), signature.getSignedDate(), signature.getNote(),
+						signature.getPositionTitle(), signature.isDelegated());
 				if (!signatures.contains(signUserInfo)) {
 					signatures.add(signUserInfo);
 				}
@@ -1231,19 +1076,17 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 		}
 
 		if (!isAlreadySigned) {
-			if (!isDelegator(user.getId().toString(), posDetails)
-					&& userApproval == ApprovalType.READYFORAPPROVAL) {
-				signUserInfo = getUserSignatureInfo(user.getId().toString(),
-						user.getFullName(), "", null, "", adminType, false);
+			if (!isDelegator(user.getId().toString(), posDetails) && userApproval == ApprovalType.READYFORAPPROVAL) {
+				signUserInfo = getUserSignatureInfo(user.getId().toString(), user.getFullName(), "", null, "",
+						adminType, false);
 				if (!signatures.contains(signUserInfo)) {
 					signatures.add(signUserInfo);
 				}
 			} else if (isDelegator(user.getId().toString(), posDetails)) {
-				addDelegatedUserSignatures(id, signatures, proposalSignatures,
-						user, posDetails, adminType);
+				addDelegatedUserSignatures(id, signatures, proposalSignatures, user, posDetails, adminType);
 			} else {
-				signUserInfo = getUserSignatureInfo(user.getId().toString(),
-						user.getFullName(), "", null, "", adminType, false);
+				signUserInfo = getUserSignatureInfo(user.getId().toString(), user.getFullName(), "", null, "",
+						adminType, false);
 
 				if (!signatures.contains(signUserInfo)) {
 					signatures.add(signUserInfo);
@@ -1262,28 +1105,21 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param posDetails
 	 * @param adminType
 	 */
-	private void addDelegatedUserSignatures(ObjectId id,
-			List<SignatureInfo> signatures,
-			final List<SignatureInfo> proposalSignatures, UserProfile user,
-			PositionDetails posDetails, String adminType) {
+	private void addDelegatedUserSignatures(ObjectId id, List<SignatureInfo> signatures,
+			final List<SignatureInfo> proposalSignatures, UserProfile user, PositionDetails posDetails,
+			String adminType) {
 		// here we used Transfer mode of Delegation
-		List<SignatureInfo> delegatedChair = findDelegatedUsersForAUser(
-				user.getId(), id.toString(), posDetails.getCollege(),
-				posDetails.getDepartment(), posDetails.getPositionType(),
-				adminType);
+		List<SignatureInfo> delegatedChair = findDelegatedUsersForAUser(user.getId(), id.toString(),
+				posDetails.getCollege(), posDetails.getDepartment(), posDetails.getPositionType(), adminType);
 		boolean delegatedUserAlreadySigned = false;
 		for (SignatureInfo delegateeInfo : delegatedChair) {
 			delegatedUserAlreadySigned = false;
 			for (SignatureInfo signature : proposalSignatures) {
-				if (delegateeInfo.getUserProfileId().equals(
-						signature.getUserProfileId())
+				if (delegateeInfo.getUserProfileId().equals(signature.getUserProfileId())
 						&& signature.getPositionTitle().equals(adminType)) {
-					delegateeInfo = getUserSignatureInfo(
-							signature.getUserProfileId(),
-							signature.getFullName(), signature.getSignature(),
-							signature.getSignedDate(), signature.getNote(),
-							signature.getPositionTitle(),
-							signature.isDelegated());
+					delegateeInfo = getUserSignatureInfo(signature.getUserProfileId(), signature.getFullName(),
+							signature.getSignature(), signature.getSignedDate(), signature.getNote(),
+							signature.getPositionTitle(), signature.isDelegated());
 					if (!signatures.contains(delegateeInfo)) {
 						signatures.add(delegateeInfo);
 					}
@@ -1307,28 +1143,21 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param investigatorRefPosition
 	 * @param investigatorType
 	 */
-	private void addPIAndCoPISignaturesToSignatureList(
-			List<SignatureInfo> signatures,
-			List<CollegeDepartmentInfo> investigators,
-			final List<SignatureInfo> proposalSignatures,
-			InvestigatorRefAndPosition investigatorRefPosition,
-			String investigatorType) {
+	private void addPIAndCoPISignaturesToSignatureList(List<SignatureInfo> signatures,
+			List<CollegeDepartmentInfo> investigators, final List<SignatureInfo> proposalSignatures,
+			InvestigatorRefAndPosition investigatorRefPosition, String investigatorType) {
 		boolean isAlreadySigned = false;
 		boolean isAlreadyExist = false;
 		SignatureInfo signatureInfo = new SignatureInfo();
 		for (SignatureInfo signature : proposalSignatures) {
-			if (investigatorRefPosition.getUserProfileId().equals(
-					signature.getUserProfileId())
+			if (investigatorRefPosition.getUserProfileId().equals(signature.getUserProfileId())
 					&& !investigatorRefPosition.getUserRef().isDeleted()
 					&& signature.getPositionTitle().equals(investigatorType)) {
-				signatureInfo = getUserSignatureInfo(
-						signature.getUserProfileId(), signature.getFullName(),
-						signature.getSignature(), signature.getSignedDate(),
-						signature.getNote(), signature.getPositionTitle(),
-						signature.isDelegated());
+				signatureInfo = getUserSignatureInfo(signature.getUserProfileId(), signature.getFullName(),
+						signature.getSignature(), signature.getSignedDate(), signature.getNote(),
+						signature.getPositionTitle(), signature.isDelegated());
 				for (SignatureInfo sign : signatures) {
-					if (sign.getUserProfileId().equalsIgnoreCase(
-							signatureInfo.getUserProfileId())) {
+					if (sign.getUserProfileId().equalsIgnoreCase(signatureInfo.getUserProfileId())) {
 						isAlreadyExist = true;
 						break;
 					}
@@ -1339,20 +1168,16 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 				isAlreadySigned = true;
 			}
 		}
-		if (!isAlreadySigned
-				&& !investigatorRefPosition.getUserRef().isDeleted()) {
+		if (!isAlreadySigned && !investigatorRefPosition.getUserRef().isDeleted()) {
 			for (SignatureInfo sign : signatures) {
-				if (sign.getUserProfileId().equalsIgnoreCase(
-						signatureInfo.getUserProfileId())) {
+				if (sign.getUserProfileId().equalsIgnoreCase(signatureInfo.getUserProfileId())) {
 					isAlreadyExist = true;
 					break;
 				}
 			}
 			if (!isAlreadyExist) {
-				signatures.add(getUserSignatureInfo(investigatorRefPosition
-						.getUserProfileId().toString(), investigatorRefPosition
-						.getUserRef().getFullName(), "", null, "",
-						investigatorType, false));
+				signatures.add(getUserSignatureInfo(investigatorRefPosition.getUserProfileId().toString(),
+						investigatorRefPosition.getUserRef().getFullName(), "", null, "", investigatorType, false));
 			}
 		}
 
@@ -1376,9 +1201,8 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param delegated
 	 * @return
 	 */
-	private SignatureInfo getUserSignatureInfo(String userProfileId,
-			String fullName, String signature, Date date, String note,
-			String positionTitle, boolean delegated) {
+	private SignatureInfo getUserSignatureInfo(String userProfileId, String fullName, String signature, Date date,
+			String note, String positionTitle, boolean delegated) {
 		SignatureInfo signatureInfo = new SignatureInfo();
 		signatureInfo.setUserProfileId(userProfileId);
 		signatureInfo.setFullName(fullName);
@@ -1399,14 +1223,10 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 */
 	private boolean isDelegator(String delegatorId, PositionDetails posDetails) {
 		Datastore ds = getDatastore();
-		long delegationCount = ds.createQuery(Delegation.class)
-				.field("revoked").equal(false).field("delegator user id")
-				.equal(delegatorId).field("delegated college")
-				.equal(posDetails.getCollege()).field("delegated department")
-				.equal(posDetails.getDepartment())
-				.field("delegated position type")
-				.equal(posDetails.getPositionType())
-				.field("delegated position title")
+		long delegationCount = ds.createQuery(Delegation.class).field("revoked").equal(false).field("delegator user id")
+				.equal(delegatorId).field("delegated college").equal(posDetails.getCollege())
+				.field("delegated department").equal(posDetails.getDepartment()).field("delegated position type")
+				.equal(posDetails.getPositionType()).field("delegated position title")
 				.equal(posDetails.getPositionTitle()).countAll();
 		if (delegationCount > 0) {
 			return true;
@@ -1425,46 +1245,27 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param positionTitle
 	 * @return
 	 */
-	public List<SignatureInfo> findDelegatedUsersForAUser(ObjectId userId,
-			String proposalId, String positionCollege,
-			String positionDeptartment, String positionType,
-			String positionTitle) {
+	public List<SignatureInfo> findDelegatedUsersForAUser(ObjectId userId, String proposalId, String positionCollege,
+			String positionDeptartment, String positionType, String positionTitle) {
 		Datastore ds = getDatastore();
 		List<SignatureInfo> signatures = new ArrayList<SignatureInfo>();
 		Query<Delegation> delegationQuery = ds.createQuery(Delegation.class);
-		Query<UserProfile> profileQuery = ds.createQuery(UserProfile.class)
-				.field("_id").equal(userId).field("deleted").equal(false)
-				.retrievedFields(true, "_id");
-		delegationQuery.or(
-				delegationQuery.criteria("delegator user profile")
-						.in(profileQuery.asKeyList()).criteria("revoked")
-						.equal(false).criteria("delegatee college")
-						.equal(positionCollege)
-						.criteria("delegatee department")
-						.equal(positionDeptartment)
-						.criteria("delegatee position type")
-						.equal(positionType)
-						.criteria("delegated position title")
-						.equal(positionTitle).criteria("proposal id").equal("")
-						.criteria("from").lessThanOrEq(new Date())
-						.criteria("to").greaterThanOrEq(new Date()),
-				delegationQuery.criteria("delegator user profile")
-						.in(profileQuery.asKeyList()).criteria("revoked")
-						.equal(false).criteria("delegatee college")
-						.equal(positionCollege)
-						.criteria("delegatee department")
-						.equal(positionDeptartment)
-						.criteria("delegatee position type")
-						.equal(positionType)
-						.criteria("delegated position title")
-						.equal(positionTitle).criteria("proposal id")
-						.containsIgnoreCase(proposalId).criteria("from")
-						.lessThanOrEq(new Date()).criteria("to")
-						.greaterThanOrEq(new Date()));
+		Query<UserProfile> profileQuery = ds.createQuery(UserProfile.class).field("_id").equal(userId).field("deleted")
+				.equal(false).retrievedFields(true, "_id");
+		delegationQuery.or(delegationQuery.criteria("delegator user profile").in(profileQuery.asKeyList())
+				.criteria("revoked").equal(false).criteria("delegatee college").equal(positionCollege)
+				.criteria("delegatee department").equal(positionDeptartment).criteria("delegatee position type")
+				.equal(positionType).criteria("delegated position title").equal(positionTitle).criteria("proposal id")
+				.equal("").criteria("from").lessThanOrEq(new Date()).criteria("to").greaterThanOrEq(new Date()),
+				delegationQuery.criteria("delegator user profile").in(profileQuery.asKeyList()).criteria("revoked")
+						.equal(false).criteria("delegatee college").equal(positionCollege)
+						.criteria("delegatee department").equal(positionDeptartment).criteria("delegatee position type")
+						.equal(positionType).criteria("delegated position title").equal(positionTitle)
+						.criteria("proposal id").containsIgnoreCase(proposalId).criteria("from")
+						.lessThanOrEq(new Date()).criteria("to").greaterThanOrEq(new Date()));
 		List<Delegation> delegates = delegationQuery.asList();
 		for (Delegation delegation : delegates) {
-			SignatureInfo signature = getUserSignatureInfo(
-					delegation.getDelegateeId(), delegation.getDelegatee(), "",
+			SignatureInfo signature = getUserSignatureInfo(delegation.getDelegateeId(), delegation.getDelegatee(), "",
 					null, "", positionTitle, true);
 			if (!signatures.contains(signature)) {
 				signatures.add(signature);
@@ -1481,72 +1282,40 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param posDetails
 	 * @return
 	 */
-	public List<SignatureUserInfo> findDelegatedUsersSignatures(
-			ObjectId userId, String proposalId, PositionDetails posDetails) {
+	public List<SignatureUserInfo> findDelegatedUsersSignatures(ObjectId userId, String proposalId,
+			PositionDetails posDetails) {
 		Datastore ds = getDatastore();
 		List<SignatureUserInfo> signatures = new ArrayList<SignatureUserInfo>();
 		Query<Delegation> delegationQuery = ds.createQuery(Delegation.class);
-		Query<UserProfile> profileQuery = ds.createQuery(UserProfile.class)
-				.field("_id").equal(userId).retrievedFields(true, "_id");
+		Query<UserProfile> profileQuery = ds.createQuery(UserProfile.class).field("_id").equal(userId)
+				.retrievedFields(true, "_id");
 		delegationQuery.or(
-				delegationQuery
-						.and(delegationQuery.criteria("delegator user profile")
-								.in(profileQuery.asKeyList()),
-								delegationQuery.criteria("revoked")
-										.equal(false),
-								delegationQuery.criteria("delegatee college")
-										.equalIgnoreCase(
-												posDetails.getCollege()),
-								delegationQuery
-										.criteria("delegatee department")
-										.equalIgnoreCase(
-												posDetails.getDepartment()),
-								delegationQuery.criteria(
-										"delegatee position type")
-										.equalIgnoreCase(
-												posDetails.getPositionType()),
-								delegationQuery.criteria(
-										"delegated position title")
-										.equalIgnoreCase(
-												posDetails.getPositionTitle()),
-								delegationQuery.criteria("proposal id").equal(
-										"")).criteria("from")
-						.lessThanOrEq(new Date()).criteria("to")
-						.greaterThanOrEq(new Date()),
-				delegationQuery
-						.and(delegationQuery.criteria("delegator user profile")
-								.in(profileQuery.asKeyList()),
-								delegationQuery.criteria("revoked")
-										.equal(false),
-								delegationQuery.criteria("delegatee college")
-										.equalIgnoreCase(
-												posDetails.getCollege()),
-								delegationQuery
-										.criteria("delegatee department")
-										.equalIgnoreCase(
-												posDetails.getDepartment()),
-								delegationQuery.criteria(
-										"delegatee position type")
-										.equalIgnoreCase(
-												posDetails.getPositionType()),
-								delegationQuery.criteria(
-										"delegated position title")
-										.equalIgnoreCase(
-												posDetails.getPositionTitle()),
-								delegationQuery.criteria("proposal id")
-										.containsIgnoreCase(proposalId))
-						.criteria("from").lessThanOrEq(new Date())
-						.criteria("to").greaterThanOrEq(new Date()));
+				delegationQuery.and(delegationQuery.criteria("delegator user profile").in(profileQuery.asKeyList()),
+						delegationQuery.criteria("revoked").equal(false),
+						delegationQuery.criteria("delegatee college").equalIgnoreCase(posDetails.getCollege()),
+						delegationQuery.criteria("delegatee department").equalIgnoreCase(posDetails.getDepartment()),
+						delegationQuery.criteria("delegatee position type")
+								.equalIgnoreCase(posDetails.getPositionType()),
+						delegationQuery.criteria("delegated position title").equalIgnoreCase(
+								posDetails.getPositionTitle()),
+						delegationQuery.criteria("proposal id").equal("")).criteria("from").lessThanOrEq(new Date())
+						.criteria("to").greaterThanOrEq(new Date()),
+				delegationQuery.and(delegationQuery.criteria("delegator user profile").in(profileQuery.asKeyList()),
+						delegationQuery.criteria("revoked").equal(false),
+						delegationQuery.criteria("delegatee college").equalIgnoreCase(posDetails.getCollege()),
+						delegationQuery.criteria("delegatee department").equalIgnoreCase(posDetails.getDepartment()),
+						delegationQuery.criteria("delegatee position type")
+								.equalIgnoreCase(posDetails.getPositionType()),
+						delegationQuery.criteria("delegated position title")
+								.equalIgnoreCase(posDetails.getPositionTitle()),
+						delegationQuery.criteria("proposal id").containsIgnoreCase(proposalId)).criteria("from")
+						.lessThanOrEq(new Date()).criteria("to").greaterThanOrEq(new Date()));
 		List<Delegation> delegates = delegationQuery.asList();
 		for (Delegation delegation : delegates) {
-			ObjectId delegateeUserProfileId = new ObjectId(
-					delegation.getDelegateeId());
-			UserProfile user = ds
-					.createQuery(UserProfile.class)
-					.field("_id")
-					.equal(delegateeUserProfileId)
-					.retrievedFields(true, "_id", "first name", "middle name",
-							"last name", "work email", "user id").get();
+			ObjectId delegateeUserProfileId = new ObjectId(delegation.getDelegateeId());
+			UserProfile user = ds.createQuery(UserProfile.class).field("_id").equal(delegateeUserProfileId)
+					.retrievedFields(true, "_id", "first name", "middle name", "last name", "work email", "user id")
+					.get();
 			addSignaturesToSignatureList(signatures, user, posDetails, true);
 		}
 		return signatures;
@@ -1560,38 +1329,25 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param irbApprovalRequired
 	 * @return
 	 */
-	public List<SignatureUserInfo> findSignaturesExceptInvestigator(
-			ObjectId id, Boolean irbApprovalRequired) {
+	public List<SignatureUserInfo> findSignaturesExceptInvestigator(ObjectId id, Boolean irbApprovalRequired) {
 		Datastore ds = getDatastore();
 		List<SignatureUserInfo> signatures = new ArrayList<SignatureUserInfo>();
-		Query<Proposal> q1 = ds
-				.createQuery(Proposal.class)
-				.field("_id")
-				.equal(id)
-				.retrievedFields(true, "_id", "investigator info",
-						"signature info");
+		Query<Proposal> q1 = ds.createQuery(Proposal.class).field("_id").equal(id).retrievedFields(true, "_id",
+				"investigator info", "signature info");
 		Proposal proposal = q1.get();
 		List<CollegeDepartmentInfo> investigators = addInvestigatorsInfo(proposal);
-		List<UserProfile> userProfile = findAdminUsersForAProposal(
-				irbApprovalRequired, ds);
+		List<UserProfile> userProfile = findAdminUsersForAProposal(irbApprovalRequired, ds);
 		for (UserProfile user : userProfile) {
 			for (PositionDetails posDetails : user.getDetails()) {
 				for (CollegeDepartmentInfo colDeptInfo : investigators) {
-					addSignaturesWithPotentialDelegation(id, signatures, user,
-							posDetails, colDeptInfo);
+					addSignaturesWithPotentialDelegation(id, signatures, user, posDetails, colDeptInfo);
 				}
-				if (posDetails.getPositionTitle().equalsIgnoreCase("IRB")
-						&& irbApprovalRequired) {
-					addSignaturesToSignatureList(signatures, user, posDetails,
-							false);
-				} else if (posDetails.getPositionTitle().equalsIgnoreCase(
-						"University Research Administrator")) {
-					addSignaturesToSignatureList(signatures, user, posDetails,
-							false);
-				} else if (posDetails.getPositionTitle().equalsIgnoreCase(
-						"University Research Director")) {
-					addSignaturesToSignatureList(signatures, user, posDetails,
-							false);
+				if (posDetails.getPositionTitle().equalsIgnoreCase("IRB") && irbApprovalRequired) {
+					addSignaturesToSignatureList(signatures, user, posDetails, false);
+				} else if (posDetails.getPositionTitle().equalsIgnoreCase("University Research Administrator")) {
+					addSignaturesToSignatureList(signatures, user, posDetails, false);
+				} else if (posDetails.getPositionTitle().equalsIgnoreCase("University Research Director")) {
+					addSignaturesToSignatureList(signatures, user, posDetails, false);
 				}
 			}
 		}
@@ -1615,8 +1371,7 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 			investRef.setDepartment(PI.getDepartment());
 			investigators.add(investRef);
 		}
-		for (InvestigatorRefAndPosition coPIs : proposal.getInvestigatorInfo()
-				.getCo_pi()) {
+		for (InvestigatorRefAndPosition coPIs : proposal.getInvestigatorInfo().getCo_pi()) {
 			// Adding Co-PIs
 			if (!coPIs.getUserRef().isDeleted()) {
 				investRef = new CollegeDepartmentInfo();
@@ -1637,8 +1392,7 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param ds
 	 * @return
 	 */
-	private List<UserProfile> findAdminUsersForAProposal(
-			Boolean irbApprovalRequired, Datastore ds) {
+	private List<UserProfile> findAdminUsersForAProposal(Boolean irbApprovalRequired, Datastore ds) {
 		List<String> positions = new ArrayList<String>();
 		positions.add("Department Chair");
 		positions.add("Business Manager");
@@ -1648,9 +1402,8 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 		if (irbApprovalRequired) {
 			positions.add("IRB");
 		}
-		Query<UserProfile> profileQuery = ds.createQuery(UserProfile.class)
-				.retrievedFields(true, "_id", "first name", "middle name",
-						"last name", "details", "work email");
+		Query<UserProfile> profileQuery = ds.createQuery(UserProfile.class).retrievedFields(true, "_id", "first name",
+				"middle name", "last name", "details", "work email");
 		profileQuery.and(profileQuery.criteria("deleted").equal(false),
 				profileQuery.criteria("details.position title").in(positions));
 		List<UserProfile> userProfile = profileQuery.asList();
@@ -1664,39 +1417,25 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param irbApprovalRequired
 	 * @return
 	 */
-	public List<SignatureUserInfo> findAllUsersToBeNotified(ObjectId id,
-			Boolean irbApprovalRequired) {
+	public List<SignatureUserInfo> findAllUsersToBeNotified(ObjectId id, Boolean irbApprovalRequired) {
 		Datastore ds = getDatastore();
 		List<SignatureUserInfo> signatures = new ArrayList<SignatureUserInfo>();
-		Query<Proposal> q1 = ds
-				.createQuery(Proposal.class)
-				.field("_id")
-				.equal(id)
-				.retrievedFields(true, "_id", "investigator info",
-						"signature info");
+		Query<Proposal> q1 = ds.createQuery(Proposal.class).field("_id").equal(id).retrievedFields(true, "_id",
+				"investigator info", "signature info");
 		Proposal proposal = q1.get();
-		List<CollegeDepartmentInfo> investigators = addInvestigatorsInfo(
-				proposal, signatures);
-		List<UserProfile> userProfile = findAdminUsersForAProposal(
-				irbApprovalRequired, ds);
+		List<CollegeDepartmentInfo> investigators = addInvestigatorsInfo(proposal, signatures);
+		List<UserProfile> userProfile = findAdminUsersForAProposal(irbApprovalRequired, ds);
 		for (UserProfile user : userProfile) {
 			for (PositionDetails posDetails : user.getDetails()) {
 				for (CollegeDepartmentInfo colDeptInfo : investigators) {
-					addSignaturesWithPotentialDelegation(id, signatures, user,
-							posDetails, colDeptInfo);
+					addSignaturesWithPotentialDelegation(id, signatures, user, posDetails, colDeptInfo);
 				}
-				if (posDetails.getPositionTitle().equalsIgnoreCase("IRB")
-						&& irbApprovalRequired) {
-					addSignaturesToSignatureList(signatures, user, posDetails,
-							false);
-				} else if (posDetails.getPositionTitle().equalsIgnoreCase(
-						"University Research Administrator")) {
-					addSignaturesToSignatureList(signatures, user, posDetails,
-							false);
-				} else if (posDetails.getPositionTitle().equalsIgnoreCase(
-						"University Research Director")) {
-					addSignaturesToSignatureList(signatures, user, posDetails,
-							false);
+				if (posDetails.getPositionTitle().equalsIgnoreCase("IRB") && irbApprovalRequired) {
+					addSignaturesToSignatureList(signatures, user, posDetails, false);
+				} else if (posDetails.getPositionTitle().equalsIgnoreCase("University Research Administrator")) {
+					addSignaturesToSignatureList(signatures, user, posDetails, false);
+				} else if (posDetails.getPositionTitle().equalsIgnoreCase("University Research Director")) {
+					addSignaturesToSignatureList(signatures, user, posDetails, false);
 				}
 			}
 		}
@@ -1709,8 +1448,7 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param proposal
 	 * @return
 	 */
-	private List<CollegeDepartmentInfo> addInvestigatorsInfo(Proposal proposal,
-			List<SignatureUserInfo> signatures) {
+	private List<CollegeDepartmentInfo> addInvestigatorsInfo(Proposal proposal, List<SignatureUserInfo> signatures) {
 		List<CollegeDepartmentInfo> investigators = new ArrayList<CollegeDepartmentInfo>();
 		// Adding PI
 		InvestigatorRefAndPosition PI = proposal.getInvestigatorInfo().getPi();
@@ -1725,11 +1463,9 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 			posDetails.setDepartment(PI.getDepartment());
 			posDetails.setPositionType(PI.getPositionType());
 			posDetails.setPositionTitle(PI.getPositionTitle());
-			addSignaturesToSignatureList(signatures, PI.getUserRef(),
-					posDetails, false);
+			addSignaturesToSignatureList(signatures, PI.getUserRef(), posDetails, false);
 		}
-		for (InvestigatorRefAndPosition coPI : proposal.getInvestigatorInfo()
-				.getCo_pi()) {
+		for (InvestigatorRefAndPosition coPI : proposal.getInvestigatorInfo().getCo_pi()) {
 			// Adding Co-PIs
 			if (!coPI.getUserRef().isDeleted()) {
 				investRef = new CollegeDepartmentInfo();
@@ -1743,20 +1479,17 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 				posDetails.setDepartment(coPI.getDepartment());
 				posDetails.setPositionType(coPI.getPositionType());
 				posDetails.setPositionTitle(coPI.getPositionTitle());
-				addSignaturesToSignatureList(signatures, coPI.getUserRef(),
-						posDetails, false);
+				addSignaturesToSignatureList(signatures, coPI.getUserRef(), posDetails, false);
 			}
 		}
-		for (InvestigatorRefAndPosition senior : proposal.getInvestigatorInfo()
-				.getSeniorPersonnel()) {
+		for (InvestigatorRefAndPosition senior : proposal.getInvestigatorInfo().getSeniorPersonnel()) {
 			// Adding Seniors No need to add Admin users based on Senior Users
 			if (!senior.getUserRef().isDeleted()) {
 				posDetails.setCollege(senior.getCollege());
 				posDetails.setDepartment(senior.getDepartment());
 				posDetails.setPositionType(senior.getPositionType());
 				posDetails.setPositionTitle(senior.getPositionTitle());
-				addSignaturesToSignatureList(signatures, senior.getUserRef(),
-						posDetails, false);
+				addSignaturesToSignatureList(signatures, senior.getUserRef(), posDetails, false);
 			}
 		}
 		return investigators;
@@ -1771,40 +1504,29 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param posDetails
 	 * @param colDeptInfo
 	 */
-	private void addSignaturesWithPotentialDelegation(ObjectId id,
-			List<SignatureUserInfo> signatures, UserProfile user,
+	private void addSignaturesWithPotentialDelegation(ObjectId id, List<SignatureUserInfo> signatures, UserProfile user,
 			PositionDetails posDetails, CollegeDepartmentInfo colDeptInfo) {
 		if (posDetails.getCollege().equalsIgnoreCase(colDeptInfo.getCollege())
-				&& posDetails.getDepartment().equalsIgnoreCase(
-						colDeptInfo.getDepartment())
-				&& posDetails.getPositionTitle().equalsIgnoreCase(
-						"Department Chair")) {
+				&& posDetails.getDepartment().equalsIgnoreCase(colDeptInfo.getDepartment())
+				&& posDetails.getPositionTitle().equalsIgnoreCase("Department Chair")) {
 			if (!isDelegator(user.getId().toString(), posDetails)) {
-				addSignaturesToSignatureList(signatures, user, posDetails,
-						false);
+				addSignaturesToSignatureList(signatures, user, posDetails, false);
 			} else {
 				addSignaturesOfDelegatee(id, signatures, user, posDetails);
 			}
-		} else if (posDetails.getCollege().equalsIgnoreCase(
-				colDeptInfo.getCollege())
-				&& posDetails.getDepartment().equalsIgnoreCase(
-						colDeptInfo.getDepartment())
-				&& posDetails.getPositionTitle().equalsIgnoreCase(
-						"Business Manager")) {
+		} else if (posDetails.getCollege().equalsIgnoreCase(colDeptInfo.getCollege())
+				&& posDetails.getDepartment().equalsIgnoreCase(colDeptInfo.getDepartment())
+				&& posDetails.getPositionTitle().equalsIgnoreCase("Business Manager")) {
 			if (!isDelegator(user.getId().toString(), posDetails)) {
-				addSignaturesToSignatureList(signatures, user, posDetails,
-						false);
+				addSignaturesToSignatureList(signatures, user, posDetails, false);
 			} else {
 				addSignaturesOfDelegatee(id, signatures, user, posDetails);
 			}
-		} else if (posDetails.getCollege().equalsIgnoreCase(
-				colDeptInfo.getCollege())
-				&& posDetails.getDepartment().equalsIgnoreCase(
-						colDeptInfo.getDepartment())
+		} else if (posDetails.getCollege().equalsIgnoreCase(colDeptInfo.getCollege())
+				&& posDetails.getDepartment().equalsIgnoreCase(colDeptInfo.getDepartment())
 				&& posDetails.getPositionTitle().equalsIgnoreCase("Dean")) {
 			if (!isDelegator(user.getId().toString(), posDetails)) {
-				addSignaturesToSignatureList(signatures, user, posDetails,
-						false);
+				addSignaturesToSignatureList(signatures, user, posDetails, false);
 			} else {
 				addSignaturesOfDelegatee(id, signatures, user, posDetails);
 			}
@@ -1820,11 +1542,9 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param posDetails
 	 * @param adminType
 	 */
-	private void addSignaturesOfDelegatee(ObjectId id,
-			List<SignatureUserInfo> signatures, UserProfile user,
+	private void addSignaturesOfDelegatee(ObjectId id, List<SignatureUserInfo> signatures, UserProfile user,
 			PositionDetails posDetails) {
-		List<SignatureUserInfo> delegatee = findDelegatedUsersSignatures(
-				user.getId(), id.toString(), posDetails);
+		List<SignatureUserInfo> delegatee = findDelegatedUsersSignatures(user.getId(), id.toString(), posDetails);
 		for (SignatureUserInfo delegateeInfo : delegatee) {
 			if (!signatures.contains(delegateeInfo)) {
 				signatures.add(delegateeInfo);
@@ -1840,8 +1560,7 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param posDetails
 	 * @param isDelegated
 	 */
-	private void addSignaturesToSignatureList(
-			List<SignatureUserInfo> signatures, UserProfile user,
+	private void addSignaturesToSignatureList(List<SignatureUserInfo> signatures, UserProfile user,
 			PositionDetails posDetails, boolean isDelegated) {
 		SignatureUserInfo signatureInfo = new SignatureUserInfo();
 		signatureInfo.setUserProfileId(user.getId().toString());
@@ -1872,17 +1591,14 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param projectInfo
 	 * @throws Exception
 	 */
-	public void getProposalTitle(Proposal existingProposal, String proposalID,
-			ProjectInfo newProjectInfo, JsonNode projectInfo) throws Exception {
+	public void getProposalTitle(Proposal existingProposal, String proposalID, ProjectInfo newProjectInfo,
+			JsonNode projectInfo) throws Exception {
 		if (projectInfo != null && projectInfo.has("ProjectTitle")) {
-			final String proposalTitle = projectInfo.get("ProjectTitle")
-					.textValue().trim().replaceAll("\\<[^>]*>", "");
+			final String proposalTitle = projectInfo.get("ProjectTitle").textValue().trim().replaceAll("\\<[^>]*>", "");
 			if (validateNotEmptyValue(proposalTitle)) {
 				if (!proposalID.equals("0")) {
-					if (!existingProposal.getProjectInfo().getProjectTitle()
-							.equals(proposalTitle)) {
-						existingProposal.getProjectInfo().setProjectTitle(
-								proposalTitle);
+					if (!existingProposal.getProjectInfo().getProjectTitle().equals(proposalTitle)) {
+						existingProposal.getProjectInfo().setProjectTitle(proposalTitle);
 					}
 				} else {
 					newProjectInfo.setProjectTitle(proposalTitle);
@@ -1901,8 +1617,8 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param newProjectInfo
 	 * @param projectInfo
 	 */
-	public void getProposalType(Proposal existingProposal, String proposalID,
-			ProjectInfo newProjectInfo, JsonNode projectInfo) {
+	public void getProposalType(Proposal existingProposal, String proposalID, ProjectInfo newProjectInfo,
+			JsonNode projectInfo) {
 		if (projectInfo != null && projectInfo.has("ProjectType")) {
 			ProjectType projectType = new ProjectType();
 			switch (projectInfo.get("ProjectType").textValue()) {
@@ -1925,10 +1641,8 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 				break;
 			}
 			if (!proposalID.equals("0")) {
-				if (!existingProposal.getProjectInfo().getProjectType()
-						.equals(projectType)) {
-					existingProposal.getProjectInfo().setProjectType(
-							projectType);
+				if (!existingProposal.getProjectInfo().getProjectType().equals(projectType)) {
+					existingProposal.getProjectInfo().setProjectType(projectType);
 				}
 			} else {
 				newProjectInfo.setProjectType(projectType);
@@ -1944,8 +1658,8 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param newProjectInfo
 	 * @param projectInfo
 	 */
-	public void getTypeOfRequest(Proposal existingProposal, String proposalID,
-			ProjectInfo newProjectInfo, JsonNode projectInfo) {
+	public void getTypeOfRequest(Proposal existingProposal, String proposalID, ProjectInfo newProjectInfo,
+			JsonNode projectInfo) {
 		if (projectInfo != null && projectInfo.has("TypeOfRequest")) {
 			TypeOfRequest typeOfRequest = new TypeOfRequest();
 			switch (projectInfo.get("TypeOfRequest").textValue()) {
@@ -1965,10 +1679,8 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 				break;
 			}
 			if (!proposalID.equals("0")) {
-				if (!existingProposal.getProjectInfo().getTypeOfRequest()
-						.equals(typeOfRequest)) {
-					existingProposal.getProjectInfo().setTypeOfRequest(
-							typeOfRequest);
+				if (!existingProposal.getProjectInfo().getTypeOfRequest().equals(typeOfRequest)) {
+					existingProposal.getProjectInfo().setTypeOfRequest(typeOfRequest);
 				}
 			} else {
 				newProjectInfo.setTypeOfRequest(typeOfRequest);
@@ -1984,8 +1696,8 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param newProjectInfo
 	 * @param projectInfo
 	 */
-	public void getProjectLocation(Proposal existingProposal,
-			String proposalID, ProjectInfo newProjectInfo, JsonNode projectInfo) {
+	public void getProjectLocation(Proposal existingProposal, String proposalID, ProjectInfo newProjectInfo,
+			JsonNode projectInfo) {
 		if (projectInfo != null && projectInfo.has("ProjectLocation")) {
 			ProjectLocation projectLocation = new ProjectLocation();
 			switch (projectInfo.get("ProjectLocation").textValue()) {
@@ -1999,10 +1711,8 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 				break;
 			}
 			if (!proposalID.equals("0")) {
-				if (!existingProposal.getProjectInfo().getProjectLocation()
-						.equals(projectLocation)) {
-					existingProposal.getProjectInfo().setProjectLocation(
-							projectLocation);
+				if (!existingProposal.getProjectInfo().getProjectLocation().equals(projectLocation)) {
+					existingProposal.getProjectInfo().setProjectLocation(projectLocation);
 				}
 			} else {
 				newProjectInfo.setProjectLocation(projectLocation);
@@ -2020,16 +1730,13 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @throws ParseException
 	 * @throws Exception
 	 */
-	public void getDueDate(Proposal existingProposal, String proposalID,
-			ProjectInfo newProjectInfo, JsonNode projectInfo)
-			throws ParseException, Exception {
+	public void getDueDate(Proposal existingProposal, String proposalID, ProjectInfo newProjectInfo,
+			JsonNode projectInfo) throws ParseException, Exception {
 		if (projectInfo != null && projectInfo.has("DueDate")) {
-			Date dueDate = formatter.parse(projectInfo.get("DueDate")
-					.textValue().trim().replaceAll("\\<[^>]*>", ""));
+			Date dueDate = formatter.parse(projectInfo.get("DueDate").textValue().trim().replaceAll("\\<[^>]*>", ""));
 			if (validateNotEmptyValue(dueDate.toString())) {
 				if (!proposalID.equals("0")) {
-					if (!existingProposal.getProjectInfo().getDueDate()
-							.equals(dueDate)) {
+					if (!existingProposal.getProjectInfo().getDueDate().equals(dueDate)) {
 						existingProposal.getProjectInfo().setDueDate(dueDate);
 					}
 				} else {
@@ -2051,14 +1758,12 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @throws ParseException
 	 * @throws Exception
 	 */
-	public void getProjectPeriod(Proposal existingProposal, String proposalID,
-			ProjectInfo newProjectInfo, JsonNode projectInfo)
-			throws ParseException, Exception {
+	public void getProjectPeriod(Proposal existingProposal, String proposalID, ProjectInfo newProjectInfo,
+			JsonNode projectInfo) throws ParseException, Exception {
 		ProjectPeriod projectPeriod = new ProjectPeriod();
 		if (projectInfo != null && projectInfo.has("ProjectPeriodFrom")) {
-			Date periodFrom = formatter.parse(projectInfo
-					.get("ProjectPeriodFrom").textValue().trim()
-					.replaceAll("\\<[^>]*>", ""));
+			Date periodFrom = formatter
+					.parse(projectInfo.get("ProjectPeriodFrom").textValue().trim().replaceAll("\\<[^>]*>", ""));
 			if (validateNotEmptyValue(periodFrom.toString())) {
 				projectPeriod.setFrom(periodFrom);
 			} else {
@@ -2066,8 +1771,8 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 			}
 		}
 		if (projectInfo != null && projectInfo.has("ProjectPeriodTo")) {
-			Date periodTo = formatter.parse(projectInfo.get("ProjectPeriodTo")
-					.textValue().trim().replaceAll("\\<[^>]*>", ""));
+			Date periodTo = formatter
+					.parse(projectInfo.get("ProjectPeriodTo").textValue().trim().replaceAll("\\<[^>]*>", ""));
 			if (validateNotEmptyValue(periodTo.toString())) {
 				projectPeriod.setTo(periodTo);
 			} else {
@@ -2075,10 +1780,8 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 			}
 		}
 		if (!proposalID.equals("0")) {
-			if (!existingProposal.getProjectInfo().getProjectPeriod()
-					.equals(projectPeriod)) {
-				existingProposal.getProjectInfo().setProjectPeriod(
-						projectPeriod);
+			if (!existingProposal.getProjectInfo().getProjectPeriod().equals(projectPeriod)) {
+				existingProposal.getProjectInfo().setProjectPeriod(projectPeriod);
 			}
 		} else {
 			newProjectInfo.setProjectPeriod(projectPeriod);
@@ -2094,23 +1797,17 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @throws Exception
 	 * @throws ParseException
 	 */
-	public void getProjectInfo(Proposal existingProposal, String proposalID,
-			JsonNode proposalInfo) throws Exception, ParseException {
+	public void getProjectInfo(Proposal existingProposal, String proposalID, JsonNode proposalInfo)
+			throws Exception, ParseException {
 		ProjectInfo newProjectInfo = new ProjectInfo();
 		if (proposalInfo != null && proposalInfo.has("ProjectInfo")) {
 			JsonNode projectInfo = proposalInfo.get("ProjectInfo");
-			getProposalTitle(existingProposal, proposalID, newProjectInfo,
-					projectInfo);
-			getProposalType(existingProposal, proposalID, newProjectInfo,
-					projectInfo);
-			getTypeOfRequest(existingProposal, proposalID, newProjectInfo,
-					projectInfo);
-			getProjectLocation(existingProposal, proposalID, newProjectInfo,
-					projectInfo);
-			getDueDate(existingProposal, proposalID, newProjectInfo,
-					projectInfo);
-			getProjectPeriod(existingProposal, proposalID, newProjectInfo,
-					projectInfo);
+			getProposalTitle(existingProposal, proposalID, newProjectInfo, projectInfo);
+			getProposalType(existingProposal, proposalID, newProjectInfo, projectInfo);
+			getTypeOfRequest(existingProposal, proposalID, newProjectInfo, projectInfo);
+			getProjectLocation(existingProposal, proposalID, newProjectInfo, projectInfo);
+			getDueDate(existingProposal, proposalID, newProjectInfo, projectInfo);
+			getProjectPeriod(existingProposal, proposalID, newProjectInfo, projectInfo);
 		}
 		// ProjectInfo
 		if (proposalID.equals("0")) {
@@ -2126,79 +1823,62 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param proposalInfo
 	 * @throws Exception
 	 */
-	public void getSponsorAndBudgetInfo(Proposal existingProposal,
-			String proposalID, JsonNode proposalInfo) throws Exception {
+	public void getSponsorAndBudgetInfo(Proposal existingProposal, String proposalID, JsonNode proposalInfo)
+			throws Exception {
 		SponsorAndBudgetInfo newSponsorAndBudgetInfo = new SponsorAndBudgetInfo();
 		if (proposalInfo != null && proposalInfo.has("SponsorAndBudgetInfo")) {
-			JsonNode sponsorAndBudgetInfo = proposalInfo
-					.get("SponsorAndBudgetInfo");
-			if (sponsorAndBudgetInfo != null
-					&& sponsorAndBudgetInfo.has("GrantingAgency")) {
-				for (String grantingAgency : sponsorAndBudgetInfo
-						.get("GrantingAgency").textValue().trim()
+			JsonNode sponsorAndBudgetInfo = proposalInfo.get("SponsorAndBudgetInfo");
+			if (sponsorAndBudgetInfo != null && sponsorAndBudgetInfo.has("GrantingAgency")) {
+				for (String grantingAgency : sponsorAndBudgetInfo.get("GrantingAgency").textValue().trim()
 						.replaceAll("\\<[^>]*>", "").split(", ")) {
 					if (validateNotEmptyValue(grantingAgency)) {
-						newSponsorAndBudgetInfo.getGrantingAgency().add(
-								grantingAgency);
+						newSponsorAndBudgetInfo.getGrantingAgency().add(grantingAgency);
 					} else {
-						//throw new Exception( "The Granting Agency can not be Empty");
+						// throw new Exception( "The Granting Agency can not be Empty");
 					}
 				}
 			}
-			if (sponsorAndBudgetInfo != null
-					&& sponsorAndBudgetInfo.has("DirectCosts")) {
-				final String directCost = sponsorAndBudgetInfo
-						.get("DirectCosts").textValue().trim()
+			if (sponsorAndBudgetInfo != null && sponsorAndBudgetInfo.has("DirectCosts")) {
+				final String directCost = sponsorAndBudgetInfo.get("DirectCosts").textValue().trim()
 						.replaceAll("\\<[^>]*>", "");
 				if (validateNotEmptyValue(directCost)) {
-					newSponsorAndBudgetInfo.setDirectCosts(Double
-							.parseDouble(directCost));
+					newSponsorAndBudgetInfo.setDirectCosts(Double.parseDouble(directCost));
 				} else {
-					//throw new Exception("The Direct Costs can not be Empty");
+					// throw new Exception("The Direct Costs can not be Empty");
 				}
 			}
-			if (sponsorAndBudgetInfo != null
-					&& sponsorAndBudgetInfo.has("FACosts")) {
-				final String FACosts = sponsorAndBudgetInfo.get("FACosts")
-						.textValue().trim().replaceAll("\\<[^>]*>", "");
+			if (sponsorAndBudgetInfo != null && sponsorAndBudgetInfo.has("FACosts")) {
+				final String FACosts = sponsorAndBudgetInfo.get("FACosts").textValue().trim().replaceAll("\\<[^>]*>",
+						"");
 				if (validateNotEmptyValue(FACosts)) {
-					newSponsorAndBudgetInfo.setFaCosts(Double
-							.parseDouble(FACosts));
+					newSponsorAndBudgetInfo.setFaCosts(Double.parseDouble(FACosts));
 				} else {
-					//throw new Exception("The FA Costs can not be Empty");
+					// throw new Exception("The FA Costs can not be Empty");
 				}
 			}
-			if (sponsorAndBudgetInfo != null
-					&& sponsorAndBudgetInfo.has("TotalCosts")) {
-				final String totalCosts = sponsorAndBudgetInfo
-						.get("TotalCosts").textValue().trim()
+			if (sponsorAndBudgetInfo != null && sponsorAndBudgetInfo.has("TotalCosts")) {
+				final String totalCosts = sponsorAndBudgetInfo.get("TotalCosts").textValue().trim()
 						.replaceAll("\\<[^>]*>", "");
 				if (validateNotEmptyValue(totalCosts)) {
-					newSponsorAndBudgetInfo.setTotalCosts(Double
-							.parseDouble(totalCosts));
+					newSponsorAndBudgetInfo.setTotalCosts(Double.parseDouble(totalCosts));
 				} else {
-					//throw new Exception("The Total Costs can not be Empty");
+					// throw new Exception("The Total Costs can not be Empty");
 				}
 			}
-			if (sponsorAndBudgetInfo != null
-					&& sponsorAndBudgetInfo.has("FARate")) {
-				final String FARate = sponsorAndBudgetInfo.get("FARate")
-						.textValue().trim().replaceAll("\\<[^>]*>", "");
+			if (sponsorAndBudgetInfo != null && sponsorAndBudgetInfo.has("FARate")) {
+				final String FARate = sponsorAndBudgetInfo.get("FARate").textValue().trim().replaceAll("\\<[^>]*>", "");
 				if (validateNotEmptyValue(FARate)) {
-					newSponsorAndBudgetInfo.setFaRate(Double
-							.parseDouble(FARate));
+					newSponsorAndBudgetInfo.setFaRate(Double.parseDouble(FARate));
 				} else {
-					//throw new Exception("The FA Rate can not be Empty");
+					// throw new Exception("The FA Rate can not be Empty");
 				}
 			}
 		}
 
 		// SponsorAndBudgetInfo
 		if (!proposalID.equals("0")) {
-			if (!existingProposal.getSponsorAndBudgetInfo().equals(
-					newSponsorAndBudgetInfo)) {
-				existingProposal
-						.setSponsorAndBudgetInfo(newSponsorAndBudgetInfo);
+			if (!existingProposal.getSponsorAndBudgetInfo().equals(newSponsorAndBudgetInfo)) {
+				existingProposal.setSponsorAndBudgetInfo(newSponsorAndBudgetInfo);
 			}
 		} else {
 			existingProposal.setSponsorAndBudgetInfo(newSponsorAndBudgetInfo);
@@ -2212,13 +1892,11 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param proposalID
 	 * @param proposalInfo
 	 */
-	public void getCostShareInfo(Proposal existingProposal, String proposalID,
-			JsonNode proposalInfo) {
+	public void getCostShareInfo(Proposal existingProposal, String proposalID, JsonNode proposalInfo) {
 		CostShareInfo newCostShareInfo = new CostShareInfo();
 		if (proposalInfo != null && proposalInfo.has("CostShareInfo")) {
 			JsonNode costShareInfo = proposalInfo.get("CostShareInfo");
-			if (costShareInfo != null
-					&& costShareInfo.has("InstitutionalCommitted")) {
+			if (costShareInfo != null && costShareInfo.has("InstitutionalCommitted")) {
 				switch (costShareInfo.get("InstitutionalCommitted").textValue()) {
 				case "1":
 					newCostShareInfo.setInstitutionalCommitted(true);
@@ -2231,8 +1909,7 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 				}
 			}
 
-			if (costShareInfo != null
-					&& costShareInfo.has("ThirdPartyCommitted")) {
+			if (costShareInfo != null && costShareInfo.has("ThirdPartyCommitted")) {
 				switch (costShareInfo.get("ThirdPartyCommitted").textValue()) {
 				case "1":
 					newCostShareInfo.setThirdPartyCommitted(true);
@@ -2262,15 +1939,12 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param proposalID
 	 * @param proposalInfo
 	 */
-	public void getUniversityCommitments(Proposal existingProposal,
-			String proposalID, JsonNode proposalInfo) {
+	public void getUniversityCommitments(Proposal existingProposal, String proposalID, JsonNode proposalInfo) {
 		UniversityCommitments newUnivCommitments = new UniversityCommitments();
 		if (proposalInfo != null && proposalInfo.has("UnivCommitments")) {
 			JsonNode univCommitments = proposalInfo.get("UnivCommitments");
-			if (univCommitments != null
-					&& univCommitments.has("NewRenovatedFacilitiesRequired")) {
-				switch (univCommitments.get("NewRenovatedFacilitiesRequired")
-						.textValue()) {
+			if (univCommitments != null && univCommitments.has("NewRenovatedFacilitiesRequired")) {
+				switch (univCommitments.get("NewRenovatedFacilitiesRequired").textValue()) {
 				case "1":
 					newUnivCommitments.setNewRenovatedFacilitiesRequired(true);
 					break;
@@ -2281,8 +1955,7 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 					break;
 				}
 			}
-			if (univCommitments != null
-					&& univCommitments.has("RentalSpaceRequired")) {
+			if (univCommitments != null && univCommitments.has("RentalSpaceRequired")) {
 				switch (univCommitments.get("RentalSpaceRequired").textValue()) {
 				case "1":
 					newUnivCommitments.setRentalSpaceRequired(true);
@@ -2294,16 +1967,13 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 					break;
 				}
 			}
-			if (univCommitments != null
-					&& univCommitments.has("InstitutionalCommitmentRequired")) {
-				switch (univCommitments.get("InstitutionalCommitmentRequired")
-						.textValue()) {
+			if (univCommitments != null && univCommitments.has("InstitutionalCommitmentRequired")) {
+				switch (univCommitments.get("InstitutionalCommitmentRequired").textValue()) {
 				case "1":
 					newUnivCommitments.setInstitutionalCommitmentRequired(true);
 					break;
 				case "2":
-					newUnivCommitments
-							.setInstitutionalCommitmentRequired(false);
+					newUnivCommitments.setInstitutionalCommitmentRequired(false);
 					break;
 				default:
 					break;
@@ -2312,8 +1982,7 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 		}
 		// UnivCommitments
 		if (!proposalID.equals("0")) {
-			if (!existingProposal.getUniversityCommitments().equals(
-					newUnivCommitments)) {
+			if (!existingProposal.getUniversityCommitments().equals(newUnivCommitments)) {
 				existingProposal.setUniversityCommitments(newUnivCommitments);
 			}
 		} else {
@@ -2328,14 +1997,11 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param proposalID
 	 * @param proposalInfo
 	 */
-	public void getConflictOfInterest(Proposal existingProposal,
-			String proposalID, JsonNode proposalInfo) {
+	public void getConflictOfInterest(Proposal existingProposal, String proposalID, JsonNode proposalInfo) {
 		ConflictOfInterest newConflictOfInterest = new ConflictOfInterest();
 		if (proposalInfo != null && proposalInfo.has("ConflicOfInterestInfo")) {
-			JsonNode conflicOfInterestInfo = proposalInfo
-					.get("ConflicOfInterestInfo");
-			if (conflicOfInterestInfo != null
-					&& conflicOfInterestInfo.has("FinancialCOI")) {
+			JsonNode conflicOfInterestInfo = proposalInfo.get("ConflicOfInterestInfo");
+			if (conflicOfInterestInfo != null && conflicOfInterestInfo.has("FinancialCOI")) {
 				switch (conflicOfInterestInfo.get("FinancialCOI").textValue()) {
 				case "1":
 					newConflictOfInterest.setFinancialCOI(true);
@@ -2347,10 +2013,8 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 					break;
 				}
 			}
-			if (conflicOfInterestInfo != null
-					&& conflicOfInterestInfo.has("ConflictDisclosed")) {
-				switch (conflicOfInterestInfo.get("ConflictDisclosed")
-						.textValue()) {
+			if (conflicOfInterestInfo != null && conflicOfInterestInfo.has("ConflictDisclosed")) {
+				switch (conflicOfInterestInfo.get("ConflictDisclosed").textValue()) {
 				case "1":
 					newConflictOfInterest.setConflictDisclosed(true);
 					break;
@@ -2361,10 +2025,8 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 					break;
 				}
 			}
-			if (conflicOfInterestInfo != null
-					&& conflicOfInterestInfo.has("DisclosureFormChange")) {
-				switch (conflicOfInterestInfo.get("DisclosureFormChange")
-						.textValue()) {
+			if (conflicOfInterestInfo != null && conflicOfInterestInfo.has("DisclosureFormChange")) {
+				switch (conflicOfInterestInfo.get("DisclosureFormChange").textValue()) {
 				case "1":
 					newConflictOfInterest.setDisclosureFormChange(true);
 					break;
@@ -2378,8 +2040,7 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 		}
 		// ConflicOfInterestInfo
 		if (!proposalID.equals("0")) {
-			if (!existingProposal.getConflicOfInterest().equals(
-					newConflictOfInterest)) {
+			if (!existingProposal.getConflicOfInterest().equals(newConflictOfInterest)) {
 				existingProposal.setConflicOfInterest(newConflictOfInterest);
 			}
 		} else {
@@ -2394,31 +2055,24 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param proposalID
 	 * @param proposalInfo
 	 */
-	public void getAdditionalInfo(Proposal existingProposal, String proposalID,
-			JsonNode proposalInfo) {
+	public void getAdditionalInfo(Proposal existingProposal, String proposalID, JsonNode proposalInfo) {
 		AdditionalInfo newAdditionalInfo = new AdditionalInfo();
 		if (proposalInfo != null && proposalInfo.has("AdditionalInfo")) {
 			JsonNode additionalInfo = proposalInfo.get("AdditionalInfo");
-			if (additionalInfo != null
-					&& additionalInfo.has("AnticipatesForeignNationalsPayment")) {
-				switch (additionalInfo
-						.get("AnticipatesForeignNationalsPayment").textValue()) {
+			if (additionalInfo != null && additionalInfo.has("AnticipatesForeignNationalsPayment")) {
+				switch (additionalInfo.get("AnticipatesForeignNationalsPayment").textValue()) {
 				case "1":
-					newAdditionalInfo
-							.setAnticipatesForeignNationalsPayment(true);
+					newAdditionalInfo.setAnticipatesForeignNationalsPayment(true);
 					break;
 				case "2":
-					newAdditionalInfo
-							.setAnticipatesForeignNationalsPayment(false);
+					newAdditionalInfo.setAnticipatesForeignNationalsPayment(false);
 					break;
 				default:
 					break;
 				}
 			}
-			if (additionalInfo != null
-					&& additionalInfo.has("AnticipatesCourseReleaseTime")) {
-				switch (additionalInfo.get("AnticipatesCourseReleaseTime")
-						.textValue()) {
+			if (additionalInfo != null && additionalInfo.has("AnticipatesCourseReleaseTime")) {
+				switch (additionalInfo.get("AnticipatesCourseReleaseTime").textValue()) {
 				case "1":
 					newAdditionalInfo.setAnticipatesCourseReleaseTime(true);
 					break;
@@ -2429,18 +2083,13 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 					break;
 				}
 			}
-			if (additionalInfo != null
-					&& additionalInfo
-							.has("RelatedToCenterForAdvancedEnergyStudies")) {
-				switch (additionalInfo.get(
-						"RelatedToCenterForAdvancedEnergyStudies").textValue()) {
+			if (additionalInfo != null && additionalInfo.has("RelatedToCenterForAdvancedEnergyStudies")) {
+				switch (additionalInfo.get("RelatedToCenterForAdvancedEnergyStudies").textValue()) {
 				case "1":
-					newAdditionalInfo
-							.setRelatedToCenterForAdvancedEnergyStudies(true);
+					newAdditionalInfo.setRelatedToCenterForAdvancedEnergyStudies(true);
 					break;
 				case "2":
-					newAdditionalInfo
-							.setRelatedToCenterForAdvancedEnergyStudies(false);
+					newAdditionalInfo.setRelatedToCenterForAdvancedEnergyStudies(false);
 					break;
 				default:
 					break;
@@ -2465,28 +2114,22 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param proposalInfo
 	 * @throws Exception
 	 */
-	public void getCollaborationInfo(Proposal existingProposal,
-			String proposalID, JsonNode proposalInfo) throws Exception {
+	public void getCollaborationInfo(Proposal existingProposal, String proposalID, JsonNode proposalInfo)
+			throws Exception {
 		CollaborationInfo newCollaborationInfo = new CollaborationInfo();
 		if (proposalInfo != null && proposalInfo.has("CollaborationInfo")) {
 			JsonNode collaborationInfo = proposalInfo.get("CollaborationInfo");
-			if (collaborationInfo != null
-					&& collaborationInfo.has("InvolveNonFundedCollab")) {
-				switch (collaborationInfo.get("InvolveNonFundedCollab")
-						.textValue()) {
+			if (collaborationInfo != null && collaborationInfo.has("InvolveNonFundedCollab")) {
+				switch (collaborationInfo.get("InvolveNonFundedCollab").textValue()) {
 				case "1":
 					newCollaborationInfo.setInvolveNonFundedCollab(true);
-					if (collaborationInfo != null
-							&& collaborationInfo.has("Collaborators")) {
-						final String collabarationName = collaborationInfo
-								.get("Collaborators").textValue().trim()
+					if (collaborationInfo != null && collaborationInfo.has("Collaborators")) {
+						final String collabarationName = collaborationInfo.get("Collaborators").textValue().trim()
 								.replaceAll("\\<[^>]*>", "");
 						if (validateNotEmptyValue(collabarationName)) {
-							newCollaborationInfo
-									.setInvolvedCollaborators(collabarationName);
+							newCollaborationInfo.setInvolvedCollaborators(collabarationName);
 						} else {
-							throw new Exception(
-									"Collaborators can not be Empty");
+							throw new Exception("Collaborators can not be Empty");
 						}
 					}
 					break;
@@ -2500,8 +2143,7 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 		}
 		// CollaborationInfo
 		if (!proposalID.equals("0")) {
-			if (!existingProposal.getCollaborationInfo().equals(
-					newCollaborationInfo)) {
+			if (!existingProposal.getCollaborationInfo().equals(newCollaborationInfo)) {
 				existingProposal.setCollaborationInfo(newCollaborationInfo);
 			}
 		} else {
@@ -2517,50 +2159,40 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param proposalInfo
 	 * @throws Exception
 	 */
-	public void getConfidentialInfo(Proposal existingProposal,
-			String proposalID, JsonNode proposalInfo) throws Exception {
+	public void getConfidentialInfo(Proposal existingProposal, String proposalID, JsonNode proposalInfo)
+			throws Exception {
 		ConfidentialInfo newConfidentialInfo = new ConfidentialInfo();
 		if (proposalInfo != null && proposalInfo.has("ConfidentialInfo")) {
 			JsonNode confidentialInfo = proposalInfo.get("ConfidentialInfo");
-			if (confidentialInfo != null
-					&& confidentialInfo.has("ContainConfidentialInformation")) {
-				switch (confidentialInfo.get("ContainConfidentialInformation")
-						.textValue()) {
+			if (confidentialInfo != null && confidentialInfo.has("ContainConfidentialInformation")) {
+				switch (confidentialInfo.get("ContainConfidentialInformation").textValue()) {
 				case "1":
 					newConfidentialInfo.setContainConfidentialInformation(true);
-					if (confidentialInfo != null
-							&& confidentialInfo.has("OnPages")) {
-						final String onPages = confidentialInfo.get("OnPages")
-								.textValue().trim().replaceAll("\\<[^>]*>", "");
+					if (confidentialInfo != null && confidentialInfo.has("OnPages")) {
+						final String onPages = confidentialInfo.get("OnPages").textValue().trim()
+								.replaceAll("\\<[^>]*>", "");
 						if (validateNotEmptyValue(onPages)) {
 							newConfidentialInfo.setOnPages(onPages);
 						} else {
 							throw new Exception("The Pages can not be Empty");
 						}
 					}
-					if (confidentialInfo != null
-							&& confidentialInfo.has("Patentable")) {
-						newConfidentialInfo.setPatentable(confidentialInfo.get(
-								"Patentable").booleanValue());
+					if (confidentialInfo != null && confidentialInfo.has("Patentable")) {
+						newConfidentialInfo.setPatentable(confidentialInfo.get("Patentable").booleanValue());
 					}
-					if (confidentialInfo != null
-							&& confidentialInfo.has("Copyrightable")) {
-						newConfidentialInfo.setCopyrightable(confidentialInfo
-								.get("Copyrightable").booleanValue());
+					if (confidentialInfo != null && confidentialInfo.has("Copyrightable")) {
+						newConfidentialInfo.setCopyrightable(confidentialInfo.get("Copyrightable").booleanValue());
 					}
 					break;
 				case "2":
-					newConfidentialInfo
-							.setContainConfidentialInformation(false);
+					newConfidentialInfo.setContainConfidentialInformation(false);
 					break;
 				default:
 					break;
 				}
 			}
-			if (confidentialInfo != null
-					&& confidentialInfo.has("InvolveIntellectualProperty")) {
-				switch (confidentialInfo.get("InvolveIntellectualProperty")
-						.textValue()) {
+			if (confidentialInfo != null && confidentialInfo.has("InvolveIntellectualProperty")) {
+				switch (confidentialInfo.get("InvolveIntellectualProperty").textValue()) {
 				case "1":
 					newConfidentialInfo.setInvolveIntellectualProperty(true);
 					break;
@@ -2574,8 +2206,7 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 		}
 		// ConfidentialInfo
 		if (!proposalID.equals("0")) {
-			if (!existingProposal.getConfidentialInfo().equals(
-					newConfidentialInfo)) {
+			if (!existingProposal.getConfidentialInfo().equals(newConfidentialInfo)) {
 				existingProposal.setConfidentialInfo(newConfidentialInfo);
 			}
 		} else {
@@ -2589,59 +2220,44 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param existingProposal
 	 * @param oSPSectionInfo
 	 */
-	public void getFundingSource(Proposal existingProposal,
-			JsonNode oSPSectionInfo) {
+	public void getFundingSource(Proposal existingProposal, JsonNode oSPSectionInfo) {
 		FundingSource newFundingSource = new FundingSource();
 		if (oSPSectionInfo != null && oSPSectionInfo.has("Federal")) {
-			newFundingSource.setFederal(oSPSectionInfo.get("Federal")
-					.booleanValue());
+			newFundingSource.setFederal(oSPSectionInfo.get("Federal").booleanValue());
 		}
 		if (oSPSectionInfo != null && oSPSectionInfo.has("FederalFlowThrough")) {
-			newFundingSource.setFederalFlowThrough(oSPSectionInfo.get(
-					"FederalFlowThrough").booleanValue());
+			newFundingSource.setFederalFlowThrough(oSPSectionInfo.get("FederalFlowThrough").booleanValue());
 		}
 		if (oSPSectionInfo != null && oSPSectionInfo.has("StateOfIdahoEntity")) {
-			newFundingSource.setStateOfIdahoEntity(oSPSectionInfo.get(
-					"StateOfIdahoEntity").booleanValue());
+			newFundingSource.setStateOfIdahoEntity(oSPSectionInfo.get("StateOfIdahoEntity").booleanValue());
 		}
 		if (oSPSectionInfo != null && oSPSectionInfo.has("PrivateForProfit")) {
-			newFundingSource.setPrivateForProfit(oSPSectionInfo.get(
-					"PrivateForProfit").booleanValue());
+			newFundingSource.setPrivateForProfit(oSPSectionInfo.get("PrivateForProfit").booleanValue());
 		}
-		if (oSPSectionInfo != null
-				&& oSPSectionInfo.has("NonProfitOrganization")) {
-			newFundingSource.setNonProfitOrganization(oSPSectionInfo.get(
-					"NonProfitOrganization").booleanValue());
+		if (oSPSectionInfo != null && oSPSectionInfo.has("NonProfitOrganization")) {
+			newFundingSource.setNonProfitOrganization(oSPSectionInfo.get("NonProfitOrganization").booleanValue());
 		}
 		if (oSPSectionInfo != null && oSPSectionInfo.has("NonIdahoStateEntity")) {
-			newFundingSource.setNonIdahoStateEntity(oSPSectionInfo.get(
-					"NonIdahoStateEntity").booleanValue());
+			newFundingSource.setNonIdahoStateEntity(oSPSectionInfo.get("NonIdahoStateEntity").booleanValue());
 		}
 		if (oSPSectionInfo != null && oSPSectionInfo.has("CollegeOrUniversity")) {
-			newFundingSource.setCollegeOrUniversity(oSPSectionInfo.get(
-					"CollegeOrUniversity").booleanValue());
+			newFundingSource.setCollegeOrUniversity(oSPSectionInfo.get("CollegeOrUniversity").booleanValue());
 		}
 		if (oSPSectionInfo != null && oSPSectionInfo.has("LocalEntity")) {
-			newFundingSource.setLocalEntity(oSPSectionInfo.get("LocalEntity")
-					.booleanValue());
+			newFundingSource.setLocalEntity(oSPSectionInfo.get("LocalEntity").booleanValue());
 		}
 		if (oSPSectionInfo != null && oSPSectionInfo.has("NonIdahoLocalEntity")) {
-			newFundingSource.setNonIdahoLocalEntity(oSPSectionInfo.get(
-					"NonIdahoLocalEntity").booleanValue());
+			newFundingSource.setNonIdahoLocalEntity(oSPSectionInfo.get("NonIdahoLocalEntity").booleanValue());
 		}
 		if (oSPSectionInfo != null && oSPSectionInfo.has("TirbalGovernment")) {
-			newFundingSource.setTirbalGovernment(oSPSectionInfo.get(
-					"TirbalGovernment").booleanValue());
+			newFundingSource.setTirbalGovernment(oSPSectionInfo.get("TirbalGovernment").booleanValue());
 		}
 		if (oSPSectionInfo != null && oSPSectionInfo.has("Foreign")) {
-			newFundingSource.setForeign(oSPSectionInfo.get("Foreign")
-					.booleanValue());
+			newFundingSource.setForeign(oSPSectionInfo.get("Foreign").booleanValue());
 		}
 		// Funding Source
-		if (!existingProposal.getOspSectionInfo().getFundingSource()
-				.equals(newFundingSource)) {
-			existingProposal.getOspSectionInfo().setFundingSource(
-					newFundingSource);
+		if (!existingProposal.getOspSectionInfo().getFundingSource().equals(newFundingSource)) {
+			existingProposal.getOspSectionInfo().setFundingSource(newFundingSource);
 		}
 	}
 
@@ -2652,17 +2268,13 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param oSPSectionInfo
 	 * @throws Exception
 	 */
-	public void getListAgency(Proposal existingProposal, JsonNode oSPSectionInfo)
-			throws Exception {
+	public void getListAgency(Proposal existingProposal, JsonNode oSPSectionInfo) throws Exception {
 		// List Agency
 		if (oSPSectionInfo != null && oSPSectionInfo.has("ListAgency")) {
-			String agencies = oSPSectionInfo.get("ListAgency").textValue()
-					.trim().replaceAll("\\<[^>]*>", "");
+			String agencies = oSPSectionInfo.get("ListAgency").textValue().trim().replaceAll("\\<[^>]*>", "");
 			if (validateNotEmptyValue(agencies)) {
-				if (!existingProposal.getOspSectionInfo().getListAgency()
-						.equals(agencies)) {
-					existingProposal.getOspSectionInfo()
-							.setListAgency(agencies);
+				if (!existingProposal.getOspSectionInfo().getListAgency().equals(agencies)) {
+					existingProposal.getOspSectionInfo().setListAgency(agencies);
 				}
 			} else {
 				throw new Exception("The Agency List can not be Empty");
@@ -2676,36 +2288,29 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param existingProposal
 	 * @param oSPSectionInfo
 	 */
-	public void getRecoveryDetails(Proposal existingProposal,
-			JsonNode oSPSectionInfo) {
+	public void getRecoveryDetails(Proposal existingProposal, JsonNode oSPSectionInfo) {
 		Recovery newRecovery = new Recovery();
 		if (oSPSectionInfo != null && oSPSectionInfo.has("FullRecovery")) {
-			newRecovery.setFullRecovery(oSPSectionInfo.get("FullRecovery")
-					.booleanValue());
+			newRecovery.setFullRecovery(oSPSectionInfo.get("FullRecovery").booleanValue());
 		}
-		if (oSPSectionInfo != null
-				&& oSPSectionInfo.has("NoRecoveryNormalSponsorPolicy")) {
-			newRecovery.setNoRecoveryNormalSponsorPolicy(oSPSectionInfo.get(
-					"NoRecoveryNormalSponsorPolicy").booleanValue());
+		if (oSPSectionInfo != null && oSPSectionInfo.has("NoRecoveryNormalSponsorPolicy")) {
+			newRecovery.setNoRecoveryNormalSponsorPolicy(
+					oSPSectionInfo.get("NoRecoveryNormalSponsorPolicy").booleanValue());
 		}
-		if (oSPSectionInfo != null
-				&& oSPSectionInfo.has("NoRecoveryInstitutionalWaiver")) {
-			newRecovery.setNoRecoveryInstitutionalWaiver(oSPSectionInfo.get(
-					"NoRecoveryInstitutionalWaiver").booleanValue());
+		if (oSPSectionInfo != null && oSPSectionInfo.has("NoRecoveryInstitutionalWaiver")) {
+			newRecovery.setNoRecoveryInstitutionalWaiver(
+					oSPSectionInfo.get("NoRecoveryInstitutionalWaiver").booleanValue());
 		}
-		if (oSPSectionInfo != null
-				&& oSPSectionInfo.has("LimitedRecoveryNormalSponsorPolicy")) {
-			newRecovery.setLimitedRecoveryNormalSponsorPolicy(oSPSectionInfo
-					.get("LimitedRecoveryNormalSponsorPolicy").booleanValue());
+		if (oSPSectionInfo != null && oSPSectionInfo.has("LimitedRecoveryNormalSponsorPolicy")) {
+			newRecovery.setLimitedRecoveryNormalSponsorPolicy(
+					oSPSectionInfo.get("LimitedRecoveryNormalSponsorPolicy").booleanValue());
 		}
-		if (oSPSectionInfo != null
-				&& oSPSectionInfo.has("LimitedRecoveryInstitutionalWaiver")) {
-			newRecovery.setLimitedRecoveryInstitutionalWaiver(oSPSectionInfo
-					.get("LimitedRecoveryInstitutionalWaiver").booleanValue());
+		if (oSPSectionInfo != null && oSPSectionInfo.has("LimitedRecoveryInstitutionalWaiver")) {
+			newRecovery.setLimitedRecoveryInstitutionalWaiver(
+					oSPSectionInfo.get("LimitedRecoveryInstitutionalWaiver").booleanValue());
 		}
 		// Recovery
-		if (!existingProposal.getOspSectionInfo().getRecovery()
-				.equals(newRecovery)) {
+		if (!existingProposal.getOspSectionInfo().getRecovery().equals(newRecovery)) {
 			existingProposal.getOspSectionInfo().setRecovery(newRecovery);
 		}
 	}
@@ -2731,12 +2336,10 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 			newBaseInfo.setOther(oSPSectionInfo.get("Other").booleanValue());
 		}
 		if (oSPSectionInfo != null && oSPSectionInfo.has("NotApplicable")) {
-			newBaseInfo.setNotApplicable(oSPSectionInfo.get("NotApplicable")
-					.booleanValue());
+			newBaseInfo.setNotApplicable(oSPSectionInfo.get("NotApplicable").booleanValue());
 		}
 		// Base Info
-		if (!existingProposal.getOspSectionInfo().getBaseInfo()
-				.equals(newBaseInfo)) {
+		if (!existingProposal.getOspSectionInfo().getBaseInfo().equals(newBaseInfo)) {
 			existingProposal.getOspSectionInfo().setBaseInfo(newBaseInfo);
 		}
 	}
@@ -2749,8 +2352,7 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param oSPSectionInfo
 	 * @throws Exception
 	 */
-	public void getSalaryDetails(Proposal existingProposal,
-			OSPSectionInfo newOSPSectionInfo, JsonNode oSPSectionInfo)
+	public void getSalaryDetails(Proposal existingProposal, OSPSectionInfo newOSPSectionInfo, JsonNode oSPSectionInfo)
 			throws Exception {
 		if (oSPSectionInfo != null && oSPSectionInfo.has("IsPISalaryIncluded")) {
 			switch (oSPSectionInfo.get("IsPISalaryIncluded").textValue()) {
@@ -2765,20 +2367,15 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 			}
 		}
 		// PI Salary Included
-		if (existingProposal.getOspSectionInfo().isPiSalaryIncluded() != newOSPSectionInfo
-				.isPiSalaryIncluded()) {
-			existingProposal.getOspSectionInfo().setPiSalaryIncluded(
-					newOSPSectionInfo.isPiSalaryIncluded());
+		if (existingProposal.getOspSectionInfo().isPiSalaryIncluded() != newOSPSectionInfo.isPiSalaryIncluded()) {
+			existingProposal.getOspSectionInfo().setPiSalaryIncluded(newOSPSectionInfo.isPiSalaryIncluded());
 		}
 		if (oSPSectionInfo != null && oSPSectionInfo.has("PISalary")) {
 			// PI Salary
-			String PISalary = oSPSectionInfo.get("PISalary").textValue().trim()
-					.replaceAll("\\<[^>]*>", "");
+			String PISalary = oSPSectionInfo.get("PISalary").textValue().trim().replaceAll("\\<[^>]*>", "");
 			if (validateNotEmptyValue(PISalary)) {
-				if (existingProposal.getOspSectionInfo().getPiSalary() != Double
-						.parseDouble(PISalary)) {
-					existingProposal.getOspSectionInfo().setPiSalary(
-							Double.parseDouble(PISalary));
+				if (existingProposal.getOspSectionInfo().getPiSalary() != Double.parseDouble(PISalary)) {
+					existingProposal.getOspSectionInfo().setPiSalary(Double.parseDouble(PISalary));
 				}
 			} else {
 				throw new Exception("The PI Salary can not be Empty");
@@ -2786,13 +2383,10 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 		}
 		if (oSPSectionInfo != null && oSPSectionInfo.has("PIFringe")) {
 			// PI Fringe
-			String PiFringe = oSPSectionInfo.get("PIFringe").textValue().trim()
-					.replaceAll("\\<[^>]*>", "");
+			String PiFringe = oSPSectionInfo.get("PIFringe").textValue().trim().replaceAll("\\<[^>]*>", "");
 			if (validateNotEmptyValue(PiFringe)) {
-				if (existingProposal.getOspSectionInfo().getPiFringe() != Double
-						.parseDouble(PiFringe)) {
-					existingProposal.getOspSectionInfo().setPiFringe(
-							Double.parseDouble(PiFringe));
+				if (existingProposal.getOspSectionInfo().getPiFringe() != Double.parseDouble(PiFringe)) {
+					existingProposal.getOspSectionInfo().setPiFringe(Double.parseDouble(PiFringe));
 				}
 			} else {
 				throw new Exception("The PI Fringe can not be Empty");
@@ -2800,13 +2394,10 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 		}
 		if (oSPSectionInfo != null && oSPSectionInfo.has("DepartmentId")) {
 			// Department Id
-			String departmentId = oSPSectionInfo.get("DepartmentId")
-					.textValue().trim().replaceAll("\\<[^>]*>", "");
+			String departmentId = oSPSectionInfo.get("DepartmentId").textValue().trim().replaceAll("\\<[^>]*>", "");
 			if (validateNotEmptyValue(departmentId)) {
-				if (!existingProposal.getOspSectionInfo().getDepartmentId()
-						.equals(departmentId)) {
-					existingProposal.getOspSectionInfo().setDepartmentId(
-							departmentId);
+				if (!existingProposal.getOspSectionInfo().getDepartmentId().equals(departmentId)) {
+					existingProposal.getOspSectionInfo().setDepartmentId(departmentId);
 				}
 			} else {
 				throw new Exception("The Department Id can not be Empty");
@@ -2821,15 +2412,12 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param oSPSectionInfo
 	 * @throws Exception
 	 */
-	public void getProgramDetails(Proposal existingProposal,
-			JsonNode oSPSectionInfo) throws Exception {
+	public void getProgramDetails(Proposal existingProposal, JsonNode oSPSectionInfo) throws Exception {
 		// CFDA No
 		if (oSPSectionInfo != null && oSPSectionInfo.has("CFDANo")) {
-			String CFDANo = oSPSectionInfo.get("CFDANo").textValue().trim()
-					.replaceAll("\\<[^>]*>", "");
+			String CFDANo = oSPSectionInfo.get("CFDANo").textValue().trim().replaceAll("\\<[^>]*>", "");
 			if (validateNotEmptyValue(CFDANo)) {
-				if (!existingProposal.getOspSectionInfo().getCfdaNo()
-						.equals(CFDANo)) {
+				if (!existingProposal.getOspSectionInfo().getCfdaNo().equals(CFDANo)) {
 					existingProposal.getOspSectionInfo().setCfdaNo(CFDANo);
 				}
 			} else {
@@ -2839,13 +2427,10 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 
 		// Program No
 		if (oSPSectionInfo != null && oSPSectionInfo.has("ProgramNo")) {
-			String programNo = oSPSectionInfo.get("ProgramNo").textValue()
-					.trim().replaceAll("\\<[^>]*>", "");
+			String programNo = oSPSectionInfo.get("ProgramNo").textValue().trim().replaceAll("\\<[^>]*>", "");
 			if (validateNotEmptyValue(programNo)) {
-				if (!existingProposal.getOspSectionInfo().getProgramNo()
-						.equals(programNo)) {
-					existingProposal.getOspSectionInfo()
-							.setProgramNo(programNo);
+				if (!existingProposal.getOspSectionInfo().getProgramNo().equals(programNo)) {
+					existingProposal.getOspSectionInfo().setProgramNo(programNo);
 				}
 			} else {
 				throw new Exception("The Program No can not be Empty");
@@ -2854,13 +2439,10 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 
 		// Program Title
 		if (oSPSectionInfo != null && oSPSectionInfo.has("ProgramTitle")) {
-			String programTitle = oSPSectionInfo.get("ProgramTitle")
-					.textValue().trim().replaceAll("\\<[^>]*>", "");
+			String programTitle = oSPSectionInfo.get("ProgramTitle").textValue().trim().replaceAll("\\<[^>]*>", "");
 			if (validateNotEmptyValue(programTitle)) {
-				if (!existingProposal.getOspSectionInfo().getProgramTitle()
-						.equals(programTitle)) {
-					existingProposal.getOspSectionInfo().setProgramTitle(
-							programTitle);
+				if (!existingProposal.getOspSectionInfo().getProgramTitle().equals(programTitle)) {
+					existingProposal.getOspSectionInfo().setProgramTitle(programTitle);
 				}
 			} else {
 				throw new Exception("The Program Title can not be Empty");
@@ -2874,13 +2456,10 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param existingProposal
 	 * @param oSPSectionInfo
 	 */
-	public void getInstitutionalCostDetails(Proposal existingProposal,
-			JsonNode oSPSectionInfo) {
+	public void getInstitutionalCostDetails(Proposal existingProposal, JsonNode oSPSectionInfo) {
 		BaseOptions newBaseOptions = new BaseOptions();
-		if (oSPSectionInfo != null
-				&& oSPSectionInfo.has("InstitutionalCostDocumented")) {
-			switch (oSPSectionInfo.get("InstitutionalCostDocumented")
-					.textValue()) {
+		if (oSPSectionInfo != null && oSPSectionInfo.has("InstitutionalCostDocumented")) {
+			switch (oSPSectionInfo.get("InstitutionalCostDocumented").textValue()) {
 			case "1":
 				newBaseOptions.setYes(true);
 				break;
@@ -2895,14 +2474,11 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 			}
 		}
 		// Institutional Cost Documented
-		if (!existingProposal.getOspSectionInfo()
-				.getInstitutionalCostDocumented().equals(newBaseOptions)) {
-			existingProposal.getOspSectionInfo()
-					.setInstitutionalCostDocumented(newBaseOptions);
+		if (!existingProposal.getOspSectionInfo().getInstitutionalCostDocumented().equals(newBaseOptions)) {
+			existingProposal.getOspSectionInfo().setInstitutionalCostDocumented(newBaseOptions);
 		}
 		newBaseOptions = new BaseOptions();
-		if (oSPSectionInfo != null
-				&& oSPSectionInfo.has("ThirdPartyCostDocumented")) {
+		if (oSPSectionInfo != null && oSPSectionInfo.has("ThirdPartyCostDocumented")) {
 			switch (oSPSectionInfo.get("ThirdPartyCostDocumented").textValue()) {
 			case "1":
 				newBaseOptions.setYes(true);
@@ -2918,10 +2494,8 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 			}
 		}
 		// Third Party Cost Documented
-		if (!existingProposal.getOspSectionInfo().getThirdPartyCostDocumented()
-				.equals(newBaseOptions)) {
-			existingProposal.getOspSectionInfo().setThirdPartyCostDocumented(
-					newBaseOptions);
+		if (!existingProposal.getOspSectionInfo().getThirdPartyCostDocumented().equals(newBaseOptions)) {
+			existingProposal.getOspSectionInfo().setThirdPartyCostDocumented(newBaseOptions);
 		}
 	}
 
@@ -2933,26 +2507,19 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param oSPSectionInfo
 	 * @throws Exception
 	 */
-	public void getSubRecipientsDetails(Proposal existingProposal,
-			OSPSectionInfo newOSPSectionInfo, JsonNode oSPSectionInfo)
-			throws Exception {
-		if (oSPSectionInfo != null
-				&& oSPSectionInfo.has("IsAnticipatedSubRecipients")) {
-			switch (oSPSectionInfo.get("IsAnticipatedSubRecipients")
-					.textValue()) {
+	public void getSubRecipientsDetails(Proposal existingProposal, OSPSectionInfo newOSPSectionInfo,
+			JsonNode oSPSectionInfo) throws Exception {
+		if (oSPSectionInfo != null && oSPSectionInfo.has("IsAnticipatedSubRecipients")) {
+			switch (oSPSectionInfo.get("IsAnticipatedSubRecipients").textValue()) {
 			case "1":
 				newOSPSectionInfo.setAnticipatedSubRecipients(true);
-				if (oSPSectionInfo != null
-						&& oSPSectionInfo.has("AnticipatedSubRecipientsNames")) {
-					final String anticipatedSubRecipients = oSPSectionInfo
-							.get("AnticipatedSubRecipientsNames").textValue()
-							.trim().replaceAll("\\<[^>]*>", "");
+				if (oSPSectionInfo != null && oSPSectionInfo.has("AnticipatedSubRecipientsNames")) {
+					final String anticipatedSubRecipients = oSPSectionInfo.get("AnticipatedSubRecipientsNames")
+							.textValue().trim().replaceAll("\\<[^>]*>", "");
 					if (validateNotEmptyValue(anticipatedSubRecipients)) {
-						newOSPSectionInfo
-								.setAnticipatedSubRecipientsNames(anticipatedSubRecipients);
+						newOSPSectionInfo.setAnticipatedSubRecipientsNames(anticipatedSubRecipients);
 					} else {
-						throw new Exception(
-								"The Anticipated SubRecipients Names can not be Empty");
+						throw new Exception("The Anticipated SubRecipients Names can not be Empty");
 					}
 				}
 				break;
@@ -2966,27 +2533,19 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 		// Is Anticipated SubRecipients
 		if (existingProposal.getOspSectionInfo().isAnticipatedSubRecipients() != newOSPSectionInfo
 				.isAnticipatedSubRecipients()) {
-			existingProposal.getOspSectionInfo().setAnticipatedSubRecipients(
-					newOSPSectionInfo.isAnticipatedSubRecipients());
+			existingProposal.getOspSectionInfo()
+					.setAnticipatedSubRecipients(newOSPSectionInfo.isAnticipatedSubRecipients());
 		}
 		// Anticipated SubRecipients Names
-		if (existingProposal.getOspSectionInfo()
-				.getAnticipatedSubRecipientsNames() != null) {
-			if (!existingProposal
-					.getOspSectionInfo()
-					.getAnticipatedSubRecipientsNames()
-					.equals(newOSPSectionInfo
-							.getAnticipatedSubRecipientsNames())) {
+		if (existingProposal.getOspSectionInfo().getAnticipatedSubRecipientsNames() != null) {
+			if (!existingProposal.getOspSectionInfo().getAnticipatedSubRecipientsNames()
+					.equals(newOSPSectionInfo.getAnticipatedSubRecipientsNames())) {
 				existingProposal.getOspSectionInfo()
-						.setAnticipatedSubRecipientsNames(
-								newOSPSectionInfo
-										.getAnticipatedSubRecipientsNames());
+						.setAnticipatedSubRecipientsNames(newOSPSectionInfo.getAnticipatedSubRecipientsNames());
 			}
 		} else {
 			existingProposal.getOspSectionInfo()
-					.setAnticipatedSubRecipientsNames(
-							newOSPSectionInfo
-									.getAnticipatedSubRecipientsNames());
+					.setAnticipatedSubRecipientsNames(newOSPSectionInfo.getAnticipatedSubRecipientsNames());
 		}
 	}
 
@@ -2996,8 +2555,7 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param existingProposal
 	 * @param oSPSectionInfo
 	 */
-	public void getBasePIEligibilityOptions(Proposal existingProposal,
-			JsonNode oSPSectionInfo) {
+	public void getBasePIEligibilityOptions(Proposal existingProposal, JsonNode oSPSectionInfo) {
 		BasePIEligibilityOptions newBasePIEligibilityOptions = new BasePIEligibilityOptions();
 		if (oSPSectionInfo != null && oSPSectionInfo.has("PIEligibilityWaiver")) {
 			switch (oSPSectionInfo.get("PIEligibilityWaiver").textValue()) {
@@ -3021,10 +2579,8 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 			}
 		}
 		// Base PI Eligibility Options
-		if (!existingProposal.getOspSectionInfo().getPiEligibilityWaiver()
-				.equals(newBasePIEligibilityOptions)) {
-			existingProposal.getOspSectionInfo().setPiEligibilityWaiver(
-					newBasePIEligibilityOptions);
+		if (!existingProposal.getOspSectionInfo().getPiEligibilityWaiver().equals(newBasePIEligibilityOptions)) {
+			existingProposal.getOspSectionInfo().setPiEligibilityWaiver(newBasePIEligibilityOptions);
 		}
 	}
 
@@ -3034,11 +2590,9 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param existingProposal
 	 * @param oSPSectionInfo
 	 */
-	public void getConflictOfInterestForms(Proposal existingProposal,
-			JsonNode oSPSectionInfo) {
+	public void getConflictOfInterestForms(Proposal existingProposal, JsonNode oSPSectionInfo) {
 		BaseOptions newBaseOptions = new BaseOptions();
-		if (oSPSectionInfo != null
-				&& oSPSectionInfo.has("ConflictOfInterestForms")) {
+		if (oSPSectionInfo != null && oSPSectionInfo.has("ConflictOfInterestForms")) {
 			switch (oSPSectionInfo.get("ConflictOfInterestForms").textValue()) {
 			case "1":
 				newBaseOptions.setYes(true);
@@ -3054,10 +2608,8 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 			}
 		}
 		// Conflict Of Interest Forms
-		if (!existingProposal.getOspSectionInfo().getConflictOfInterestForms()
-				.equals(newBaseOptions)) {
-			existingProposal.getOspSectionInfo().setConflictOfInterestForms(
-					newBaseOptions);
+		if (!existingProposal.getOspSectionInfo().getConflictOfInterestForms().equals(newBaseOptions)) {
+			existingProposal.getOspSectionInfo().setConflictOfInterestForms(newBaseOptions);
 		}
 	}
 
@@ -3067,11 +2619,9 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param existingProposal
 	 * @param oSPSectionInfo
 	 */
-	public void getExcludedPartyListChecked(Proposal existingProposal,
-			JsonNode oSPSectionInfo) {
+	public void getExcludedPartyListChecked(Proposal existingProposal, JsonNode oSPSectionInfo) {
 		BaseOptions newBaseOptions = new BaseOptions();
-		if (oSPSectionInfo != null
-				&& oSPSectionInfo.has("ExcludedPartyListChecked")) {
+		if (oSPSectionInfo != null && oSPSectionInfo.has("ExcludedPartyListChecked")) {
 			switch (oSPSectionInfo.get("ExcludedPartyListChecked").textValue()) {
 			case "1":
 				newBaseOptions.setYes(true);
@@ -3087,10 +2637,8 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 			}
 		}
 		// Excluded Party List Checked
-		if (!existingProposal.getOspSectionInfo().getExcludedPartyListChecked()
-				.equals(newBaseOptions)) {
-			existingProposal.getOspSectionInfo().setExcludedPartyListChecked(
-					newBaseOptions);
+		if (!existingProposal.getOspSectionInfo().getExcludedPartyListChecked().equals(newBaseOptions)) {
+			existingProposal.getOspSectionInfo().setExcludedPartyListChecked(newBaseOptions);
 		}
 	}
 
@@ -3105,21 +2653,17 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @throws JsonParseException
 	 * @throws JsonMappingException
 	 */
-	public void getAppendixDetails(String proposalId,
-			Proposal existingProposal, Proposal oldProposal,
-			JsonNode proposalInfo) throws IOException, JsonParseException,
-			JsonMappingException {
+	public void getAppendixDetails(String proposalId, Proposal existingProposal, Proposal oldProposal,
+			JsonNode proposalInfo) throws IOException, JsonParseException, JsonMappingException {
 		ObjectMapper mapper = new ObjectMapper();
 		// Appendix Info
 		if (proposalInfo != null && proposalInfo.has("AppendixInfo")) {
-			List<Appendix> appendixInfo = Arrays.asList(mapper.readValue(
-					proposalInfo.get("AppendixInfo").toString(),
-					Appendix[].class));
+			List<Appendix> appendixInfo = Arrays
+					.asList(mapper.readValue(proposalInfo.get("AppendixInfo").toString(), Appendix[].class));
 			if (appendixInfo.size() != 0) {
 				String UPLOAD_PATH = new String();
 				try {
-					UPLOAD_PATH = this.getClass().getResource("/uploads")
-							.toURI().getPath();
+					UPLOAD_PATH = this.getClass().getResource("/uploads").toURI().getPath();
 				} catch (URISyntaxException e) {
 					e.printStackTrace();
 				}
@@ -3128,17 +2672,9 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 					boolean alreadyExist = false;
 					for (Appendix appendix : oldProposal.getAppendices()) {
 						for (Appendix appendixObj : appendixInfo) {
-							if (appendix.getFilename().equalsIgnoreCase(
-									appendixObj.getFilename())
-									&& appendix
-											.getTitle()
-											.equalsIgnoreCase(
-													appendixObj
-															.getTitle()
-															.trim()
-															.replaceAll(
-																	"\\<[^>]*>",
-																	""))) {
+							if (appendix.getFilename().equalsIgnoreCase(appendixObj.getFilename())
+									&& appendix.getTitle().equalsIgnoreCase(
+											appendixObj.getTitle().trim().replaceAll("\\<[^>]*>", ""))) {
 								alreadyExist = true;
 								existingFiles.add(appendixObj.getFilename());
 								break;
@@ -3159,9 +2695,8 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 								if (verifyValidFileExtension(extension)) {
 									uploadFile.setExtension(extension);
 								} else {
-									Response.status(403)
-											.entity(extension
-													+ " is not allowed. Allowed extensions: jpg,png,gif,jpeg,bmp,png,pdf,doc,docx,xls,xlsx,txt")
+									Response.status(403).entity(extension
+											+ " is not allowed. Allowed extensions: jpg,png,gif,jpeg,bmp,png,pdf,doc,docx,xls,xlsx,txt")
 											.build();
 								}
 							}
@@ -3169,19 +2704,14 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 							if (verifyValidFileSize(fileSize)) {
 								uploadFile.setFilesize(fileSize);
 							} else {
-								Response.status(403)
-										.entity("The uploaded file is larger than 5MB")
-										.build();
+								Response.status(403).entity("The uploaded file is larger than 5MB").build();
 							}
 							uploadFile.setFilepath("/uploads/" + fileName);
-							String fileTitle = uploadFile.getTitle().trim()
-									.replaceAll("\\<[^>]*>", "");
+							String fileTitle = uploadFile.getTitle().trim().replaceAll("\\<[^>]*>", "");
 							if (validateNotEmptyValue(fileTitle)) {
 								uploadFile.setTitle(fileTitle);
 							} else {
-								Response.status(403)
-										.entity("The Uploaded File's Title can not be Empty")
-										.build();
+								Response.status(403).entity("The Uploaded File's Title can not be Empty").build();
 							}
 							existingProposal.getAppendices().add(uploadFile);
 						}
@@ -3197,9 +2727,8 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 							if (verifyValidFileExtension(extension)) {
 								uploadFile.setExtension(extension);
 							} else {
-								Response.status(403)
-										.entity(extension
-												+ " is not allowed. Allowed extensions: jpg,png,gif,jpeg,bmp,png,pdf,doc,docx,xls,xlsx,txt")
+								Response.status(403).entity(extension
+										+ " is not allowed. Allowed extensions: jpg,png,gif,jpeg,bmp,png,pdf,doc,docx,xls,xlsx,txt")
 										.build();
 							}
 						}
@@ -3207,20 +2736,15 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 						if (verifyValidFileSize(fileSize)) {
 							uploadFile.setFilesize(fileSize);
 						} else {
-							Response.status(403)
-									.entity("The uploaded file is larger than 5MB")
-									.build();
+							Response.status(403).entity("The uploaded file is larger than 5MB").build();
 						}
 						uploadFile.setFilesize(fileSize);
 						uploadFile.setFilepath("/uploads/" + fileName);
-						String fileTitle = uploadFile.getTitle().trim()
-								.replaceAll("\\<[^>]*>", "");
+						String fileTitle = uploadFile.getTitle().trim().replaceAll("\\<[^>]*>", "");
 						if (validateNotEmptyValue(fileTitle)) {
 							uploadFile.setTitle(fileTitle);
 						} else {
-							Response.status(403)
-									.entity("The Uploaded File's Title can not be Empty")
-									.build();
+							Response.status(403).entity("The Uploaded File's Title can not be Empty").build();
 						}
 						existingProposal.getAppendices().add(uploadFile);
 					}
@@ -3241,12 +2765,10 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @return
 	 * @throws ParseException
 	 */
-	public boolean getSignatureDetails(GPMSCommonInfo userInfo,
-			String proposalId, Proposal existingProposal, JsonNode proposalInfo)
-			throws ParseException {
+	public boolean getSignatureDetails(GPMSCommonInfo userInfo, String proposalId, Proposal existingProposal,
+			JsonNode proposalInfo) throws ParseException {
 		if (proposalInfo != null && proposalInfo.has("SignatureInfo")) {
-			String[] rows = proposalInfo.get("SignatureInfo").textValue()
-					.split("#!#");
+			String[] rows = proposalInfo.get("SignatureInfo").textValue().split("#!#");
 			List<SignatureInfo> newSignatureInfo = new ArrayList<SignatureInfo>();
 			List<SignatureInfo> allSignatureInfo = new ArrayList<SignatureInfo>();
 			List<SignatureInfo> removeSignatureInfo = new ArrayList<SignatureInfo>();
@@ -3255,28 +2777,23 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 				String[] cols = col.split("!#!");
 				SignatureInfo signatureInfo = new SignatureInfo();
 				signatureInfo.setUserProfileId(cols[0]);
-				final String signatureText = cols[1]
-						.replaceAll("\\<[^>]*>", "");
+				final String signatureText = cols[1].replaceAll("\\<[^>]*>", "");
 				if (validateNotEmptyValue(signatureText)) {
 					signatureInfo.setSignature(signatureText);
 				} else {
-					Response.status(403)
-							.entity("The Signature can not be Empty").build();
+					Response.status(403).entity("The Signature can not be Empty").build();
 				}
-				final String signedDate = cols[2].trim().replaceAll(
-						"\\<[^>]*>", "");
+				final String signedDate = cols[2].trim().replaceAll("\\<[^>]*>", "");
 				if (validateNotEmptyValue(signedDate)) {
 					signatureInfo.setSignedDate(format.parse(signedDate));
 				} else {
-					Response.status(403)
-							.entity("The Signed Date can not be Empty").build();
+					Response.status(403).entity("The Signed Date can not be Empty").build();
 				}
 				final String noteText = cols[3].replaceAll("\\<[^>]*>", "");
 				if (validateNotEmptyValue(noteText)) {
 					signatureInfo.setNote(noteText);
 				} else {
-					Response.status(403).entity("The Note can not be Empty")
-							.build();
+					Response.status(403).entity("The Note can not be Empty").build();
 				}
 				signatureInfo.setFullName(cols[4]);
 				signatureInfo.setPositionTitle(cols[5]);
@@ -3284,8 +2801,7 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 				allSignatureInfo.add(signatureInfo);
 				if (!proposalId.equals("0")) {
 					boolean alreadyExist = false;
-					for (SignatureInfo sign : existingProposal
-							.getSignatureInfo()) {
+					for (SignatureInfo sign : existingProposal.getSignatureInfo()) {
 						if (sign.equals(signatureInfo)) {
 							alreadyExist = true;
 							break;
@@ -3304,8 +2820,7 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 				}
 			}
 			if (!proposalId.equals("0")) {
-				if (!existingProposal.getSignatureInfo().equals(
-						allSignatureInfo)) {
+				if (!existingProposal.getSignatureInfo().equals(allSignatureInfo)) {
 					for (SignatureInfo signatureInfo : newSignatureInfo) {
 						existingProposal.getSignatureInfo().add(signatureInfo);
 					}
@@ -3331,11 +2846,9 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param complianceInfo
 	 * @return
 	 */
-	public Boolean getInvolveUseOfHumanSubjectsInfo(
-			ComplianceInfo newComplianceInfo, Boolean irbApprovalRequired,
+	public Boolean getInvolveUseOfHumanSubjectsInfo(ComplianceInfo newComplianceInfo, Boolean irbApprovalRequired,
 			JsonNode complianceInfo) {
-		if (complianceInfo != null
-				&& complianceInfo.has("InvolveUseOfHumanSubjects")) {
+		if (complianceInfo != null && complianceInfo.has("InvolveUseOfHumanSubjects")) {
 			switch (complianceInfo.get("InvolveUseOfHumanSubjects").textValue()) {
 			case "1":
 				newComplianceInfo.setInvolveUseOfHumanSubjects(true);
@@ -3345,15 +2858,12 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 					case "1":
 						newComplianceInfo.setIrbPending(false);
 						if (complianceInfo != null && complianceInfo.has("IRB")) {
-							final String IRBNo = complianceInfo.get("IRB")
-									.textValue().trim()
-									.replaceAll("\\<[^>]*>", "");
+							final String IRBNo = complianceInfo.get("IRB").textValue().trim().replaceAll("\\<[^>]*>",
+									"");
 							if (validateNotEmptyValue(IRBNo)) {
 								newComplianceInfo.setIrb(IRBNo);
 							} else {
-								Response.status(403)
-										.entity("The IRB # can not be Empty")
-										.build();
+								Response.status(403).entity("The IRB # can not be Empty").build();
 							}
 						}
 						break;
@@ -3383,32 +2893,24 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param complianceInfo
 	 * @return
 	 */
-	public Boolean getInvolveUseOfVertebrateAnimalsInfo(
-			ComplianceInfo newComplianceInfo, Boolean irbApprovalRequired,
+	public Boolean getInvolveUseOfVertebrateAnimalsInfo(ComplianceInfo newComplianceInfo, Boolean irbApprovalRequired,
 			JsonNode complianceInfo) {
-		if (complianceInfo != null
-				&& complianceInfo.has("InvolveUseOfVertebrateAnimals")) {
-			switch (complianceInfo.get("InvolveUseOfVertebrateAnimals")
-					.textValue()) {
+		if (complianceInfo != null && complianceInfo.has("InvolveUseOfVertebrateAnimals")) {
+			switch (complianceInfo.get("InvolveUseOfVertebrateAnimals").textValue()) {
 			case "1":
 				newComplianceInfo.setInvolveUseOfVertebrateAnimals(true);
 				irbApprovalRequired = true;
-				if (complianceInfo != null
-						&& complianceInfo.has("IACUCPending")) {
+				if (complianceInfo != null && complianceInfo.has("IACUCPending")) {
 					switch (complianceInfo.get("IACUCPending").textValue()) {
 					case "1":
 						newComplianceInfo.setIacucPending(false);
-						if (complianceInfo != null
-								&& complianceInfo.has("IACUC")) {
-							final String IACUCNo = complianceInfo.get("IACUC")
-									.textValue().trim()
+						if (complianceInfo != null && complianceInfo.has("IACUC")) {
+							final String IACUCNo = complianceInfo.get("IACUC").textValue().trim()
 									.replaceAll("\\<[^>]*>", "");
 							if (validateNotEmptyValue(IACUCNo)) {
 								newComplianceInfo.setIacuc(IACUCNo);
 							} else {
-								Response.status(403)
-										.entity("The IACUC # can not be Empty")
-										.build();
+								Response.status(403).entity("The IACUC # can not be Empty").build();
 							}
 						}
 						break;
@@ -3438,11 +2940,9 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param complianceInfo
 	 * @return
 	 */
-	public Boolean getInvolveBiosafetyConcernsInfo(
-			ComplianceInfo newComplianceInfo, Boolean irbApprovalRequired,
+	public Boolean getInvolveBiosafetyConcernsInfo(ComplianceInfo newComplianceInfo, Boolean irbApprovalRequired,
 			JsonNode complianceInfo) {
-		if (complianceInfo != null
-				&& complianceInfo.has("InvolveBiosafetyConcerns")) {
+		if (complianceInfo != null && complianceInfo.has("InvolveBiosafetyConcerns")) {
 			switch (complianceInfo.get("InvolveBiosafetyConcerns").textValue()) {
 			case "1":
 				newComplianceInfo.setInvolveBiosafetyConcerns(true);
@@ -3452,16 +2952,13 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 					case "1":
 						newComplianceInfo.setIbcPending(false);
 						if (complianceInfo != null && complianceInfo.has("IBC")) {
-							final String IBCNo = complianceInfo.get("IBC")
-									.textValue().trim()
-									.replaceAll("\\<[^>]*>", "");
+							final String IBCNo = complianceInfo.get("IBC").textValue().trim().replaceAll("\\<[^>]*>",
+									"");
 
 							if (validateNotEmptyValue(IBCNo)) {
 								newComplianceInfo.setIbc(IBCNo);
 							} else {
-								Response.status(403)
-										.entity("The IBC # can not be Empty")
-										.build();
+								Response.status(403).entity("The IBC # can not be Empty").build();
 							}
 						}
 						break;
@@ -3491,22 +2988,16 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param complianceInfo
 	 * @return
 	 */
-	public Boolean getInvolveEnvironmentalHealthAndSafetyConcernsInfo(
-			ComplianceInfo newComplianceInfo, Boolean irbApprovalRequired,
-			JsonNode complianceInfo) {
-		if (complianceInfo != null
-				&& complianceInfo
-						.has("InvolveEnvironmentalHealthAndSafetyConcerns")) {
-			switch (complianceInfo.get(
-					"InvolveEnvironmentalHealthAndSafetyConcerns").textValue()) {
+	public Boolean getInvolveEnvironmentalHealthAndSafetyConcernsInfo(ComplianceInfo newComplianceInfo,
+			Boolean irbApprovalRequired, JsonNode complianceInfo) {
+		if (complianceInfo != null && complianceInfo.has("InvolveEnvironmentalHealthAndSafetyConcerns")) {
+			switch (complianceInfo.get("InvolveEnvironmentalHealthAndSafetyConcerns").textValue()) {
 			case "1":
-				newComplianceInfo
-						.setInvolveEnvironmentalHealthAndSafetyConcerns(true);
+				newComplianceInfo.setInvolveEnvironmentalHealthAndSafetyConcerns(true);
 				irbApprovalRequired = true;
 				break;
 			case "2":
-				newComplianceInfo
-						.setInvolveEnvironmentalHealthAndSafetyConcerns(false);
+				newComplianceInfo.setInvolveEnvironmentalHealthAndSafetyConcerns(false);
 				break;
 			default:
 				break;
@@ -3523,20 +3014,19 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param proposalInfo
 	 * @return
 	 */
-	public Boolean getComplianceDetails(String proposalId,
-			Proposal existingProposal, JsonNode proposalInfo) {
+	public Boolean getComplianceDetails(String proposalId, Proposal existingProposal, JsonNode proposalInfo) {
 		ComplianceInfo newComplianceInfo = new ComplianceInfo();
 		Boolean irbApprovalRequired = false;
 		if (proposalInfo != null && proposalInfo.has("ComplianceInfo")) {
 			JsonNode complianceInfo = proposalInfo.get("ComplianceInfo");
-			irbApprovalRequired = getInvolveUseOfHumanSubjectsInfo(
-					newComplianceInfo, irbApprovalRequired, complianceInfo);
-			irbApprovalRequired = getInvolveUseOfVertebrateAnimalsInfo(
-					newComplianceInfo, irbApprovalRequired, complianceInfo);
-			irbApprovalRequired = getInvolveBiosafetyConcernsInfo(
-					newComplianceInfo, irbApprovalRequired, complianceInfo);
-			irbApprovalRequired = getInvolveEnvironmentalHealthAndSafetyConcernsInfo(
-					newComplianceInfo, irbApprovalRequired, complianceInfo);
+			irbApprovalRequired = getInvolveUseOfHumanSubjectsInfo(newComplianceInfo, irbApprovalRequired,
+					complianceInfo);
+			irbApprovalRequired = getInvolveUseOfVertebrateAnimalsInfo(newComplianceInfo, irbApprovalRequired,
+					complianceInfo);
+			irbApprovalRequired = getInvolveBiosafetyConcernsInfo(newComplianceInfo, irbApprovalRequired,
+					complianceInfo);
+			irbApprovalRequired = getInvolveEnvironmentalHealthAndSafetyConcernsInfo(newComplianceInfo,
+					irbApprovalRequired, complianceInfo);
 		}
 		// ComplianceInfo
 		if (!proposalId.equals("0")) {
@@ -3558,8 +3048,7 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param proposalInfo
 	 * @throws Exception
 	 */
-	public void getOSPSectionInfo(Proposal existingProposal,
-			JsonNode proposalInfo) throws Exception {
+	public void getOSPSectionInfo(Proposal existingProposal, JsonNode proposalInfo) throws Exception {
 		// OSP Section Info Only for University Research
 		// Administrator
 		// or University Research Director
@@ -3571,11 +3060,9 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 			getProgramDetails(existingProposal, oSPSectionInfo);
 			getRecoveryDetails(existingProposal, oSPSectionInfo);
 			getBaseInfo(existingProposal, oSPSectionInfo);
-			getSalaryDetails(existingProposal, newOSPSectionInfo,
-					oSPSectionInfo);
+			getSalaryDetails(existingProposal, newOSPSectionInfo, oSPSectionInfo);
 			getInstitutionalCostDetails(existingProposal, oSPSectionInfo);
-			getSubRecipientsDetails(existingProposal, newOSPSectionInfo,
-					oSPSectionInfo);
+			getSubRecipientsDetails(existingProposal, newOSPSectionInfo, oSPSectionInfo);
 			getBasePIEligibilityOptions(existingProposal, oSPSectionInfo);
 			getConflictOfInterestForms(existingProposal, oSPSectionInfo);
 			getExcludedPartyListChecked(existingProposal, oSPSectionInfo);
@@ -3593,9 +3080,8 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param currentProposalRoles
 	 * @return
 	 */
-	public String updateForProposalSave(Proposal existingProposal,
-			String proposalID, RequiredSignaturesInfo requiredSignatures,
-			String authorUserName, String notificationMessage,
+	public String updateForProposalSave(Proposal existingProposal, String proposalID,
+			RequiredSignaturesInfo requiredSignatures, String authorUserName, String notificationMessage,
 			List<String> currentProposalRoles) {
 		// Change status to ready to submitted by PI
 		if (proposalID.equals("0")) {
@@ -3603,25 +3089,20 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 			if (existingProposal.getInvestigatorInfo().getCo_pi().size() == 0) {
 				existingProposal.setReadyForSubmissionByPI(true);
 				existingProposal.getProposalStatus().clear();
-				existingProposal.getProposalStatus().add(
-						Status.READYFORSUBMITBYPI);
+				existingProposal.getProposalStatus().add(Status.READYFORSUBMITBYPI);
 			}
 		} else if (!proposalID.equals("0") && currentProposalRoles != null) {
-			if ((currentProposalRoles.contains("PI") || (currentProposalRoles
-					.contains("Co-PI") && !existingProposal
-					.isReadyForSubmissionByPI()))
+			if ((currentProposalRoles.contains("PI")
+					|| (currentProposalRoles.contains("Co-PI") && !existingProposal.isReadyForSubmissionByPI()))
 					&& existingProposal.getSubmittedByPI() == SubmitType.NOTSUBMITTED) {
-				if (requiredSignatures.isSignedByPI()
-						&& requiredSignatures.isSignedByAllCoPIs()) {
+				if (requiredSignatures.isSignedByPI() && requiredSignatures.isSignedByAllCoPIs()) {
 					existingProposal.setReadyForSubmissionByPI(true);
 					existingProposal.getProposalStatus().clear();
-					existingProposal.getProposalStatus().add(
-							Status.READYFORSUBMITBYPI);
+					existingProposal.getProposalStatus().add(Status.READYFORSUBMITBYPI);
 				} else {
 					existingProposal.setReadyForSubmissionByPI(false);
 					existingProposal.getProposalStatus().clear();
-					existingProposal.getProposalStatus().add(
-							Status.NOTSUBMITTEDBYPI);
+					existingProposal.getProposalStatus().add(Status.NOTSUBMITTEDBYPI);
 				}
 				notificationMessage = "Updated by " + authorUserName + ".";
 			}
@@ -3636,8 +3117,8 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @return
 	 * @throws JsonProcessingException
 	 */
-	public EmailCommonInfo saveProposalWithObligations(
-			List<ObligationResult> obligations) throws JsonProcessingException {
+	public EmailCommonInfo saveProposalWithObligations(List<ObligationResult> obligations)
+			throws JsonProcessingException {
 		EmailCommonInfo emailDetails = new EmailCommonInfo();
 		getObligationsDetails(obligations, emailDetails);
 		return emailDetails;
@@ -3655,10 +3136,8 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @return
 	 * @throws IOException
 	 */
-	public EmailCommonInfo saveProposalWithoutObligations(String message,
-			String proposalId, Proposal existingProposal, Proposal oldProposal,
-			UserProfile authorProfile, Boolean irbApprovalRequired)
-			throws IOException {
+	public EmailCommonInfo saveProposalWithoutObligations(String message, String proposalId, Proposal existingProposal,
+			Proposal oldProposal, UserProfile authorProfile, Boolean irbApprovalRequired) throws IOException {
 		ObjectMapper mapper = new ObjectMapper();
 		JsonNode root = mapper.readTree(message);
 		JsonNode buttonType = root.get("buttonType");
@@ -3669,34 +3148,25 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 			switch (buttonType.textValue()) {
 			case "Save":
 				if (proposalId.equals("0")) {
-					emailDetails
-							.setEmailSubject("The proposal has been created by: "
-									+ authorUserName);
-					emailDetails
-							.setEmailBody("Hello User,<br/><br/>The proposal has been created by Admin.<br/><br/>Thank you, <br/> GPMS Team");
+					emailDetails.setEmailSubject("The proposal has been created by: " + authorUserName);
+					emailDetails.setEmailBody(
+							"Hello User,<br/><br/>The proposal has been created by Admin.<br/><br/>Thank you, <br/> GPMS Team");
 				} else if (!proposalId.equals("0")) {
-					emailDetails
-							.setEmailSubject("The proposal has been updated by: "
-									+ authorUserName);
-					emailDetails
-							.setEmailBody("Hello User,<br/><br/>The proposal has been updated by Admin.<br/><br/>Thank you, <br/> GPMS Team");
+					emailDetails.setEmailSubject("The proposal has been updated by: " + authorUserName);
+					emailDetails.setEmailBody(
+							"Hello User,<br/><br/>The proposal has been updated by Admin.<br/><br/>Thank you, <br/> GPMS Team");
 				}
 				break;
 			default:
 				break;
 			}
 		}
-		emailDetails.setPiEmail(existingProposal.getInvestigatorInfo().getPi()
-				.getUserRef().getWorkEmails().get(0));
-		for (InvestigatorRefAndPosition copis : existingProposal
-				.getInvestigatorInfo().getCo_pi()) {
-			emailDetails.getEmaillist().add(
-					copis.getUserRef().getWorkEmails().get(0));
+		emailDetails.setPiEmail(existingProposal.getInvestigatorInfo().getPi().getUserRef().getWorkEmails().get(0));
+		for (InvestigatorRefAndPosition copis : existingProposal.getInvestigatorInfo().getCo_pi()) {
+			emailDetails.getEmaillist().add(copis.getUserRef().getWorkEmails().get(0));
 		}
-		for (InvestigatorRefAndPosition seniors : existingProposal
-				.getInvestigatorInfo().getSeniorPersonnel()) {
-			emailDetails.getEmaillist().add(
-					seniors.getUserRef().getWorkEmails().get(0));
+		for (InvestigatorRefAndPosition seniors : existingProposal.getInvestigatorInfo().getSeniorPersonnel()) {
+			emailDetails.getEmaillist().add(seniors.getUserRef().getWorkEmails().get(0));
 		}
 		return emailDetails;
 	}
@@ -3708,10 +3178,9 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param requiredSigns
 	 * @param signedByCurrentUser
 	 */
-	public void checkForSignedByAllUsers(StringBuffer contentProfile,
-			RequiredSignaturesInfo requiredSigns, boolean signedByCurrentUser) {
-		boolean signedByPI = requiredSigns.getExistingPISign().containsAll(
-				requiredSigns.getRequiredPISign());
+	public void checkForSignedByAllUsers(StringBuffer contentProfile, RequiredSignaturesInfo requiredSigns,
+			boolean signedByCurrentUser) {
+		boolean signedByPI = requiredSigns.getExistingPISign().containsAll(requiredSigns.getRequiredPISign());
 		requiredSigns.setSignedByPI(signedByPI);
 		boolean signedByAllCoPIs = requiredSigns.getExistingCoPISigns()
 				.containsAll(requiredSigns.getRequiredCoPISigns());
@@ -3719,26 +3188,20 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 		boolean signedByAllChairs = requiredSigns.getExistingChairSigns()
 				.containsAll(requiredSigns.getRequiredChairSigns());
 		requiredSigns.setSignedByAllChairs(signedByAllChairs);
-		boolean signedByAllBusinessManagers = requiredSigns
-				.getExistingBusinessManagerSigns().containsAll(
-						requiredSigns.getRequiredBusinessManagerSigns());
-		requiredSigns
-				.setSignedByAllBusinessManagers(signedByAllBusinessManagers);
+		boolean signedByAllBusinessManagers = requiredSigns.getExistingBusinessManagerSigns()
+				.containsAll(requiredSigns.getRequiredBusinessManagerSigns());
+		requiredSigns.setSignedByAllBusinessManagers(signedByAllBusinessManagers);
 		boolean signedByAllDeans = requiredSigns.getExistingDeanSigns()
 				.containsAll(requiredSigns.getRequiredDeanSigns());
 		requiredSigns.setSignedByAllDeans(signedByAllDeans);
-		boolean signedByAllIRBs = requiredSigns.getExistingIRBSigns()
-				.containsAll(requiredSigns.getRequiredIRBSigns());
+		boolean signedByAllIRBs = requiredSigns.getExistingIRBSigns().containsAll(requiredSigns.getRequiredIRBSigns());
 		requiredSigns.setSignedByAllIRBs(signedByAllIRBs);
-		boolean signedByAllResearchAdmins = requiredSigns
-				.getExistingResearchAdminSigns().containsAll(
-						requiredSigns.getRequiredResearchAdminSigns());
+		boolean signedByAllResearchAdmins = requiredSigns.getExistingResearchAdminSigns()
+				.containsAll(requiredSigns.getRequiredResearchAdminSigns());
 		requiredSigns.setSignedByAllResearchAdmins(signedByAllResearchAdmins);
-		boolean signedByAllResearchDirectors = requiredSigns
-				.getExistingResearchDirectorSigns().containsAll(
-						requiredSigns.getRequiredResearchDirectorSigns());
-		requiredSigns
-				.setSignedByAllResearchDirectors(signedByAllResearchDirectors);
+		boolean signedByAllResearchDirectors = requiredSigns.getExistingResearchDirectorSigns()
+				.containsAll(requiredSigns.getRequiredResearchDirectorSigns());
+		requiredSigns.setSignedByAllResearchDirectors(signedByAllResearchDirectors);
 		contentProfile.append("<ak:signedByCurrentUser>");
 		contentProfile.append(signedByCurrentUser);
 		contentProfile.append("</ak:signedByCurrentUser>");
@@ -3754,8 +3217,7 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 		contentProfile.append("<ak:signedByAllChairs>");
 		contentProfile.append(signedByAllChairs);
 		contentProfile.append("</ak:signedByAllChairs>");
-		requiredSigns
-				.setSignedByAllBusinessManagers(signedByAllBusinessManagers);
+		requiredSigns.setSignedByAllBusinessManagers(signedByAllBusinessManagers);
 		contentProfile.append("<ak:signedByAllBusinessManagers>");
 		contentProfile.append(signedByAllBusinessManagers);
 		contentProfile.append("</ak:signedByAllBusinessManagers>");
@@ -3771,8 +3233,7 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 		contentProfile.append("<ak:signedByAllResearchAdmins>");
 		contentProfile.append(signedByAllResearchAdmins);
 		contentProfile.append("</ak:signedByAllResearchAdmins>");
-		requiredSigns
-				.setSignedByAllResearchDirectors(signedByAllResearchDirectors);
+		requiredSigns.setSignedByAllResearchDirectors(signedByAllResearchDirectors);
 		contentProfile.append("<ak:signedByAllResearchDirectors>");
 		contentProfile.append(signedByAllResearchDirectors);
 		contentProfile.append("</ak:signedByAllResearchDirectors>");
@@ -3786,50 +3247,40 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param requiredSigns
 	 * @param signedByCurrentUser
 	 */
-	public void getExistingSignaturesForProposal(StringBuffer contentProfile,
-			Proposal existingProposal, RequiredSignaturesInfo requiredSigns,
-			boolean signedByCurrentUser) {
+	public void getExistingSignaturesForProposal(StringBuffer contentProfile, Proposal existingProposal,
+			RequiredSignaturesInfo requiredSigns, boolean signedByCurrentUser) {
 
 		for (SignatureInfo sign : existingProposal.getSignatureInfo()) {
 			if (sign.getPositionTitle().equals("PI")) {
 				requiredSigns.getExistingPISign().add(sign.getUserProfileId());
 			} else if (sign.getPositionTitle().equals("Co-PI")) {
-				requiredSigns.getExistingCoPISigns().add(
-						sign.getUserProfileId());
+				requiredSigns.getExistingCoPISigns().add(sign.getUserProfileId());
 			} else if (sign.getPositionTitle().equals("Department Chair")) {
-				requiredSigns.getExistingChairSigns().add(
-						sign.getUserProfileId());
+				requiredSigns.getExistingChairSigns().add(sign.getUserProfileId());
 			} else if (sign.getPositionTitle().equals("Business Manager")) {
-				requiredSigns.getExistingBusinessManagerSigns().add(
-						sign.getUserProfileId());
+				requiredSigns.getExistingBusinessManagerSigns().add(sign.getUserProfileId());
 			} else if (sign.getPositionTitle().equals("Dean")) {
-				requiredSigns.getExistingDeanSigns().add(
-						sign.getUserProfileId());
+				requiredSigns.getExistingDeanSigns().add(sign.getUserProfileId());
 			} else if (sign.getPositionTitle().equals("IRB")) {
-				requiredSigns.getExistingIRBSigns()
-						.add(sign.getUserProfileId());
-			} else if (sign.getPositionTitle().equals(
-					"University Research Administrator")) {
-				requiredSigns.getExistingResearchAdminSigns().add(
-						sign.getUserProfileId());
-			} else if (sign.getPositionTitle().equals(
-					"University Research Director")) {
-				requiredSigns.getExistingResearchDirectorSigns().add(
-						sign.getUserProfileId());
+				requiredSigns.getExistingIRBSigns().add(sign.getUserProfileId());
+			} else if (sign.getPositionTitle().equals("University Research Administrator")) {
+				requiredSigns.getExistingResearchAdminSigns().add(sign.getUserProfileId());
+			} else if (sign.getPositionTitle().equals("University Research Director")) {
+				requiredSigns.getExistingResearchDirectorSigns().add(sign.getUserProfileId());
 			}
 		}
 	}
-	
-	public Set<String> getExistingSignatureProfileIdForAProposal(
-			Proposal existingProposal, Set<String> profileIds,String tag) {
+
+	public Set<String> getExistingSignatureProfileIdForAProposal(Proposal existingProposal, Set<String> profileIds,
+			String tag) {
 
 		for (SignatureInfo sign : existingProposal.getSignatureInfo()) {
 			if (sign.getPositionTitle().equals(tag)) {
 				profileIds.add(sign.getUserProfileId());
-			} 			
+			}
 		}
 		return profileIds;
-		
+
 		//
 //		for (SignatureInfo sign : existingProposal.getSignatureInfo()) {
 //			if (sign.getPositionTitle().equals("PI")) {
@@ -3873,25 +3324,19 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @return
 	 * @throws JsonProcessingException
 	 */
-	public boolean updateWithdrawnStatus(String proposalId,
-			String proposalUserTitle, Proposal existingProposal,
-			UserProfile authorProfile, String authorUserName,
-			EmailCommonInfo emailDetails) throws JsonProcessingException {
+	public boolean updateWithdrawnStatus(String proposalId, String proposalUserTitle, Proposal existingProposal,
+			UserProfile authorProfile, String authorUserName, EmailCommonInfo emailDetails)
+			throws JsonProcessingException {
 		boolean isStatusUpdated = false;
 		if (!proposalId.equals("0")) {
 			if (existingProposal.getResearchAdministratorWithdraw() == WithdrawType.NOTWITHDRAWN
 					&& existingProposal.getResearchAdministratorApproval() == ApprovalType.READYFORAPPROVAL
-					&& proposalUserTitle
-							.equals("University Research Administrator")) {
-				existingProposal
-						.setResearchAdministratorWithdraw(WithdrawType.WITHDRAWN);
-				existingProposal
-						.setResearchAdministratorApproval(ApprovalType.NOTREADYFORAPPROVAL);
+					&& proposalUserTitle.equals("University Research Administrator")) {
+				existingProposal.setResearchAdministratorWithdraw(WithdrawType.WITHDRAWN);
+				existingProposal.setResearchAdministratorApproval(ApprovalType.NOTREADYFORAPPROVAL);
 				existingProposal.getProposalStatus().clear();
-				existingProposal.getProposalStatus().add(
-						Status.WITHDRAWBYRESEARCHADMIN);
-				isStatusUpdated = updateProposalStatus(existingProposal,
-						authorProfile);
+				existingProposal.getProposalStatus().add(Status.WITHDRAWBYRESEARCHADMIN);
+				isStatusUpdated = updateProposalStatus(existingProposal, authorProfile);
 			}
 		}
 		return isStatusUpdated;
@@ -3909,24 +3354,19 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @return
 	 * @throws JsonProcessingException
 	 */
-	public boolean updateArchivedStatus(String proposalId,
-			String proposalUserTitle, Proposal existingProposal,
-			UserProfile authorProfile, String authorUserName,
-			EmailCommonInfo emailDetails) throws JsonProcessingException {
+	public boolean updateArchivedStatus(String proposalId, String proposalUserTitle, Proposal existingProposal,
+			UserProfile authorProfile, String authorUserName, EmailCommonInfo emailDetails)
+			throws JsonProcessingException {
 		boolean isStatusUpdated = false;
 		if (!proposalId.equals("0")) {
 			if (existingProposal.getResearchDirectorArchived() == ArchiveType.NOTARCHIVED
 					&& existingProposal.getResearchAdministratorSubmission() == SubmitType.SUBMITTED
 					&& proposalUserTitle.equals("University Research Director")) {
-				existingProposal
-						.setResearchDirectorArchived(ArchiveType.ARCHIVED);
-				existingProposal
-						.setResearchDirectorApproval(ApprovalType.NOTREADYFORAPPROVAL);
+				existingProposal.setResearchDirectorArchived(ArchiveType.ARCHIVED);
+				existingProposal.setResearchDirectorApproval(ApprovalType.NOTREADYFORAPPROVAL);
 				existingProposal.getProposalStatus().clear();
-				existingProposal.getProposalStatus().add(
-						Status.ARCHIVEDBYRESEARCHDIRECTOR);
-				isStatusUpdated = updateProposalStatus(existingProposal,
-						authorProfile);
+				existingProposal.getProposalStatus().add(Status.ARCHIVEDBYRESEARCHDIRECTOR);
+				isStatusUpdated = updateProposalStatus(existingProposal, authorProfile);
 			}
 		}
 		return isStatusUpdated;
@@ -3939,23 +3379,20 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param emailDetails
 	 * @return
 	 */
-	public Response getObligationsDetails(List<ObligationResult> obligations,
-			EmailCommonInfo emailDetails) {
+	public Response getObligationsDetails(List<ObligationResult> obligations, EmailCommonInfo emailDetails) {
 		if (obligations.size() > 0) {
 			List<ObligationResult> preObligations = new ArrayList<ObligationResult>();
 			List<ObligationResult> postObligations = new ArrayList<ObligationResult>();
 			List<ObligationResult> ongoingObligations = new ArrayList<ObligationResult>();
 			for (ObligationResult obligation : obligations) {
-				categorizeObligationTypes(preObligations, postObligations,
-						ongoingObligations, obligation);
+				categorizeObligationTypes(preObligations, postObligations, ongoingObligations, obligation);
 			}
 			// Performs Preobligations
 			Boolean preCondition = true;
 			String alertMessage = new String();
 			if (preObligations.size() != 0) {
 				preCondition = false;
-				System.out
-						.println("\n======================== Printing Obligations ====================");
+				System.out.println("\n======================== Printing Obligations ====================");
 				for (ObligationResult obligation : preObligations) {
 					if (obligation instanceof org.wso2.balana.xacml3.Obligation) {
 						List<AttributeAssignment> assignments = ((org.wso2.balana.xacml3.Obligation) obligation)
@@ -3964,8 +3401,7 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 						for (AttributeAssignment assignment : assignments) {
 							switch (assignment.getAttributeId().toString()) {
 							case "signedByCurrentUser":
-								preCondition = Boolean.parseBoolean(assignment
-										.getContent());
+								preCondition = Boolean.parseBoolean(assignment.getContent());
 								break;
 							case "alertMessage":
 								alertMessage = assignment.getContent();
@@ -3992,20 +3428,16 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 						for (AttributeAssignment assignment : assignments) {
 							switch (assignment.getAttributeId().toString()) {
 							case "authorName":
-								emailDetails.setAuthorName(assignment
-										.getContent());
+								emailDetails.setAuthorName(assignment.getContent());
 								break;
 							case "emailSubject":
-								emailDetails.setEmailSubject(assignment
-										.getContent());
+								emailDetails.setEmailSubject(assignment.getContent());
 								break;
 							case "emailBody":
-								emailDetails.setEmailBody(assignment
-										.getContent());
+								emailDetails.setEmailBody(assignment.getContent());
 								break;
 							case "piEmail":
-								emailDetails
-										.setPiEmail(assignment.getContent());
+								emailDetails.setPiEmail(assignment.getContent());
 								break;
 							case "copisEmail":
 							case "seniorsEmail":
@@ -4016,8 +3448,7 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 							case "administratorsEmail":
 							case "directorsEmail":
 								if (!assignment.getContent().equals("")) {
-									emailDetails.getEmaillist().add(
-											assignment.getContent());
+									emailDetails.getEmaillist().add(assignment.getContent());
 								}
 								break;
 							default:
@@ -4028,14 +3459,11 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 					}
 				}
 			} else {
-				return Response.status(403).type(MediaType.APPLICATION_JSON)
-						.entity(alertMessage).build();
+				return Response.status(403).type(MediaType.APPLICATION_JSON).entity(alertMessage).build();
 			}
 		}
-		return Response
-				.status(403)
-				.entity("{\"error\": \"Error while geting Obligations Information!\", \"status\": \"FAIL\"}")
-				.build();
+		return Response.status(403)
+				.entity("{\"error\": \"Error while geting Obligations Information!\", \"status\": \"FAIL\"}").build();
 	}
 
 	/***
@@ -4046,18 +3474,13 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param ongoingObligations
 	 * @param obligation
 	 */
-	public void categorizeObligationTypes(
-			List<ObligationResult> preObligations,
-			List<ObligationResult> postObligations,
-			List<ObligationResult> ongoingObligations,
-			ObligationResult obligation) {
+	public void categorizeObligationTypes(List<ObligationResult> preObligations, List<ObligationResult> postObligations,
+			List<ObligationResult> ongoingObligations, ObligationResult obligation) {
 		if (obligation instanceof org.wso2.balana.xacml3.Obligation) {
-			List<AttributeAssignment> assignments = ((org.wso2.balana.xacml3.Obligation) obligation)
-					.getAssignments();
+			List<AttributeAssignment> assignments = ((org.wso2.balana.xacml3.Obligation) obligation).getAssignments();
 			String obligationType = "postobligation";
 			for (AttributeAssignment assignment : assignments) {
-				if (assignment.getAttributeId().toString()
-						.equalsIgnoreCase("obligationType")) {
+				if (assignment.getAttributeId().toString().equalsIgnoreCase("obligationType")) {
 					obligationType = assignment.getContent();
 					break;
 				}
@@ -4088,11 +3511,9 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @return
 	 * @throws JsonProcessingException
 	 */
-	public String updateProposalStatusWithObligations(String proposalId,
-			String buttonType, String proposalUserTitle,
-			Proposal existingProposal, UserProfile authorProfile,
-			String authorUserName, List<ObligationResult> obligations)
-			throws JsonProcessingException {
+	public String updateProposalStatusWithObligations(String proposalId, String buttonType, String proposalUserTitle,
+			Proposal existingProposal, UserProfile authorProfile, String authorUserName,
+			List<ObligationResult> obligations) throws JsonProcessingException {
 		boolean isStatusUpdated = false;
 		String changeDone = new String();
 		EmailCommonInfo emailDetails = new EmailCommonInfo();
@@ -4100,14 +3521,12 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 		if (buttonType != null && buttonType != "") {
 			switch (buttonType) {
 			case "Withdraw":
-				isStatusUpdated = updateWithdrawnStatus(proposalId,
-						proposalUserTitle, existingProposal, authorProfile,
+				isStatusUpdated = updateWithdrawnStatus(proposalId, proposalUserTitle, existingProposal, authorProfile,
 						authorUserName, emailDetails);
 				changeDone = "Withdrawn";
 				break;
 			case "Archive":
-				isStatusUpdated = updateArchivedStatus(proposalId,
-						proposalUserTitle, existingProposal, authorProfile,
+				isStatusUpdated = updateArchivedStatus(proposalId, proposalUserTitle, existingProposal, authorProfile,
 						authorUserName, emailDetails);
 				changeDone = "Archived";
 				break;
@@ -4122,8 +3541,9 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 			String piEmail = emailDetails.getPiEmail();
 			List<String> emaillist = emailDetails.getEmaillist();
 			if (!emailSubject.equals("")) {
-				//EmailUtil emailUtil = new EmailUtil();
-				//emailUtil.sendMailMultipleUsersWithoutAuth(piEmail, emaillist,emailSubject + authorName, emailBody);
+				// EmailUtil emailUtil = new EmailUtil();
+				// emailUtil.sendMailMultipleUsersWithoutAuth(piEmail, emaillist,emailSubject +
+				// authorName, emailBody);
 			}
 		}
 		return changeDone;
@@ -4141,14 +3561,12 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @return
 	 * @throws JsonProcessingException
 	 */
-	public boolean deleteProposalWithObligations(String proposalRoles,
-			String proposalUserTitle, Proposal existingProposal,
-			UserProfile authorProfile, String authorUserName,
+	public boolean deleteProposalWithObligations(String proposalRoles, String proposalUserTitle,
+			Proposal existingProposal, UserProfile authorProfile, String authorUserName,
 			List<ObligationResult> obligations) throws JsonProcessingException {
 		EmailCommonInfo emailDetails = new EmailCommonInfo();
 		getObligationsDetails(obligations, emailDetails);
-		boolean isDeleted = deleteProposal(existingProposal, proposalRoles,
-				proposalUserTitle, authorProfile);
+		boolean isDeleted = deleteProposal(existingProposal, proposalRoles, proposalUserTitle, authorProfile);
 		if (isDeleted) {
 			String emailSubject = emailDetails.getEmailSubject();
 			String emailBody = emailDetails.getEmailBody();
@@ -4156,21 +3574,21 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 			String piEmail = emailDetails.getPiEmail();
 			List<String> emaillist = emailDetails.getEmaillist();
 			if (!emailSubject.equals("")) {
-				//EmailUtil emailUtil = new EmailUtil();
-				//emailUtil.sendMailMultipleUsersWithoutAuth(piEmail, emaillist,emailSubject + authorName, emailBody);
+				// EmailUtil emailUtil = new EmailUtil();
+				// emailUtil.sendMailMultipleUsersWithoutAuth(piEmail, emaillist,emailSubject +
+				// authorName, emailBody);
 			}
 		}
 		return isDeleted;
 	}
-	
+
 	/***
 	 * Generates Attributes based on policy info
 	 * 
 	 * @param policyInfo
 	 * @return
 	 */
-	public HashMap<String, String> generateAttributesForPM(
-			JsonNode policyInfo) {
+	public HashMap<String, String> generateAttributesForPM(JsonNode policyInfo) {
 		HashMap<String, String> attrMap = new HashMap<String, String>();
 		Multimap<String, String> subjectMap = ArrayListMultimap.create();
 		Multimap<String, String> resourceMap = ArrayListMultimap.create();
@@ -4180,9 +3598,9 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 			String attributeName = node.path("attributeName").asText();
 			String attributeValue = node.path("attributeValue").asText();
 			String attributeType = node.path("attributeType").asText();
-			attrMap.put(attributeName,attributeValue);
+			attrMap.put(attributeName, attributeValue);
 		}
-		
+
 		return attrMap;
 	}
 
@@ -4192,8 +3610,7 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param policyInfo
 	 * @return
 	 */
-	public HashMap<String, Multimap<String, String>> generateAttributes(
-			JsonNode policyInfo) {
+	public HashMap<String, Multimap<String, String>> generateAttributes(JsonNode policyInfo) {
 		HashMap<String, Multimap<String, String>> attrMap = new HashMap<String, Multimap<String, String>>();
 		Multimap<String, String> subjectMap = ArrayListMultimap.create();
 		Multimap<String, String> resourceMap = ArrayListMultimap.create();
@@ -4236,34 +3653,27 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @throws URISyntaxException
 	 * @throws JsonProcessingException
 	 */
-	public String exportToExcelFile(List<ProposalInfo> proposals,
-			List<AuditLogInfo> proposalAuditLogs) throws URISyntaxException,
-			JsonProcessingException {
+	public String exportToExcelFile(List<ProposalInfo> proposals, List<AuditLogInfo> proposalAuditLogs)
+			throws URISyntaxException, JsonProcessingException {
 		ObjectMapper mapper = new ObjectMapper();
 		String filename = new String();
 		Xcelite xcelite = new Xcelite();
 		if (proposals != null) {
 			XceliteSheet sheet = xcelite.createSheet("Proposals");
-			SheetWriter<ProposalInfo> writer = sheet
-					.getBeanWriter(ProposalInfo.class);
+			SheetWriter<ProposalInfo> writer = sheet.getBeanWriter(ProposalInfo.class);
 			writer.write(proposals);
 		} else {
 			XceliteSheet sheet = xcelite.createSheet("AuditLogs");
-			SheetWriter<AuditLogInfo> writer = sheet
-					.getBeanWriter(AuditLogInfo.class);
+			SheetWriter<AuditLogInfo> writer = sheet.getBeanWriter(AuditLogInfo.class);
 			writer.write(proposalAuditLogs);
 		}
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy_MM_dd");
 		Date date = new Date();
-		String fileName = String.format(
-				"%s.%s",
-				RandomStringUtils.randomAlphanumeric(8) + "_"
-						+ dateFormat.format(date), "xlsx");
-		String downloadLocation = this.getClass().getResource("/uploads")
-				.toURI().getPath();
+		String fileName = String.format("%s.%s",
+				RandomStringUtils.randomAlphanumeric(8) + "_" + dateFormat.format(date), "xlsx");
+		String downloadLocation = this.getClass().getResource("/uploads").toURI().getPath();
 		xcelite.write(new File(downloadLocation + fileName));
-		filename = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(
-				fileName);
+		filename = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(fileName);
 		return filename;
 	}
 
@@ -4277,27 +3687,20 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param signatures
 	 * @param requiredSignatures
 	 */
-	public void generateContentProfileForAllUsers(Proposal existingProposal,
-			StringBuffer contentProfile, List<SignatureUserInfo> signatures,
-			RequiredSignaturesInfo requiredSignatures) {
-		if (!existingProposal.getInvestigatorInfo().getPi().getUserRef()
-				.isDeleted()) {
-			generatePIContentProfile(contentProfile, existingProposal
-					.getInvestigatorInfo().getPi());
-			requiredSignatures.getRequiredPISign().add(
-					existingProposal.getInvestigatorInfo().getPi()
-							.getUserProfileId());
+	public void generateContentProfileForAllUsers(Proposal existingProposal, StringBuffer contentProfile,
+			List<SignatureUserInfo> signatures, RequiredSignaturesInfo requiredSignatures) {
+		if (!existingProposal.getInvestigatorInfo().getPi().getUserRef().isDeleted()) {
+			generatePIContentProfile(contentProfile, existingProposal.getInvestigatorInfo().getPi());
+			requiredSignatures.getRequiredPISign()
+					.add(existingProposal.getInvestigatorInfo().getPi().getUserProfileId());
 		}
-		for (InvestigatorRefAndPosition copis : existingProposal
-				.getInvestigatorInfo().getCo_pi()) {
+		for (InvestigatorRefAndPosition copis : existingProposal.getInvestigatorInfo().getCo_pi()) {
 			if (!copis.getUserRef().isDeleted()) {
 				generateCoPIContentProfile(contentProfile, copis);
-				requiredSignatures.getRequiredCoPISigns().add(
-						copis.getUserProfileId());
+				requiredSignatures.getRequiredCoPISigns().add(copis.getUserProfileId());
 			}
 		}
-		for (InvestigatorRefAndPosition seniors : existingProposal
-				.getInvestigatorInfo().getSeniorPersonnel()) {
+		for (InvestigatorRefAndPosition seniors : existingProposal.getInvestigatorInfo().getSeniorPersonnel()) {
 			if (!seniors.getUserRef().isDeleted()) {
 				generateSeniorContentProfile(contentProfile, seniors);
 			}
@@ -4306,34 +3709,27 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 			switch (signatureInfo.getPositionTitle()) {
 			case "Department Chair":
 				generateChairContentProfile(contentProfile, signatureInfo);
-				requiredSignatures.getRequiredChairSigns().add(
-						signatureInfo.getUserProfileId());
+				requiredSignatures.getRequiredChairSigns().add(signatureInfo.getUserProfileId());
 				break;
 			case "Business Manager":
 				generateManagerContentProfile(contentProfile, signatureInfo);
-				requiredSignatures.getRequiredBusinessManagerSigns().add(
-						signatureInfo.getUserProfileId());
+				requiredSignatures.getRequiredBusinessManagerSigns().add(signatureInfo.getUserProfileId());
 				break;
 			case "Dean":
 				generateDeanContentProfile(contentProfile, signatureInfo);
-				requiredSignatures.getRequiredDeanSigns().add(
-						signatureInfo.getUserProfileId());
+				requiredSignatures.getRequiredDeanSigns().add(signatureInfo.getUserProfileId());
 				break;
 			case "IRB":
 				generateIRBContentProfile(contentProfile, signatureInfo);
-				requiredSignatures.getRequiredIRBSigns().add(
-						signatureInfo.getUserProfileId());
+				requiredSignatures.getRequiredIRBSigns().add(signatureInfo.getUserProfileId());
 				break;
 			case "University Research Administrator":
-				generateResearchAdminContentProfile(contentProfile,
-						signatureInfo);
-				requiredSignatures.getRequiredResearchAdminSigns().add(
-						signatureInfo.getUserProfileId());
+				generateResearchAdminContentProfile(contentProfile, signatureInfo);
+				requiredSignatures.getRequiredResearchAdminSigns().add(signatureInfo.getUserProfileId());
 				break;
 			case "University Research Director":
 				generateDirectorContentProfile(contentProfile, signatureInfo);
-				requiredSignatures.getRequiredResearchDirectorSigns().add(
-						signatureInfo.getUserProfileId());
+				requiredSignatures.getRequiredResearchDirectorSigns().add(signatureInfo.getUserProfileId());
 				break;
 			default:
 				break;
@@ -4352,28 +3748,22 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param signatures
 	 * @param requiredSignatures
 	 */
-	public void generateUsersInProposalContentProfile(
-			UserProfile authorProfile, String proposalId,
-			Proposal existingProposal, boolean signedByCurrentUser,
-			StringBuffer contentProfile, List<SignatureUserInfo> signatures,
-			RequiredSignaturesInfo requiredSignatures) {
+	public void generateUsersInProposalContentProfile(UserProfile authorProfile, String proposalId,
+			Proposal existingProposal, boolean signedByCurrentUser, StringBuffer contentProfile,
+			List<SignatureUserInfo> signatures, RequiredSignaturesInfo requiredSignatures) {
 		contentProfile.append("<Content>");
 		contentProfile.append("<ak:record xmlns:ak=\"http://akpower.org\">");
-		genearteProposalInfoContentProfile(proposalId, existingProposal,
-				contentProfile);
+		genearteProposalInfoContentProfile(proposalId, existingProposal, contentProfile);
 		generateAuthorContentProfile(contentProfile, authorProfile);
 		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX");
 		contentProfile.append("<ak:currentdatetime>");
 		contentProfile.append(dateFormat.format(new Date()));
 		contentProfile.append("</ak:currentdatetime>");
 
-		generateContentProfileForAllUsers(existingProposal, contentProfile,
-				signatures, requiredSignatures);
+		generateContentProfileForAllUsers(existingProposal, contentProfile, signatures, requiredSignatures);
 
-		getExistingSignaturesForProposal(contentProfile, existingProposal,
-				requiredSignatures, signedByCurrentUser);
-		checkForSignedByAllUsers(contentProfile, requiredSignatures,
-				signedByCurrentUser);
+		getExistingSignaturesForProposal(contentProfile, existingProposal, requiredSignatures, signedByCurrentUser);
+		checkForSignedByAllUsers(contentProfile, requiredSignatures, signedByCurrentUser);
 		contentProfile.append("</ak:proposal>");
 		contentProfile.append("</ak:record>");
 		contentProfile.append("</Content>");
@@ -4391,27 +3781,23 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param requiredSignatures
 	 * @return
 	 */
-	public List<SignatureUserInfo> generateProposalContentProfile(
-			UserProfile authorProfile, String proposalId,
-			Proposal existingProposal, boolean signedByCurrentUser,
-			StringBuffer contentProfile, Boolean irbApprovalRequired,
-			RequiredSignaturesInfo requiredSignatures) {
+	public List<SignatureUserInfo> generateProposalContentProfile(UserProfile authorProfile, String proposalId,
+			Proposal existingProposal, boolean signedByCurrentUser, StringBuffer contentProfile,
+			Boolean irbApprovalRequired, RequiredSignaturesInfo requiredSignatures) {
 		List<SignatureUserInfo> signatures = new ArrayList<SignatureUserInfo>();
 		if (!proposalId.equals("0")) {
 			ObjectId id = new ObjectId(proposalId);
-			signatures = findSignaturesExceptInvestigator(id,
-					irbApprovalRequired);
-			generateUsersInProposalContentProfile(authorProfile, proposalId,
-					existingProposal, signedByCurrentUser, contentProfile,
-					signatures, requiredSignatures);
+			signatures = findSignaturesExceptInvestigator(id, irbApprovalRequired);
+			generateUsersInProposalContentProfile(authorProfile, proposalId, existingProposal, signedByCurrentUser,
+					contentProfile, signatures, requiredSignatures);
 		} else {
-			generateDefaultProposalContentProfile(authorProfile, proposalId,
-					existingProposal, signedByCurrentUser, contentProfile);
+			generateDefaultProposalContentProfile(authorProfile, proposalId, existingProposal, signedByCurrentUser,
+					contentProfile);
 		}
-		contentProfile
-				.append("<Attribute AttributeId=\"urn:oasis:names:tc:xacml:3.0:content-selector\" IncludeInResult=\"false\">");
-		contentProfile
-				.append("<AttributeValue XPathCategory=\"urn:oasis:names:tc:xacml:3.0:attribute-category:resource\" DataType=\"urn:oasis:names:tc:xacml:3.0:data-type:xpathExpression\">//ak:record/ak:proposal</AttributeValue>");
+		contentProfile.append(
+				"<Attribute AttributeId=\"urn:oasis:names:tc:xacml:3.0:content-selector\" IncludeInResult=\"false\">");
+		contentProfile.append(
+				"<AttributeValue XPathCategory=\"urn:oasis:names:tc:xacml:3.0:attribute-category:resource\" DataType=\"urn:oasis:names:tc:xacml:3.0:data-type:xpathExpression\">//ak:record/ak:proposal</AttributeValue>");
 		contentProfile.append("</Attribute>");
 		return signatures;
 	}
@@ -4424,23 +3810,20 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param contentProfile
 	 * @return
 	 */
-	public List<String> generateMDPDecision(
-			HashMap<String, Multimap<String, String>> attrMap,
+	public List<String> generateMDPDecision(HashMap<String, Multimap<String, String>> attrMap,
 			Multimap<String, String> actionMap, StringBuffer contentProfile) {
 		BalanaConnector ac = new BalanaConnector();
-		List<String> attributeValue = Arrays.asList("Save", "Submit",
-				"Approve", "Disapprove", "Withdraw", "Archive", "Delete");
+		List<String> attributeValue = Arrays.asList("Save", "Submit", "Approve", "Disapprove", "Withdraw", "Archive",
+				"Delete");
 		for (String action : attributeValue) {
 			actionMap.put("proposal.action", action);
 			attrMap.put("Action", actionMap);
 		}
-		Set<AbstractResult> results = ac.getXACMLdecisionForMDPWithProfile(
-				attrMap, contentProfile);
+		Set<AbstractResult> results = ac.getXACMLdecisionForMDPWithProfile(attrMap, contentProfile);
 		List<String> actions = new ArrayList<String>();
 		for (AbstractResult result : results) {
 			if (AbstractResult.DECISION_PERMIT == result.getDecision()) {
-				Set<Attributes> attributesSet = ((Result) result)
-						.getAttributes();
+				Set<Attributes> attributesSet = ((Result) result).getAttributes();
 				for (Attributes attributes : attributesSet) {
 					for (Attribute attribute : attributes.getAttributes()) {
 						actions.add(attribute.getValue().encode());
@@ -4457,8 +3840,7 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param contentProfile
 	 * @param authorProfile
 	 */
-	public void generateAuthorContentProfile(StringBuffer contentProfile,
-			UserProfile authorProfile) {
+	public void generateAuthorContentProfile(StringBuffer contentProfile, UserProfile authorProfile) {
 		contentProfile.append("<ak:authorprofile>");
 		contentProfile.append("<ak:fullname>");
 		contentProfile.append(authorProfile.getFullName());
@@ -4475,8 +3857,7 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param contentProfile
 	 * @param signatureInfo
 	 */
-	public void generateDirectorContentProfile(StringBuffer contentProfile,
-			SignatureUserInfo signatureInfo) {
+	public void generateDirectorContentProfile(StringBuffer contentProfile, SignatureUserInfo signatureInfo) {
 		contentProfile.append("<ak:director>");
 		contentProfile.append("<ak:fullname>");
 		contentProfile.append(signatureInfo.getFullName());
@@ -4496,8 +3877,7 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param contentProfile
 	 * @param signatureInfo
 	 */
-	public void generateResearchAdminContentProfile(
-			StringBuffer contentProfile, SignatureUserInfo signatureInfo) {
+	public void generateResearchAdminContentProfile(StringBuffer contentProfile, SignatureUserInfo signatureInfo) {
 		contentProfile.append("<ak:administrator>");
 		contentProfile.append("<ak:fullname>");
 		contentProfile.append(signatureInfo.getFullName());
@@ -4517,8 +3897,7 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param contentProfile
 	 * @param signatureInfo
 	 */
-	public void generateIRBContentProfile(StringBuffer contentProfile,
-			SignatureUserInfo signatureInfo) {
+	public void generateIRBContentProfile(StringBuffer contentProfile, SignatureUserInfo signatureInfo) {
 		contentProfile.append("<ak:irb>");
 		contentProfile.append("<ak:fullname>");
 		contentProfile.append(signatureInfo.getFullName());
@@ -4538,8 +3917,7 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param contentProfile
 	 * @param signatureInfo
 	 */
-	public void generateDeanContentProfile(StringBuffer contentProfile,
-			SignatureUserInfo signatureInfo) {
+	public void generateDeanContentProfile(StringBuffer contentProfile, SignatureUserInfo signatureInfo) {
 		contentProfile.append("<ak:dean>");
 		contentProfile.append("<ak:fullname>");
 		contentProfile.append(signatureInfo.getFullName());
@@ -4559,8 +3937,7 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param contentProfile
 	 * @param signatureInfo
 	 */
-	public void generateManagerContentProfile(StringBuffer contentProfile,
-			SignatureUserInfo signatureInfo) {
+	public void generateManagerContentProfile(StringBuffer contentProfile, SignatureUserInfo signatureInfo) {
 		contentProfile.append("<ak:manager>");
 		contentProfile.append("<ak:fullname>");
 		contentProfile.append(signatureInfo.getFullName());
@@ -4580,8 +3957,7 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param contentProfile
 	 * @param signatureInfo
 	 */
-	public void generateChairContentProfile(StringBuffer contentProfile,
-			SignatureUserInfo signatureInfo) {
+	public void generateChairContentProfile(StringBuffer contentProfile, SignatureUserInfo signatureInfo) {
 		contentProfile.append("<ak:chair>");
 		contentProfile.append("<ak:fullname>");
 		contentProfile.append(signatureInfo.getFullName());
@@ -4601,8 +3977,7 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param contentProfile
 	 * @param senior
 	 */
-	public void generateSeniorContentProfile(StringBuffer contentProfile,
-			InvestigatorRefAndPosition senior) {
+	public void generateSeniorContentProfile(StringBuffer contentProfile, InvestigatorRefAndPosition senior) {
 		contentProfile.append("<ak:senior>");
 		contentProfile.append("<ak:fullname>");
 		contentProfile.append(senior.getUserRef().getFullName());
@@ -4622,8 +3997,7 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param contentProfile
 	 * @param copi
 	 */
-	public void generateCoPIContentProfile(StringBuffer contentProfile,
-			InvestigatorRefAndPosition copi) {
+	public void generateCoPIContentProfile(StringBuffer contentProfile, InvestigatorRefAndPosition copi) {
 		contentProfile.append("<ak:copi>");
 		contentProfile.append("<ak:fullname>");
 		contentProfile.append(copi.getUserRef().getFullName());
@@ -4643,8 +4017,7 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param contentProfile
 	 * @param pi
 	 */
-	public void generatePIContentProfile(StringBuffer contentProfile,
-			InvestigatorRefAndPosition pi) {
+	public void generatePIContentProfile(StringBuffer contentProfile, InvestigatorRefAndPosition pi) {
 		contentProfile.append("<ak:pi>");
 		contentProfile.append("<ak:fullname>");
 		contentProfile.append(pi.getUserRef().getFullName());
@@ -4664,8 +4037,7 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param contentProfile
 	 * @param signatureInfo
 	 */
-	public void generateSignatureContentProfile(StringBuffer contentProfile,
-			SignatureUserInfo signatureInfo) {
+	public void generateSignatureContentProfile(StringBuffer contentProfile, SignatureUserInfo signatureInfo) {
 		switch (signatureInfo.getPositionTitle()) {
 		case "Department Chair":
 			generateChairContentProfile(contentProfile, signatureInfo);
@@ -4696,16 +4068,12 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param existingProposal
 	 * @param contentProfile
 	 */
-	public void generateInvestigatorContentProfile(Proposal existingProposal,
-			StringBuffer contentProfile) {
-		generatePIContentProfile(contentProfile, existingProposal
-				.getInvestigatorInfo().getPi());
-		for (InvestigatorRefAndPosition copi : existingProposal
-				.getInvestigatorInfo().getCo_pi()) {
+	public void generateInvestigatorContentProfile(Proposal existingProposal, StringBuffer contentProfile) {
+		generatePIContentProfile(contentProfile, existingProposal.getInvestigatorInfo().getPi());
+		for (InvestigatorRefAndPosition copi : existingProposal.getInvestigatorInfo().getCo_pi()) {
 			generateCoPIContentProfile(contentProfile, copi);
 		}
-		for (InvestigatorRefAndPosition senior : existingProposal
-				.getInvestigatorInfo().getSeniorPersonnel()) {
+		for (InvestigatorRefAndPosition senior : existingProposal.getInvestigatorInfo().getSeniorPersonnel()) {
 			generateSeniorContentProfile(contentProfile, senior);
 		}
 	}
@@ -4717,15 +4085,14 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param existingProposal
 	 * @param contentProfile
 	 */
-	public void genearteProposalInfoContentProfile(String proposalId,
-			Proposal existingProposal, StringBuffer contentProfile) {
+	public void genearteProposalInfoContentProfile(String proposalId, Proposal existingProposal,
+			StringBuffer contentProfile) {
 		contentProfile.append("<ak:proposal>");
 		contentProfile.append("<ak:proposalid>");
 		contentProfile.append(proposalId);
 		contentProfile.append("</ak:proposalid>");
 		contentProfile.append("<ak:proposaltitle>");
-		contentProfile.append(existingProposal.getProjectInfo()
-				.getProjectTitle());
+		contentProfile.append(existingProposal.getProjectInfo().getProjectTitle());
 		contentProfile.append("</ak:proposaltitle>");
 		contentProfile.append("<ak:irbApprovalRequired>");
 		contentProfile.append(existingProposal.isIrbApprovalRequired());
@@ -4743,8 +4110,7 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 		contentProfile.append(existingProposal.getChairApproval().name());
 		contentProfile.append("</ak:approvedbydepartmentchair>");
 		contentProfile.append("<ak:approvedbybusinessmanager>");
-		contentProfile.append(existingProposal.getBusinessManagerApproval()
-				.name());
+		contentProfile.append(existingProposal.getBusinessManagerApproval().name());
 		contentProfile.append("</ak:approvedbybusinessmanager>");
 		contentProfile.append("<ak:approvedbyirb>");
 		contentProfile.append(existingProposal.getIrbApproval().name());
@@ -4753,33 +4119,22 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 		contentProfile.append(existingProposal.getDeanApproval().name());
 		contentProfile.append("</ak:approvedbydean>");
 		contentProfile.append("<ak:approvedbyuniversityresearchadministrator>");
-		contentProfile.append(existingProposal
-				.getResearchAdministratorApproval().name());
-		contentProfile
-				.append("</ak:approvedbyuniversityresearchadministrator>");
-		contentProfile
-				.append("<ak:withdrawnbyuniversityresearchadministrator>");
-		contentProfile.append(existingProposal
-				.getResearchAdministratorWithdraw().name());
-		contentProfile
-				.append("</ak:withdrawnbyuniversityresearchadministrator>");
-		contentProfile
-				.append("<ak:submittedbyuniversityresearchadministrator>");
-		contentProfile.append(existingProposal
-				.getResearchAdministratorSubmission().name());
-		contentProfile
-				.append("</ak:submittedbyuniversityresearchadministrator>");
+		contentProfile.append(existingProposal.getResearchAdministratorApproval().name());
+		contentProfile.append("</ak:approvedbyuniversityresearchadministrator>");
+		contentProfile.append("<ak:withdrawnbyuniversityresearchadministrator>");
+		contentProfile.append(existingProposal.getResearchAdministratorWithdraw().name());
+		contentProfile.append("</ak:withdrawnbyuniversityresearchadministrator>");
+		contentProfile.append("<ak:submittedbyuniversityresearchadministrator>");
+		contentProfile.append(existingProposal.getResearchAdministratorSubmission().name());
+		contentProfile.append("</ak:submittedbyuniversityresearchadministrator>");
 		contentProfile.append("<ak:approvedbyuniversityresearchdirector>");
-		contentProfile.append(existingProposal.getResearchDirectorApproval()
-				.name());
+		contentProfile.append(existingProposal.getResearchDirectorApproval().name());
 		contentProfile.append("</ak:approvedbyuniversityresearchdirector>");
 		contentProfile.append("<ak:deletedbyuniversityresearchdirector>");
-		contentProfile.append(existingProposal.getResearchDirectorDeletion()
-				.name());
+		contentProfile.append(existingProposal.getResearchDirectorDeletion().name());
 		contentProfile.append("</ak:deletedbyuniversityresearchdirector>");
 		contentProfile.append("<ak:archivedbyuniversityresearchdirector>");
-		contentProfile.append(existingProposal.getResearchDirectorArchived()
-				.name());
+		contentProfile.append(existingProposal.getResearchDirectorArchived().name());
 		contentProfile.append("</ak:archivedbyuniversityresearchdirector>");
 	}
 
@@ -4791,13 +4146,12 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param existingProposal
 	 * @return
 	 */
-	public StringBuffer generateProposalContentProfile(String proposalId,
-			GPMSCommonInfo userInfo, Proposal existingProposal) {
+	public StringBuffer generateProposalContentProfile(String proposalId, GPMSCommonInfo userInfo,
+			Proposal existingProposal) {
 		StringBuffer contentProfile = new StringBuffer();
 		contentProfile.append("<Content>");
 		contentProfile.append("<ak:record xmlns:ak=\"http://akpower.org\">");
-		genearteProposalInfoContentProfile(proposalId, existingProposal,
-				contentProfile);
+		genearteProposalInfoContentProfile(proposalId, existingProposal, contentProfile);
 		contentProfile.append("<ak:authorprofile>");
 		contentProfile.append("<ak:userid>");
 		contentProfile.append(userInfo.getUserProfileID());
@@ -4810,10 +4164,10 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 		contentProfile.append("</ak:proposal>");
 		contentProfile.append("</ak:record>");
 		contentProfile.append("</Content>");
-		contentProfile
-				.append("<Attribute AttributeId=\"urn:oasis:names:tc:xacml:3.0:content-selector\" IncludeInResult=\"false\">");
-		contentProfile
-				.append("<AttributeValue XPathCategory=\"urn:oasis:names:tc:xacml:3.0:attribute-category:resource\" DataType=\"urn:oasis:names:tc:xacml:3.0:data-type:xpathExpression\">//ak:record/ak:proposal</AttributeValue>");
+		contentProfile.append(
+				"<Attribute AttributeId=\"urn:oasis:names:tc:xacml:3.0:content-selector\" IncludeInResult=\"false\">");
+		contentProfile.append(
+				"<AttributeValue XPathCategory=\"urn:oasis:names:tc:xacml:3.0:attribute-category:resource\" DataType=\"urn:oasis:names:tc:xacml:3.0:data-type:xpathExpression\">//ak:record/ak:proposal</AttributeValue>");
 		contentProfile.append("</Attribute>");
 		return contentProfile;
 	}
@@ -4827,10 +4181,8 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param signedByCurrentUser
 	 * @param contentProfile
 	 */
-	public void generateDefaultProposalContentProfile(
-			UserProfile authorProfile, String proposalId,
-			Proposal existingProposal, boolean signedByCurrentUser,
-			StringBuffer contentProfile) {
+	public void generateDefaultProposalContentProfile(UserProfile authorProfile, String proposalId,
+			Proposal existingProposal, boolean signedByCurrentUser, StringBuffer contentProfile) {
 		contentProfile.append("<Content>");
 		contentProfile.append("<ak:record xmlns:ak=\"http://akpower.org\">");
 		contentProfile.append("<ak:proposal>");
@@ -4838,8 +4190,7 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 		contentProfile.append(proposalId);
 		contentProfile.append("</ak:proposalid>");
 		contentProfile.append("<ak:proposaltitle>");
-		contentProfile.append(existingProposal.getProjectInfo()
-				.getProjectTitle());
+		contentProfile.append(existingProposal.getProjectInfo().getProjectTitle());
 		contentProfile.append("</ak:proposaltitle>");
 		contentProfile.append("<ak:irbApprovalRequired>");
 		contentProfile.append(existingProposal.isIrbApprovalRequired());
@@ -4863,14 +4214,12 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param authorProfile
 	 * @return
 	 */
-	public StringBuffer generateContentProfile(String proposalId,
-			Proposal existingProposal, List<SignatureUserInfo> signatures,
-			UserProfile authorProfile) {
+	public StringBuffer generateContentProfile(String proposalId, Proposal existingProposal,
+			List<SignatureUserInfo> signatures, UserProfile authorProfile) {
 		StringBuffer contentProfile = new StringBuffer();
 		contentProfile.append("<Content>");
 		contentProfile.append("<ak:record xmlns:ak=\"http://akpower.org\">");
-		genearteProposalInfoContentProfile(proposalId, existingProposal,
-				contentProfile);
+		genearteProposalInfoContentProfile(proposalId, existingProposal, contentProfile);
 		generateAuthorContentProfile(contentProfile, authorProfile);
 		generateInvestigatorContentProfile(existingProposal, contentProfile);
 		for (SignatureUserInfo signatureInfo : signatures) {
@@ -4879,10 +4228,10 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 		contentProfile.append("</ak:proposal>");
 		contentProfile.append("</ak:record>");
 		contentProfile.append("</Content>");
-		contentProfile
-				.append("<Attribute AttributeId=\"urn:oasis:names:tc:xacml:3.0:content-selector\" IncludeInResult=\"false\">");
-		contentProfile
-				.append("<AttributeValue XPathCategory=\"urn:oasis:names:tc:xacml:3.0:attribute-category:resource\" DataType=\"urn:oasis:names:tc:xacml:3.0:data-type:xpathExpression\">//ak:record/ak:proposal</AttributeValue>");
+		contentProfile.append(
+				"<Attribute AttributeId=\"urn:oasis:names:tc:xacml:3.0:content-selector\" IncludeInResult=\"false\">");
+		contentProfile.append(
+				"<AttributeValue XPathCategory=\"urn:oasis:names:tc:xacml:3.0:attribute-category:resource\" DataType=\"urn:oasis:names:tc:xacml:3.0:data-type:xpathExpression\">//ak:record/ak:proposal</AttributeValue>");
 		contentProfile.append("</Attribute>");
 		return contentProfile;
 	}
@@ -4895,31 +4244,25 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param addedInvestigators
 	 * @param deletedInvestigators
 	 */
-	public void updateInvestigatorList(Proposal existingProposal,
-			Proposal oldProposal, InvestigatorInfo addedInvestigators,
-			InvestigatorInfo deletedInvestigators) {
+	public void updateInvestigatorList(Proposal existingProposal, Proposal oldProposal,
+			InvestigatorInfo addedInvestigators, InvestigatorInfo deletedInvestigators) {
 		InvestigatorInfo existingInvestigators = new InvestigatorInfo();
 		existingInvestigators = oldProposal.getInvestigatorInfo();
 		for (InvestigatorRefAndPosition coPI : existingInvestigators.getCo_pi()) {
-			if (!existingProposal.getInvestigatorInfo().getCo_pi()
-					.contains(coPI)) {
+			if (!existingProposal.getInvestigatorInfo().getCo_pi().contains(coPI)) {
 				if (!deletedInvestigators.getCo_pi().contains(coPI)) {
 					deletedInvestigators.getCo_pi().add(coPI);
-					existingProposal.getInvestigatorInfo().getCo_pi()
-							.remove(coPI);
+					existingProposal.getInvestigatorInfo().getCo_pi().remove(coPI);
 				}
 			} else {
 				addedInvestigators.getCo_pi().remove(coPI);
 			}
 		}
-		for (InvestigatorRefAndPosition senior : existingInvestigators
-				.getSeniorPersonnel()) {
-			if (!existingProposal.getInvestigatorInfo().getSeniorPersonnel()
-					.contains(senior)) {
+		for (InvestigatorRefAndPosition senior : existingInvestigators.getSeniorPersonnel()) {
+			if (!existingProposal.getInvestigatorInfo().getSeniorPersonnel().contains(senior)) {
 				if (!deletedInvestigators.getSeniorPersonnel().contains(senior)) {
 					deletedInvestigators.getSeniorPersonnel().add(senior);
-					existingProposal.getInvestigatorInfo().getSeniorPersonnel()
-							.remove(senior);
+					existingProposal.getInvestigatorInfo().getSeniorPersonnel().remove(senior);
 				}
 			} else {
 				addedInvestigators.getSeniorPersonnel().remove(senior);
@@ -4928,8 +4271,7 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 		// Remove Signatures FOR Deleted Investigators
 		for (InvestigatorRefAndPosition coPI : deletedInvestigators.getCo_pi()) {
 			for (SignatureInfo sign : oldProposal.getSignatureInfo()) {
-				if (coPI.getUserProfileId().equalsIgnoreCase(
-						sign.getUserProfileId())) {
+				if (coPI.getUserProfileId().equalsIgnoreCase(sign.getUserProfileId())) {
 					existingProposal.getSignatureInfo().remove(sign);
 				}
 			}
@@ -4948,11 +4290,9 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @return
 	 * @throws ParseException
 	 */
-	public List<AuditLogInfo> findAllProposalAuditLogForGrid(int offset,
-			int limit, ObjectId id, AuditLogCommonInfo auditLogInfo)
-			throws ParseException {
-		return getAuditListBasedOnPaging(offset, limit,
-				getSortedAuditLogResults(auditLogInfo, id));
+	public List<AuditLogInfo> findAllProposalAuditLogForGrid(int offset, int limit, ObjectId id,
+			AuditLogCommonInfo auditLogInfo) throws ParseException {
+		return getAuditListBasedOnPaging(offset, limit, getSortedAuditLogResults(auditLogInfo, id));
 	}
 
 	/***
@@ -4963,8 +4303,7 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param allAuditLogs
 	 * @return
 	 */
-	private List<AuditLogInfo> getAuditListBasedOnPaging(int offset, int limit,
-			List<AuditLogInfo> allAuditLogs) {
+	private List<AuditLogInfo> getAuditListBasedOnPaging(int offset, int limit, List<AuditLogInfo> allAuditLogs) {
 		int rowTotal = 0;
 		rowTotal = allAuditLogs.size();
 		if (rowTotal > 0) {
@@ -4987,8 +4326,8 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @return
 	 * @throws ParseException
 	 */
-	public List<AuditLogInfo> getSortedAuditLogResults(
-			AuditLogCommonInfo auditLogInfo, ObjectId id) throws ParseException {
+	public List<AuditLogInfo> getSortedAuditLogResults(AuditLogCommonInfo auditLogInfo, ObjectId id)
+			throws ParseException {
 		Datastore ds = getDatastore();
 		Query<Proposal> proposalQuery = ds.createQuery(Proposal.class);
 		Proposal q = proposalQuery.field("_id").equal(id).get();
@@ -4996,24 +4335,18 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 		if (q.getAuditLog() != null && q.getAuditLog().size() != 0) {
 			for (AuditLog poposalAudit : q.getAuditLog()) {
 				AuditLogInfo proposalAuditLog = new AuditLogInfo();
-				boolean isActionMatch = isAuditLogActionFieldProvided(
-						auditLogInfo.getAction(), poposalAudit);
-				boolean isAuditedByMatch = isAuditLogAuditedByFieldProvided(
-						auditLogInfo.getAuditedBy(), poposalAudit);
-				boolean isActivityDateFromMatch = isAuditLogActivityDateFromProvided(
-						auditLogInfo.getActivityOnFrom(), poposalAudit);
-				boolean isActivityDateToMatch = isAuditLogActivityDateToProvided(
-						auditLogInfo.getActivityOnTo(), poposalAudit);
+				boolean isActionMatch = isAuditLogActionFieldProvided(auditLogInfo.getAction(), poposalAudit);
+				boolean isAuditedByMatch = isAuditLogAuditedByFieldProvided(auditLogInfo.getAuditedBy(), poposalAudit);
+				boolean isActivityDateFromMatch = isAuditLogActivityDateFromProvided(auditLogInfo.getActivityOnFrom(),
+						poposalAudit);
+				boolean isActivityDateToMatch = isAuditLogActivityDateToProvided(auditLogInfo.getActivityOnTo(),
+						poposalAudit);
 
-				if (isActionMatch && isAuditedByMatch
-						&& isActivityDateFromMatch && isActivityDateToMatch) {
-					proposalAuditLog.setUserName(poposalAudit.getUserProfile()
-							.getUserAccount().getUserName());
-					proposalAuditLog.setUserFullName(poposalAudit
-							.getUserProfile().getFullName());
+				if (isActionMatch && isAuditedByMatch && isActivityDateFromMatch && isActivityDateToMatch) {
+					proposalAuditLog.setUserName(poposalAudit.getUserProfile().getUserAccount().getUserName());
+					proposalAuditLog.setUserFullName(poposalAudit.getUserProfile().getFullName());
 					proposalAuditLog.setAction(poposalAudit.getAction());
-					proposalAuditLog.setActivityDate(poposalAudit
-							.getActivityDate());
+					proposalAuditLog.setActivityDate(poposalAudit.getActivityDate());
 					allAuditLogs.add(proposalAuditLog);
 				}
 			}
@@ -5030,8 +4363,7 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @return
 	 * @throws ParseException
 	 */
-	private boolean isAuditLogActivityDateToProvided(String activityOnTo,
-			AuditLog poposalAudit) throws ParseException {
+	private boolean isAuditLogActivityDateToProvided(String activityOnTo, AuditLog poposalAudit) throws ParseException {
 		if (activityOnTo != null) {
 			Date activityDateTo = formatter.parse(activityOnTo);
 			if (poposalAudit.getActivityDate().compareTo(activityDateTo) > 0) {
@@ -5055,17 +4387,15 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @return
 	 * @throws ParseException
 	 */
-	private boolean isAuditLogActivityDateFromProvided(String activityOnFrom,
-			AuditLog poposalAudit) throws ParseException {
+	private boolean isAuditLogActivityDateFromProvided(String activityOnFrom, AuditLog poposalAudit)
+			throws ParseException {
 		if (activityOnFrom != null) {
 			Date activityDateFrom = formatter.parse(activityOnFrom);
 			if (poposalAudit.getActivityDate().compareTo(activityDateFrom) > 0) {
 				return true;
-			} else if (poposalAudit.getActivityDate().compareTo(
-					activityDateFrom) < 0) {
+			} else if (poposalAudit.getActivityDate().compareTo(activityDateFrom) < 0) {
 				return false;
-			} else if (poposalAudit.getActivityDate().compareTo(
-					activityDateFrom) == 0) {
+			} else if (poposalAudit.getActivityDate().compareTo(activityDateFrom) == 0) {
 				return true;
 			}
 		} else {
@@ -5081,20 +4411,16 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param poposalAudit
 	 * @return
 	 */
-	private boolean isAuditLogAuditedByFieldProvided(String auditedBy,
-			AuditLog poposalAudit) {
+	private boolean isAuditLogAuditedByFieldProvided(String auditedBy, AuditLog poposalAudit) {
 		if (auditedBy != null) {
-			if (poposalAudit.getUserProfile().getUserAccount().getUserName()
-					.toLowerCase().contains(auditedBy.toLowerCase())) {
+			if (poposalAudit.getUserProfile().getUserAccount().getUserName().toLowerCase()
+					.contains(auditedBy.toLowerCase())) {
 				return true;
-			} else if (poposalAudit.getUserProfile().getFirstName()
-					.toLowerCase().contains(auditedBy.toLowerCase())) {
+			} else if (poposalAudit.getUserProfile().getFirstName().toLowerCase().contains(auditedBy.toLowerCase())) {
 				return true;
-			} else if (poposalAudit.getUserProfile().getMiddleName()
-					.toLowerCase().contains(auditedBy.toLowerCase())) {
+			} else if (poposalAudit.getUserProfile().getMiddleName().toLowerCase().contains(auditedBy.toLowerCase())) {
 				return true;
-			} else if (poposalAudit.getUserProfile().getLastName()
-					.toLowerCase().contains(auditedBy.toLowerCase())) {
+			} else if (poposalAudit.getUserProfile().getLastName().toLowerCase().contains(auditedBy.toLowerCase())) {
 				return true;
 			}
 		} else {
@@ -5110,11 +4436,9 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param poposalAudit
 	 * @return
 	 */
-	private boolean isAuditLogActionFieldProvided(String action,
-			AuditLog poposalAudit) {
+	private boolean isAuditLogActionFieldProvided(String action, AuditLog poposalAudit) {
 		if (action != null) {
-			if (poposalAudit.getAction().toLowerCase()
-					.contains(action.toLowerCase())) {
+			if (poposalAudit.getAction().toLowerCase().contains(action.toLowerCase())) {
 				return true;
 			}
 		} else {

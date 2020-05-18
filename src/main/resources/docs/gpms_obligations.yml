@@ -37,30 +37,72 @@ rules:
         - assign:
             - what:
                 function:
-                  name: chair_for
+                  name: get_child_user_in_policy_class
                   args: 
                     - function:
-                        name: current_user              
+                        name: get_ancestor_in_policy_class
+                        args: 
+                          - function:
+                              name: current_user
+                          - function:
+                              name: get_node
+                              args:
+                                - AcademicUnitsPolicyClass
+                                - PC
+                          - "2"        
+                    - function:
+                        name: get_node
+                        args:
+                          - AcademicUnitsPolicyClass
+                          - PC                      
               where:
                 name: Chair
                 type: UA
         - assign:
             - what:
                 function:
-                  name: dean_for
+                  name: get_child_user_in_policy_class
                   args: 
                     - function:
-                        name: current_user              
+                        name: get_ancestor_in_policy_class
+                        args: 
+                          - function:
+                              name: current_user
+                          - function:
+                              name: get_node
+                              args:
+                                - AcademicUnitsPolicyClass
+                                - PC
+                          - "4"        
+                    - function:
+                        name: get_node
+                        args:
+                          - AcademicUnitsPolicyClass
+                          - PC                  
               where:
                 name: Dean
                 type: UA
         - assign:
             - what:
                 function:
-                  name: bm_for
+                  name: get_child_user_in_policy_class
                   args: 
                     - function:
-                        name: current_user              
+                        name: get_ancestor_in_policy_class
+                        args: 
+                          - function:
+                              name: current_user
+                          - function:
+                              name: get_node
+                              args:
+                                - AcademicUnitsPolicyClass
+                                - PC
+                          - "3"        
+                    - function:
+                        name: get_node
+                        args:
+                          - AcademicUnitsPolicyClass
+                          - PC                
               where:
                 name: Business-Manager
                 type: UA 
@@ -114,10 +156,24 @@ rules:
                 name: is_node_contained_in
                 args:
                   - function:
-                      name: chair_for
-                      args:
+                      name: get_child_user_in_policy_class
+                      args: 
                         - function:
-                            name: copi_to_add 
+                            name: get_ancestor_in_policy_class
+                            args: 
+                              - function:
+                                  name: copi_to_add
+                              - function:
+                                  name: get_node
+                                  args:
+                                    - AcademicUnitsPolicyClass
+                                    - PC
+                              - "2"
+                        - function:
+                            name: get_node
+                            args:
+                              - AcademicUnitsPolicyClass
+                              - PC   
                   - function:
                       name: get_node
                       args:
@@ -126,10 +182,24 @@ rules:
           assign:
             - what:
                 function:
-                  name: chair_for
+                  name: get_child_user_in_policy_class
                   args: 
                     - function:
-                        name: copi_to_add              
+                        name: get_ancestor_in_policy_class
+                        args: 
+                          - function:
+                              name: copi_to_add
+                          - function:
+                              name: get_node
+                              args:
+                                - AcademicUnitsPolicyClass
+                                - PC
+                          - "2"        
+                    - function:
+                        name: get_node
+                        args:
+                          - AcademicUnitsPolicyClass
+                          - PC                   
               where:
                 name: Chair
                 type: UA
@@ -138,10 +208,24 @@ rules:
                 name: is_node_contained_in
                 args:
                   - function:
-                      name: dean_for
-                      args:
+                      name: get_child_user_in_policy_class
+                      args: 
                         - function:
-                            name: copi_to_add 
+                            name: get_ancestor_in_policy_class
+                            args: 
+                              - function:
+                                  name: copi_to_add
+                              - function:
+                                  name: get_node
+                                  args:
+                                    - AcademicUnitsPolicyClass
+                                    - PC
+                              - "4" 
+                        - function:
+                            name: get_node
+                            args:
+                              - AcademicUnitsPolicyClass
+                              - PC  
                   - function:
                       name: get_node
                       args:
@@ -150,10 +234,24 @@ rules:
           assign:
             - what:
                 function:
-                  name: dean_for
+                  name: get_child_user_in_policy_class
                   args: 
                     - function:
-                        name: copi_to_add              
+                        name: get_ancestor_in_policy_class
+                        args: 
+                          - function:
+                              name: copi_to_add
+                          - function:
+                              name: get_node
+                              args:
+                                - AcademicUnitsPolicyClass
+                                - PC
+                          - "4"
+                    - function:
+                        name: get_node
+                        args:
+                          - AcademicUnitsPolicyClass
+                          - PC                  
               where:
                 name: Dean
                 type: UA
@@ -162,10 +260,24 @@ rules:
                 name: is_node_contained_in
                 args:
                   - function:
-                      name: bm_for
-                      args:
+                      name: get_child_user_in_policy_class
+                      args: 
                         - function:
-                            name: copi_to_add 
+                            name: get_ancestor_in_policy_class
+                            args: 
+                              - function:
+                                  name: copi_to_add
+                              - function:
+                                  name: get_node
+                                  args:
+                                    - AcademicUnitsPolicyClass
+                                    - PC
+                              - "3"
+                        - function:
+                            name: get_node
+                            args:
+                              - AcademicUnitsPolicyClass
+                              - PC   
                   - function:
                       name: get_node
                       args:
@@ -174,10 +286,24 @@ rules:
           assign:
             - what:
                 function:
-                  name: bm_for
+                  name: get_child_user_in_policy_class
                   args: 
                     - function:
-                        name: copi_to_add              
+                        name: get_ancestor_in_policy_class
+                        args: 
+                          - function:
+                              name: copi_to_add
+                          - function:
+                              name: get_node
+                              args:
+                                - AcademicUnitsPolicyClass
+                                - PC
+                          - "3" 
+                    - function:
+                        name: get_node
+                        args:
+                          - AcademicUnitsPolicyClass
+                          - PC                                                    
               where:
                 name: Business-Manager
                 type: UA                

@@ -16,6 +16,7 @@ import gpms.model.UserInfo;
 import gpms.model.UserProfile;
 import gpms.model.UserProposalCount;
 import gpms.ngac.policy.NGACPolicyConfigurationLoader;
+import gpms.ngac.policy.PDSOperations;
 import gpms.utils.EmailUtil;
 
 import static gov.nist.csd.pm.pip.graph.model.nodes.NodeType.U;
@@ -231,30 +232,60 @@ public class UserProfileDAO extends BasicDAO<UserProfile, String> {
 		return profileQuery.asList();
 	}
 
-	public List<UserProfile> findAllUsersWithPosition()
+	public List<UserProfile> findAllUsersWithPosition(String position)
 			throws UnknownHostException {
 		Datastore ds = getDatastore();
-		Query<UserProfile> profileQuery = ds.createQuery(UserProfile.class);
-		profileQuery
-				.and(profileQuery.criteria("deleted").equal(false),
-						profileQuery.criteria("details").notEqual(null),
-						profileQuery
-								.or(profileQuery.criteria(
-										"details.position type")
-										.equalIgnoreCase(
-												"Tenured/tenure-track faculty"),
-										profileQuery
-												.criteria(
-														"details.position type")
-												.equalIgnoreCase(
-														"Non-tenure-track research faculty"),
-										profileQuery.criteria(
-												"details.position type")
-												.equalIgnoreCase(
-														"Teaching faculty")));
-		return profileQuery.retrievedFields(true, "_id", "first name",
-				"middle name", "last name").asList();
+//		Query<UserProfile> profileQuery = ds.createQuery(UserProfile.class);
+//		profileQuery
+//				.and(profileQuery.criteria("deleted").equal(false),
+//						profileQuery.criteria("details").notEqual(null),
+//						profileQuery
+//								.or(profileQuery.criteria(
+//										"details.position type")
+//										.equalIgnoreCase(
+//												"Tenured/tenure-track faculty"),
+//										profileQuery
+//												.criteria(
+//														"details.position type")
+//												.equalIgnoreCase(
+//														"Non-tenure-track research faculty"),
+//										profileQuery.criteria(
+//												"details.position type")
+//												.equalIgnoreCase(
+//														"Teaching faculty")));
+		
+		List<UserProfile> userProfiles = new ArrayList<UserProfile>();
+		try {
+			Set<String> elegibleUserNames = PDSOperations.getElegibleUsers(position);
+			for(String userName : elegibleUserNames) {
+				userProfiles.add(findAnyUserWithSameUserName(userName));
+			}
+		} catch (PMException e) {
+			e.printStackTrace();
+		}
+		return userProfiles;
+
+		
+//		for(UserProfile up : profileQuery.retrievedFields(true, "_id", "first name",
+//				"middle name", "last name").asList()) {
+////			System.out.println(up.getId());
+////			System.out.println(up.getFirstName());
+////
+////			System.out.println(up.getMiddleName());
+////
+////			System.out.println(up.getLastName());
+//
+//
+//		}
+//		return profileQuery.retrievedFields(true, "_id", "first name",
+//				"middle name", "last name").asList();
 	}
+	
+	
+	
+	
+	
+	
 	
 	private List<String> getPositionTypesWithAccessPI() throws PMException{
 		List<String> arrayOfElegiblePIs = new ArrayList<String>();

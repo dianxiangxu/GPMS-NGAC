@@ -1009,7 +1009,36 @@ public class UserService {
 			log.info("UserService::getAllUsers started");
 			HashMap<String, String> users = new HashMap<String, String>();
 			List<UserProfile> userprofiles = userProfileDAO
-					.findAllUsersWithPosition();
+					.findAllUsersWithPosition("CoPI-Eligible Faculty");
+			for (UserProfile userProfile : userprofiles) {
+				users.put(userProfile.getId().toString(),
+						userProfile.getFullName());
+			}
+			ObjectMapper mapper = new ObjectMapper();
+			return Response
+					.status(Response.Status.OK)
+					.entity(mapper.writerWithDefaultPrettyPrinter()
+							.writeValueAsString(users)).build();
+		} catch (Exception e) {
+			log.error("Could not get all Users error e=", e);
+		}
+		return Response
+				.status(Response.Status.BAD_REQUEST)
+				.entity("{\"error\": \"Could Not Get All Users\", \"status\": \"FAIL\"}")
+				.build();
+	}
+	@POST
+	@Path("/GetAllSPUserDropdown")
+	@ApiOperation(value = "Get All Users", notes = "This API gets all active Users to bind in dropdowns")
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, message = "Success: { User Info }"),
+			@ApiResponse(code = 400, message = "Failed: { \"error\":\"error description\", \"status\": \"FAIL\" }") })
+	public Response getAllSPUsers() {
+		try {
+			log.info("UserService::getAllUsers started");
+			HashMap<String, String> users = new HashMap<String, String>();
+			List<UserProfile> userprofiles = userProfileDAO
+					.findAllUsersWithPosition("SP-Eligible Faculty");
 			for (UserProfile userProfile : userprofiles) {
 				users.put(userProfile.getId().toString(),
 						userProfile.getFullName());
