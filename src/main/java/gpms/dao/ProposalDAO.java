@@ -902,7 +902,9 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 			addPIAndCoPISignaturesToSignatureList(signatures, investigators, proposalSignatures, proposal
 					.getInvestigatorInfo().getPIByName(PDSOperations.getUserChildrenInGraph("PI", memGraph).get(0)),
 					"PI");
-			for (String userName : PDSOperations.getUserChildrenInGraph("CoPI", memGraph)) {
+			for (String userName : PDSOperations.getUserChildrenInGraph("CoPI", memGraph)) 
+			{
+				System.out.println(userName);
 				addPIAndCoPISignaturesToSignatureList(signatures, investigators, proposalSignatures,
 						proposal.getInvestigatorInfo().getCoPIByName(userName), "Co-PI");
 			}

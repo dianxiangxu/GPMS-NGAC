@@ -529,25 +529,19 @@
      },
   {
     "operations": [
-         "assign-u-to",
-         "deassign-u-to"
+         "add-copi",
+         "delete-copi"
         ],
        "source": "PI", 
        "target": "CoPI"  
      },    
      {
     "operations": [
-         "assign-u-from"
+         "add-sp",
+         "delete-sp"
         ],
        "source": "PI", 
        "target": "SP"  
-     },
-          {
-    "operations": [
-         "assign-u-from"
-        ],
-       "source": "PI", 
-       "target": "CoPI-Eligible Faculty"  
      },
      {
        "operations": [
@@ -565,16 +559,16 @@
      },
   {
        "operations": [
-         "assign-u-to",
-   "deassign-u-to"
+         "add-sp",
+         "delete-sp"
         ],
        "source": "CoPI",
        "target": "SP"  
      },
   {
        "operations": [
-         "assign-u-to",
-   "deassign-u-to"
+         "add-sp",
+         "delete-sp"
         ],
        "source": "PI",
        "target": "SP"  

@@ -4,6 +4,8 @@ rules:
     event:
       subject:
         anyUser:
+      policyClass: 
+        policyClass: EligibilityPolicyClass
       operations:
         - create
       target:
@@ -110,6 +112,8 @@ rules:
     event:
       subject:
         anyUser:
+      policyClass: 
+        policyClass: EditingPolicyClass
       operations:
         - add-copi
       target:
@@ -310,6 +314,8 @@ rules:
   - label: submit_proposal
     event:
       subject:
+      policyClass: 
+        policyClass: EditingPolicyClass
       operations:
         - submit
       target:
@@ -354,7 +360,8 @@ rules:
                   - function:
                       name: current_user
             operations:
-               - assign-u-from
+               - add-copi
+               - delete-copi
             target:
               complement: false
               containers:
@@ -366,7 +373,7 @@ rules:
               name: CoPI
               type: UA              
             operations:
-              - assign-u-to
+              - add-sp
             target:
               complement: false
               containers:
@@ -378,7 +385,7 @@ rules:
               name: CoPI
               type: UA
             operations:
-              - deassign-u-to
+              - delete-sp
             target:
               complement: false
               containers:
@@ -446,11 +453,14 @@ rules:
               - function:
                   name: to_props
                   args:
-                    - approved=true                                                             
+                    - approved=true
+                    - required=true                                                             
   - label: add_sp
     event:
       subject:
         anyUser:
+      policyClass: 
+        policyClass: EditingPolicyClass
       operations:
         - add-sp
       target:
@@ -495,6 +505,8 @@ rules:
   - label: delete_copi
     event:
       subject:
+      policyClass: 
+        policyClass: EditingPolicyClass
       operations:
         - delete-copi
       target:
@@ -522,24 +534,52 @@ rules:
                         args:
                           - function:
                               name: copi_to_delete
-                    - CoPI 
+                    - CoPI                                   
         - condition!:
             - function:
                 name: is_node_in_list
                 args:
                   - function:
-                      name: chair_for
-                      args:
+                      name: get_child_user_in_policy_class
+                      args: 
                         - function:
-                            name: copi_to_delete
-                  - function:
-                      name: chairs_for
-                      args:
+                            name: get_ancestor_in_policy_class
+                            args: 
+                              - function:
+                                  name: copi_to_delete
+                              - function:
+                                  name: get_node
+                                  args:
+                                    - AcademicUnitsPolicyClass
+                                    - PC
+                              - "2"
                         - function:
-                            name: get_children
+                            name: get_node
                             args:
-                              - CoPI
-                              - UA 
+                              - AcademicUnitsPolicyClass
+                              - PC  
+                  - function:
+                      name: get_children_users_in_policy_class
+                      args: 
+                        - function:
+                            name: get_ancestors_in_policy_class
+                            args: 
+                              - function:
+                                  name: get_node
+                                  args:
+                                    - CoPI
+                                    - UA
+                              - function:
+                                  name: get_node
+                                  args:
+                                    - AcademicUnitsPolicyClass
+                                    - PC
+                              - "2"
+                        - function:
+                            name: get_node
+                            args:
+                              - AcademicUnitsPolicyClass
+                              - PC  
             - function:
                 name: compare_node_names
                 args:
@@ -547,33 +587,398 @@ rules:
                       name: get_node_name
                       args:
                         - function:
-                            name: chair_for
+                            name: get_child_user_in_policy_class
                             args: 
                               - function:
-                                  name: copi_to_delete    
+                                  name: get_ancestor_in_policy_class
+                                  args: 
+                                    - function:
+                                        name: copi_to_delete
+                                    - function:
+                                        name: get_node
+                                        args:
+                                          - AcademicUnitsPolicyClass
+                                          - PC
+                                    - "2"
+                              - function:
+                                  name: get_node
+                                  args:
+                                    - AcademicUnitsPolicyClass
+                                    - PC 
                   - function:
                       name: get_node_name
                       args:
                         - function:
-                            name: chair_for
+                            name: get_child_user_in_policy_class
                             args: 
                               - function:
-                                  name: current_user        
+                                  name: get_ancestor_in_policy_class
+                                  args: 
+                                    - function:
+                                        name: current_user
+                                    - function:
+                                        name: get_node
+                                        args:
+                                          - AcademicUnitsPolicyClass
+                                          - PC
+                                    - "2"
+                              - function:
+                                  name: get_node
+                                  args:
+                                    - AcademicUnitsPolicyClass
+                                    - PC  
+            - function:
+                name: compare_node_names
+                args:
+                  - function:
+                      name: get_node_name
+                      args:
+                        - function:
+                            name: get_child_user_in_policy_class
+                            args: 
+                              - function:
+                                  name: get_ancestor_in_policy_class
+                                  args: 
+                                    - function:
+                                        name: copi_to_delete
+                                    - function:
+                                        name: get_node
+                                        args:
+                                          - AcademicUnitsPolicyClass
+                                          - PC
+                                    - "2"
+                              - function:
+                                  name: get_node
+                                  args:
+                                    - AcademicUnitsPolicyClass
+                                    - PC 
+                  - function:
+                      name: get_child
+                      args:
+                        - "PI"
           delete:
             assignments:
               - what:
                   function:
-                    name: chair_for
+                    name: get_child_user_in_policy_class
                     args: 
                       - function:
-                          name: copi_to_delete              
+                          name: get_ancestor_in_policy_class
+                          args: 
+                            - function:
+                                name: copi_to_delete
+                            - function:
+                                name: get_node
+                                args:
+                                  - AcademicUnitsPolicyClass
+                                  - PC
+                            - "2"
+                      - function:
+                          name: get_node
+                          args:
+                            - AcademicUnitsPolicyClass
+                            - PC          
                 where:
                   name: Chair
-                  type: UA      
+                  type: UA 
+        - condition!:
+            - function:
+                name: is_node_in_list
+                args:
+                  - function:
+                      name: get_child_user_in_policy_class
+                      args: 
+                        - function:
+                            name: get_ancestor_in_policy_class
+                            args: 
+                              - function:
+                                  name: copi_to_delete
+                              - function:
+                                  name: get_node
+                                  args:
+                                    - AcademicUnitsPolicyClass
+                                    - PC
+                              - "4"
+                        - function:
+                            name: get_node
+                            args:
+                              - AcademicUnitsPolicyClass
+                              - PC  
+                  - function:
+                      name: get_children_users_in_policy_class
+                      args: 
+                        - function:
+                            name: get_ancestors_in_policy_class
+                            args: 
+                              - function:
+                                  name: get_node
+                                  args:
+                                    - CoPI
+                                    - UA
+                              - function:
+                                  name: get_node
+                                  args:
+                                    - AcademicUnitsPolicyClass
+                                    - PC
+                              - "4"
+                        - function:
+                            name: get_node
+                            args:
+                              - AcademicUnitsPolicyClass
+                              - PC  
+            - function:
+                name: compare_node_names
+                args:
+                  - function:
+                      name: get_node_name
+                      args:
+                        - function:
+                            name: get_child_user_in_policy_class
+                            args: 
+                              - function:
+                                  name: get_ancestor_in_policy_class
+                                  args: 
+                                    - function:
+                                        name: copi_to_delete
+                                    - function:
+                                        name: get_node
+                                        args:
+                                          - AcademicUnitsPolicyClass
+                                          - PC
+                                    - "4"
+                              - function:
+                                  name: get_node
+                                  args:
+                                    - AcademicUnitsPolicyClass
+                                    - PC 
+                  - function:
+                      name: get_node_name
+                      args:
+                        - function:
+                            name: get_child_user_in_policy_class
+                            args: 
+                              - function:
+                                  name: get_ancestor_in_policy_class
+                                  args: 
+                                    - function:
+                                        name: current_user
+                                    - function:
+                                        name: get_node
+                                        args:
+                                          - AcademicUnitsPolicyClass
+                                          - PC
+                                    - "4"
+                              - function:
+                                  name: get_node
+                                  args:
+                                    - AcademicUnitsPolicyClass
+                                    - PC  
+            - function:
+                name: compare_node_names
+                args:
+                  - function:
+                      name: get_node_name
+                      args:
+                        - function:
+                            name: get_child_user_in_policy_class
+                            args: 
+                              - function:
+                                  name: get_ancestor_in_policy_class
+                                  args: 
+                                    - function:
+                                        name: copi_to_delete
+                                    - function:
+                                        name: get_node
+                                        args:
+                                          - AcademicUnitsPolicyClass
+                                          - PC
+                                    - "4"
+                              - function:
+                                  name: get_node
+                                  args:
+                                    - AcademicUnitsPolicyClass
+                                    - PC 
+                  - function:
+                      name: get_child
+                      args:
+                        - "PI"
+          delete:
+            assignments:
+              - what:
+                  function:
+                    name: get_child_user_in_policy_class
+                    args: 
+                      - function:
+                          name: get_ancestor_in_policy_class
+                          args: 
+                            - function:
+                                name: copi_to_delete
+                            - function:
+                                name: get_node
+                                args:
+                                  - AcademicUnitsPolicyClass
+                                  - PC
+                            - "4"
+                      - function:
+                          name: get_node
+                          args:
+                            - AcademicUnitsPolicyClass
+                            - PC         
+                where:
+                  name: Dean
+                  type: UA 
+        - condition!:
+            - function:
+                name: is_node_in_list
+                args:
+                  - function:
+                      name: get_child_user_in_policy_class
+                      args: 
+                        - function:
+                            name: get_ancestor_in_policy_class
+                            args: 
+                              - function:
+                                  name: copi_to_delete
+                              - function:
+                                  name: get_node
+                                  args:
+                                    - AcademicUnitsPolicyClass
+                                    - PC
+                              - "3"
+                        - function:
+                            name: get_node
+                            args:
+                              - AcademicUnitsPolicyClass
+                              - PC  
+                  - function:
+                      name: get_children_users_in_policy_class
+                      args: 
+                        - function:
+                            name: get_ancestors_in_policy_class
+                            args: 
+                              - function:
+                                  name: get_node
+                                  args:
+                                    - CoPI
+                                    - UA
+                              - function:
+                                  name: get_node
+                                  args:
+                                    - AcademicUnitsPolicyClass
+                                    - PC
+                              - "3"
+                        - function:
+                            name: get_node
+                            args:
+                              - AcademicUnitsPolicyClass
+                              - PC  
+            - function:
+                name: compare_node_names
+                args:
+                  - function:
+                      name: get_node_name
+                      args:
+                        - function:
+                            name: get_child_user_in_policy_class
+                            args: 
+                              - function:
+                                  name: get_ancestor_in_policy_class
+                                  args: 
+                                    - function:
+                                        name: copi_to_delete
+                                    - function:
+                                        name: get_node
+                                        args:
+                                          - AcademicUnitsPolicyClass
+                                          - PC
+                                    - "3"
+                              - function:
+                                  name: get_node
+                                  args:
+                                    - AcademicUnitsPolicyClass
+                                    - PC 
+                  - function:
+                      name: get_node_name
+                      args:
+                        - function:
+                            name: get_child_user_in_policy_class
+                            args: 
+                              - function:
+                                  name: get_ancestor_in_policy_class
+                                  args: 
+                                    - function:
+                                        name: current_user
+                                    - function:
+                                        name: get_node
+                                        args:
+                                          - AcademicUnitsPolicyClass
+                                          - PC
+                                    - "3"
+                              - function:
+                                  name: get_node
+                                  args:
+                                    - AcademicUnitsPolicyClass
+                                    - PC  
+            - function:
+                name: compare_node_names
+                args:
+                  - function:
+                      name: get_node_name
+                      args:
+                        - function:
+                            name: get_child_user_in_policy_class
+                            args: 
+                              - function:
+                                  name: get_ancestor_in_policy_class
+                                  args: 
+                                    - function:
+                                        name: copi_to_delete
+                                    - function:
+                                        name: get_node
+                                        args:
+                                          - AcademicUnitsPolicyClass
+                                          - PC
+                                    - "3"
+                              - function:
+                                  name: get_node
+                                  args:
+                                    - AcademicUnitsPolicyClass
+                                    - PC 
+                  - function:
+                      name: get_child
+                      args:
+                        - "PI"
+          delete:
+            assignments:
+              - what:
+                  function:
+                    name: get_child_user_in_policy_class
+                    args: 
+                      - function:
+                          name: get_ancestor_in_policy_class
+                          args: 
+                            - function:
+                                name: copi_to_delete
+                            - function:
+                                name: get_node
+                                args:
+                                  - AcademicUnitsPolicyClass
+                                  - PC
+                            - "3"
+                      - function:
+                          name: get_node
+                          args:
+                            - AcademicUnitsPolicyClass
+                            - PC         
+                where:
+                  name: Business-Manager
+                  type: UA     
   - label: delete_sp
     event:
       subject:
         anyUser:
+      policyClass: 
+        policyClass: EditingPolicyClass
       operations:
         - delete-sp
       target:
@@ -607,13 +1012,15 @@ rules:
     event:
       subject:
         anyUser:
+      policyClass: 
+        policyClass: EditingPolicyClass
       operations:
         - approve
       target:
         policyElements:
           - name: Chair-Approval
             type: OA
-    response:
+    response:  
       actions:
         - function:
             name: add_properties_to_node
@@ -636,7 +1043,7 @@ rules:
                   - function:
                       name: to_props
                       args:
-                        - approved=true          
+                        - approved=true        
           delete:
             associations:
               - subject:
@@ -644,7 +1051,7 @@ rules:
                   type: UA
                 target:
                   name: Approval Content
-                  type: OA
+                  type: OA 
         - condition:
             - function:
                 name: all_children_have_properties
@@ -678,7 +1085,7 @@ rules:
                   - function:
                       name: to_props
                       args:
-                        - approved=true 
+                        - approved=true  
           grant:
             subject:
               name: Business-Manager
@@ -700,7 +1107,7 @@ rules:
                   - function:
                       name: to_props
                       args:
-                        - approved=true 
+                        - approved=true  
           grant:
             subject:
               name: Business-Manager
@@ -723,7 +1130,7 @@ rules:
                   - function:
                       name: to_props
                       args:
-                        - approved=true 
+                        - approved=true  
           grant:
             subject:
               name: IRB
@@ -745,7 +1152,7 @@ rules:
                   - function:
                       name: to_props
                       args:
-                        - approved=true 
+                        - approved=true  
           grant:
             subject:
               name: IRB
@@ -755,7 +1162,7 @@ rules:
               - Disapprove
             target:
               name: Approval Content
-              type: OA   
+              type: OA 
         - condition:
             - function:
                 name: all_children_have_properties
@@ -768,7 +1175,21 @@ rules:
                   - function:
                       name: to_props
                       args:
-                        - approved=true               
+                        - approved=true  
+          condition!:
+            - function:
+                name: is_node_contained_in
+                args:
+                  - function:
+                      name: get_node
+                      args:
+                        - irbglobal
+                        - U   
+                  - function:
+                      name: get_node
+                      args:
+                        - IRB
+                        - UA                                
           assign:
             - what:
                 name: irbglobal
@@ -781,6 +1202,8 @@ rules:
     event:
       subject:
         anyUser:
+      policyClass: 
+        policyClass: EditingPolicyClass
       operations:
         - disapprove
       target:
@@ -829,6 +1252,8 @@ rules:
     event:
       subject:
         anyUser:
+      policyClass: 
+        policyClass: EditingPolicyClass
       operations:
         - approve
       target:
@@ -938,6 +1363,8 @@ rules:
     event:
       subject:
         anyUser:
+      policyClass: 
+        policyClass: EditingPolicyClass
       operations:
         - disapprove
       target:
@@ -998,6 +1425,8 @@ rules:
     event:
       subject:
         anyUser:
+      policyClass: 
+        policyClass: EditingPolicyClass
       operations:
         - approve
       target:

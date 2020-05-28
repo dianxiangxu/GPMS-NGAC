@@ -782,7 +782,8 @@ public class ProposalService {
 				irbApprovalRequired = Boolean.parseBoolean(root.get("irbApprovalRequired").textValue());
 			}
 			ObjectId id = new ObjectId(proposalId);
-			List<SignatureInfo> signatures = proposalDAO.getSignaturesOfAProposal(id, irbApprovalRequired, proposalDAO.findProposalByProposalID(id).getPolicyGraph());
+			List<SignatureInfo> signatures = proposalDAO.getSignaturesOfAProposal(id, irbApprovalRequired,
+					proposalDAO.findProposalByProposalID(id).getPolicyGraph());
 			return Response.status(Response.Status.OK)
 					.entity(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(signatures)).build();
 		} catch (Exception e) {
@@ -1196,7 +1197,6 @@ public class ProposalService {
 							log.info(sign.getDepartment() + "|" + sign.getPositionTitle() + "|" + sign.getUserName());
 						}
 
-
 						String decisionString = "";
 						EmailCommonInfo emailDetails = new EmailCommonInfo();
 						int intDecision = AbstractResult.DECISION_NOT_APPLICABLE;
@@ -1226,6 +1226,9 @@ public class ProposalService {
 											.entity("Proposal is not ready to be submitted.").build();
 
 								}
+								projectProposal.updateCoPI(userInfo.getUserName(), true);
+								existingProposal
+										.setPolicyGraph(GraphSerializer.toJson(projectProposal.getProposalPolicy()));
 								PDP pdp = pdsOperations.submitAProposal(userInfo.getUserName(),
 										existingProposal.getPolicyGraph(), irbApprovalRequired);
 								existingProposal.setPolicyGraph(GraphSerializer.toJson(pdp.getPAP().getGraphPAP()));
@@ -1253,11 +1256,11 @@ public class ProposalService {
 							if (action.equals("Approve")) {
 								approveAction(projectProposal, existingProposal, userInfo);
 							}
-							
+
 							if (action.equals("Disapprove")) {
 								disapproveAction(projectProposal, existingProposal, userInfo);
 							}
-							
+
 							if (actions.contains(action))
 								decisionString = "Permit";
 							else
@@ -1265,7 +1268,6 @@ public class ProposalService {
 							log.info("D:" + decisionString);
 						}
 						if (decisionString.equals("Permit") || AbstractResult.DECISIONS[intDecision].equals("Permit")) {
-
 
 							log.info("Pre :Action:" + action + "|Role:" + proposalRoles + "|Name:"
 									+ userInfo.getUserName() + "|Stage:" + projectProposal.getApprovalStage());
@@ -1276,7 +1278,6 @@ public class ProposalService {
 									irbApprovalRequired, requiredSignatures, emailDetails, action)) {
 
 								log.info("User Info:" + userInfo.toString());
-	
 
 								if (action.equals("Submit") && !userInfo.getUserPositionTitle()
 										.equalsIgnoreCase("University Research Administrator")) {
@@ -1300,8 +1301,6 @@ public class ProposalService {
 										projectProposal.updatePostSubmissionchanges(proposalDAO);
 									}
 								}
-
-
 
 								return Response.status(200).type(MediaType.APPLICATION_JSON)
 										.entity(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(true))
@@ -1528,7 +1527,7 @@ public class ProposalService {
 						log.info("D:" + decision);
 					} else if (action.equalsIgnoreCase("Add Co-PI")) {
 						String objectAtt = "CoPI";
-						String acRight = "assign-u-to";
+						String acRight = "add-copi";
 						decision = projectProposal.getPolicyDecision(pdsOperations, userInfo.getUserName(), acRight,
 								objectAtt);
 						/*
@@ -1539,7 +1538,7 @@ public class ProposalService {
 						 */
 					} else if (action.equalsIgnoreCase("Add Senior Personnel")) {
 						String objectAtt = "SP";
-						String acRight = "assign-u-to";
+						String acRight = "add-sp";
 						decision = projectProposal.getPolicyDecision(pdsOperations, userInfo.getUserName(), acRight,
 								objectAtt);
 //						Boolean hasPermission = pdsOperations.hasPermissionToAddAsSP(

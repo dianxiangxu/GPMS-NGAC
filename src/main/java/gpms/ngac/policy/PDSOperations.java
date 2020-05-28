@@ -53,7 +53,6 @@ import gpms.ngac.policy.customFunctions.SPToAddExecutor;
 import gpms.ngac.policy.customFunctions.SPToDeleteExecutor;
 import gpms.ngac.policy.customFunctions.AddPropertiesToNodeExecutor;
 import gpms.ngac.policy.customFunctions.AllChildrenHavePropertiesExecutor;
-import gpms.ngac.policy.customFunctions.BMForExecutor;
 import gpms.ngac.policy.customFunctions.ChairForExecutor;
 import gpms.ngac.policy.customFunctions.ChairsForExecutor;
 import gpms.ngac.policy.customFunctions.CoPIToAddExecutor;
@@ -65,7 +64,10 @@ import gpms.ngac.policy.customFunctions.DeanForExecutor;
 import gpms.ngac.policy.customFunctions.DeleteNodeExecutor;
 import gpms.ngac.policy.customFunctions.EmailExecutor;
 import gpms.ngac.policy.customFunctions.GetAncestorInPCExecutor;
+import gpms.ngac.policy.customFunctions.GetAncestorsInPCExecutor;
+import gpms.ngac.policy.customFunctions.GetChildExecutor;
 import gpms.ngac.policy.customFunctions.GetChildInPCExecutor;
+import gpms.ngac.policy.customFunctions.GetChildrenUsersInPolicyClassExecutor;
 import gpms.ngac.policy.customFunctions.HasChildrenExecutor;
 import gpms.ngac.policy.customFunctions.IRBApprovalRequired;
 import gpms.rest.UserService;
@@ -134,7 +136,7 @@ public class PDSOperations {
 		IsAllowedToBeCoPIExecutor isAllowedToBeCoPIExecutor = new IsAllowedToBeCoPIExecutor();
 		ChairForExecutor chairForExecutor = new ChairForExecutor();
 		DeanForExecutor deanForExecutor = new DeanForExecutor();
-		BMForExecutor bmForExecutor = new BMForExecutor();
+		// BMForExecutor bmForExecutor = new BMForExecutor();
 		CreateNodeExecutor1 createNodeExecutor1 = new CreateNodeExecutor1();
 		ConcatExecutor concatExecutor = new ConcatExecutor();
 		ChairsForExecutor chairsForExecutor = new ChairsForExecutor();
@@ -151,13 +153,18 @@ public class PDSOperations {
 		IRBApprovalRequired iRBApprovalRequired = new IRBApprovalRequired();
 		GetAncestorInPCExecutor getAncestorInPCExecutor = new GetAncestorInPCExecutor();
 		GetChildInPCExecutor getChildInPCExecutor = new GetChildInPCExecutor();
+		GetChildrenUsersInPolicyClassExecutor getChildrenInPCExecutor = new GetChildrenUsersInPolicyClassExecutor();
+		GetChildExecutor getChildExecutor = new GetChildExecutor();
+		GetAncestorsInPCExecutor getAncestorsInPCExecutor = new GetAncestorsInPCExecutor();
+
 		obligation = policyLoader.getObligation();
 		EPPOptions eppOptions = new EPPOptions(deleteNodeExecutor, emailExecutor, chairForExecutor, deanForExecutor,
-				bmForExecutor, isAllowedToBeCoPIExecutor, createNodeExecutor1, concatExecutor, chairsForExecutor,
+				isAllowedToBeCoPIExecutor, createNodeExecutor1, concatExecutor, chairsForExecutor,
 				areSomeNodesContainedInExecutor, compareNodesExecutor, coPIToAddExecutor, spToAddExecutor,
 				coPIToDeleteExecutor, spToDeleteExecutor, addPropertiesToNodeExecutor,
 				removePropertiesFromChildrenExecutor, allChildrenHavePropertiesExecutor, hasChildrenExecutor,
-				iRBApprovalRequired, getAncestorInPCExecutor, getChildInPCExecutor);
+				iRBApprovalRequired, getAncestorInPCExecutor, getChildInPCExecutor, getChildrenInPCExecutor,
+				getChildExecutor, getAncestorsInPCExecutor);
 		pdp = new PDP(new PAP(graph, new MemProhibitions(), new MemObligations()), eppOptions);
 		pdp.getPAP().getObligationsPAP().add(obligation, true);
 
@@ -228,17 +235,23 @@ public class PDSOperations {
 	public boolean hasPermissionToAddAsCoPI(Graph policy, String userName, String coPIApproachableUser,
 			Prohibitions prohibitions) {
 		boolean hasPermission = true;
-
+		//log.info("Graph Policy:"+ GraphSerializer.toJson(ngacPolicy));
+		String[] requiredAccessRights = new String[1];
+		requiredAccessRights[0] = "add-copi";
+		PReviewDecider decider = new PReviewDecider(policy,prohibitions);
 		HashMap map = Task.ADD_CO_PI.getPermissionsSets();
-
 		Iterator<Map.Entry<Attribute, HashSet>> itr = map.entrySet().iterator();
 
 		while (itr.hasNext()) {
 			Map.Entry<Attribute, HashSet> entry = itr.next();
 			log.info("Container = " + entry.getKey() + ", permission set = " + entry.getValue());
 			System.out.println("Container = " + entry.getKey() + ", permission set = " + entry.getValue());
-			hasPermission = hasPermission && UserPermissionChecker.checkPermissionAnyType(policy, prohibitions, "PI",
-					UA.toString(), (Attribute) entry.getKey(), new ArrayList<String>(entry.getValue()));
+			try {
+				hasPermission = hasPermission && decider.check(userName, "process" ,"CoPI", requiredAccessRights);
+			} catch (PMException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 		// try {
 		// hasPermission = hasPermission && isChildrenFound(policy,
@@ -255,7 +268,9 @@ public class PDSOperations {
 
 	public boolean hasPermissionToDeleteCoPI(Graph policy, String userName, Prohibitions prohibitions) {
 		boolean hasPermission = true;
-
+		String[] requiredAccessRights = new String[1];
+		requiredAccessRights[0] = "delete-copi";
+		PReviewDecider decider = new PReviewDecider(policy,prohibitions);
 		HashMap map = Task.DELETE_CO_PI.getPermissionsSets();
 
 		Iterator<Map.Entry<Attribute, HashSet>> itr = map.entrySet().iterator();
@@ -264,8 +279,12 @@ public class PDSOperations {
 			Map.Entry<Attribute, HashSet> entry = itr.next();
 			log.info("Container = " + entry.getKey() + ", permission set = " + entry.getValue());
 			System.out.println("Container = " + entry.getKey() + ", permission set = " + entry.getValue());
-			hasPermission = hasPermission && UserPermissionChecker.checkPermissionAnyType(policy, prohibitions,
-					userName, UA.toString(), (Attribute) entry.getKey(), new ArrayList<String>(entry.getValue()));
+			try {
+				hasPermission = hasPermission && decider.check(userName, "process" ,"CoPI", requiredAccessRights);
+			} catch (PMException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 //        try {
 //        	hasPermission = hasPermission && isChildrenFound(policy, coPIApproachableUser, Constants.CO_PI_UA_LBL);
@@ -281,7 +300,9 @@ public class PDSOperations {
 
 	public boolean hasPermissionToDeleteSP(Graph policy, String userName, Prohibitions prohibitions) {
 		boolean hasPermission = true;
-
+		String[] requiredAccessRights = new String[1];
+		requiredAccessRights[0] = "delete-sp";
+		PReviewDecider decider = new PReviewDecider(policy,prohibitions);
 		HashMap map = Task.DELETE_SP.getPermissionsSets();
 
 		Iterator<Map.Entry<Attribute, HashSet>> itr = map.entrySet().iterator();
@@ -290,8 +311,12 @@ public class PDSOperations {
 			Map.Entry<Attribute, HashSet> entry = itr.next();
 			log.info("Container = " + entry.getKey() + ", permission set = " + entry.getValue());
 			System.out.println("Container = " + entry.getKey() + ", permission set = " + entry.getValue());
-			hasPermission = hasPermission && UserPermissionChecker.checkPermissionAnyType(policy, prohibitions,
-					userName, UA.toString(), (Attribute) entry.getKey(), new ArrayList<String>(entry.getValue()));
+			try {
+				hasPermission = hasPermission && decider.check(userName, "process" ,"SP", requiredAccessRights);
+			} catch (PMException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 //        try {
 //        	hasPermission = hasPermission && isChildrenFound(policy, coPIApproachableUser, Constants.CO_PI_UA_LBL);
@@ -333,9 +358,9 @@ public class PDSOperations {
 		listOfChildren.addAll(graph.getChildren(parent));
 
 		for (String nodeName : listOfChildren) {
-			if(graph.getNode(nodeName).getType().toString().equals("U")) {
+			if (graph.getNode(nodeName).getType().toString().equals("U")) {
 				listOfChildrenUsers.add(nodeName);
-				System.out.println("ADDED: "+nodeName);
+				System.out.println("ADDED: " + nodeName);
 			}
 		}
 
@@ -349,8 +374,8 @@ public class PDSOperations {
 		listOfAdmins.add("Chair");
 		listOfAdmins.add("Dean");
 		listOfAdmins.add("Business-Manager");
-		listOfAdmins.add("Research-Admin");
-		listOfAdmins.add("Research-Director");
+		listOfAdmins.add("Research Admin");
+		listOfAdmins.add("Research Director");
 
 		return listOfAdmins;
 	}
@@ -359,9 +384,6 @@ public class PDSOperations {
 
 		List<String> listOfAdmins = new ArrayList<String>();
 		listOfAdmins.add("irbglobal");
-
-		listOfAdmins.add("racomputerscience");
-		listOfAdmins.add("directorcomputerscience");
 		return listOfAdmins;
 	}
 
@@ -419,13 +441,13 @@ public class PDSOperations {
 			proposalPolicy = policyLoader.reloadBasicConfig();
 			proposalPolicy = policyLoader.createAProposalGraph(proposalPolicy); // loads editing policy
 			proposalPolicy = policyLoader.createAprovalGraph(proposalPolicy); // loads editing policy
-			Map<String, String> properties = new HashMap<String, String>();
-			properties.put("workEmail", email);
-			properties.put("departmentChair", chairDept);
-			properties.put("departmentDean", deanDept);
-			properties.put("departmentBM", bmDept);
+			// Map<String, String> properties = new HashMap<String, String>();
+			// properties.put("workEmail", email);
+			// properties.put("departmentChair", chairDept);
+			// properties.put("departmentDean", deanDept);
+			// properties.put("departmentBM", bmDept);
 
-			proposalPolicy.updateNode(PI, properties);
+			// proposalPolicy.updateNode(PI, properties);
 
 			getPDP(proposalPolicy).getEPP()
 					.processEvent(new CreateEvent(proposalPolicy.getNode(Constants.PDS_ORIGINATING_OA)), PI, "process");
