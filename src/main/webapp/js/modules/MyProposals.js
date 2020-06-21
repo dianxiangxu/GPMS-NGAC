@@ -1088,7 +1088,6 @@ $(function() {
 				Action : buttonType,
 				
 			});
-
 			this.config.buttonType = buttonType;
 			this.ajaxCall(this.config);
 		},
@@ -1841,6 +1840,7 @@ $(function() {
 		EditProposal : function(tblID, argus) {
 			switch (tblID) {
 			case "gdvProposals":
+				
 				// $('#accordion-expand-holder').show();
 				$("#accordion").accordion("option", "active", false);
 
@@ -1870,7 +1870,12 @@ $(function() {
 				myProposal.config.researchDirectorDeletion = argus[17];
 				myProposal.config.researchAdministratorSubmission = argus[18];
 				myProposal.config.researchDirectorArchived = argus[19];
-
+				var proposal_roles = $.trim(argus[5]);
+				myProposal.config.proposalId = argus[0];
+				myProposal.config.proposalRoles = proposal_roles;
+				myProposal.config.ajaxCallMode = 155;
+				myProposal.config.arguments = argus;
+				
 				$("#txtNameOfGrantingAgency").val(argus[2]);
 
 				$("#trSignChair").show();
@@ -1939,6 +1944,19 @@ $(function() {
 						if ($(this).find("select:first").val() == 2)
 							$(this).find('input.AddCoPI').show();
 					});
+				}
+				myProposal.config.ajaxCallMode = 155;
+
+				if (proposal_roles != "") {
+					
+					myProposal.CheckUserPermissionWithProposalRole("read",
+							myProposal.config.proposalRoles,
+							myProposal.config.proposalId, "PDSs",
+							myProposal.config);
+				} else {
+					myProposal.CheckUserPermissionWithPositionTitle("read",
+							myProposal.config.proposalId, "PDSs",
+							myProposal.config);
 				}
 				break;
 			default:
@@ -2901,12 +2919,12 @@ $(function() {
 				myProposal.config.ajaxCallMode = 16;
 				myProposal.config.arguments = argus;
 				if (proposal_roles != "") {
-					myProposal.CheckUserPermissionWithProposalRole("View",
+					myProposal.CheckUserPermissionWithProposalRole("ViewLog",
 							myProposal.config.proposalRoles,
 							myProposal.config.proposalId, "Audit Log",
 							myProposal.config);
 				} else {
-					myProposal.CheckUserPermissionWithPositionTitle("View",
+					myProposal.CheckUserPermissionWithPositionTitle("ViewLog",
 							myProposal.config.proposalId, "Audit Log",
 							myProposal.config);
 				}
@@ -4982,7 +5000,24 @@ $(function() {
 						+ 'Cannot find policy rules for button! '
 						+ msg.responseText + "</p>");
 				break;
+			case 155:
+				$('#divProposalForm').hide();
+				$('#divProposalAuditGrid').hide();
+				$('#divProposalGrid').show();
+				csscody.error("<h2>" + 'Error Message' + "</h2><p>"
+						+ 'Cannot view the proposal! '
+						+ msg.responseText + "</p>");
+				// myProposal.CollapseAccordion();
+				// myProposal.SelectFirstAccordion();
 
+				myProposal.config.proposalId = '0';
+				myProposal.config.proposalRoles = "";
+				myProposal.config.buttonType = "";
+				myProposal.config.arguments = [];
+				myProposal.config.events = "";
+				myProposal.config.content = "";
+				myProposal.config.investigatorButton = "";
+				break;
 			}
 		},
 

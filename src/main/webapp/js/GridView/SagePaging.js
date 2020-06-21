@@ -5,6 +5,7 @@
 		this.rowPerPage = ''
 		this.nav = ''
 		this.rowPerPage = Rows;
+		console.log(Total);
 		this.maxPage = String((Total / this.rowPerPage));
 		if (this.maxPage.indexOf('.') > 0)
 			this.maxPage = parseInt(this.maxPage) + 1;

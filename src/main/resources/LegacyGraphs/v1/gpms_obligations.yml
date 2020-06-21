@@ -1,0 +1,131 @@
+label: GPMS Obligations
+rules:
+  - label: create_proposal
+    event:
+      subject:
+        anyUser:
+      operations:
+        - assign to
+      target:
+        policyElements:
+          - name: PDS
+            type: OA
+    response:
+      actions:
+        - assign:
+            what:
+              - function:
+                  name: current_user
+            where:
+              - name: PI
+                type: UA
+        - create:
+            what:
+              - function:
+                  name: create_node
+                  args: 
+                    - function:
+                        name: get_node_name 
+                        args:
+                          - function:
+                              name: current_user
+                    - O
+            where:
+              - name: PI-Info
+                type: OA
+  - label: add_copi
+    event:
+      subject:
+        anyUser:
+      operations:
+        - assign to
+      target:
+        policyElements:
+          - name: CoPI
+            type: UA
+    response:
+      actions:
+        - create:
+            what:
+              - function:
+                  name: create_node
+                  args: 
+                    - function:
+                        name: get_node_name 
+                        args:
+                          - function:
+                              name: child_of_assign
+                    - O
+            where:
+              - name: CoPI-Info
+                type: OA  
+  - label: add_sp
+    event:
+      subject:
+        anyUser:
+      operations:
+        - assign to
+      target:
+        policyElements:
+          - name: SP
+            type: UA
+    response:
+      actions:
+        - create:
+            what:
+              - function:
+                  name: create_node
+                  args: 
+                    - function:
+                        name: get_node_name 
+                        args:
+                          - function:
+                              name: child_of_assign
+                    - O
+            where:
+              - name: SP-Info
+                type: OA
+  - label: delete_sp
+    event:
+      subject:
+        anyUser:
+      operations:
+        - deassign from
+      target:
+        policyElements:
+          - name: SP
+            type: UA
+    response:
+      actions:
+        - delete:
+            grant:
+              subjects:
+                - name: PI
+                  type: UA 
+              operations:
+                - w
+              targets:
+                - name: PI-Editable-Data
+                  type: OA                
+  - label: submit_proposal
+    event:
+      subject:
+        anyUser:
+      operations:
+        - assign to
+      target:
+        policyElements:
+          - name: Submission-Info
+            type: OA
+    response:
+      actions:
+        - delete:
+            grant:
+              subjects:
+                - name: PI
+                  type: UA 
+              operations:    
+                - Delete
+              targets:
+                - name: PDSs
+                  type: OA   

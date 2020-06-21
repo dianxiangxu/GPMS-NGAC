@@ -1567,10 +1567,14 @@ public class ProposalService {
 						else
 							decision = "Deny";
 
-					} else if (action.equalsIgnoreCase("View")) {
-						decision = projectProposal.getPolicyDecision(pdsOperations, userInfo.getUserName(), "View",
-								"Log");
+					} else if (action.equalsIgnoreCase("ViewLog")) {
+						decision = projectProposal.getPolicyDecision(pdsOperations, userInfo.getUserName(), "ViewLog",
+								"Audit Log");
 						log.info("Decisiong for viewing log: " + decision);
+					}else if (action.equalsIgnoreCase("read")) {
+						decision = projectProposal.getPolicyDecision(pdsOperations, userInfo.getUserName(), "read",
+								"PDSs");
+						log.info("Decisiong for viewing PDSs: " + decision);
 					} else {
 						BalanaConnector ac = new BalanaConnector();
 						decision = ac.getXACMLdecision(attrMap);

@@ -1,0 +1,319 @@
+{    "nodes" : [
+ {
+      "name": "EligibilityPolicyClass",
+      "type": "PC",
+      "properties": {
+        "default_ua": "HR",
+        "default_oa": "OSP"
+      }
+    },
+  
+ {
+      "name": "Faculty",
+      "type": "UA",
+      "properties": {}
+    },
+ 
+    {
+      "name": "PI-Eligible Faculty",
+      "type": "UA",
+      "properties": {}
+    },
+ 
+ {
+      "name": "CoPI-Eligible Faculty",
+      "type": "UA",
+      "properties": {}
+    },
+ 
+ {
+      "name": "SP-Eligible Faculty",
+      "type": "UA",
+      "properties": {}
+    },
+ 
+ {
+      "name": "Non-Tenure-Track Faculty",
+      "type": "UA",
+      "properties": {}
+    },
+ 
+ {
+      "name": "Tenure-Track/Tenured Faculty",
+      "type": "UA",
+      "properties": {}
+    },
+ 
+ {
+      "name": "Tenured Faculty",
+      "type": "UA",
+      "properties": {}
+    }, 
+ {
+      "name": "Tenure-Track Faculty",
+      "type": "UA",
+      "properties": {}
+    }, 
+ 
+ {
+      "name": "Research Faculty",
+      "type": "UA",
+      "properties": {}
+    },
+ {
+      "name": "Teaching Faculty",
+      "type": "UA",
+      "properties": {}
+    },
+    
+    {
+      "name": "Clinical Faculty",
+      "type": "UA",
+      "properties": {}
+    },
+ 
+ {
+      "name": "Adjunct Faculty",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "PDS",
+      "type": "OA",
+      "properties": {}
+    },
+    {
+      "name": "nazmul",
+      "type": "U",
+      "properties": {}
+    },
+ {
+      "name": "tomtom",
+      "type": "U",
+      "properties": {}
+    },  
+ 
+  {
+      "name": "liliana",
+      "type": "U",
+      "properties": {}
+    },
+     {
+      "name": "amy",
+      "type": "U",
+      "properties": {}
+    },    
+    {
+      "name": "samer",
+      "type": "U",
+      "properties": {}
+    },    
+    {
+      "name": "milson",
+      "type": "U",
+      "properties": {}
+    },    
+    {
+      "name": "edmund",
+      "type": "U",
+      "properties": {}
+    },  
+    {
+      "name": "vlad",
+      "type": "U",
+      "properties": {}
+    },   
+    {
+      "name": "tamanna",
+      "type": "U",
+      "properties": {}
+    },    
+    {
+      "name": "selena",
+      "type": "U",
+      "properties": {}
+    },    
+    {
+      "name": "NickC",
+      "type": "U",
+      "properties": {}
+    }
+ 
+ ],
+ 
+ "assignments":[
+ 
+    {
+      "source": "Faculty",
+      "target": "EligibilityPolicyClass"  
+    },
+ {
+      "source": "PI-Eligible Faculty",
+      "target": "EligibilityPolicyClass"  
+    },
+ {
+      "source": "CoPI-Eligible Faculty", 
+      "target": "EligibilityPolicyClass"  
+    },
+ {
+      "source": "NickC", 
+      "target": "Teaching Faculty"  
+    },
+ {
+      "source": "selena", 
+      "target": "Teaching Faculty" 
+    },
+ {
+      "source": "tamanna", 
+      "target": "Tenured Faculty" 
+    },
+ {
+      "source": "edmund", 
+      "target": "Research Faculty" 
+    },
+ {
+      "source": "milson", 
+      "target": "Research Faculty" 
+    },
+ {
+      "source": "amy", 
+      "target": "Adjunct Faculty"  
+    },
+    {
+      "source": "samer", 
+      "target": "Research Faculty"  
+    },
+    {
+      "source": "vlad", 
+      "target": "Adjunct Faculty"  
+    },    
+    {
+      "source": "vlad", 
+      "target": "SP-Eligible Faculty"  
+    },
+ {
+      "source": "SP-Eligible Faculty", 
+      "target": "EligibilityPolicyClass"  
+    },
+   
+    {
+      "source": "Adjunct Faculty", 
+      "target": "Faculty" 
+    },
+ 
+ {
+      "source": "Non-Tenure-Track Faculty",
+      "target": "Faculty" 
+    },
+ 
+ {
+      "source": "Tenure-Track/Tenured Faculty", 
+      "target": "Faculty" 
+    },
+ 
+ {
+      "source": "Tenured Faculty",   
+      "target": "Tenure-Track/Tenured Faculty"    
+    },
+ {
+      "source": "Tenure-Track Faculty",   
+      "target": "Tenure-Track/Tenured Faculty"    
+    },
+ {
+      "source": "Teaching Faculty",  
+      "target": "Non-Tenure-Track Faculty"   
+    },
+    {
+      "source": "Research Faculty",  
+      "target": "Non-Tenure-Track Faculty"   
+    },
+ {
+      "source": "Clinical Faculty",  
+      "target": "Non-Tenure-Track Faculty"   
+    },
+ 
+ {
+      "source": "Tenure-Track/Tenured Faculty",   
+      "target": "PI-Eligible Faculty"  
+    },
+ 
+ {
+      "source": "Research Faculty",   
+      "target": "PI-Eligible Faculty"  
+    },
+ 
+ {
+      "source": "Non-Tenure-Track Faculty",  
+      "target": "CoPI-Eligible Faculty"  
+    },
+ 
+ {
+      "source": "Tenure-Track/Tenured Faculty", 
+      "target": "CoPI-Eligible Faculty"  
+    },
+ 
+ {
+      "source": "Tenure-Track/Tenured Faculty", 
+      "target": "SP-Eligible Faculty"  
+    },
+ 
+ {
+      "source": "Non-Tenure-Track Faculty",
+      "target": "SP-Eligible Faculty"  
+    },
+    
+ {
+      "source": "super_ua1", 
+      "target": "EligibilityPolicyClass"  
+    },
+ 
+ {
+      "source": "nazmul", 
+      "target": "Tenure-Track Faculty" 
+    },
+ 
+ {
+      "source": "tomtom", 
+      "target": "Teaching Faculty"
+    },
+ {
+      "source": "liliana", 
+      "target": "Research Faculty"
+    },
+    
+ {
+      "source": "PDS", 
+      "target": "EligibilityPolicyClass"  
+    }
+ 
+ ],
+ 
+ "associations":
+ [
+ {
+      "operations": [
+        "*"
+      ],
+      "source": "super_ua1",   
+      "target": "PDS" 
+    },
+  {
+      "operations": [
+        "*"
+      ],
+      "source": "super_ua1",
+      "target": "Faculty" 
+    },
+ 
+    {
+      "operations": [
+        "create"
+      ],
+      "source": "PI-Eligible Faculty", 
+      "target": "PDS"  
+    }
+    
+ 
+ ]
+ 
+} 

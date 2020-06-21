@@ -1,0 +1,565 @@
+{    "nodes" : [
+	{
+      "id": 6588474352522051738,
+      "name": "University Organization",
+      "type": "PC",
+      "properties": {
+        
+      }
+    },
+	{
+      "id": -2407171345681856418,
+      "name": "HR",
+      "type": "UA",
+      "properties": {
+      }
+    },
+	
+	{
+      "id": 468830104550723231,
+      "name": "OSP",
+      "type": "UA",
+      "properties": {
+      }
+    },
+		
+	{
+      "id": -4225605595362871987,
+      "name": "colleges",
+      "type": "UA",
+      "properties": {}
+    },
+		
+	 {
+      "id": -3827208593481533860,
+      "name": "COEN",
+      "type": "UA",
+      "properties": {}
+    },
+	  {
+      "id": 4634365383664859031,
+      "name": "COAS",
+      "type": "UA",
+      "properties": {}
+    },
+	
+	{
+      "id": 2163593328410663036,
+      "name": "Research Admin",
+      "type": "UA",
+      "properties": {}
+    },
+	
+	{
+      "id": -4014767058954776283,
+      "name": "Research Director",
+      "type": "UA",
+      "properties": {}
+    },
+	{
+      "id": -7100363777565732413,
+      "name": "IRB",
+      "type": "UA",
+      "properties": {}
+    },
+	
+	{
+      "id": -4785020809954839442,
+      "name": "COAS Dean",
+      "type": "UA",
+      "properties": {
+        "dean": "COAS"
+      }
+    },
+	{
+      "id": -5548645679822329594,
+      "name": "COEN Dean",
+      "type": "UA",
+      "properties": {
+        "dean": "COEN"
+      }
+    },
+    
+	 {
+      "id": -3398397769932174121,
+      "name": "CS Chair",
+      "type": "UA",
+      "properties": {
+        "chair": "CS"
+      }
+    },
+	{
+      "id": 1494896189709888253,
+      "name": "CE Chair",
+      "type": "UA",
+      "properties": {
+        "chair": "CE"
+      }
+    },
+	{
+      "id": 3876709696137897047,
+      "name": "CE Business Manager",
+      "type": "UA",
+      "properties": {
+        "chair": "CE"
+      }
+    },
+	{
+      "id": 2068436678544278583,
+      "name": "ECE Chair",
+      "type": "UA",
+      "properties": {
+        "chair": "ECE"
+      }
+    },
+	 {
+      "id": 3918382103089094743,
+      "name": "PHYSICS Chair",
+      "type": "UA",
+      "properties": {
+        "chair": "PHYSICS"
+      }
+    },
+    
+    {
+      "id": 3452974349944313,
+      "name": "CHEMISTRY Chair",
+      "type": "UA",
+      "properties": {
+        "chair": "CHEMISTRY"
+      }
+    },
+	
+	{
+      "id": 1616667271637025064,
+      "name": "CS Business Manager",
+      "type": "UA",
+      "properties": {}
+    },
+	{
+      "id": 3941587421454889623,
+      "name": "CHEMISTRY Business Manager",
+      "type": "UA",
+      "properties": {}
+    },
+	{
+      "id": -546201459535537643,
+      "name": "ECE Business Manager",
+      "type": "UA",
+      "properties": {}
+    },
+	{
+      "id": -3893882683476287343,
+      "name": "PHYSICS Business Manager",
+      "type": "UA",
+      "properties": {}
+    },
+	
+	{
+      "id": -7031673001826632717,
+      "name": "ECE",
+      "type": "UA",
+      "properties": {}
+    },
+	{
+      "id": -7329081160781035690,
+      "name": "CS",
+      "type": "UA",
+      "properties": {}
+    },
+	{
+      "id": 953797490230333931,
+      "name": "CE",
+      "type": "UA",
+      "properties": {}
+    },
+    
+	{
+      "id": 6159912223249768137,
+      "name": "CHEMISTRY",
+      "type": "UA",
+      "properties": {}
+    },
+	 {
+      "id": -8560546373184779058,
+      "name": "PHYSICS",
+      "type": "UA",
+      "properties": {}
+    },
+	{
+      "id": 3937856505754651961,
+      "name": "deancomputerscience",
+      "type": "U",
+      "properties": {}
+    },
+	{
+      "id": 40,
+      "name": "deancomputerengineering",
+      "type": "U",
+      "properties": {}
+    },
+	{
+      "id": 41,
+      "name": "deanelectricalengineering",
+      "type": "U",
+      "properties": {}
+    },
+	
+    {
+      "id": 42,
+      "name": "deanphysics1",
+      "type": "U",
+      "properties": {}
+    },
+	{
+      "id": 43,
+      "name": "deanchemistry1",
+      "type": "U",
+      "properties": {}
+    },
+	{
+      "id": 44,
+      "name": "chaircomputerscience",
+      "type": "U",
+      "properties": {}
+    },
+	{
+      "id": 45,
+      "name": "bmcomputerscience",
+      "type": "U",
+      "properties": {}
+    },
+	{
+      "id": 46,
+      "name": "chaircomputerengineering",
+      "type": "U",
+      "properties": {}
+    },
+	{
+      "id": 47,
+      "name": "bmcomputerengineering1",
+      "type": "U",
+      "properties": {}
+    },
+	{
+      "id": 48,
+      "name": "chairelectricalengineering",
+      "type": "U",
+      "properties": {}
+    },
+	{
+      "id": 49,
+      "name": "bmelectricalengineering",
+      "type": "U",
+      "properties": {}
+    },
+	{
+      "id": 50,
+      "name": "chairphysics1",
+      "type": "U",
+      "properties": {}
+    },
+	{
+      "id": 51,
+      "name": "bmphysics1",
+      "type": "U",
+      "properties": {}
+    },
+	{
+      "id": 52,
+      "name": "chairchemistry",
+      "type": "U",
+      "properties": {}
+    },
+	{
+      "id": 53,
+      "name": "bmchemistry1",
+      "type": "U",
+      "properties": {}
+    },
+	{
+      "id": 54,
+      "name": "racomputerscience",
+      "type": "U",
+      "properties": {}
+    },
+	{
+      "id": 55,
+      "name": "directorcomputerscience",
+      "type": "U",
+      "properties": {}
+    },
+	{
+      "id": 56,
+      "name": "irbglobal",
+      "type": "U",
+      "properties": {}
+    }
+	
+   
+	],
+	
+	"assignments":[
+	
+	{
+      "sourceID": -7329081160781035690, 
+      "targetID": -3827208593481533860  
+    },
+	 {
+      "sourceID": -7031673001826632717, 
+      "targetID": -3827208593481533860  
+    },
+	{
+      "sourceID": 953797490230333931, 
+      "targetID": -3827208593481533860  
+    },
+	{
+      "sourceID": 1494896189709888253, 
+      "targetID": 953797490230333931  
+    },
+	{
+      "sourceID": 3876709696137897047, 
+      "targetID": 953797490230333931  
+    },
+	{
+      "sourceID": 6159912223249768137,  
+      "targetID": 4634365383664859031   
+    },
+	{
+      "sourceID": -8560546373184779058, 
+      "targetID": 4634365383664859031   
+    },
+	 	
+	 {
+      "sourceID": -4785020809954839442,  
+      "targetID": 4634365383664859031  
+    },
+	
+	{
+      "sourceID": -5548645679822329594,
+      "targetID": -3827208593481533860 
+    },
+	
+     {
+      "sourceID": 3452974349944313,  
+      "targetID": 6159912223249768137  
+    },
+	
+	 {
+      "sourceID": 3941587421454889623, 
+      "targetID": 6159912223249768137  
+    },
+   
+	 {
+      "sourceID": -3398397769932174121,  
+      "targetID": -7329081160781035690   
+    },
+	{
+	  "sourceID": 7890168025809137159,  
+      "targetID": -7329081160781035690  
+	},
+	{
+      "sourceID": 1616667271637025064,   
+      "targetID": -7329081160781035690   
+    },
+	 
+	{
+      "sourceID": 3918382103089094743,  
+      "targetID": -8560546373184779058  
+    },
+	
+	{
+      "sourceID": -3893882683476287343,  
+      "targetID": -8560546373184779058  
+    },
+
+	{
+      "sourceID": 2068436678544278583,  
+      "targetID": -7031673001826632717  
+    },
+	
+	{
+      "sourceID": -546201459535537643,  
+      "targetID": -7031673001826632717  
+    },
+	
+	{
+      "sourceID": -3827208593481533860, 
+      "targetID": -4225605595362871987  
+    },
+      
+    {
+      "sourceID": 4634365383664859031,  
+      "targetID": -4225605595362871987  
+    },
+	
+	{
+      "sourceID": 2163593328410663036,  
+      "targetID": 468830104550723231    
+    },
+	{
+      "sourceID": -4014767058954776283, 
+      "targetID": 468830104550723231    
+    },
+	{
+      "sourceID": -7100363777565732413, 
+      "targetID": 468830104550723231    
+    },
+     {
+      "sourceID": -4225605595362871987, 
+      "targetID": 6588474352522051738   
+    },
+	
+    {
+      "sourceID": -2407171345681856418, 
+      "targetID": 6588474352522051738   
+    },
+	
+	{
+      "sourceID": 468830104550723231,  
+      "targetID": 6588474352522051738   
+    },
+    
+    
+	{
+      "sourceID": 6674456450717933892,  
+      "targetID": 6588474352522051738   
+    },
+	
+	
+	{
+      "sourceID": -5060873034783971306,  
+      "targetID": 6159912223249768137   
+    },
+	
+	{
+      "sourceID": 3080953031002080322,  
+      "targetID": -7329081160781035690   
+    }, 
+    {
+      "sourceID": 31,  
+      "targetID": -7031673001826632717   
+    },
+	{
+      "sourceID": 36,  
+      "targetID": -8560546373184779058   
+    },
+	{
+      "sourceID": 35,  
+      "targetID": 6159912223249768137  
+    },
+	{
+      "sourceID": 34,  
+      "targetID": -7329081160781035690  
+    },
+	{
+      "sourceID": 33,  
+      "targetID": -7329081160781035690  
+    },
+	{
+      "sourceID": 32,  
+      "targetID": -7329081160781035690  
+    },
+	{
+      "sourceID": 3937856505754651961,  
+      "targetID": -5548645679822329594   
+    },
+	{
+      "sourceID": 40,  
+      "targetID": -5548645679822329594   
+    },
+	{
+      "sourceID": 41,  
+      "targetID": -5548645679822329594   
+    },
+	{
+      "sourceID": 42,  
+      "targetID": -4785020809954839442   
+    },
+	{
+      "sourceID": 43,  
+      "targetID": -4785020809954839442   
+    },
+	{
+      "sourceID": 44,  
+      "targetID": -3398397769932174121  
+    },
+	{
+      "sourceID": 45,  
+      "targetID": 1616667271637025064   
+    },
+	{
+      "sourceID": 46,  
+      "targetID": 1494896189709888253   
+    },
+	{
+      "sourceID": 47,  
+      "targetID": 3876709696137897047  
+    },
+	{
+      "sourceID": 48,  
+      "targetID": 2068436678544278583   
+    },
+	{
+      "sourceID": 49,  
+      "targetID": -546201459535537643   
+    },
+	{
+      "sourceID": 50,  
+      "targetID": 3918382103089094743   
+    },
+	{
+      "sourceID": 51,  
+      "targetID": -3893882683476287343   
+    },
+	{
+      "sourceID": 52,  
+      "targetID": 3452974349944313 
+    },
+	{
+      "sourceID": 53,  
+      "targetID": 3941587421454889623 
+    },
+	{
+      "sourceID": 54,  
+      "targetID": 2163593328410663036 
+    },
+	{
+      "sourceID": 55,  
+      "targetID": -4014767058954776283 
+    },
+	{
+      "sourceID": 56,  
+      "targetID": -7100363777565732413
+    }
+	
+	],
+	
+	"associations":
+	[
+	{
+      "operations": [
+        "*"
+      ],
+      "sourceID": 6674456450717933892,  
+      "targetID": -4225605595362871987  
+    },
+	 {
+      "operations": [
+        "*"
+      ],
+      "sourceID": 6674456450717933892,  
+      "targetID": -2407171345681856418  
+    },
+	{
+      "operations": [
+        "*"
+      ],
+      "sourceID": 6674456450717933892,  
+      "targetID": 468830104550723231    
+    }
+    
+	
+	]
+	
+}	

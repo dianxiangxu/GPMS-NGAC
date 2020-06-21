@@ -85,6 +85,7 @@ $(function() {
 			return false;
 		},
 		UserProposalGetAllCountSuccess : function(msg) {
+			console.log("Count from home.js"+msg.totalProposalCount);
 			$("#spanTotalProposal").html(msg.totalProposalCount);
 			$("#spanPICount").html(msg.piCount);
 			$("#spanCoPICount").html(msg.coPICount);

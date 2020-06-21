@@ -54,8 +54,8 @@ public class NGACPolicyConfigurationLoader {
 			File file_proposal_creation = getFileFromResources(Constants.POLICY_CONFIG_FILE_PROPOSAL_CREATION);
 			File file_university_org = getFileFromResources(Constants.POLICY_CONFIG_FILE_UNIVERSITY_ORGANIZATION);
 			File file_proposal_editing = getFileFromResources(Constants.PDS_EDITING_TEMPLATE);
-			File file_proposal_approval = getFileFromResources(Constants.POLICY_CONFIG_FILE_CREATE_APPROVAL);
-			File prohibitionFile = getFileFromResources(Constants.PROHIBITION_POST_SUBMISSION); 
+			//File file_proposal_approval = getFileFromResources(Constants.POLICY_CONFIG_FILE_CREATE_APPROVAL);
+			//File prohibitionFile = getFileFromResources(Constants.PROHIBITION_POST_SUBMISSION); 
 			
 			obligationFile = getFileFromResources(Constants.OBLIGATION_TEMPLATE_PROPOSAL_CREATION); 
 			String jsonUnivOrg;
@@ -66,11 +66,11 @@ public class NGACPolicyConfigurationLoader {
 						Files.readAllBytes(Paths.get(file_proposal_creation.getAbsolutePath())));
 				jsonUnivOrg = new String(Files.readAllBytes(Paths.get(file_university_org.getAbsolutePath())));
 				jsonProposalPolicy = new String(Files.readAllBytes(Paths.get(file_proposal_editing.getAbsolutePath())));
-				jsonApprovalPolicy = new String(Files.readAllBytes(Paths.get(file_proposal_approval.getAbsolutePath())));
-				jsonProhibitionPolicy = new String(Files.readAllBytes(Paths.get(prohibitionFile.getAbsolutePath())));
+				//jsonApprovalPolicy = new String(Files.readAllBytes(Paths.get(file_proposal_approval.getAbsolutePath())));
+				//jsonProhibitionPolicy = new String(Files.readAllBytes(Paths.get(prohibitionFile.getAbsolutePath())));
 				
 				log.info("Editing Policy:" + jsonProposalPolicy.length());
-				log.info("Approval Policy:" + jsonApprovalPolicy.length());
+				//log.info("Approval Policy:" + jsonApprovalPolicy.length());
 				log.info("Prohibition:" + jsonProhibitionPolicy.length());
 				if(obligationFile.exists()) {
 					log.info("Obligation ready.");

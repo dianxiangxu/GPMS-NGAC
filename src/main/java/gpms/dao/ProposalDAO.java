@@ -255,6 +255,8 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 */
 	public List<ProposalInfo> findAllProposalsForGrid(int offset, int limit, ProposalCommonInfo proposalInfo)
 			throws ParseException {
+		System.out.println("findAllProposalsForGrid!");
+
 		Query<Proposal> proposalQuery = getUserProposalSearchCriteria(proposalInfo);
 		List<Proposal> allCurrentLoginUserProposalsList = proposalQuery.offset(offset - 1).limit(limit)
 				.order("-audit log.activity on").asList();
@@ -269,6 +271,8 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @throws ParseException
 	 */
 	private Query<Proposal> getUserProposalSearchCriteria(ProposalCommonInfo proposalInfo) throws ParseException {
+		System.out.println("getUserProposalSearchCriteria!");
+
 		Datastore ds = getDatastore();
 		Query<Proposal> proposalQuery = ds.createQuery(Proposal.class);
 		if (proposalInfo.getProjectTitle() != null) {
@@ -314,6 +318,8 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @return
 	 */
 	private List<ProposalInfo> getUserProposalGrid(int rowTotal, List<Proposal> allCurrentLoginUserProposalsList) {
+		System.out.println("getUserProposalGrid!");
+
 		List<ProposalInfo> proposalsGridInfoList = new ArrayList<ProposalInfo>();
 		for (Proposal userProposal : allCurrentLoginUserProposalsList) {
 			ProposalInfo proposalGridInfo = new ProposalInfo();
@@ -476,14 +482,30 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 */
 	public List<ProposalInfo> findUserProposalGrid(int offset, int limit, ProposalCommonInfo proposalInfo,
 			GPMSCommonInfo userInfo) throws ParseException {
+		System.out.println("findUserProposalGrid");
 		List<ProposalInfo> proposals = new ArrayList<ProposalInfo>();
 		Query<Proposal> proposalQuery = buildSearchQuery(proposalInfo, userInfo);
-		int rowTotal = proposalQuery.asList().size();
+		//int rowTotal = proposalQuery.asList().size();
+		int rowTotal = 0;
 		List<Proposal> allProposals = proposalQuery.offset(offset - 1).limit(limit).order("-audit log.activity on")
 				.asList();
 
+		
 		for (Proposal userProposal : allProposals) {
+			if (!PDSOperations.getAccessDecisionInJSONGraph(userProposal.getPolicyGraph(),
+					userInfo.getUserName(), "read", "PDSs")) {
+				continue;
+			}
+			rowTotal++;
+		}
+		
+		for (Proposal userProposal : allProposals) {
+			if (!PDSOperations.getAccessDecisionInJSONGraph(userProposal.getPolicyGraph(),
+					userInfo.getUserName(), "read", "PDSs")) {
+				continue;
+			}
 			ProposalInfo proposal = getProposalInfoForGrid(userInfo, rowTotal, userProposal);
+			System.out.println("ROW TOTAL: "+rowTotal);
 			proposals.add(proposal);
 		}
 		return proposals;
@@ -505,6 +527,7 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 		setProposalSponsorAndBudgetInfo(userProposal, proposal);
 		setCurrentProposalStatusAttributes(userProposal, proposal);
 		getRecentProposalAuditLog(userProposal, proposal);
+		
 		setProposalPIUser(userInfo.getUserProfileID(), userInfo.getUserCollege(), userInfo.getUserDepartment(),
 				userInfo.getUserPositionType(), userInfo.getUserPositionTitle(), userProposal, proposal);
 		setProposalCoPIUsers(userInfo.getUserProfileID(), userInfo.getUserCollege(), userInfo.getUserDepartment(),
@@ -863,6 +886,10 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 		List<Proposal> allProposals = proposalQuery.order("-audit log.activity on").asList();
 
 		for (Proposal userProposal : allProposals) {
+			if (!PDSOperations.getAccessDecisionInJSONGraph(userProposal.getPolicyGraph(),userInfo.getUserName(), "read",
+					 "PDSs")) {
+				continue;
+			}
 			ProposalInfo proposal = getProposalInfoForGrid(userInfo, rowTotal, userProposal);
 			proposals.add(proposal);
 		}
@@ -902,14 +929,12 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 			addPIAndCoPISignaturesToSignatureList(signatures, investigators, proposalSignatures, proposal
 					.getInvestigatorInfo().getPIByName(PDSOperations.getUserChildrenInGraph("PI", memGraph).get(0)),
 					"PI");
-			for (String userName : PDSOperations.getUserChildrenInGraph("CoPI", memGraph)) 
-			{
+			for (String userName : PDSOperations.getUserChildrenInGraph("CoPI", memGraph)) {
 				System.out.println(userName);
 				addPIAndCoPISignaturesToSignatureList(signatures, investigators, proposalSignatures,
 						proposal.getInvestigatorInfo().getCoPIByName(userName), "Co-PI");
 			}
 
-			
 //getPIByName
 //		List<String> positions = new ArrayList<String>();
 //		positions.add("Department Chair");

@@ -742,7 +742,25 @@ public class PDSOperations {
 		return found;
 
 	}
-
+	public static boolean getAccessDecisionInJSONGraph(String jsonGraph, String subject, String accessRight, String target) {
+		boolean result = false;
+		
+		Graph graph =new MemGraph();
+		try {
+			GraphSerializer.fromJson(graph, jsonGraph);
+		} catch (Exception e) {
+			return false;
+		}
+		
+		PReviewDecider decider = new PReviewDecider(graph); 
+		try {
+			result = decider.check(subject, "", target, accessRight);
+		} catch (Exception e) {
+			return false;
+		}
+		
+		return result; 
+	}
 	public void testUsersAccessights_Proposal_created(Graph proposalPolicy) {
 
 		// long userIdNazmul = PDSOperations.getNodeID(proposalPolicy, "nazmul",

@@ -1,0 +1,100 @@
+{
+  "nodes": [
+    {
+      "name": "oa2",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "o1",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "o2",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "ua1",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "ua2",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "u1",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "u2",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "oa1",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "pc1",
+      "type": "PC",
+      "properties": {}
+    }
+  ],
+  "assignments": [
+    {
+      "source": "ua2",
+      "target": "pc1"
+    },
+    {
+      "source": "oa1",
+      "target": "oa2"
+    },
+    {
+      "source": "u1",
+      "target": "ua1"
+    },
+    {
+      "source": "u2",
+      "target": "ua2"
+    },
+    {
+      "source": "oa2",
+      "target": "pc1"
+    },
+    {
+      "source": "ua1",
+      "target": "ua2"
+    },
+    {
+      "source": "o1",
+      "target": "oa1"
+    },
+    {
+      "source": "o2",
+      "target": "oa2"
+    }
+  ],
+  "associations": [
+    {
+      "source": "ua1",
+      "target": "oa1",
+      "operations": [
+        "w"
+      ]
+    },
+    {
+      "source": "ua2",
+      "target": "oa2",
+      "operations": [
+        "r",
+        "x"
+      ]
+    }
+  ]
+}
