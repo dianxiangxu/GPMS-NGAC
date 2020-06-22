@@ -1022,12 +1022,6 @@ public class ProposalService {
 		if (existingProposal != null && existingProposal.getPolicyGraph() != null
 				&& existingProposal.getPolicyGraph().length() > 20) {
 			GraphSerializer.fromJson(test, existingProposal.getPolicyGraph());
-			PReviewDecider decider = new PReviewDecider(test);
-			if (test.exists("Chair")) {
-				System.out.println("RESULT3: " + decider.check("Chair", "process", "Signature-Info", "w"));
-				System.out
-						.println("RESULT4: " + decider.check("chaircomputerscience", "process", "Signature-Info", "w"));
-			}
 		}
 
 		projectProposal.setProposal(existingProposal);

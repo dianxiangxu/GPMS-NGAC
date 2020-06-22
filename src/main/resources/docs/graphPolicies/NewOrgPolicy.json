@@ -14,24 +14,7 @@
       }
     }, 
     
-  {
-      "name": "COEN",
-      "type": "UA",
-      "properties": {}
-    }
-    , 
-    
-  {
-      "name": "colleges",
-      "type": "UA",
-      "properties": {}
-    },
-   {
-      "name": "COAS",
-      "type": "UA",
-      "properties": {}
-    },
- 
+
  {
       "name": "Research Admin",
       "type": "UA",
@@ -44,7 +27,7 @@
       "properties": {}
     },
  {
-      "name": "IRB",
+      "name": "IRBOfficer",
       "type": "UA",
       "properties": {}
     },
@@ -52,179 +35,149 @@
       "name": "Dean COE",
       "type": "UA",
       "properties": {
-        "dean": "COEN"
       }
     },
     {
       "name": "Dean COAS",
       "type": "UA",
       "properties": {
-        "dean": "COAS"
       }
     },
   {
-      "name": "CS Chair",
+      "name": "ChairCS",
       "type": "UA",
       "properties": {
         "chair": "CS"
       }
-    },
+    }
+    ,
  {
-      "name": "CE Chair",
+      "name": "ChairECE",
       "type": "UA",
       "properties": {
-        "chair": "CE"
-      }
-    },
- {
-      "name": "CE Business Manager",
-      "type": "UA",
-      "properties": {
-        "chair": "CE"
-      }
-    },
- {
-      "name": "ECE Chair",
-      "type": "UA",
-      "properties": {
-        "chair": "ECE"
+        "chair": "DeptECE"
       }
     },
   {
-      "name": "PHYSICS Chair",
+      "name": "ChairPHY",
       "type": "UA",
       "properties": {
-        "chair": "PHYSICS"
+        "chair": "DeptPHY"
       }
     },
     
     {
-      "name": "CHEMISTRY Chair",
+      "name": "ChairCHEM",
       "type": "UA",
       "properties": {
-        "chair": "CHEMISTRY"
+        "chair": "DeptCHEM"
       }
     },
  
  {
-      "name": "CS Business Manager",
+      "name": "BMCS",
       "type": "UA",
       "properties": {}
     },
  {
-      "name": "CHEMISTRY Business Manager",
+      "name": "BMCHEM",
       "type": "UA",
       "properties": {}
     },
  {
-      "name": "ECE Business Manager",
+      "name": "BMECE",
       "type": "UA",
       "properties": {}
     },
  {
-      "name": "PHYSICS Business Manager",
+      "name": "BMPHY",
       "type": "UA",
       "properties": {}
     },
  
  {
-      "name": "ECE",
+      "name": "DeptECE",
       "type": "UA",
       "properties": {}
     },
  {
-      "name": "CS",
-      "type": "UA",
-      "properties": {}
-    },
- {
-      "name": "CE",
+      "name": "DeptCS",
       "type": "UA",
       "properties": {}
     },
     
  {
-      "name": "CHEMISTRY",
+      "name": "DeptCHEM",
       "type": "UA",
       "properties": {}
     },
   {
-      "name": "PHYSICS",
+      "name": "DeptPHY",
       "type": "UA",
       "properties": {}
     },
  {
-      "name": "DeanCOE",
+      "name": "DeanCOEUser",
       "type": "U",
       "properties": {}
     },
  {
-      "name": "DeanCOAS",
+      "name": "DeanCOASUser",
       "type": "U",
       "properties": {}
     },
  {
-      "name": "chaircomputerscience",
+      "name": "ChairCSUser",
       "type": "U",
       "properties": {}
     },
  {
-      "name": "bmcomputerscience",
+      "name": "bmCSUser",
       "type": "U",
       "properties": {}
     },
  {
-      "name": "chaircomputerengineering",
+      "name": "ChairECEUser",
       "type": "U",
       "properties": {}
     },
  {
-      "name": "bmcomputerengineering1",
+      "name": "bmECEUser",
       "type": "U",
       "properties": {}
     },
  {
-      "name": "chairelectricalengineering",
+      "name": "ChairPHYUser",
       "type": "U",
       "properties": {}
     },
  {
-      "name": "bmelectricalengineering",
+      "name": "bmPHYUser",
       "type": "U",
       "properties": {}
     },
  {
-      "name": "chairphysics1",
+      "name": "ChairChemUser",
       "type": "U",
       "properties": {}
     },
  {
-      "name": "bmphysics1",
+      "name": "bmChemUser",
       "type": "U",
       "properties": {}
     },
  {
-      "name": "chairchemistry",
+      "name": "raUser",
       "type": "U",
       "properties": {}
     },
  {
-      "name": "bmchemistry1",
+      "name": "rdUser",
       "type": "U",
       "properties": {}
     },
  {
-      "name": "racomputerscience",
-      "type": "U",
-      "properties": {}
-    },
- {
-      "name": "directorcomputerscience",
-      "type": "U",
-      "properties": {}
-    },
- {
-      "name": "irbglobal",
+      "name": "irbUser",
       "type": "U",
       "properties": {}
     }   
@@ -233,9 +186,12 @@
  "assignments":[ 
  {
    "source": "nazmul",  
-      "target": "CS"  
+      "target": "DeptCS"  
  },   
-   
+  {
+   "source": "vlad",  
+      "target": "DeptCS"  
+ }, 
  {
       "source": "super_ua1",  
       "target": "AcademicUnitsPolicyClass"   
@@ -244,122 +200,98 @@
  
  {
       "source": "tomtom",  
-      "target": "CHEMISTRY"   
+      "target": "DeptCHEM"   
     },
  
  {
       "source": "liliana",  
-      "target": "CS"   
+      "target": "DeptCS"   
     }, 
     {
       "source": "samer",  
-      "target": "ECE"   
+      "target": "DeptECE"   
     },
  {
       "source": "NickC",  
-      "target": "PHYSICS"   
+      "target": "DeptPHY"   
     },
  {
-      "source": "selena",  
-      "target": "CHEMISTRY"  
-    },
- {
-      "source": "tamanna",  
-      "target": "CS"  
-    },
- {
-      "source": "edmund",  
-      "target": "CS"  
-    },
- {
-      "source": "milson",  
-      "target": "CS"  
-    },
- {
-      "source": "DeanCOE",  
+      "source": "DeanCOEUser",  
       "target": "Dean COE"   
     },
  {
-      "source": "DeanCOAS",  
+      "source": "DeanCOASUser",  
       "target": "Dean COAS"   
     },
  {
-      "source": "chaircomputerscience",  
-      "target": "CS Chair"  
+      "source": "ChairCSUser",  
+      "target": "ChairCS"  
     },
  {
-      "source": "bmcomputerscience",  
-      "target": "CS Business Manager"   
+      "source": "bmCSUser",  
+      "target": "BMCS"   
     },
  {
-      "source": "chaircomputerengineering",  
-      "target": "ECE Chair"   
+      "source": "ChairECEUser",  
+      "target": "ChairECE"   
     },
  {
-      "source": "bmcomputerengineering1",  
-      "target": "ECE Business Manager"  
+      "source": "bmECEUser",  
+      "target": "BMECE"  
     },
  {
-      "source": "chairelectricalengineering",  
-      "target": "ECE Chair"   
+      "source": "ChairPHYUser",  
+      "target": "ChairPHY"   
     },
  {
-      "source": "bmelectricalengineering",  
-      "target": "ECE Business Manager"   
+      "source": "bmPHYUser",  
+      "target": "BMPHY"   
     },
  {
-      "source": "chairphysics1",  
-      "target": "PHYSICS Chair"   
+      "source": "ChairChemUser",  
+      "target": "ChairCHEM" 
     },
  {
-      "source": "bmphysics1",  
-      "target": "PHYSICS Business Manager"   
+      "source": "bmChemUser",  
+      "target": "BMCHEM" 
     },
  {
-      "source": "chairchemistry",  
-      "target": "CHEMISTRY Chair" 
-    },
- {
-      "source": "bmchemistry1",  
-      "target": "CHEMISTRY Business Manager" 
-    },
- {
-      "source": "racomputerscience",  
+      "source": "raUser",  
       "target": "Research Admin" 
     },
  {
-      "source": "directorcomputerscience",  
+      "source": "rdUser",  
       "target": "Research Director" 
     }
 ,
 
 {
-      "source": "CS",  
-      "target": "CS Chair" 
+      "source": "DeptCS",  
+      "target": "ChairCS" 
     }
     ,
  {
-      "source": "ECE",  
-      "target": "ECE Chair" 
+      "source": "DeptECE",  
+      "target": "ChairECE" 
     }        
     ,
  {
-      "source": "CS Chair",  
-      "target": "CS Business Manager" 
+      "source": "ChairCS",  
+      "target": "BMCS" 
     }
     ,
  {
-      "source": "ECE Chair",  
-      "target": "ECE Business Manager" 
+      "source": "ChairECE",  
+      "target": "BMECE"
     }        
     ,
  {
-      "source": "CS Business Manager",  
+      "source": "BMCS",  
       "target": "Dean COE" 
     }
     ,
  {
-      "source": "ECE Business Manager",  
+      "source": "BMECE",  
       "target": "Dean COE" 
     }  ,        
  {
@@ -383,47 +315,42 @@
     }  
     ,
  {
-      "source": "CHEMISTRY Business Manager",  
+      "source": "BMCHEM",  
       "target": "Dean COAS" 
     }
     ,
  {
-      "source": "PHYSICS Business Manager",  
+      "source": "BMPHY",  
       "target": "Dean COAS" 
     }  ,  
      {
-      "source": "CHEMISTRY Chair",  
-      "target": "CHEMISTRY Business Manager" 
+      "source": "ChairCHEM",  
+      "target": "BMCHEM" 
     }
     ,
  {
-      "source": "PHYSICS Chair",  
-      "target": "PHYSICS Business Manager" 
+      "source": "ChairPHY",  
+      "target": "BMPHY" 
     },
     {
-      "source": "CHEMISTRY",  
-      "target": "CHEMISTRY Chair" 
+      "source": "DeptCHEM",  
+      "target": "ChairCHEM" 
     }
     ,
  {
-      "source": "PHYSICS",  
-      "target": "PHYSICS Chair" 
+      "source": "DeptPHY",  
+      "target": "ChairPHY" 
     }  
     ,
  {
-      "source": "IRB",  
+      "source": "IRBOfficer",  
       "target": "AdministrationUnitsPolicyClass" 
     } 
     ,
  {
-      "source": "irbglobal",  
-      "target": "colleges" 
-    } 
-    ,
- {
-      "source": "colleges",  
-      "target": "AdministrationUnitsPolicyClass" 
-    }  
+      "source": "irbUser",  
+      "target": "IRBOfficer" 
+    }     
      ,
  {
       "source": "Research Admin",  
@@ -450,7 +377,7 @@
         "*"
       ],
       "source": "super_ua1",  
-      "target": "IRB"  
+      "target": "IRBOfficer"  
     },
     {
       "operations": [
@@ -458,14 +385,7 @@
       ],
       "source": "super_ua1",  
       "target": "Research Director"  
-    },    
-    {
-      "operations": [
-        "*"
-      ],
-      "source": "super_ua1",  
-      "target": "colleges"  
-    },    
+    },       
     {
       "operations": [
         "*"

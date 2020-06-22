@@ -430,12 +430,6 @@ public class PDSOperations {
 		long randomId = getID();
 
 		try {
-			String chairDept = DepartmentsPositionsCollection.adminUsers
-					.get(DepartmentsPositionsCollection.departmentNames.get(department) + "CHAIR");
-			String deanDept = DepartmentsPositionsCollection.adminUsers
-					.get(DepartmentsPositionsCollection.departmentNames.get(department) + "DEAN");
-			String bmDept = DepartmentsPositionsCollection.adminUsers
-					.get(DepartmentsPositionsCollection.departmentNames.get(department) + "BM");
 			Graph proposalPolicy = null;
 
 			proposalPolicy = policyLoader.reloadBasicConfig();

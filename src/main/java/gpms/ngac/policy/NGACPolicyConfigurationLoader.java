@@ -175,7 +175,7 @@ public class NGACPolicyConfigurationLoader {
 			log.info("Basic Policy :No of Nodes:" + policy.getNodes().size());
 			try {
 
-				GraphSerializer.fromJson(policy, jsonApprovalPolicy);
+				//GraphSerializer.fromJson(policy, jsonApprovalPolicy);
 				log.info("Combined with approval policy: No of Nodes:" + policy.getNodes().size());
 
 				if (policy != null) {

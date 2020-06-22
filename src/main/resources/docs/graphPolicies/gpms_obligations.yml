@@ -424,6 +424,15 @@ rules:
             target:
               name: Approval Content
               type: OA 
+        - grant:
+            subject:
+              name: Chair
+              type: UA
+            operations:
+              - read
+            target:
+              name: PDSs
+              type: OA         
         - condition:
             - function:
                 name: irb_approval_required    

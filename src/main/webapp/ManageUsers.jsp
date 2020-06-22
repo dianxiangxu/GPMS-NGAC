@@ -282,7 +282,7 @@
 														<li><a href="#fragment-1"> <span
 																id="lblTabTitle1">General Information</span>
 														</a></li>
-														<li><a href="#fragment-2" onclick="hide();"> <span
+														<li><a href="#fragment-2"> <span
 																id="lblTabTitle2">User Position Details</span>
 														</a></li>
 														<li><a href="#fragment-3"> <span
@@ -718,53 +718,5 @@
 			</div>
 		</div>
 	</form>
-<script type="text/javascript">
-function hide() {
-	  if ($('#positionTitle').val() == "Dean") {
-	    $('#departmentLabel').hide();
-	    $('#department').hide();
-	    $('#departmentLabelStar').hide();
-	  } else {
-		  $('#departmentLabel').show();
-		  $('#department').show();
-		  $('#departmentLabelStar').show();
-	  }
-	}
-$("#positionTitle").change(function() {
-	  if ($(this).val() == "Dean") {
-	    $('#departmentLabel').hide();
-	    $('#department').hide();
-	    $('#departmentLabelStar').hide();
-	  } else {
-		  $('#departmentLabel').show();
-		  $('#department').show();
-		  $('#departmentLabelStar').show();
-	  }
-	});
-$("#positionTitle").trigger("change");
-
-$("#collegeName").change(function() {
-	  if ($('#positionTitle').val() == "Dean") {
-	    $('#departmentLabel').hide();
-	    $('#department').hide();
-	    $('#departmentLabelStar').hide();
-	  } else {
-		  $('#departmentLabel').show();
-		  $('#department').show();
-		  $('#departmentLabelStar').show();
-	  }
-	});
-	//$("#collegeName").trigger("change");
-$('#collegeName').on('change', function (e) {
-		  $('#departmentLabel').show();
-		  $('#department').show();
-		  $('#departmentLabelStar').show();
-    });
-$('#positionType').on('change', function (e) {
-	  $('#departmentLabel').show();
-	  $('#department').show();
-	  $('#departmentLabelStar').show();
-});
-</script>
 </body>
 </html>

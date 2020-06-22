@@ -1009,7 +1009,7 @@ public class UserService {
 			log.info("UserService::getAllUsers started");
 			HashMap<String, String> users = new HashMap<String, String>();
 			List<UserProfile> userprofiles = userProfileDAO
-					.findAllUsersWithPosition("CoPI-Eligible Faculty");
+					.findAllUsersWithPosition("CoPIEligible");
 			for (UserProfile userProfile : userprofiles) {
 				users.put(userProfile.getId().toString(),
 						userProfile.getFullName());
@@ -1038,7 +1038,7 @@ public class UserService {
 			log.info("UserService::getAllUsers started");
 			HashMap<String, String> users = new HashMap<String, String>();
 			List<UserProfile> userprofiles = userProfileDAO
-					.findAllUsersWithPosition("SP-Eligible Faculty");
+					.findAllUsersWithPosition("SPEligible");
 			for (UserProfile userProfile : userprofiles) {
 				users.put(userProfile.getId().toString(),
 						userProfile.getFullName());
