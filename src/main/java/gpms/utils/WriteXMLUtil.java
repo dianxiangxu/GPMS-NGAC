@@ -279,7 +279,7 @@ public class WriteXMLUtil {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		System.out.println("File Saved!" + policyId);
+		//System.out.println("File Saved!" + policyId);
 		return policyId;
 	}
 
@@ -1060,7 +1060,7 @@ public class WriteXMLUtil {
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
-					System.out.println("File Saved Using revocation!");
+					//System.out.println("File Saved Using revocation!");
 					break;
 				}
 			}

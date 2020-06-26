@@ -133,16 +133,16 @@ abstract class MutantTester {
 			bool = file2.mkdir();
 		}
 		if (bool) {
-			System.out.println("The directory was created or was already there");
+			//System.out.println("The directory was created or was already there");
 		} else {
-			System.out.println("Failure with creating the directory");
+			//System.out.println("Failure with creating the directory");
 			return;
 		}
 		if (directoryForTestResults.createNewFile()) {
-			System.out.println("File has been created.");
+			//System.out.println("File has been created.");
 		} else {
 
-			System.out.println("File already exists.");
+			//System.out.println("File already exists.");
 		}
 		BufferedWriter writer = null;
 		writer = new BufferedWriter(new FileWriter(directoryForTestResults));
@@ -180,24 +180,24 @@ abstract class MutantTester {
 		graph = GraphSerializer.fromJson(new MemGraph(), json);
 		getOAsInGraph();
 		if (OAs.size() == 0) {
-			System.out.println("No OAs found");
+			//System.out.println("No OAs found");
 			return;
 		}
 		getUAsInGraph();
 		if (UAs.size() == 0) {
-			System.out.println("No OAs found");
+			//System.out.println("No OAs found");
 			return;
 		}
 		loadAssociations();
 		
 		getUAsPCsInGraph();
 		if (UAsPCs.size() == 0) {
-			System.out.println("No UAs and PCs found");
+			//System.out.println("No UAs and PCs found");
 			return;
 		}
 		getUAsPCsOAsInGraph();
 		if (UAsPCsOAs.size() == 0) {
-			System.out.println("No UAs, PCs, and OAs found");
+			//System.out.println("No UAs, PCs, and OAs found");
 			return;
 		}
 		getUAsOAsInGraph();

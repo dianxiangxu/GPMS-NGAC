@@ -127,8 +127,8 @@ public class Obligations {
     public static void createPDSNew(Graph ngacPolicy, long userID, Node iPdsNode) throws PMException {
 		
 		long id = iPdsNode.getID();
-		System.out.println("ID:"+id);
-		System.out.println("User ID:"+userID+"userName:"+ngacPolicy.getNode(userID).getName());
+		//System.out.println("ID:"+id);
+		//System.out.println("User ID:"+userID+"userName:"+ngacPolicy.getNode(userID).getName());
 		//Node node = policyCreationFromTemplate.createPolicyFromPolicy(ngacPolicy, iPdsNode);
 		policyCreationFromTemplate.createPolicyFromPolicy(ngacPolicy, iPdsNode);
 		Node userNode = ngacPolicy.getNode(userID);
@@ -138,7 +138,7 @@ public class Obligations {
 		
 		// User Name is assigned to PI Object Attribute
 		String piNodeLabel = Constants.PI_UA_LBL+Long.toString(id);		
-		System.out.println("PI:"+piNodeLabel);
+		//System.out.println("PI:"+piNodeLabel);
 		long piOANodeId = getNodeID(ngacPolicy, piNodeLabel,  OA, null);		
         ngacPolicy.assign(userObj.getID(), piOANodeId);
         

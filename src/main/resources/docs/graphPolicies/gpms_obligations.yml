@@ -24,7 +24,7 @@ rules:
         - function:
             name: create_node1
             args:
-              - PI-Info
+              - PIInfo
               - OA 
               - function:
                   name: concat_strings
@@ -106,7 +106,7 @@ rules:
                           - AcademicUnitsPolicyClass
                           - PC                
               where:
-                name: Business-Manager
+                name: Business Manager
                 type: UA 
   - label: add_copi
     event:
@@ -130,13 +130,13 @@ rules:
               - function:
                   name: get_node
                   args:
-                    - CoPI-Eligible Faculty
+                    - CoPIEligible
                     - UA    
       actions:
         - function:
             name: create_node1
             args:
-              - CoPI-Info
+              - CoPIInfo
               - OA 
               - function:
                   name: concat_strings
@@ -285,7 +285,7 @@ rules:
                   - function:
                       name: get_node
                       args:
-                        - Business-Manager
+                        - Business Manager
                         - UA
           assign:
             - what:
@@ -309,7 +309,7 @@ rules:
                           - AcademicUnitsPolicyClass
                           - PC                                                    
               where:
-                name: Business-Manager
+                name: Business Manager
                 type: UA                
   - label: submit_proposal
     event:
@@ -486,13 +486,13 @@ rules:
               - function:
                   name: get_node
                   args:
-                    - SP-Eligible Faculty
+                    - SPEligible
                     - UA  
       actions:
         - function:
             name: create_node1
             args:
-              - SP-Info
+              - SPInfo
               - OA 
               - function:
                   name: concat_strings

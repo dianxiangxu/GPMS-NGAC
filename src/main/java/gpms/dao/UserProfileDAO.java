@@ -242,12 +242,12 @@ public class UserProfileDAO extends BasicDAO<UserProfile, String> {
 
 //		for(UserProfile up : profileQuery.retrievedFields(true, "_id", "first name",
 //				"middle name", "last name").asList()) {
-////			System.out.println(up.getId());
-////			System.out.println(up.getFirstName());
+////			//System.out.println(up.getId());
+////			//System.out.println(up.getFirstName());
 ////
-////			System.out.println(up.getMiddleName());
+////			//System.out.println(up.getMiddleName());
 ////
-////			System.out.println(up.getLastName());
+////			//System.out.println(up.getLastName());
 //
 //
 //		}
@@ -269,7 +269,7 @@ public class UserProfileDAO extends BasicDAO<UserProfile, String> {
 
 		Stack<Node> stack = new Stack<Node>();
 		stack.push(piNode);
-		System.out.println(piNode);
+		////System.out.println(piNode);
 
 		while (!stack.isEmpty()) {
 
@@ -878,11 +878,11 @@ public class UserProfileDAO extends BasicDAO<UserProfile, String> {
 		int count = listOfProposals.size();
 		for (Proposal proposal : listOfProposals) {
 			if (!PDSOperations.getAccessDecisionInJSONGraph(proposal.getPolicyGraph(), userInfo.getUserName(), "read",
-					"PDSs")) {
+					"PDSSections")) {
 				count--;
 			}
 		}
-		System.out.println(count);
+		////System.out.println(count);
 
 		userProposalCount.setTotalProposalCount(count);
 
@@ -1052,7 +1052,7 @@ public class UserProfileDAO extends BasicDAO<UserProfile, String> {
 	public void setMySessionID(HttpServletRequest req, String sessionValue) {
 		try {
 			if (req == null) {
-				System.out.println("Null request in context");
+				//System.out.println("Null request in context");
 			}
 			HttpSession session = req.getSession();
 			if (session.getAttribute("userProfileId") == null) {
@@ -1091,7 +1091,7 @@ public class UserProfileDAO extends BasicDAO<UserProfile, String> {
 			// .getUserAccount().getUserName());
 
 		} catch (Exception e) {
-			System.out.println(e.getMessage());
+			//System.out.println(e.getMessage());
 		}
 	}
 

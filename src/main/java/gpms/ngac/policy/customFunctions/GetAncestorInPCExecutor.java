@@ -113,7 +113,7 @@ public class GetAncestorInPCExecutor implements FunctionExecutor {
 					functionEvaluator);
 			
 			if(count == levelOfAncestory&&isContainedIn) {		
-				System.out.println("get_ancestor_in_policy_class ancestor: "+ancestor);
+				//System.out.println("get_ancestor_in_policy_class ancestor: "+ancestor);
 				return pdp.getPAP().getGraphPAP().getNode(ancestor);
 			}
 			else if(isContainedIn) {

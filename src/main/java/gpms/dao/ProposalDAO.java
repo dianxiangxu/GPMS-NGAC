@@ -255,7 +255,7 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 */
 	public List<ProposalInfo> findAllProposalsForGrid(int offset, int limit, ProposalCommonInfo proposalInfo)
 			throws ParseException {
-		System.out.println("findAllProposalsForGrid!");
+		////System.out.println("findAllProposalsForGrid!");
 
 		Query<Proposal> proposalQuery = getUserProposalSearchCriteria(proposalInfo);
 		List<Proposal> allCurrentLoginUserProposalsList = proposalQuery.offset(offset - 1).limit(limit)
@@ -271,7 +271,7 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @throws ParseException
 	 */
 	private Query<Proposal> getUserProposalSearchCriteria(ProposalCommonInfo proposalInfo) throws ParseException {
-		System.out.println("getUserProposalSearchCriteria!");
+		////System.out.println("getUserProposalSearchCriteria!");
 
 		Datastore ds = getDatastore();
 		Query<Proposal> proposalQuery = ds.createQuery(Proposal.class);
@@ -318,7 +318,7 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @return
 	 */
 	private List<ProposalInfo> getUserProposalGrid(int rowTotal, List<Proposal> allCurrentLoginUserProposalsList) {
-		System.out.println("getUserProposalGrid!");
+		////System.out.println("getUserProposalGrid!");
 
 		List<ProposalInfo> proposalsGridInfoList = new ArrayList<ProposalInfo>();
 		for (Proposal userProposal : allCurrentLoginUserProposalsList) {
@@ -482,7 +482,7 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 */
 	public List<ProposalInfo> findUserProposalGrid(int offset, int limit, ProposalCommonInfo proposalInfo,
 			GPMSCommonInfo userInfo) throws ParseException {
-		System.out.println("findUserProposalGrid");
+		////System.out.println("findUserProposalGrid");
 		List<ProposalInfo> proposals = new ArrayList<ProposalInfo>();
 		Query<Proposal> proposalQuery = buildSearchQuery(proposalInfo, userInfo);
 		//int rowTotal = proposalQuery.asList().size();
@@ -493,7 +493,7 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 		
 		for (Proposal userProposal : allProposals) {
 			if (!PDSOperations.getAccessDecisionInJSONGraph(userProposal.getPolicyGraph(),
-					userInfo.getUserName(), "read", "PDSs")) {
+					userInfo.getUserName(), "read", "PDSSections")) {
 				continue;
 			}
 			rowTotal++;
@@ -501,11 +501,11 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 		
 		for (Proposal userProposal : allProposals) {
 			if (!PDSOperations.getAccessDecisionInJSONGraph(userProposal.getPolicyGraph(),
-					userInfo.getUserName(), "read", "PDSs")) {
+					userInfo.getUserName(), "read", "PDSSections")) {
 				continue;
 			}
 			ProposalInfo proposal = getProposalInfoForGrid(userInfo, rowTotal, userProposal);
-			System.out.println("ROW TOTAL: "+rowTotal);
+			////System.out.println("ROW TOTAL: "+rowTotal);
 			proposals.add(proposal);
 		}
 		return proposals;
@@ -887,7 +887,7 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 
 		for (Proposal userProposal : allProposals) {
 			if (!PDSOperations.getAccessDecisionInJSONGraph(userProposal.getPolicyGraph(),userInfo.getUserName(), "read",
-					 "PDSs")) {
+					 "PDSSections")) {
 				continue;
 			}
 			ProposalInfo proposal = getProposalInfoForGrid(userInfo, rowTotal, userProposal);
@@ -930,7 +930,7 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 					.getInvestigatorInfo().getPIByName(PDSOperations.getUserChildrenInGraph("PI", memGraph).get(0)),
 					"PI");
 			for (String userName : PDSOperations.getUserChildrenInGraph("CoPI", memGraph)) {
-				System.out.println(userName);
+				////System.out.println(userName);
 				addPIAndCoPISignaturesToSignatureList(signatures, investigators, proposalSignatures,
 						proposal.getInvestigatorInfo().getCoPIByName(userName), "Co-PI");
 			}
@@ -3419,7 +3419,7 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 			String alertMessage = new String();
 			if (preObligations.size() != 0) {
 				preCondition = false;
-				System.out.println("\n======================== Printing Obligations ====================");
+				//System.out.println("\n======================== Printing Obligations ====================");
 				for (ObligationResult obligation : preObligations) {
 					if (obligation instanceof org.wso2.balana.xacml3.Obligation) {
 						List<AttributeAssignment> assignments = ((org.wso2.balana.xacml3.Obligation) obligation)
@@ -3437,7 +3437,7 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 								break;
 							}
 						}
-						System.out.println(obligationType + " is RUNNING");
+						//System.out.println(obligationType + " is RUNNING");
 						if (!preCondition) {
 							break;
 						}
@@ -3482,7 +3482,7 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 								break;
 							}
 						}
-						System.out.println(obligationType + " is RUNNING");
+						//System.out.println(obligationType + " is RUNNING");
 					}
 				}
 			} else {
@@ -3514,13 +3514,13 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 			}
 			if (obligationType.equals("preobligation")) {
 				preObligations.add(obligation);
-				System.out.println(obligationType + " is FOUND");
+				//System.out.println(obligationType + " is FOUND");
 			} else if (obligationType.equals("postobligation")) {
 				postObligations.add(obligation);
-				System.out.println(obligationType + " is FOUND");
+				//System.out.println(obligationType + " is FOUND");
 			} else {
 				ongoingObligations.add(obligation);
-				System.out.println(obligationType + " is FOUND");
+				//System.out.println(obligationType + " is FOUND");
 			}
 		}
 	}

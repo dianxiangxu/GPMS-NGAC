@@ -161,9 +161,9 @@ public class ProposalDataSheet {
 	}
 
 	public void checkStaticACRights() {
-//		System.out.println("Nazmul:"+UserPermissionChecker.checkPermission(proposalPolicy, getProhibitions(), "nazmul", new Attribute("PI-Editable-Data",NodeType.OA),   new String[] {"w"}  ));
-//		System.out.println("Liliana:"+UserPermissionChecker.checkPermission(proposalPolicy, getProhibitions(), "liliana", new Attribute("CoPI-Editable-Data",NodeType.OA),   new String[] {"w"}  ));
-//		System.out.println("tomtom:"+UserPermissionChecker.checkPermission(proposalPolicy, getProhibitions(), "tomtom", new Attribute("Data-Element",NodeType.OA),   new String[] {"r"}  ));
+//		//System.out.println("Nazmul:"+UserPermissionChecker.checkPermission(proposalPolicy, getProhibitions(), "nazmul", new Attribute("PI-Editable-Data",NodeType.OA),   new String[] {"w"}  ));
+//		//System.out.println("Liliana:"+UserPermissionChecker.checkPermission(proposalPolicy, getProhibitions(), "liliana", new Attribute("CoPI-Editable-Data",NodeType.OA),   new String[] {"w"}  ));
+//		//System.out.println("tomtom:"+UserPermissionChecker.checkPermission(proposalPolicy, getProhibitions(), "tomtom", new Attribute("Data-Element",NodeType.OA),   new String[] {"r"}  ));
 
 	}
 
@@ -892,8 +892,8 @@ public class ProposalDataSheet {
 					ProhibitionsSerializer.fromJson(new MemProhibitions(), getProposal().getProhibitions()));
 
 			for (String s : graphFromDB.getChildren("Chair")) {
-				System.out.println(
-						"CHILDREN DURING CHECK" + s + decider.check("Chair", "process", "Signature-Info", "w"));
+				//System.out.println(
+					//	"CHILDREN DURING CHECK" + s + decider.check("Chair", "process", "Signature-Info", "w"));
 			}
 			boolean hasPermission = UserPermissionChecker.checkPermission(graphFromDB,
 					ProhibitionsSerializer.fromJson(new MemProhibitions(), getProposal().getProhibitions()), username,
@@ -955,19 +955,19 @@ public class ProposalDataSheet {
 		String objectAtt = "";
 		if (proposalSection.equalsIgnoreCase("Project Information")) {
 			objectAtt = Constants.PROJECT_INFO_OA_LBL;
-		} else if (proposalSection.equalsIgnoreCase("InvestigatorInformation")) {
+		} else if (proposalSection.equalsIgnoreCase("Investigator Information")) {
 			objectAtt = Constants.INVESTIGATOR_OA_UA_LBL;
 		} else if (proposalSection.equalsIgnoreCase("Certification/Signatures")) {
 			objectAtt = Constants.SIGNATURE_INFOL;
 		} else if (proposalSection.equalsIgnoreCase("Sponsor And Budget Information")) {
 			objectAtt = Constants.BUDGET_INFO_OA_LBL;
-		} else if (proposalSection.equalsIgnoreCase("cost share info")) {
+		} else if (proposalSection.equalsIgnoreCase("Cost Share Information")) {
 			objectAtt = Constants.COST_SHARE_INFO_OA_LBL;
 		} else if (proposalSection.equalsIgnoreCase("university commitments")) {
 			objectAtt = Constants.UNIV_COMMITMENT_INFO_OA_LBL;
-		} else if (proposalSection.equalsIgnoreCase("conflict of interest and commitment info")) {
+		} else if (proposalSection.equalsIgnoreCase("Conflict of Interest and Commitment Information")) {
 			objectAtt = Constants.CONFLICT_OF_INTEREST_INFO_OA_LBL;
-		} else if (proposalSection.equalsIgnoreCase("compliance info")) {
+		} else if (proposalSection.equalsIgnoreCase("Compliance Information")) {
 			objectAtt = Constants.COMPLIANCE_INFO_OA_LBL;
 		} else if (proposalSection.equalsIgnoreCase("additional info")
 				|| proposalSection.equalsIgnoreCase("Additional Information")) {

@@ -52,7 +52,7 @@ public class MutatorCHANGEAS extends MutantTester {
 	private void changeAssignment(Graph mutant, Long nodeForChange, Long nodeToRemoveAssociation, String testMethod,
 			String testSuitePath, Node parentToBe) throws PMException, IOException {
 		mutant.deassign(nodeForChange, nodeToRemoveAssociation);
-		System.out.println("Child: " + graph.getNode(nodeForChange).getName() + " Parent: " + parentToBe.getName());
+		//System.out.println("Child: " + graph.getNode(nodeForChange).getName() + " Parent: " + parentToBe.getName());
 		mutant.assign(nodeForChange, parentToBe.getID());
 	}
 

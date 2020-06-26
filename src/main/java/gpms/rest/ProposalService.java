@@ -426,7 +426,7 @@ public class ProposalService {
 //								|| intDecision == AbstractResult.DECISION_INDETERMINATE_DENY_OR_PERMIT) {
 //							intDecision = AbstractResult.DECISION_INDETERMINATE;
 //						}
-//						System.out.println(
+//						//System.out.println(
 //								"Decision:" + intDecision + " that is: " + AbstractResult.DECISIONS[intDecision]);
 //						if (AbstractResult.DECISIONS[intDecision].equals("Permit")) {
 //							List<ObligationResult> obligations = ar.getObligations();
@@ -582,8 +582,7 @@ public class ProposalService {
 								Constants.APPROVAL_CONTENT);
 					}
 				} else if (!stage.equals(Constants.ZOMBIE_STATE)) {
-					actions = projectProposal.getPermittedActions(pdsOperations, userInfo.getUserName(),
-							Constants.PDSs_OA_UA_LBL);
+					actions = projectProposal.getPermittedActions(pdsOperations, userInfo.getUserName(), "PDSWhole");
 				}
 			} else {
 
@@ -914,7 +913,7 @@ public class ProposalService {
 //								|| intDecision == AbstractResult.DECISION_INDETERMINATE_DENY_OR_PERMIT) {
 //							intDecision = AbstractResult.DECISION_INDETERMINATE;
 //						}
-//						System.out.println("Decision:" + intDecision
+//						//System.out.println("Decision:" + intDecision
 //								+ " that is: "
 //								+ AbstractResult.DECISIONS[intDecision]);
 //						if (AbstractResult.DECISIONS[intDecision]
@@ -1063,7 +1062,7 @@ public class ProposalService {
 			log.info("55555555555");
 		}
 		if (!firstSave) {
-			System.out.println("77777777777777777777777777777");
+			// System.out.println("77777777777777777777777777777");
 
 			projectProposal.clearIngestigator();
 			projectProposal.updatePI(isPostSubmissionStage);
@@ -1196,13 +1195,13 @@ public class ProposalService {
 						int intDecision = AbstractResult.DECISION_NOT_APPLICABLE;
 
 						if (action.equals("Save") || action.equals("Submit")) {
-							String objectAtt = Constants.PDSs_OA_UA_LBL;
+							String objectAtt = "PDSWhole";
 							String acRight = action;
 							// objectAtt = projectProposal.setSection(proposalSection);
 							log.info("objectAtt:" + objectAtt);
 							if (action.equals("Submit") && userInfo.getUserPositionTitle()
 									.equalsIgnoreCase("University Research Administrator")) {
-								objectAtt = Constants.APPROVAL_CONTENT;
+								objectAtt = "PDSWhole";
 								PDP pdp = pdsOperations.raSubmit(userInfo.getUserName(),
 										existingProposal.getPolicyGraph());
 								existingProposal.setPolicyGraph(GraphSerializer.toJson(pdp.getPAP().getGraphPAP()));
@@ -1329,7 +1328,7 @@ public class ProposalService {
 			existingProposal.setPolicyGraph(GraphSerializer.toJson(pdp.getPAP().getGraphPAP()));
 			Map<String, OperationSet> assoc = pdp.getPAP().getGraphPAP().getTargetAssociations("Approval Content");
 			for (String s : assoc.keySet()) {
-				System.out.println("ASSOCIATIONS: " + s);
+				// System.out.println("ASSOCIATIONS: " + s);
 			}
 		}
 
@@ -1338,7 +1337,7 @@ public class ProposalService {
 			existingProposal.setPolicyGraph(GraphSerializer.toJson(pdp.getPAP().getGraphPAP()));
 			Map<String, OperationSet> assoc = pdp.getPAP().getGraphPAP().getTargetAssociations("Approval Content");
 			for (String s : assoc.keySet()) {
-				System.out.println("ASSOCIATIONS: " + s);
+				// System.out.println("ASSOCIATIONS: " + s);
 			}
 		}
 
@@ -1347,7 +1346,7 @@ public class ProposalService {
 			existingProposal.setPolicyGraph(GraphSerializer.toJson(pdp.getPAP().getGraphPAP()));
 			Map<String, OperationSet> assoc = pdp.getPAP().getGraphPAP().getTargetAssociations("Approval Content");
 			for (String s : assoc.keySet()) {
-				System.out.println("ASSOCIATIONS: " + s);
+				// System.out.println("ASSOCIATIONS: " + s);
 			}
 		}
 
@@ -1356,7 +1355,7 @@ public class ProposalService {
 			existingProposal.setPolicyGraph(GraphSerializer.toJson(pdp.getPAP().getGraphPAP()));
 			Map<String, OperationSet> assoc = pdp.getPAP().getGraphPAP().getTargetAssociations("Approval Content");
 			for (String s : assoc.keySet()) {
-				System.out.println("ASSOCIATIONS: " + s);
+				// System.out.println("ASSOCIATIONS: " + s);
 			}
 		}
 
@@ -1365,7 +1364,7 @@ public class ProposalService {
 			existingProposal.setPolicyGraph(GraphSerializer.toJson(pdp.getPAP().getGraphPAP()));
 			Map<String, OperationSet> assoc = pdp.getPAP().getGraphPAP().getTargetAssociations("Approval Content");
 			for (String s : assoc.keySet()) {
-				System.out.println("ASSOCIATIONS: " + s);
+				// System.out.println("ASSOCIATIONS: " + s);
 			}
 		}
 		if (projectProposal.getApprovalStage().equals(Constants.STATE_RD)) {
@@ -1373,7 +1372,7 @@ public class ProposalService {
 			existingProposal.setPolicyGraph(GraphSerializer.toJson(pdp.getPAP().getGraphPAP()));
 			Map<String, OperationSet> assoc = pdp.getPAP().getGraphPAP().getTargetAssociations("Approval Content");
 			for (String s : assoc.keySet()) {
-				System.out.println("ASSOCIATIONS: " + s);
+				// System.out.println("ASSOCIATIONS: " + s);
 			}
 		}
 
@@ -1509,16 +1508,35 @@ public class ProposalService {
 
 					String decision = "";
 
-					System.out.println(projectProposal.getProposal().getPolicyGraph());
+					//// System.out.println(projectProposal.getProposal().getPolicyGraph());
 
 					if (action.equalsIgnoreCase("Edit")) {
 						String objectAtt = "";
 						String acRight = "write";
 						objectAtt = projectProposal.setSection(proposalSection);
-						log.info("objectAtt:" + objectAtt);
-						decision = projectProposal.getPolicyDecision(pdsOperations, userInfo.getUserName(), acRight,
-								objectAtt);
-						log.info("D:" + decision);
+						if (objectAtt.equalsIgnoreCase("Investigator Info")) {
+							if (projectProposal.getPolicyDecision(pdsOperations, userInfo.getUserName(), "add-sp", "SP")
+									.equals("Permit")
+									|| projectProposal
+											.getPolicyDecision(pdsOperations, userInfo.getUserName(), "delete-sp", "SP")
+											.equals("Permit")
+									|| projectProposal.getPolicyDecision(pdsOperations, userInfo.getUserName(),
+											"add-copi", "CoPI").equals("Permit")
+									|| projectProposal.getPolicyDecision(pdsOperations, userInfo.getUserName(),
+											"delete-copi", "CoPI").equals("Permit")) {
+								decision = "Permit";
+							} else {
+								decision = "Deny";
+							}
+							decision = projectProposal.getPolicyDecision(pdsOperations, userInfo.getUserName(),
+									"add-sp", "SP");
+							log.info("D:" + decision);
+						} else {
+							log.info("objectAtt:" + objectAtt);
+							decision = projectProposal.getPolicyDecision(pdsOperations, userInfo.getUserName(), acRight,
+									objectAtt);
+							log.info("D:" + decision);
+						}
 					} else if (action.equalsIgnoreCase("Add Co-PI")) {
 						String objectAtt = "CoPI";
 						String acRight = "add-copi";
@@ -1565,9 +1583,9 @@ public class ProposalService {
 						decision = projectProposal.getPolicyDecision(pdsOperations, userInfo.getUserName(), "ViewLog",
 								"Audit Log");
 						log.info("Decisiong for viewing log: " + decision);
-					}else if (action.equalsIgnoreCase("read")) {
+					} else if (action.equalsIgnoreCase("read")) {
 						decision = projectProposal.getPolicyDecision(pdsOperations, userInfo.getUserName(), "read",
-								"PDSs");
+								"PDSSections");
 						log.info("Decisiong for viewing PDSs: " + decision);
 					} else {
 						BalanaConnector ac = new BalanaConnector();

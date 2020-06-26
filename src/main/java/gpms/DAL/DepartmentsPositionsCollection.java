@@ -84,13 +84,13 @@ public class DepartmentsPositionsCollection {
 			userInfo.setUserIsActive(true);
 			
 			List<UserProfile> deptUsers = userProfileDAO.findAllForAdminUserGrid("DEPT");
-			//System.out.println("All Admins:");
+			////System.out.println("All Admins:");
 			for(UserProfile user : deptUsers) {
 				userIdNameMap.put( user.getUserAccount().getUserName(),user.getId().toString());
 			}
 			
 			List<UserProfile> users = userProfileDAO.findAllForAdminUserGrid("UNIVERSITY");
-			//System.out.println("All Admins:");
+			////System.out.println("All Admins:");
 			for(UserProfile user : users) {
 				userIdNameMap.put( user.getUserAccount().getUserName(),user.getId().toString());
 			}

@@ -95,7 +95,7 @@ public class Comparator {
 				if(!graph2.exists(node.getID())){
 					return false;
 				}
-				if(node.equals(null)){System.out.println("hello");}
+				if(node.equals(null)){//System.out.println("hello");}
 				Map<Long, Set<String>> associations1 = graph2
 						.getSourceAssociations(node.getID());
 				if (!associations.equals(associations1)) {

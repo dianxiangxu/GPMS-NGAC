@@ -250,7 +250,7 @@ public abstract class GraphTesterRS {
 		        { 
 		            for (int j=0; j<r; j++) 
 		                System.out.print(data[j]+" "); 
-		            System.out.println(""); 
+		            //System.out.println(""); 
 		        return; 
 		        } 
 		  

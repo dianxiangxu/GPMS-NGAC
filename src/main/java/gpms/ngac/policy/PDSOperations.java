@@ -245,7 +245,7 @@ public class PDSOperations {
 		while (itr.hasNext()) {
 			Map.Entry<Attribute, HashSet> entry = itr.next();
 			log.info("Container = " + entry.getKey() + ", permission set = " + entry.getValue());
-			System.out.println("Container = " + entry.getKey() + ", permission set = " + entry.getValue());
+			//System.out.println("Container = " + entry.getKey() + ", permission set = " + entry.getValue());
 			try {
 				hasPermission = hasPermission && decider.check(userName, "process" ,"CoPI", requiredAccessRights);
 			} catch (PMException e) {
@@ -261,7 +261,7 @@ public class PDSOperations {
 		// e.printStackTrace();
 		// }
 		log.info("Add CoPI Permission : " + hasPermission);
-		System.out.println("Add CoPI Permission : " + hasPermission);
+		//System.out.println("Add CoPI Permission : " + hasPermission);
 
 		return hasPermission;
 	}
@@ -278,7 +278,7 @@ public class PDSOperations {
 		while (itr.hasNext()) {
 			Map.Entry<Attribute, HashSet> entry = itr.next();
 			log.info("Container = " + entry.getKey() + ", permission set = " + entry.getValue());
-			System.out.println("Container = " + entry.getKey() + ", permission set = " + entry.getValue());
+			//System.out.println("Container = " + entry.getKey() + ", permission set = " + entry.getValue());
 			try {
 				hasPermission = hasPermission && decider.check(userName, "process" ,"CoPI", requiredAccessRights);
 			} catch (PMException e) {
@@ -293,7 +293,7 @@ public class PDSOperations {
 //        	e.printStackTrace();
 //        }
 		log.info("Delete CoPI Permission : " + hasPermission);
-		System.out.println("Delete CoPI Permission : " + hasPermission);
+		//System.out.println("Delete CoPI Permission : " + hasPermission);
 
 		return hasPermission;
 	}
@@ -310,7 +310,7 @@ public class PDSOperations {
 		while (itr.hasNext()) {
 			Map.Entry<Attribute, HashSet> entry = itr.next();
 			log.info("Container = " + entry.getKey() + ", permission set = " + entry.getValue());
-			System.out.println("Container = " + entry.getKey() + ", permission set = " + entry.getValue());
+			//System.out.println("Container = " + entry.getKey() + ", permission set = " + entry.getValue());
 			try {
 				hasPermission = hasPermission && decider.check(userName, "process" ,"SP", requiredAccessRights);
 			} catch (PMException e) {
@@ -325,7 +325,7 @@ public class PDSOperations {
 //        	e.printStackTrace();
 //        }
 		log.info("Delete SP Permission : " + hasPermission);
-		System.out.println("Delete SP Permission : " + hasPermission);
+		//System.out.println("Delete SP Permission : " + hasPermission);
 
 		return hasPermission;
 	}
@@ -360,7 +360,7 @@ public class PDSOperations {
 		for (String nodeName : listOfChildren) {
 			if (graph.getNode(nodeName).getType().toString().equals("U")) {
 				listOfChildrenUsers.add(nodeName);
-				System.out.println("ADDED: " + nodeName);
+				//System.out.println("ADDED: " + nodeName);
 			}
 		}
 
@@ -373,7 +373,7 @@ public class PDSOperations {
 
 		listOfAdmins.add("Chair");
 		listOfAdmins.add("Dean");
-		listOfAdmins.add("Business-Manager");
+		listOfAdmins.add("Business Manager");
 		listOfAdmins.add("Research Admin");
 		listOfAdmins.add("Research Director");
 
@@ -495,7 +495,7 @@ public class PDSOperations {
 		}
 		PDP pdp = getPDP(intialGraph);
 		try {
-			System.out.println();
+			//System.out.println();
 			pdp.getEPP().processEvent(new DeleteCoPIEvent(intialGraph.getNode(CoPIUA), intialGraph.getNode(CoPIUser)),
 					PI, "process");
 		} catch (NoSuchElementException ex) {
@@ -666,7 +666,7 @@ public class PDSOperations {
 	 * @param graph the graph to determine permissions
 	 */
 	public static void printAccessState(String step, Graph graph) throws PMException {
-		System.out.println("############### Access state for " + step + " ###############");
+		//System.out.println("############### Access state for " + step + " ###############");
 
 		// initialize a PReviewDecider to make decisions
 		PReviewDecider decider = new PReviewDecider(graph);
@@ -692,9 +692,9 @@ public class PDSOperations {
 
 	public static void printGraph(Graph graph) throws PMException {
 		List<Node> nodes = (List<Node>) graph.getNodes();
-		System.out.println("***********Nodes:************");
+		//System.out.println("***********Nodes:************");
 		for (Node node : nodes) {
-			System.out.println(node.getName());
+			//System.out.println(node.getName());
 		}
 
 	}
@@ -715,7 +715,7 @@ public class PDSOperations {
 		// get all of the users in the graph
 		Node userAttNode = policy.getNode(parent);
 
-		// System.out.println(search.size());
+		// //System.out.println(search.size());
 
 		// for (Node userAttNode : search) {
 

@@ -126,7 +126,7 @@ public class EmailUtil {
 
 		// Must enable less secure Apps
 		// https://www.google.com/settings/u/1/security/lesssecureapps
-		System.out.println("TLSEmail Start");
+		//System.out.println("TLSEmail Start");
 		properties = new Properties();
 		// SMTP Host
 		properties.put("mail.smtp.host", "smtp.gmail.com");
@@ -141,7 +141,7 @@ public class EmailUtil {
 				return new PasswordAuthentication(fromEmail, password);
 			}
 		};
-		System.out.println("Session created");
+		//System.out.println("Session created");
 		Session session = Session.getInstance(properties, auth);
 		sendEmail(session, toEmail, subject, body);
 	}
@@ -211,10 +211,10 @@ public class EmailUtil {
             // Now set the actual message
             message.setText(body,"utf-8", "html");
 
-            System.out.println("sending...");
+            //System.out.println("sending...");
             // Send message
             Transport.send(message);
-            System.out.println("Sent message successfully....");
+            //System.out.println("Sent message successfully....");
         } catch (MessagingException mex) {
             mex.printStackTrace();
         }
@@ -239,7 +239,7 @@ public class EmailUtil {
 		final String fromEmail = "gpmsngac2020@gmail.com";
 		// Valid gmail password
 		final String password = "GPMSngac2020*";
-		System.out.println("SSLEmail Start");
+		//System.out.println("SSLEmail Start");
 		properties = new Properties();
 		// SMTP Host
 		properties.put("mail.smtp.host", "smtp.gmail.com");
@@ -258,7 +258,7 @@ public class EmailUtil {
 		};
 
 		Session session = Session.getDefaultInstance(properties, auth);
-		System.out.println("Session created");
+		//System.out.println("Session created");
 		sendEmail(session, toEmail, subject, body);
 	}
 
@@ -309,7 +309,7 @@ public class EmailUtil {
 			String body, String attachName) throws IOException {
 		try {
 			Session session = Session.getDefaultInstance(properties);
-			System.out.println("Session created");
+			//System.out.println("Session created");
 
 			MimeMessage msg = new MimeMessage(session);
 			msg.addHeader("Content-type", "text/HTML; charset=UTF-8");
@@ -339,7 +339,7 @@ public class EmailUtil {
 
 			msg.setContent(multipart);
 			Transport.send(msg);
-			System.out.println("Email Sent Successfully with attachment!!");
+			//System.out.println("Email Sent Successfully with attachment!!");
 		} catch (MessagingException e) {
 			e.printStackTrace();
 		} catch (UnsupportedEncodingException e) {
@@ -364,7 +364,7 @@ public class EmailUtil {
 		try {
 			// Get the default Session object.
 			Session session = Session.getDefaultInstance(properties);
-			System.out.println("Session created");
+			//System.out.println("Session created");
 			MimeMessage msg = new MimeMessage(session);
 			msg.addHeader("Content-type", "text/HTML; charset=UTF-8");
 			msg.addHeader("format", "flowed");
@@ -400,7 +400,7 @@ public class EmailUtil {
 
 			msg.setContent(multipart);
 			Transport.send(msg);
-			System.out.println("Email Sent Successfully with image!!");
+			//System.out.println("Email Sent Successfully with image!!");
 		} catch (MessagingException e) {
 			e.printStackTrace();
 		} catch (UnsupportedEncodingException e) {

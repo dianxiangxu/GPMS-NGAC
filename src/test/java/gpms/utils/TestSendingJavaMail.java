@@ -7,7 +7,7 @@ public class TestSendingJavaMail {
 	public static void main(String[] args) throws Exception {
 
 		// Java Program to send Email using SMTP without authentication
-		System.out.println("SimpleEmail Start");
+		//System.out.println("SimpleEmail Start");
 
 		final String toEmail = "milsonmun@yahoo.com"; // can be any email id
 

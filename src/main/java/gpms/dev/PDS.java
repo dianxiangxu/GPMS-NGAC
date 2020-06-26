@@ -105,11 +105,11 @@ public class PDS {
     }
     
     void testGenerateIds() {
-    	System.out.println(getID());
-    	System.out.println(getID());
-    	System.out.println(getID());
-    	System.out.println(getID());
-    	System.out.println(getID());
+    	//System.out.println(getID());
+    	//System.out.println(getID());
+    	//System.out.println(getID());
+    	//System.out.println(getID());
+    	//System.out.println(getID());
     }
     
     void testMongoInfo() {
@@ -136,24 +136,24 @@ public class PDS {
 		//userInfo.setUserPositionType("Tenured/tenure-track faculty");
 		//userInfo.setUserPositionTitle("Assistant Professor");
 		try {
-	    	System.out.println("User Info:"+userInfo.toString());
+	    	//System.out.println("User Info:"+userInfo.toString());
 			//List<UserInfo> userList = userProfileDAO.findAllForAdminUserGrid(0, 1000, userInfo);
 			List<UserProfile> userList = userProfileDAO.findAllUsersWithPosition();
-			System.out.println("All positions:");
+			//System.out.println("All positions:");
 			for(UserProfile user : userList) {
-				System.out.println(user.toString());
+				//System.out.println(user.toString());
 			}
 			
 			List<UserProfile> deptUsers = userProfileDAO.findAllForAdminUserGrid("DEPT");
-			System.out.println("All Admins:");
+			//System.out.println("All Admins:");
 			for(UserProfile user : deptUsers) {
-				System.out.println(user.getId().toString()+"|"+user.getUserAccount().getUserName()+" |"+user.getDetails(0).getDepartment()+"|"+user.getDetails(0).getCollege()+"|"+user.getDetails(0).getPositionTitle()+"|position type:"+user.getDetails(0).getPositionType());
+				//System.out.println(user.getId().toString()+"|"+user.getUserAccount().getUserName()+" |"+user.getDetails(0).getDepartment()+"|"+user.getDetails(0).getCollege()+"|"+user.getDetails(0).getPositionTitle()+"|position type:"+user.getDetails(0).getPositionType());
 			}
 			
 			List<UserProfile> users = userProfileDAO.findAllForAdminUserGrid("UNIVERSITY");
-			System.out.println("All Admins:");
+			//System.out.println("All Admins:");
 			for(UserProfile user : users) {
-				System.out.println(user.getId()+"|"+user.getUserAccount().getUserName()+" |"+user.getDetails(0).getDepartment()+"|"+user.getDetails(0).getCollege()+"|"+user.getDetails(0).getPositionTitle()+"|position type:"+user.getDetails(0).getPositionType());
+				//System.out.println(user.getId()+"|"+user.getUserAccount().getUserName()+" |"+user.getDetails(0).getDepartment()+"|"+user.getDetails(0).getCollege()+"|"+user.getDetails(0).getPositionTitle()+"|position type:"+user.getDetails(0).getPositionType());
 			}
 			
 			
@@ -184,11 +184,11 @@ public class PDS {
 	        graph = GraphSerializer.fromJson(graph, json2);
 	        graph = GraphSerializer.fromJson(graph, json3);
 	        graph = GraphSerializer.fromJson(graph, json4);
-	        System.out.println("Nodes:"+graph.getNodes().size());
-	        System.out.println("Graph:"+graph.toString());
+	        //System.out.println("Nodes:"+graph.getNodes().size());
+	        //System.out.println("Graph:"+graph.toString());
         } catch(Exception e)
         {
-        	System.out.println(e.toString());
+        	//System.out.println(e.toString());
         	e.printStackTrace();
         }
         
@@ -197,7 +197,7 @@ public class PDS {
     	graph.assign(node.getID(), userAttNodeID);
     	Set<Long> childIds = graph.getChildren(userAttNodeID);
     	
-    	System.out.println(childIds.size());
+    	//System.out.println(childIds.size());
     	
     	for(long id : childIds) {
     		graph.deassign(id, userAttNodeID);
@@ -205,8 +205,8 @@ public class PDS {
     	
     	childIds = graph.getChildren(userAttNodeID);
     	
-    	System.out.println(childIds.size());
-    	System.out.println(getNodeID(graph, "PI", NodeType.UA, null));
+    	//System.out.println(childIds.size());
+    	//System.out.println(getNodeID(graph, "PI", NodeType.UA, null));
     	
     }
     
@@ -214,7 +214,7 @@ public class PDS {
 
 		File file = main.getFileFromResources(main,"docs/test_policy_graph.json"); 
 		String json = new String(Files.readAllBytes(Paths.get(file.getAbsolutePath())));
-		//System.out.println(json);
+		////System.out.println(json);
 		Graph graph =null;
 	    graph = GraphSerializer.fromJson(new MemGraph(), json);
 		
@@ -227,7 +227,7 @@ public class PDS {
 		prohibitions = ProhibitionsSerializer.fromJson(prohibitions, json_prohibition);
 		
 		String prohibitionString = ProhibitionsSerializer.toJson(prohibitions);	 	
-	 	System.out.println("Prohibition:"+json_prohibition);
+	 	//System.out.println("Prohibition:"+json_prohibition);
 
 		PReviewDecider decider = new PReviewDecider(graph, prohibitions);
 		Set<String> list = decider.list(2, 0, 6);
@@ -235,13 +235,13 @@ public class PDS {
 		for(String st: list) {
 			System.out.print(st + " ");
 		}
-		System.out.println();
+		//System.out.println();
 		Set<String> list2 = decider.list(2, 1, 7);
 		
 		for(String st2: list2) {
 			System.out.print(st2 + " ");
 		}
-		System.out.println();
+		//System.out.println();
 		Set<String> list3 = decider.list(2, 2, 10);
 		
 		for(String st2: list3) {
@@ -250,7 +250,7 @@ public class PDS {
 		
 		PReviewDecider decider2 = new PReviewDecider(graph, new MemProhibitions());
 		
-		System.out.println();
+		//System.out.println();
 		Set<String> list4 = decider2.list(2, 5, 6);
 		
 		for(String st2: list4) {
@@ -258,9 +258,9 @@ public class PDS {
 		}
 		
 		boolean hasPermission = decider.check(2, NGACPolicyConfigurationLoader.getID() ,10, new String[] {"execute"});
-		System.out.println(hasPermission);
+		//System.out.println(hasPermission);
 		
-		System.out.println(ProhibitionsSerializer.toJson(prohibitions));
+		//System.out.println(ProhibitionsSerializer.toJson(prohibitions));
 	
 	}
 	
@@ -288,32 +288,32 @@ public class PDS {
 	        graph = GraphSerializer.fromJson(graph, json2);
 	        graph = GraphSerializer.fromJson(graph, json3);
 	        graph = GraphSerializer.fromJson(graph, json4);
-	        System.out.println("Nodes:"+graph.getNodes().size());
-	        System.out.println("Graph:"+graph.toString());
+	        //System.out.println("Nodes:"+graph.getNodes().size());
+	        //System.out.println("Graph:"+graph.toString());
         } catch(Exception e)
         {
-        	System.out.println(e.toString());
+        	//System.out.println(e.toString());
         	e.printStackTrace();
         }
 		
 		
 		Prohibitions prohibitions = new MemProhibitions();		
 		String pro = ProhibitionsSerializer.toJson(prohibitions);
-		System.out.println("Prohibition:"+pro);
+		//System.out.println("Prohibition:"+pro);
 		//String prohibitionString = ProhibitionsSerializer.toJson(prohibitions);	 	
 	 	
 		
 		
-		System.out.println("*******Without prohibition********");
+		//System.out.println("*******Without prohibition********");
 		PReviewDecider decider = new PReviewDecider(graph, new MemProhibitions());
 		Set<String> list = decider.list(780103731515376518l, 0, 1432074838181907682l);
 		
 		for(String st: list) {
-			System.out.println(st);
+			//System.out.println(st);
 		}
 		
 		Boolean hasPermission = decider.check(780103731515376518l, NGACPolicyConfigurationLoader.getID() ,1432074838181907682l, new String[] {"Delete","Save", "Submit"});
-		System.out.println(hasPermission);
+		//System.out.println(hasPermission);
 		
 
 		File file_prohibition = main.getFileFromResources(main,"docs/post_submission_prohibitions.json"); 
@@ -321,21 +321,21 @@ public class PDS {
 		prohibitions = ProhibitionsSerializer.fromJson(prohibitions, json_prohibition);
 		
 		//String prohibitionString = ProhibitionsSerializer.toJson(prohibitions);	 	
-	 	System.out.println("Prohibition:"+json_prohibition);
+	 	//System.out.println("Prohibition:"+json_prohibition);
 
 		decider = new PReviewDecider(graph, prohibitions);
 		list = decider.list(780103731515376518l, 1, 1432074838181907682l);
 		
 		for(String st: list) {
-			System.out.println(st);
+			//System.out.println(st);
 		}
 		hasPermission = decider.check(780103731515376518l, NGACPolicyConfigurationLoader.getID() ,1432074838181907682l, new String[] {"Delete","Save","Submit"});
-		System.out.println(hasPermission);
+		//System.out.println(hasPermission);
 		
 		
 		
 		
-		//System.out.println(ProhibitionsSerializer.toJson(prohibitions));
+		////System.out.println(ProhibitionsSerializer.toJson(prohibitions));
 		//assertEquals(1, list.size());
 		//assertTrue(list.contains("execute"));
 	}
@@ -345,7 +345,7 @@ public class PDS {
 
 		File file = main.getFileFromResources(main,"docs/test_policy_graph.json"); 
 		String json = new String(Files.readAllBytes(Paths.get(file.getAbsolutePath())));
-		//System.out.println(json);
+		////System.out.println(json);
 		Graph graph =null;
 	    graph = GraphSerializer.fromJson(new MemGraph(), json);
 		
@@ -362,15 +362,15 @@ public class PDS {
 		for(String st: list) {
 			System.out.print(st+" ");
 		}
-		System.out.println();
+		//System.out.println();
 		boolean hasPermission = decider.check(2, NGACPolicyConfigurationLoader.getID() ,7, new String[] {"execute"});
-		System.out.println(hasPermission);
+		//System.out.println(hasPermission);
 		hasPermission = decider.check(2, NGACPolicyConfigurationLoader.getID() ,5, new String[] {"execute"});
-		System.out.println(hasPermission);
+		//System.out.println(hasPermission);
 		hasPermission = decider.check(2, NGACPolicyConfigurationLoader.getID() ,10, new String[] {"read"});
-		System.out.println(hasPermission);
+		//System.out.println(hasPermission);
 		hasPermission = decider.check(2, NGACPolicyConfigurationLoader.getID() ,10, new String[] {"delete"});
-		System.out.println(hasPermission);
+		//System.out.println(hasPermission);
 		
 		PDP pdp = new PDP(new PAP(graph, new MemProhibitions(), new MemObligations()));
 	 	pdp.getPAP().getObligationsPAP().add(obligation, true);
@@ -389,15 +389,15 @@ public class PDS {
 		for(String st: list) {
 			System.out.print(st+" ");
 		}
-		System.out.println();
+		//System.out.println();
 		hasPermission = decider.check(2, NGACPolicyConfigurationLoader.getID() ,7, new String[] {"execute"});
-		System.out.println(hasPermission);
+		//System.out.println(hasPermission);
 		hasPermission = decider.check(2, NGACPolicyConfigurationLoader.getID() ,5, new String[] {"execute"});
-		System.out.println(hasPermission);
+		//System.out.println(hasPermission);
 		hasPermission = decider.check(2, NGACPolicyConfigurationLoader.getID() ,10, new String[] {"read"});
-		System.out.println(hasPermission);
+		//System.out.println(hasPermission);
 		hasPermission = decider.check(2, NGACPolicyConfigurationLoader.getID() ,10, new String[] {"delete"});
-		System.out.println(hasPermission);
+		//System.out.println(hasPermission);
 		
 	}
     
@@ -423,11 +423,11 @@ public class PDS {
 	        graph = GraphSerializer.fromJson(graph, json2);
 	        graph = GraphSerializer.fromJson(graph, json3);
 	        graph = GraphSerializer.fromJson(graph, json4);
-	        System.out.println("Nodes:"+graph.getNodes().size());
-	        System.out.println("Graph:"+graph.toString());
+	        //System.out.println("Nodes:"+graph.getNodes().size());
+	        //System.out.println("Graph:"+graph.toString());
         } catch(Exception e)
         {
-        	System.out.println(e.toString());
+        	//System.out.println(e.toString());
         	e.printStackTrace();
         }
         
@@ -444,12 +444,12 @@ public class PDS {
 		PReviewDecider decider = new PReviewDecider(graph, prohibitions);
 		Set<String> list = decider.list(780103731515376518l, 0, 1432074838181907682l);
 		
-		System.out.println("PI->PI Editable Data");
+		//System.out.println("PI->PI Editable Data");
 		for(String st: list) {
 			System.out.print(st+" ");
 			}		
-		System.out.println();
-		System.out.println("PI->CoPI-Editable-Data");
+		//System.out.println();
+		//System.out.println("PI->CoPI-Editable-Data");
 		list = decider.list(780103731515376518l, 2, -125095002669469944l);		
 		for(String st2: list) {
 			System.out.print(st2+" ");
@@ -464,45 +464,45 @@ public class PDS {
         pdp.getEPP().processEvent(new AssignToEvent(graph.getNode(pdsSpUA), graph.getNode(child.getID())),userID, 129);
 		
            
-		System.out.println();
+		//System.out.println();
 		list = decider.list(780103731515376518l, 2, 1432074838181907682l);		
 		for(String str: list) {
 			System.out.print(str+" ");
 		}
-		System.out.println();
+		//System.out.println();
 		list = decider.list(780103731515376518l, 2, -125095002669469944l);		
 		for(String str2: list) {
 			System.out.print(str2+" ");
 		}
 		
 		boolean hasPermission = decider.check(780103731515376518l, NGACPolicyConfigurationLoader.getID() ,-125095002669469944l, new String[] {"Delete"});
-		System.out.println("Dec:"+hasPermission);
+		//System.out.println("Dec:"+hasPermission);
 //		hasPermission = decider.check(2, NGACPolicyConfigurationLoader.getID() ,6, new String[] {"execute"});
-//		System.out.println(hasPermission);
+//		//System.out.println(hasPermission);
 //		hasPermission = decider.check(2, NGACPolicyConfigurationLoader.getID() ,6, new String[] {"read"});
-//		System.out.println(hasPermission);
+//		//System.out.println(hasPermission);
 		
 //
 //		PReviewDecider decider = new PReviewDecider(graph, prohibitions);
 //		Set<String> list = decider.list(780103731515376518l, 0, 1432074838181907682l);
 //		
 //		for(String st: list) {
-//			System.out.println(st);
+//			//System.out.println(st);
 //		}
 //		boolean hasPermission = decider.check(780103731515376518l, NGACPolicyConfigurationLoader.getID() ,1432074838181907682l, new String[] {"Delete","Submit"});
-//		System.out.println(hasPermission);
+//		//System.out.println(hasPermission);
 //		
-//		System.out.println("***************");
+//		//System.out.println("***************");
 //		decider = new PReviewDecider(graph, new MemProhibitions());
 //		list = decider.list(780103731515376518l, 0, 1432074838181907682l);
 //		
 //		for(String st: list) {
-//			System.out.println(st);
+//			//System.out.println(st);
 //		}
 //		hasPermission = decider.check(780103731515376518l, NGACPolicyConfigurationLoader.getID() ,1432074838181907682l, new String[] {"Delete","Submit"});
-//		System.out.println(hasPermission);
+//		//System.out.println(hasPermission);
 		
-		//System.out.println(ProhibitionsSerializer.toJson(prohibitions));
+		////System.out.println(ProhibitionsSerializer.toJson(prohibitions));
 		//assertEquals(1, list.size());
 		//assertTrue(list.contains("execute"));
 	}
@@ -529,12 +529,12 @@ public class PDS {
 	        graph = GraphSerializer.fromJson(graph, json2);
 	        graph = GraphSerializer.fromJson(graph, json3);
 	        graph = GraphSerializer.fromJson(graph, json4);
-	        System.out.println("Nodes:"+graph.getNodes().size());
-	        System.out.println("Graph:"+graph.toString());
+	        //System.out.println("Nodes:"+graph.getNodes().size());
+	        //System.out.println("Graph:"+graph.toString());
       //  printAccessState("Initial configuration", graph);
         } catch(Exception e)
         {
-        	System.out.println(e.toString());
+        	//System.out.println(e.toString());
         	e.printStackTrace();
         }
         
@@ -549,7 +549,7 @@ public class PDS {
 		PDSOperations pdsOperations = new PDSOperations(); 
 		GPMSCommonInfo userInfo = new GPMSCommonInfo();
 		userInfo.setUserName("nazmul");		
-		System.out.println(pdsOperations.hasPermissionToCreateAProposal(graph, userInfo, new MemProhibitions()));
+		//System.out.println(pdsOperations.hasPermissionToCreateAProposal(graph, userInfo, new MemProhibitions()));
 		
 		try{
     		InputStream is = new FileInputStream(file5);
@@ -571,13 +571,13 @@ public class PDS {
 //    	 	pdp.getPAP().getObligationsPAP().add(obligation, true);
 //    	 	
 //    	 	String prohibitionString = ProhibitionsSerializer.toJson(prohibitions);    	 	
-//    	 	System.out.println("Prohibition:"+prohibitionString);
+//    	 	//System.out.println("Prohibition:"+prohibitionString);
 //    	 	
 //    	 	PReviewDecider decider = new PReviewDecider(graph, prohibitions);
 //    		Set<String> list = decider.list(780103731515376518l, 0, 1432074838181907682l);
 //    		
 //    		for(String st: list) {
-//    			System.out.println(st);
+//    			//System.out.println(st);
 //    		}
     	 	
     		PDP pdp = new PDP(new PAP(graph, new MemProhibitions(), new MemObligations()));
@@ -585,22 +585,22 @@ public class PDS {
 
 	       // test u1 assign to
 	        Set<Node> search = pdp.getPAP().getGraphPAP().search("nazmul", "O", null);	        
-	        System.out.println("Found nazmul inside:"+ !search.isEmpty());
+	        //System.out.println("Found nazmul inside:"+ !search.isEmpty());
 	        
 	        long userID = getNodeID(graph, "nazmul", U, null);
 	        pdp.getEPP().processEvent(new AssignToEvent(graph.getNode(pdsOriginationOAID), pdsNode),userID, 123);
 		
 	        
 	        search = pdp.getPAP().getGraphPAP().search("nazmul", "O", null);	        
-	        System.out.println("Found nazmul inside:"+ !search.isEmpty());
+	        //System.out.println("Found nazmul inside:"+ !search.isEmpty());
 	        
 	        printAccessState("Initial configuration", graph);
 	        
 	        //add Co PI : alice
 	        
 	        search = pdp.getPAP().getGraphPAP().search("liliana", "O", null);	        
-	        System.out.println("Found liliana inside:"+ !search.isEmpty());
-	        System.out.println(UserPermissionChecker.checkPermissionAnyType(graph, new MemProhibitions(), "liliana", U.toString(), new Attribute("CoPI-Editable-Data",NodeType.OA), Arrays.asList("w") ));
+	        //System.out.println("Found liliana inside:"+ !search.isEmpty());
+	        //System.out.println(UserPermissionChecker.checkPermissionAnyType(graph, new MemProhibitions(), "liliana", U.toString(), new Attribute("CoPI-Editable-Data",NodeType.OA), Arrays.asList("w") ));
 	        
 	        long pdCoPIUA = getNodeID(graph, Constants.CO_PI_UA_LBL,  UA, null); 
 			
@@ -609,21 +609,21 @@ public class PDS {
 		
 	        
 	        search = pdp.getPAP().getGraphPAP().search("liliana", "O", null);	        
-	        System.out.println("Found alice inside:"+ !search.isEmpty());
+	        //System.out.println("Found alice inside:"+ !search.isEmpty());
 	        
-	        System.out.println(UserPermissionChecker.checkPermissionAnyType(graph, new MemProhibitions(), "liliana", U.toString(), new Attribute("CoPI-Editable-Data",NodeType.OA), Arrays.asList("w") ));
+	        //System.out.println(UserPermissionChecker.checkPermissionAnyType(graph, new MemProhibitions(), "liliana", U.toString(), new Attribute("CoPI-Editable-Data",NodeType.OA), Arrays.asList("w") ));
 	        
 	        
 	        
 	       // userInfo.setUserName("nazmul");		
-		//	System.out.println("alice:"+pdsOperations.hasPermissionToAddAsCoPI(graph, userInfo, "alice"));
+		//	//System.out.println("alice:"+pdsOperations.hasPermissionToAddAsCoPI(graph, userInfo, "alice"));
 	        
 	        
 	        //add SP : dave
 	        
 	        
 	        search = pdp.getPAP().getGraphPAP().search("tomtom", "O", null);	        
-	        System.out.println("Found tomtom inside:"+ !search.isEmpty());
+	        //System.out.println("Found tomtom inside:"+ !search.isEmpty());
 	        
 	        long pdsSpUA = getNodeID(graph, Constants.SENIOR_PERSON_UA_LBL,  UA, null); 
 			
@@ -632,10 +632,10 @@ public class PDS {
 		
 	        
 	        search = pdp.getPAP().getGraphPAP().search("tomtom", "O", null);	        
-	        System.out.println("Found tomtom inside:"+ !search.isEmpty());
+	        //System.out.println("Found tomtom inside:"+ !search.isEmpty());
 	        
 	        search = pdp.getPAP().getGraphPAP().search("amy", "U", null);	        
-	        System.out.println("Found amy inside:"+ !search.isEmpty());
+	        //System.out.println("Found amy inside:"+ !search.isEmpty());
 	        
 	        //Tenured Faculty
 	        
@@ -650,10 +650,10 @@ public class PDS {
 		
 	        
 	        search = pdp.getPAP().getGraphPAP().search("tomtom", "O", null);	        
-	        System.out.println("Found tomtom inside:"+ !search.isEmpty());
+	        //System.out.println("Found tomtom inside:"+ !search.isEmpty());
 	        
 	        search = pdp.getPAP().getGraphPAP().search("amy", "U", null);	        
-	        System.out.println("Found amy inside:"+ !search.isEmpty());
+	        //System.out.println("Found amy inside:"+ !search.isEmpty());
 	        
 	        
 	        
@@ -671,7 +671,7 @@ public class PDS {
 	        
 	        
 		} catch(Exception e) {
-			//System.out.println(e.toString());
+			////System.out.println(e.toString());
 			e.printStackTrace();
 		}
     	
@@ -691,21 +691,21 @@ public class PDS {
         // get all of the users in the graph
         Set<Node> search = graph.search(parent, UA.toString(), null);
         
-        System.out.println(search.size());
+        //System.out.println(search.size());
         
         for(Node userAttNode : search) {
         	
         	 Set<Long> childIds = graph.getChildren(userAttNode.getID());
-        	 System.out.println(childIds.size()+"|"+childIds);
+        	 //System.out.println(childIds.size()+"|"+childIds);
         	 
         	 long tenureFacultyNode = getNodeID(graph, name, U, null);
         	 
-        	 System.out.println(tenureFacultyNode);
+        	 //System.out.println(tenureFacultyNode);
         	 
         	 if(childIds.contains(tenureFacultyNode))
         	 {	
         		 found = true;
-        		 System.out.println("found");
+        		 //System.out.println("found");
         	 }
         }
         return found;
@@ -715,9 +715,9 @@ public class PDS {
     
     private static void printGraph(Graph graph) throws PMException {
     	List<Node> nodes =  (List<Node>) graph.getNodes();
-    	System.out.println("***********Nodes:************");
+    	//System.out.println("***********Nodes:************");
     	for(Node node: nodes) {
-    		System.out.println(node.getName());
+    		//System.out.println(node.getName());
     	}
     	
     }
@@ -728,7 +728,7 @@ public class PDS {
      * @param graph the graph to determine permissions
      */
     private static void printAccessState(String step, Graph graph) throws PMException {
-        System.out.println("############### Access state for " + step + " ###############");
+        //System.out.println("############### Access state for " + step + " ###############");
 
         // initialize a PReviewDecider to make decisions
         PReviewDecider decider = new PReviewDecider(graph);
@@ -741,22 +741,22 @@ public class PDS {
                 continue;
             }
 
-            System.out.println(user.getName());
+            //System.out.println(user.getName());
             // get all of the nodes accessible for the current user
             Map<Long, Set<String>> accessibleNodes = decider.getAccessibleNodes(user.getID(),123);
             for(long objectID : accessibleNodes.keySet()) {
                 Node obj = graph.getNode(objectID);
-                System.out.println("\t" + obj.getName() + "(" +obj.getType().toString()+") -> " + accessibleNodes.get(objectID));
+                //System.out.println("\t" + obj.getName() + "(" +obj.getType().toString()+") -> " + accessibleNodes.get(objectID));
             }
         }
-        System.out.println("############### End Access state for " + step + "############");
+        //System.out.println("############### End Access state for " + step + "############");
     }
     
     
     
     
     private static void printAccessStateForUA(String step, Graph graph) throws PMException {
-        System.out.println("############### Access state for " + step + " ###############");
+        //System.out.println("############### Access state for " + step + " ###############");
 
         // initialize a PReviewDecider to make decisions
         PReviewDecider decider = new PReviewDecider(graph);
@@ -769,15 +769,15 @@ public class PDS {
                 continue;
             }
 
-            System.out.println(user.getName());
+            //System.out.println(user.getName());
             // get all of the nodes accessible for the current user
             Map<Long, Set<String>> accessibleNodes = decider.getAccessibleNodes(user.getID(),123);
             for(long objectID : accessibleNodes.keySet()) {
                 Node obj = graph.getNode(objectID);
-                System.out.println("\t" + obj.getName() + " -> " + accessibleNodes.get(objectID));
+                //System.out.println("\t" + obj.getName() + " -> " + accessibleNodes.get(objectID));
             }
         }
-        System.out.println("############### End Access state for " + step + "############");
+        //System.out.println("############### End Access state for " + step + "############");
     }
 
     /**
@@ -872,13 +872,13 @@ public class PDS {
 		
 		String prohibitionString = ProhibitionsSerializer.toJson(prohibitions);
 	 	
-	 	System.out.println("Prohibition:"+prohibitionString);
+	 	//System.out.println("Prohibition:"+prohibitionString);
 
 		PReviewDecider decider = new PReviewDecider(graph, prohibitions);
 		Set<String> list = decider.list(ua1.getID(), 0, oa2.getID());
 		
 		for(String st: list) {
-			System.out.println(st);
+			//System.out.println(st);
 		}
 		//assertEquals(1, list.size());
 		//assertTrue(list.contains("execute"));

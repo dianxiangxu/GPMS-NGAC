@@ -653,7 +653,7 @@ public class AllPairs
 	}
 	System.out.print(row[j]);
       }
-      System.out.println();
+      //System.out.println();
     }
     System.out.flush();
     }
@@ -702,10 +702,10 @@ public class AllPairs
       if (result.length < bestSofar)
       {
         bestSofar = result.length;
-	System.out.println("New best of " + bestSofar + " rows at go " +
+	//System.out.println("New best of " + bestSofar + " rows at go " +
 	  go);
 	showResult(result, tran, doWriteCsv);
-	System.out.println("New best was " +
+	//System.out.println("New best was " +
 	  bestSofar + " rows at go " + go);
       }
       if ((max > 0) && (go >= max))
@@ -1222,8 +1222,8 @@ public class AllPairs
       System.out.print(' ');
       System.out.print(choices[i]);
     }
-    System.out.println();
-    System.out.println("MaxGoes " + maxGoes + " seed " + seed +
+    //System.out.println();
+    //System.out.println("MaxGoes " + maxGoes + " seed " + seed +
       " noShuffle " + noShuffle);
     AllPairs.indefiniteGenerate(choices, seed, maxGoes, !noShuffle, tran, writeCsv);      
   }
@@ -1357,7 +1357,7 @@ public class AllPairs
 	readSpaceSeparatedFile(filename);
       }
       /*
-      System.out.println("Got data " +
+      //System.out.println("Got data " +
         Arrays.deepToString(choiceTranslator));
       */
       numChoices = new int[choiceTranslator.length];

@@ -53,7 +53,7 @@ public class RemovePropertyFromChildrenExecutor implements FunctionExecutor {
 				if (mapProperties.containsKey(key)) {
 					mapProperties.remove(key);
 					pdp.getPAP().getGraphPAP().updateNode(node.getName(), mapProperties);
-					System.out.println("remove_properties_from_children: "+pdp.getPAP().getGraphPAP().getNode(node.getName()));
+					//System.out.println("remove_properties_from_children: "+pdp.getPAP().getGraphPAP().getNode(node.getName()));
 				}
 
 			}

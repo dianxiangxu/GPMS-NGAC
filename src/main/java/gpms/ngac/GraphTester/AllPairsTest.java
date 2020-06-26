@@ -47,12 +47,12 @@ public class AllPairsTest {
 		  
 	  }
 	  static void printPairs(ArrayList<int[]> pairs){
-		  System.out.println("#pairs: "+pairs.size());
+		  //System.out.println("#pairs: "+pairs.size());
 		  for (int[] pair: pairs){
 			  System.out.print(pairs.indexOf(pair)+1+".");
 			  for (int i=0; i<pair.length; i++)
 				  System.out.print(" "+pair[i]);
-			  System.out.println();
+			  //System.out.println();
 		  }
 	  }
 	  

@@ -624,8 +624,8 @@ public class DelegationService {
 						|| intDecision == AbstractResult.DECISION_INDETERMINATE_DENY_OR_PERMIT) {
 					intDecision = AbstractResult.DECISION_INDETERMINATE;
 				}
-				System.out.println("Decision:" + intDecision + " that is: "
-						+ AbstractResult.DECISIONS[intDecision]);
+				//System.out.println("Decision:" + intDecision + " that is: "
+					//	+ AbstractResult.DECISIONS[intDecision]);
 				if (AbstractResult.DECISIONS[intDecision].equals("Permit")) {
 					return revokeDelegation(userInfo, existingDelegation,
 							authorProfile, authorUserName, ar);

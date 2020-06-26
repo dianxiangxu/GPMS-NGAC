@@ -208,22 +208,22 @@ public class PasswordHash {
 
 			// Test password validation
 			boolean failure = false;
-			System.out.println("Running tests...");
+			//System.out.println("Running tests...");
 			for (int i = 0; i < 100; i++) {
 				String password = "" + i;
 				String hash = createHash(password);
 				String secondHash = createHash(password);
 				if (hash.equals(secondHash)) {
-					System.out.println("FAILURE: TWO HASHES ARE EQUAL!");
+					//System.out.println("FAILURE: TWO HASHES ARE EQUAL!");
 					failure = true;
 				}
 				String wrongPassword = "" + (i + 1);
 				if (validatePassword(wrongPassword, hash)) {
-					System.out.println("FAILURE: WRONG PASSWORD ACCEPTED!");
+					//System.out.println("FAILURE: WRONG PASSWORD ACCEPTED!");
 					failure = true;
 				}
 				if (!validatePassword(password, hash)) {
-					System.out.println("FAILURE: GOOD PASSWORD NOT ACCEPTED!");
+					//System.out.println("FAILURE: GOOD PASSWORD NOT ACCEPTED!");
 					failure = true;
 				}
 			}
@@ -232,7 +232,7 @@ public class PasswordHash {
 			else
 				System.out.println("TESTS PASSED!");
 		} catch (Exception ex) {
-			System.out.println("ERROR: " + ex);
+			//System.out.println("ERROR: " + ex);
 		}
 	}
 

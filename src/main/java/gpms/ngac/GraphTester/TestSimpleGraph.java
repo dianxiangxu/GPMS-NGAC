@@ -59,35 +59,35 @@ public class TestSimpleGraph {
 		// print them
 		for (String s : list) {
 
-			System.out.println("UA2 AND OA2: " + s);
+			//System.out.println("UA2 AND OA2: " + s);
 		}
-		System.out.println("------------------------------------------------------");
+		//System.out.println("------------------------------------------------------");
 
 		for (String s : decider.list(ua1.getName(), "", oa2.getName())) {
 
-			System.out.println("UA1 AND OA2: " + s);
+			//System.out.println("UA1 AND OA2: " + s);
 		}
-		System.out.println("------------------------------------------------------");
+		//System.out.println("------------------------------------------------------");
 
 		for (String s : decider.list(ua2.getName(), "", oa1.getName())) {
 
-			System.out.println("UA2 AND OA1: " + s);
+			//System.out.println("UA2 AND OA1: " + s);
 		}
-		System.out.println("------------------------------------------------------");
+		//System.out.println("------------------------------------------------------");
 
 		for (String s : decider.list(ua1.getName(), "", oa1.getName())) {
 
-			System.out.println("UA1 AND OA1: " + s);
+			//System.out.println("UA1 AND OA1: " + s);
 		}
-		System.out.println("------------------------------------------------------");
+		//System.out.println("------------------------------------------------------");
 
 		// check if UA1 has {w} access right on OA2
 		boolean result = decider.check(ua1.getName(), "", oa2.getName(), "w");
-		System.out.println("UA1 {w} OA1: " + result);// false
+		//System.out.println("UA1 {w} OA1: " + result);// false
 
 		// check if UA1 has {r} access right on OA2
 		result = decider.check(ua1.getName(), "", oa2.getName(), "r");
-		System.out.println("UA1 {r} OA1: " + result);// true
+		//System.out.println("UA1 {r} OA1: " + result);// true
 
 		//convert graph to JSON String
 		String jsonGraph = GraphSerializer.toJson(graph); // convert the graph to JSON
@@ -118,11 +118,11 @@ public class TestSimpleGraph {
 		PReviewDecider decider2 = new PReviewDecider(graphFromFile, null);
 		// check if UA1 has {w} access right on OA2
 		result = decider2.check(ua1.getName(), "", oa2.getName(), "w");
-		System.out.println("UA1 {w} OA1: " + result);// false
+		//System.out.println("UA1 {w} OA1: " + result);// false
 
 		// check if UA1 has {r} access right on OA2
 		result = decider2.check(ua1.getName(), "", oa2.getName(), "r");
-		System.out.println("UA1 {r} OA1: " + result);// true
+		//System.out.println("UA1 {r} OA1: " + result);// true
 
 	}
 
@@ -151,10 +151,10 @@ public class TestSimpleGraph {
 		}
 
 		if (file.createNewFile()) {
-			System.out.println("File has been created.");
+			//System.out.println("File has been created.");
 		} else {
 
-			System.out.println("File already exists.");
+			//System.out.println("File already exists.");
 		}
 
 		BufferedWriter writer = null;

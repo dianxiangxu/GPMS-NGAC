@@ -80,7 +80,7 @@ public class GetChildInPCExecutor implements FunctionExecutor {
 					functionEvaluator);
 
 			if (isContainedIn&&childFromParent.getType().toString().equals("U")) {
-				System.out.println("get_child_in_policy_class CHILD: "+childFromParent.getName());
+				//System.out.println("get_child_in_policy_class CHILD: "+childFromParent.getName());
 				return childFromParent;
 			} 
 		}

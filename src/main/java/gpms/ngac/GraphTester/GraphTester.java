@@ -46,7 +46,7 @@ public class GraphTester {
 		 * String(Files.readAllBytes(Paths.get(fileEntry.getAbsolutePath())));
 		 * 
 		 * Graph graph = GraphSerializer.fromJson(new MemGraph(), json);
-		 * System.out.println("Sneak path and Reachability:");
+		 * //System.out.println("Sneak path and Reachability:");
 		 * GraphTesterReachabilitySneakpath gt = new
 		 * GraphTesterReachabilitySneakpath(graph); List<Long> usersTrueFalse =
 		 * gt.getUsers(); List<String[]> data = gt.testGraphPC();
@@ -73,34 +73,34 @@ public class GraphTester {
 		/*
 		 * File folder = new File("C:/Users/dubro/git/GPMS-NGAC/CSV/RS"); int i = 0; for
 		 * (final File fileEntry1 : folder.listFiles()) { if (i == 0) { i++; continue; }
-		 * System.out.println("Killed number " +i + " mutant: " +
+		 * //System.out.println("Killed number " +i + " mutant: " +
 		 * !graphTester.compareCSV(new
 		 * File("C:/Users/dubro/git/GPMS-NGAC/CSV/RS/csv0.csv"), fileEntry1)); i++; }
-		 * System.out.println("Mutant death ratio:" + i/(folder.listFiles().length - 1)
-		 * * 100 + "%"); System.out.println("Number of mutants" + (i-1));
+		 * //System.out.println("Mutant death ratio:" + i/(folder.listFiles().length - 1)
+		 * * 100 + "%"); //System.out.println("Number of mutants" + (i-1));
 		 */
 		/*
-		 * System.out.println("============================================");
+		 * //System.out.println("============================================");
 		 * 
 		 * //loader.setPolicy(gt.graph); //loader.savePolicy(null);
-		 * System.out.println(""); System.out.println("Reachability:");
+		 * //System.out.println(""); //System.out.println("Reachability:");
 		 * 
 		 * GraphTesterReachability gttrue = new GraphTesterReachability(); List<Long>
 		 * usersTrue = gttrue.getUsers(); gttrue.testGraphPC();
-		 * System.out.println("============================================");
+		 * //System.out.println("============================================");
 		 * 
-		 * System.out.println(""); System.out.println("Pairwise combinations Path:");
+		 * //System.out.println(""); //System.out.println("Pairwise combinations Path:");
 		 * GraphTesterPairwisePath gtptrue = new GraphTesterPairwisePath();
 		 * gtptrue.testGraphPairwisePC();
-		 * System.out.println("============================================");
+		 * //System.out.println("============================================");
 		 * 
-		 * System.out.println(""); System.out.println("Pairwise combinations Path:");
+		 * //System.out.println(""); //System.out.println("Pairwise combinations Path:");
 		 * GraphTesterPairwiseNoPath gtpfalse = new GraphTesterPairwiseNoPath();
 		 * gtpfalse.testGraphPairwisePC();
-		 * System.out.println("============================================");
+		 * //System.out.println("============================================");
 		 * 
 		 * 
-		 * System.out.println("Mutation:");
+		 * //System.out.println("Mutation:");
 		 * 
 		 * //GraphTesterReachabilitySneakpathMutation gtRSMutation = new
 		 * GraphTesterReachabilitySneakpathMutation(); //gtRSMutation.mutator();
@@ -117,7 +117,7 @@ public class GraphTester {
 		 * //result = gh.testValidUser("tenureTrackTenuredU"); //result =
 		 * gh.testValidUser("PIElegibleU");
 		 * 
-		 * //System.out.println(result);
+		 * ////System.out.println(result);
 		 * 
 		 */
 	}
@@ -135,18 +135,18 @@ public class GraphTester {
 			bool = file2.mkdir();
 		}
 		if (bool) {
-			System.out.println("The directory was created or was already there");
+			//System.out.println("The directory was created or was already there");
 		} else {
-			System.out.println("Failure with creating the directory");
+			//System.out.println("Failure with creating the directory");
 			return;
 		}
 		String testSuiteFile = "CSV/testSuits/" + testMethod + "testSuite.csv";
 		file = new File(testSuiteFile);
 		if (file.createNewFile()) {
-			System.out.println("File has been created.");
+			//System.out.println("File has been created.");
 		} else {
 
-			System.out.println("File already exists.");
+			//System.out.println("File already exists.");
 		}
 		BufferedWriter writer = null;
 		writer = new BufferedWriter(new FileWriter(file));

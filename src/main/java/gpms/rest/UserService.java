@@ -1147,7 +1147,7 @@ public class UserService {
 			}
 			UserProposalCount count = userProfileDAO
 					.getUserProposalCounts(userInfo);
-			System.out.println("COUNT: "+count.getTotalProposalCount());
+			////System.out.println("COUNT: "+count.getTotalProposalCount());
 			return Response
 					.status(Response.Status.OK)
 					.entity(mapper.writerWithDefaultPrettyPrinter()

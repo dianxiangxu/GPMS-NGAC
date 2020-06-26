@@ -96,7 +96,7 @@ public class FileService {
 			os.flush();
 			os.close();
 			fis.close();
-			System.out.println("File downloaded at client successfully");
+			//System.out.println("File downloaded at client successfully");
 			return Response.ok(true).build();
 		} catch (Exception e) {
 			log.error("Could not find the requested file error e=", e);

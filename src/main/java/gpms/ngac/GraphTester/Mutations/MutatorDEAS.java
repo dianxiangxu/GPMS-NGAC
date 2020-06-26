@@ -69,7 +69,7 @@ public class MutatorDEAS extends MutantTester {
 		Node OA = set2.iterator().next();
 		Set<Node> set3 = graph.search("ProposalCreation", "PC", null);
 		Node PC = set3.iterator().next();
-		System.out.println(
+		//System.out.println(
 				"Test on the original graph: " + decider.check(UA.getID(), 101L, OA.getID(), requiredAccessRights1));
 
 	}
@@ -87,10 +87,10 @@ public class MutatorDEAS extends MutantTester {
 		Node PC = set3.iterator().next();
 
 		PReviewDecider decider = new PReviewDecider(mutant);
-		System.out.println("Test on the graph before removing the assignment of UA to PC: "
+		//System.out.println("Test on the graph before removing the assignment of UA to PC: "
 				+ decider.check(UA.getID(), 101L, OA.getID(), requiredAccessRights1));
 		mutant.deassign(UA.getID(), PC.getID());
-		System.out.println("Test on the graph after removing the assignment of UA to PC: "
+		//System.out.println("Test on the graph after removing the assignment of UA to PC: "
 				+ decider.check(UA.getID(), 101L, OA.getID(), requiredAccessRights1));
 
 	}
@@ -108,10 +108,10 @@ public class MutatorDEAS extends MutantTester {
 		Node PC = set3.iterator().next();
 
 		PReviewDecider decider = new PReviewDecider(mutant);
-		System.out.println("Test on the graph before removing the assignment of OA to PC: "
+		//System.out.println("Test on the graph before removing the assignment of OA to PC: "
 				+ decider.check(UA.getID(), 101L, OA.getID(), requiredAccessRights1));
 		mutant.deassign(OA.getID(), PC.getID());
-		System.out.println("Test on the graph after removing the assignment of OA to PC: "
+		//System.out.println("Test on the graph after removing the assignment of OA to PC: "
 				+ decider.check(UA.getID(), 101L, OA.getID(), requiredAccessRights1));
 
 	}

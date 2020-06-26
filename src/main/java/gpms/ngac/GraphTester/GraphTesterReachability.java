@@ -64,7 +64,7 @@ public class GraphTesterReachability extends GraphTesterRS {
 
 		Stack<Node> stack = new Stack<Node>();
 		stack.push(policy);
-		System.out.println(policy);
+		//System.out.println(policy);
 
 		while (!stack.isEmpty()) {
 
@@ -91,7 +91,7 @@ public class GraphTesterReachability extends GraphTesterRS {
 					result = false;
 				}
 				if (result == true) {
-					System.out.println(newRoot + " " + result + " "
+					//System.out.println(newRoot + " " + result + " "
 							+ createPDS.getName() + " "
 							+ requiredAccessRights[0]);
 				}
@@ -104,7 +104,7 @@ public class GraphTesterReachability extends GraphTesterRS {
 					result = false;
 				}
 				if (result == true) {
-					System.out.println(newRoot + " " + result + " "
+					//System.out.println(newRoot + " " + result + " "
 							+ writePDS.getName() + " "
 							+ requiredAccessRights[0]);
 				}
@@ -143,7 +143,7 @@ public class GraphTesterReachability extends GraphTesterRS {
 		for (Node pc : PCs) {
 			Stack<Node> stack = new Stack<Node>();
 			stack.push(pc);
-			System.out.println(pc);
+			//System.out.println(pc);
 			if (pc == null)
 				return null;
 			while (!stack.isEmpty()) {

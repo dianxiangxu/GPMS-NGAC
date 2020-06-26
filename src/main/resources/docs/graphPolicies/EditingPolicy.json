@@ -5,16 +5,9 @@
        "type": "PC",
        "properties": {
          "default_ua": "SP",
-         "default_oa": "PDSs"
+         "default_oa": "PDSSections"
        }
-     },
-      {
-      "name": "Approval Content",
-      "type": "OA",
-      "properties": {
-        
-      }
-    },
+     },      
   {
        "name": "Audit Log",
        "type": "OA",
@@ -23,14 +16,14 @@
        }
      },
   {
-       "name": "PDSs",
+       "name": "PDSSections",
        "type": "OA",
        "properties": {
          
        }
      },
    {
-   "name" : "Composite-PDS",
+   "name" : "PDSWhole",
    "type" : "OA",
    "properties": {
           
@@ -38,93 +31,56 @@
   },
   
   {
-       "name": "Data-Element",
-       "type": "OA",
-      "properties": {
-         
-       }
-     },
-  {
-   "name" : "Approval-Element",
+   "name" : "ApprovalInfo",
    "type" : "OA",
    "properties": {
           
         }
   },
   {
-   "name" : "Chair-Approval",
+   "name" : "ChairApproval",
    "type" : "OA",
    "properties": {
           
         }
   },
   {
-   "name" : "BM-Approval",
+   "name" : "BMApproval",
    "type" : "OA",
    "properties": {
           
         }
   },
   {
-   "name" : "Dean-Approval",
+   "name" : "DeanApproval",
    "type" : "OA",
    "properties": {
           
         }
   },
   {
-   "name" : "IRB-Approval",
+   "name" : "IRBApproval",
    "type" : "OA",
    "properties": {
           
         }
   },
   {
-   "name" : "Research-Admin-Approval",
+   "name" : "RAApproval",
    "type" : "OA",
    "properties": {
           
         }
   },
   {
-   "name" : "Research-Director-Approval",
+   "name" : "RDApproval",
    "type" : "OA",
    "properties": {
           
         }
-  },
+  },  
   {
-   "name" : "Approval",
-   "type" : "OA",
-   "properties": {
-          
-        }
-  },
-  {
-   "name" : "Disapproval",
-   "type" : "OA",
-   "properties": {
-          
-        }
-  },
-  {
-   "name" : "Comment-Sign",
-   "type" : "OA",
-   "properties": {
-          
-        }
-  },
-  
-  {
-   "name" : "Submission-Info",
-   "type" : "OA",
-   "properties": {
-          
-        }
-  },
-  
-  {
-       "name": "PI-Editable-Data",
+       "name": "PIEditable",
        "type": "OA",
        "properties": {
          
@@ -132,7 +88,7 @@
      },
   
   {
-       "name": "CoPI-Editable-Data",
+       "name": "CoPIEditable",
        "type": "OA",
        "properties": {
          
@@ -140,7 +96,7 @@
      },
   
   {
-   "name" : "Investigator-Info",
+   "name" : "Investigator Info",
    "type" : "OA",
    "properties": {
           
@@ -148,77 +104,77 @@
    
   },
   {
-   "name" : "Budget-Info",
+   "name" : "Budget Info",
    "type" : "OA",
    "properties": {
           
         }
   },
   {
-   "name" : "Project-Info",
+   "name" : "Project Info",
    "type" : "OA",
    "properties": {
           
         }
   },
   {
-   "name" : "Cost-Share-Info",
+   "name" : "CostShare Info",
    "type" : "OA",
    "properties": {
           
         }
   },
   {
-   "name" : "University-Commitments-Info",
+   "name" : "UnivCommitmentsInfo",
    "type" : "OA",
    "properties": {
           
         }
   },
   {
-   "name" : "Conflict-Of-Interest-Info",
+   "name" : "COI",
    "type" : "OA",
    "properties": {
           
         }
   },
   {
-   "name" : "Compliance-Info",
+   "name" : "Compliance Info",
    "type" : "OA",
    "properties": {
           
         }
   },
   {
-   "name" : "Additional-Info",
+   "name" : "Additional Info",
    "type" : "OA",
    "properties": {
           
         }
   },
   {
-   "name" : "Collaboration-Info",
+   "name" : "Collaboration Info",
    "type" : "OA",
    "properties": {
           
         }
   },
   {
-   "name" : "Confidential-Info",
+   "name" : "Proprietary Info",
    "type" : "OA",
    "properties": {
           
         }
   },
   {
-   "name" : "OSP-Section-Info",
+   "name" : "OSPInfo",
    "type" : "OA",
    "properties": {
           
         }
   },
   {
-   "name" : "Signature-Info",
+   "name" : "Signature Info",
    "type" : "OA",
    "properties": {
           
@@ -226,21 +182,21 @@
   },
   
   {
-   "name" : "PI-Info",
+   "name" : "PIInfo",
    "type" : "OA",
    "properties": {
           
         }
   },
   {
-   "name" : "CoPI-Info",
+   "name" : "CoPIInfo",
    "type" : "OA",
    "properties": {
           
         }
   },
   {
-   "name" : "SP-Info",
+   "name" : "SPInfo",
    "type" : "OA",
    "properties": {
           
@@ -292,7 +248,7 @@
         }
   },
   {
-   "name" : "Business-Manager",
+   "name" : "Business Manager",
    "type" : "UA",
    "properties": {
           
@@ -313,29 +269,21 @@
         }
   },
   {
-   "name" : "Research-Admin",
+   "name" : "Research Admin",
    "type" : "UA",
    "properties": {
           
         }
   },
   {
-   "name" : "Research-Director",
+   "name" : "Research Director",
    "type" : "UA",
    "properties": {
           
         }
-  }
-  
-  
-  
-  
-  
+  }          
  ],
- 
- 
-
- 
+   
  "assignments":[
   
   {                                  
@@ -347,15 +295,19 @@
        "target":"EditingPolicyClass" 
      },  
   {                                  
-       "source": "PDSs",  
+       "source": "PDSSections",  
        "target":"EditingPolicyClass" 
+     },
+     {                                  
+       "source": "Investigator Info",  
+       "target": "PDSSections" 
      },
   {                                  
        "source": "Chair",  
        "target": "EditingPolicyClass"  
      },
   {                                  
-       "source": "Business-Manager",  
+       "source": "Business Manager",  
        "target": "EditingPolicyClass"  
      },
   {                                  
@@ -367,22 +319,14 @@
        "target":"EditingPolicyClass" 
      }
      ,
-     {                                  
-       "source": "Approval Content",  
-       "target":"EditingPolicyClass" 
-     },
   {                                  
-       "source": "Research-Admin",  
+       "source": "Research Admin",  
        "target":"EditingPolicyClass"  
      },
   {                                  
-       "source": "Research-Director",  
+       "source": "Research Director",  
        "target": "EditingPolicyClass"  
-     },
-  {                                  
-       "source": "Submission-Info",  
-       "target": "Composite-PDS"  
-     },                                    
+     },                                 
   {                                  
        "source": "SPAdd",
        "target": "SP"   
@@ -399,117 +343,109 @@
        "source": "PI", 
        "target": "CoPIAdd" 
      },
+ 
   {
-       "source": "Composite-PDS", 
-       "target": "PDSs"   
+       "source": "ApprovalInfo",  
+       "target": "PDSSections"  
+     },
+     {
+       "source": "CoPIEditable",  
+       "target": "PDSSections"  
      },
   {
-       "source": "Data-Element",  
-       "target": "Composite-PDS"   
+       "source": "PIEditable",  
+       "target": "PDSSections"  
      },
   {
-       "source": "Approval-Element",  
-       "target": "Composite-PDS"  
-     },
-  
-  {
-       "source": "Chair-Approval",  
-       "target": "Approval-Element"  
+       "source": "ChairApproval",  
+       "target": "ApprovalInfo"  
      },
   {
-       "source": "BM-Approval",  
-       "target": "Approval-Element"  
+       "source": "BMApproval",  
+       "target": "ApprovalInfo"  
      },
        {
-       "source": "IRB-Approval",  
-       "target": "Approval-Element"  
+       "source": "IRBApproval",  
+       "target": "ApprovalInfo"  
      },
   {
-       "source": "Dean-Approval",  
-       "target": "Approval-Element"  
+       "source": "DeanApproval",  
+       "target": "ApprovalInfo"  
      },
   {
-       "source": "Research-Admin-Approval",  
-       "target": "Approval-Element"  
+       "source": "RAApproval",  
+       "target": "ApprovalInfo"  
      },
   {
-       "source": "Research-Director-Approval",  
-       "target": "Approval-Element"  
+       "source": "RDApproval",  
+       "target": "ApprovalInfo"  
      },
      
-     {
-       "source": "Investigator-Info", 
-       "target": "Data-Element"   
-     },
-     {
-       "source": "PI-Editable-Data", 
-       "target": "Data-Element"  
-     },
-  {
-       "source": "CoPI-Editable-Data",  
-       "target": "PI-Editable-Data"  
-     },
-  {
-       "source": "Budget-Info", 
-       "target": "PI-Editable-Data"  
-     },
      
+  {
+       "source": "Budget Info", 
+       "target": "PIEditable"  
+     },     
      {
-       "source": "Project-Info",  
-       "target": "CoPI-Editable-Data"  
+       "source": "Project Info",  
+       "target": "PIEditable"  
      },
      {
-       "source": "Cost-Share-Info",  
-       "target": "CoPI-Editable-Data"   
+       "source": "CostShare Info",  
+       "target": "CoPIEditable"   
      },
      {
-       "source": "University-Commitments-Info",  
-       "target": "CoPI-Editable-Data"   
+       "source": "UnivCommitmentsInfo",  
+       "target": "CoPIEditable"   
      },
      {
-       "source": "Conflict-Of-Interest-Info",  
-       "target": "CoPI-Editable-Data"   
+       "source": "COI",  
+       "target": "CoPIEditable"   
      },
      {
-       "source": "Compliance-Info",  
-       "target": "CoPI-Editable-Data"   
+       "source": "Compliance Info",  
+       "target": "CoPIEditable"   
      },
      {
-       "source": "Additional-Info",  
-       "target": "CoPI-Editable-Data"   
+       "source": "Additional Info",  
+       "target": "CoPIEditable"   
      },
      {
-       "source": "Collaboration-Info",  
-       "target": "CoPI-Editable-Data"   
+       "source": "Collaboration Info",  
+       "target": "CoPIEditable"   
      },
      {
-       "source": "Confidential-Info",  
-       "target": "CoPI-Editable-Data"   
+       "source": "Proprietary Info",  
+       "target": "CoPIEditable"   
      },
      {
-       "source": "OSP-Section-Info",  
-       "target": "CoPI-Editable-Data"   
+       "source": "OSPInfo",  
+       "target": "PDSSections"   
      },
      {
-       "source": "Signature-Info", 
-       "target": "CoPI-Editable-Data"  
+       "source": "Signature Info", 
+       "target": "CoPIEditable"  
      },
   {
        "source": "PI", 
-       "target": "EligibilityPolicyClass"  
+       "target": "EditingPolicyClass"  
      },
      {
        "source": "CoPI", 
-       "target": "EligibilityPolicyClass"  
+       "target": "EditingPolicyClass"  
+     },
+     {
+       "source": "PDSWhole", 
+       "target": "EditingPolicyClass"  
      }, {
-       "source": "PI-Info", 
-       "target": "Investigator-Info"  
+       "source": "PIInfo", 
+       "target": "Investigator Info"  
      }, {
-       "source": "CoPI-Info", 
-       "target": "Investigator-Info"  
+       "source": "CoPIInfo", 
+       "target": "Investigator Info"  
      }, {
-       "source": "SP-Info", 
-       "target": "Investigator-Info"  
+       "source": "SPInfo", 
+       "target": "Investigator Info"  
      }
     
  ],
@@ -521,23 +457,15 @@
          "write"
         ],
        "source": "PI", 
-       "target": "PI-Editable-Data"  
+       "target": "PIEditable"  
      },
      {
-    "operations": [
-         "Save",
+    "operations": [         
          "Delete",
          "Submit"
         ],
        "source": "PI", 
-       "target": "PDSs" 
-     },
-  {
-    "operations": [
-         "create-o"
-        ],
-       "source": "PI", 
-       "target": "Submission-Info"  
+       "target": "PDSWhole" 
      },
   {
     "operations": [
@@ -560,15 +488,15 @@
          "write"
         ],
        "source": "CoPI", 
-       "target": "CoPI-Editable-Data"  
+       "target": "CoPIEditable"  
      },
   {
        "operations": [
          "Save"
         ],
        "source": "CoPI", 
-       "target": "PDSs" 
-     },
+       "target": "PDSWhole" 
+     },         
   {
        "operations": [
          "add-sp",
@@ -584,13 +512,6 @@
         ],
        "source": "PI",
        "target": "SP"  
-     },
-     {
-       "operations": [
-         "r"
-        ],
-       "source": "SP", 
-       "target": "Composite-PDS" 
      },     
      {
        "operations": [
@@ -604,7 +525,7 @@
          "read"
         ],
        "source": "SP", 
-       "target": "PDSs" 
+       "target": "PDSSections" 
      }
  ]
  

@@ -93,7 +93,7 @@ public class PolicyCreationFromTemplate {
 
 			Node node = ngacPolicy.createNode(getID(), name + pdsId, nodeType, null);
 			nodeMap.put(id, node);
-			System.out.println(node.getName());
+			//System.out.println(node.getName());
 
 		}
 	}
@@ -168,7 +168,7 @@ public class PolicyCreationFromTemplate {
 
 		while (iterator.hasNext()) {
 			Entry<String, Node> entry = iterator.next();
-			System.out.println("Key = " + entry.getKey() + ", Value = " + entry.getValue());
+			//System.out.println("Key = " + entry.getKey() + ", Value = " + entry.getValue());
 		}
 	}
 

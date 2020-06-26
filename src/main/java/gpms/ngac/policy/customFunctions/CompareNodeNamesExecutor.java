@@ -43,7 +43,7 @@ public class CompareNodeNamesExecutor implements FunctionExecutor {
 		if (string2Arg.getFunction() != null) {
 			node2name = functionEvaluator.evalString(eventCtx, user, process, pdp, string2Arg.getFunction());
 		}
-		System.out.println("compare_node_names result: "+  node1name.equals(node2name));
+		//System.out.println("compare_node_names result: "+  node1name.equals(node2name));
 		return node1name.equals(node2name);
 	}
 }

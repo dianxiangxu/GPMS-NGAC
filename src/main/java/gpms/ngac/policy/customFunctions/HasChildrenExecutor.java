@@ -40,14 +40,14 @@ public class HasChildrenExecutor implements FunctionExecutor {
 		}
 		
 		if (pdp.getPAP().getGraphPAP().getChildren(name).size()>0) {
-			System.out.println("HAS_CHILDREN: "+ true);
+			//System.out.println("HAS_CHILDREN: "+ true);
 			for(String child : pdp.getPAP().getGraphPAP().getChildren(name)) {
-				System.out.println("CHILDREN FROM HAS_CHILDREN: "+ child);
+				//System.out.println("CHILDREN FROM HAS_CHILDREN: "+ child);
 			}
 			
 			return true;
 		} else {
-			System.out.println("HAS_CHILDREN: "+ false);
+			//System.out.println("HAS_CHILDREN: "+ false);
 			return false;
 		}
 	}

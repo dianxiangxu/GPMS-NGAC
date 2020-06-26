@@ -50,7 +50,7 @@ public class AddPropertiesToNodeExecutor implements FunctionExecutor {
         }
         
         pdp.getPAP().getGraphPAP().updateNode(node.getName(), props);
-        System.out.println(pdp.getPAP().getGraphPAP().getNode(node.getName()));
+        //System.out.println(pdp.getPAP().getGraphPAP().getNode(node.getName()));
 
         return pdp.getPAP().getGraphPAP().getNode(node.getName());
     }

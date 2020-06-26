@@ -79,7 +79,7 @@ public class CreateNodeExecutor1 implements FunctionExecutor {
         }
 
         Graph graph = pdp.getPAP().getGraphPAP();
-        //System.out.println(GraphSerializer.toJson(graph));
+        ////System.out.println(GraphSerializer.toJson(graph));
         Node parentNode;
         if (parentName != null) {
             parentNode = graph.getNode(parentName);

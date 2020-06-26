@@ -67,11 +67,11 @@ public class MutationController {
 		}
 		double mutationScore = mutatorADDAR.calculateMutationScore(mutatorADDAR.getNumberOfMutants(),
 				mutatorADDAR.getNumberOfKilledMutants());
-		System.out.println("Number of mutations: " + mutatorADDAR.getNumberOfMutants());
-		System.out.println("Number of killed mutants: " + mutatorADDAR.getNumberOfKilledMutants());
+		//System.out.println("Number of mutations: " + mutatorADDAR.getNumberOfMutants());
+		//System.out.println("Number of killed mutants: " + mutatorADDAR.getNumberOfKilledMutants());
 
-		System.out.println("Mutation Score: " + mutationScore + "%");
-		System.out.println();
+		//System.out.println("Mutation Score: " + mutationScore + "%");
+		//System.out.println();
 		totalNumberOfMutantsForTest += mutatorADDAR.getNumberOfMutants();
 		totalNumberOfKilledMutantsForTest += mutatorADDAR.getNumberOfKilledMutants();
 		return mutationScore;
@@ -89,11 +89,11 @@ public class MutationController {
 		}
 		double mutationScore = mutatorADDASSOC.calculateMutationScore(mutatorADDASSOC.getNumberOfMutants(),
 				mutatorADDASSOC.getNumberOfKilledMutants());
-		System.out.println("Number of mutations: " + mutatorADDASSOC.getNumberOfMutants());
-		System.out.println("Number of killed mutants: " + mutatorADDASSOC.getNumberOfKilledMutants());
+		//System.out.println("Number of mutations: " + mutatorADDASSOC.getNumberOfMutants());
+		//System.out.println("Number of killed mutants: " + mutatorADDASSOC.getNumberOfKilledMutants());
 
-		System.out.println("Mutation Score: " + mutationScore + "%");
-		System.out.println();
+		//System.out.println("Mutation Score: " + mutationScore + "%");
+		//System.out.println();
 		totalNumberOfMutantsForTest += mutatorADDASSOC.getNumberOfMutants();
 		totalNumberOfKilledMutantsForTest += mutatorADDASSOC.getNumberOfKilledMutants();
 		return mutationScore;
@@ -112,11 +112,11 @@ public class MutationController {
 		}
 		double mutationScore = mutatorDEAS.calculateMutationScore(mutatorDEAS.getNumberOfMutants(),
 				mutatorDEAS.getNumberOfKilledMutants());
-		System.out.println("Number of mutations: " + mutatorDEAS.getNumberOfMutants());
-		System.out.println("Number of killed mutants: " + mutatorDEAS.getNumberOfKilledMutants());
+		//System.out.println("Number of mutations: " + mutatorDEAS.getNumberOfMutants());
+		//System.out.println("Number of killed mutants: " + mutatorDEAS.getNumberOfKilledMutants());
 
-		System.out.println("Mutation Score: " + mutationScore + "%");
-		System.out.println();
+		//System.out.println("Mutation Score: " + mutationScore + "%");
+		//System.out.println();
 		totalNumberOfMutantsForTest += mutatorDEAS.getNumberOfMutants();
 		totalNumberOfKilledMutantsForTest += mutatorDEAS.getNumberOfKilledMutants();
 		return mutationScore;
@@ -135,11 +135,11 @@ public class MutationController {
 		}
 		double mutationScore = mutatorDISS.calculateMutationScore(mutatorDISS.getNumberOfMutants(),
 				mutatorDISS.getNumberOfKilledMutants());
-		System.out.println("Number of mutations: " + mutatorDISS.getNumberOfMutants());
-		System.out.println("Number of killed mutants: " + mutatorDISS.getNumberOfKilledMutants());
+		//System.out.println("Number of mutations: " + mutatorDISS.getNumberOfMutants());
+		//System.out.println("Number of killed mutants: " + mutatorDISS.getNumberOfKilledMutants());
 
-		System.out.println("Mutation Score: " + mutationScore + "%");
-		System.out.println();
+		//System.out.println("Mutation Score: " + mutationScore + "%");
+		//System.out.println();
 		totalNumberOfMutantsForTest += mutatorDISS.getNumberOfMutants();
 		totalNumberOfKilledMutantsForTest += mutatorDISS.getNumberOfKilledMutants();
 		return mutationScore;
@@ -159,11 +159,11 @@ public class MutationController {
 		}
 		double mutationScore = mutatorREMAR.calculateMutationScore(mutatorREMAR.getNumberOfMutants(),
 				mutatorREMAR.getNumberOfKilledMutants());
-		System.out.println("Number of mutations: " + mutatorREMAR.getNumberOfMutants());
-		System.out.println("Number of killed mutants: " + mutatorREMAR.getNumberOfKilledMutants());
+		//System.out.println("Number of mutations: " + mutatorREMAR.getNumberOfMutants());
+		//System.out.println("Number of killed mutants: " + mutatorREMAR.getNumberOfKilledMutants());
 
-		System.out.println("Mutation Score: " + mutationScore + "%");
-		System.out.println();
+		//System.out.println("Mutation Score: " + mutationScore + "%");
+		//System.out.println();
 		totalNumberOfMutantsForTest += mutatorREMAR.getNumberOfMutants();
 		totalNumberOfKilledMutantsForTest += mutatorREMAR.getNumberOfKilledMutants();
 		return mutationScore;
@@ -182,11 +182,11 @@ public class MutationController {
 		}
 		double mutationScore = mutatorREMNODE.calculateMutationScore(mutatorREMNODE.getNumberOfMutants(),
 				mutatorREMNODE.getNumberOfKilledMutants());
-		System.out.println("Number of mutations: " + mutatorREMNODE.getNumberOfMutants());
-		System.out.println("Number of killed mutants: " + mutatorREMNODE.getNumberOfKilledMutants());
+		//System.out.println("Number of mutations: " + mutatorREMNODE.getNumberOfMutants());
+		//System.out.println("Number of killed mutants: " + mutatorREMNODE.getNumberOfKilledMutants());
 
-		System.out.println("Mutation Score: " + mutationScore + "%");
-		System.out.println();
+		//System.out.println("Mutation Score: " + mutationScore + "%");
+		//System.out.println();
 		totalNumberOfMutantsForTest += mutatorREMNODE.getNumberOfMutants();
 		totalNumberOfKilledMutantsForTest += mutatorREMNODE.getNumberOfKilledMutants();
 		return mutationScore;
@@ -204,11 +204,11 @@ public class MutationController {
 		}
 		double mutationScore = mutatorCHANGEAS.calculateMutationScore(mutatorCHANGEAS.getNumberOfMutants(),
 				mutatorCHANGEAS.getNumberOfKilledMutants());
-		System.out.println("Number of mutations: " + mutatorCHANGEAS.getNumberOfMutants());
-		System.out.println("Number of killed mutants: " + mutatorCHANGEAS.getNumberOfKilledMutants());
+		//System.out.println("Number of mutations: " + mutatorCHANGEAS.getNumberOfMutants());
+		//System.out.println("Number of killed mutants: " + mutatorCHANGEAS.getNumberOfKilledMutants());
 
-		System.out.println("Mutation Score: " + mutationScore + "%");
-		System.out.println();
+		//System.out.println("Mutation Score: " + mutationScore + "%");
+		//System.out.println();
 		totalNumberOfMutantsForTest += mutatorCHANGEAS.getNumberOfMutants();
 		totalNumberOfKilledMutantsForTest += mutatorCHANGEAS.getNumberOfKilledMutants();
 		return mutationScore;
@@ -226,11 +226,11 @@ public class MutationController {
 		}
 		double mutationScore = mutatorCHANGEASSOC.calculateMutationScore(mutatorCHANGEASSOC.getNumberOfMutants(),
 				mutatorCHANGEASSOC.getNumberOfKilledMutants());
-		System.out.println("Number of mutations: " + mutatorCHANGEASSOC.getNumberOfMutants());
-		System.out.println("Number of killed mutants: " + mutatorCHANGEASSOC.getNumberOfKilledMutants());
+		//System.out.println("Number of mutations: " + mutatorCHANGEASSOC.getNumberOfMutants());
+		//System.out.println("Number of killed mutants: " + mutatorCHANGEASSOC.getNumberOfKilledMutants());
 
-		System.out.println("Mutation Score: " + mutationScore + "%");
-		System.out.println();
+		//System.out.println("Mutation Score: " + mutationScore + "%");
+		//System.out.println();
 		totalNumberOfMutantsForTest += mutatorCHANGEASSOC.getNumberOfMutants();
 		totalNumberOfKilledMutantsForTest += mutatorCHANGEASSOC.getNumberOfKilledMutants();
 		return mutationScore;
@@ -264,10 +264,10 @@ public class MutationController {
 	public void saveCSV(List<String[]> data, File directoryForTestResults) throws PMException, IOException {
 
 		if (directoryForTestResults.createNewFile()) {
-			System.out.println("File has been created.");
+			//System.out.println("File has been created.");
 		} else {
 
-			System.out.println("File already exists.");
+			//System.out.println("File already exists.");
 		}
 		BufferedWriter writer = null;
 		writer = new BufferedWriter(new FileWriter(directoryForTestResults));

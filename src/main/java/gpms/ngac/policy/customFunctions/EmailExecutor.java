@@ -64,7 +64,7 @@ public class EmailExecutor implements FunctionExecutor{
 
 		        Map<String,String>properties1 = child.getProperties();
 		        String email = properties1.get("workEmail");
-		        System.out.println(email+"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+		        //System.out.println(email+"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 		       
 		        
 		        try {
@@ -87,7 +87,7 @@ public class EmailExecutor implements FunctionExecutor{
 		        emailExecutor.execute(new Runnable() {
 		            @Override
 		            public void run() {
-				System.out.println(to);
+				//System.out.println(to);
 				 Properties properties = new Properties();
 			        properties.put("mail.smtp.host", "smtp.gmail.com");
 			        properties.put("mail.smtp.port", "587");

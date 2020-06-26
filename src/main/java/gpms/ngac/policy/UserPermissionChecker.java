@@ -50,11 +50,11 @@ public class UserPermissionChecker {
 	   		    //objects.to
 	        	
 	        		 log.info("UserPermissionChecker: "+user.getName()+"|"+requiredAccessRights.toString());
-	        		 System.out.println("UserPermissionChecker: "+user.getName()+"|"+targetAttribute.toString()+"|"+Arrays.toString(requiredAccessRights));
+	        		 //System.out.println("UserPermissionChecker: "+user.getName()+"|"+targetAttribute.toString()+"|"+Arrays.toString(requiredAccessRights));
 	        		 hasPermission = decider.check(userOrAttributeName, "process" ,targetAttribute.getAttributeName(), requiredAccessRights);
 	        		 
 	        		 log.info(hasPermission);
-	        		 System.out.println("Permission:"+hasPermission);
+	        		 //System.out.println("Permission:"+hasPermission);
 	        	 
 
         } catch(PMException pme) {
@@ -80,9 +80,14 @@ public static boolean checkPermission(Graph graph, Prohibitions prohibitions, St
 			
 			// get all of the users in the graph
 	        Node user = graph.getNode(userName);	        	        
-	        	//String[] requiredAccessRights = Arrays.copyOf(objects, objects.length, String[].class);	   		 	        	
-		    log.info("UserPermissionChecker: "+user.getName()+"|"+objects.toString());
-    		System.out.println("UserPermissionChecker: "+user.getName()+"|"+targetAttribute.toString()+"|"+Arrays.toString(objects));
+	        	//String[] requiredAccessRights = Arrays.copyOf(objects, objects.length, String[].class);	
+	        
+	        for(String s : objects) {
+		    log.info("UserPermissionChecker: "+user.getName()+"|"+s+"|" +targetAttribute.getAttributeName());
+		    
+	        }
+	        
+    		//System.out.println("UserPermissionChecker: "+user.getName()+"|"+targetAttribute.toString()+"|"+Arrays.toString(objects));
     	    hasPermission = decider.check(userName, "process" , targetAttribute.getAttributeName(), objects);
     		log.info(hasPermission);	        
         } catch(PMException pme) {

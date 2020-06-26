@@ -15,9 +15,9 @@ import org.jdom2.output.support.FormatStack;
 public class CustomXMLOutputProcessor extends AbstractXMLOutputProcessor {
 	protected void printNamespace(Writer out, FormatStack fstack, Namespace ns)
 			throws java.io.IOException {
-		System.out.println("namespace is " + ns);
+		//System.out.println("namespace is " + ns);
 		if (ns == Namespace.NO_NAMESPACE) {
-			System.out.println("refusing to print empty namespace");
+			//System.out.println("refusing to print empty namespace");
 			return;
 		} else {
 			super.printNamespace(out, fstack, ns);

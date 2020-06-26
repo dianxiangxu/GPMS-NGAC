@@ -79,7 +79,7 @@ public class BalanaConnector {
 		PDP pdp = getPDPNewInstance();
 		System.out
 				.println("\n======================== XACML Request ====================");
-		System.out.println(request);
+		//System.out.println(request);
 		System.out
 				.println("===========================================================");
 		AbstractRequestCtx requestCtx;
@@ -114,11 +114,11 @@ public class BalanaConnector {
 		String request = createXACMLRequest(attrMap);
 		ResponseCtx response = getResponse(request.replaceAll(">\\s+<", "><"));
 		if (response != null) {
-			System.out
-					.println("\n======================== XACML Response ====================");
-			System.out.println(response.encode());
-			System.out
-					.println("===========================================================");
+			//System.out
+					//.println("\n======================== XACML Response ====================");
+			//System.out.println(response.encode());
+			//System.out
+					//.println("===========================================================");
 			Set<AbstractResult> set = response.getResults();
 			Iterator<AbstractResult> it = set.iterator();
 			int intDecision = AbstractResult.DECISION_NOT_APPLICABLE;
@@ -127,8 +127,8 @@ public class BalanaConnector {
 				intDecision = ar.getDecision();
 				printObligations();
 				printAdvice();
-				System.out
-						.println("===========================================================");
+				//System.out
+				//		.println("===========================================================");
 				if (intDecision == AbstractResult.DECISION_INDETERMINATE_DENY
 						|| intDecision == AbstractResult.DECISION_INDETERMINATE_PERMIT
 						|| intDecision == AbstractResult.DECISION_INDETERMINATE_DENY_OR_PERMIT) {
@@ -136,13 +136,13 @@ public class BalanaConnector {
 				}
 				// WARNING: We currently take the first decision as the Multiple
 				// decisions may be returned
-				System.out.println("Decision:" + intDecision + " that is: "
-						+ AbstractResult.DECISIONS[intDecision]);
+				//System.out.println("Decision:" + intDecision + " that is: "
+						//+ AbstractResult.DECISIONS[intDecision]);
 				break;
 			}
 			return AbstractResult.DECISIONS[intDecision];
 		} else {
-			System.out.println("Response received PDP is Null");
+			//System.out.println("Response received PDP is Null");
 		}
 		return null;
 	}
@@ -161,8 +161,8 @@ public class BalanaConnector {
 				List<AttributeAssignment> assignments = ((org.wso2.balana.xacml3.Advice) advice)
 						.getAssignments();
 				for (AttributeAssignment assignment : assignments) {
-					System.out.println("Advice :  " + assignment.getContent()
-							+ "\n");
+					//System.out.println("Advice :  " + assignment.getContent()
+						//	+ "\n");
 				}
 			}
 		}
@@ -180,8 +180,8 @@ public class BalanaConnector {
 				List<AttributeAssignment> assignments = ((org.wso2.balana.xacml3.Obligation) obligation)
 						.getAssignments();
 				for (AttributeAssignment assignment : assignments) {
-					System.out.println("Obligation :  "
-							+ assignment.getContent() + "\n");
+					//System.out.println("Obligation :  "
+					//		+ assignment.getContent() + "\n");
 				}
 			}
 		}
@@ -204,13 +204,13 @@ public class BalanaConnector {
 		if (response != null) {
 			System.out
 					.println("\n======================== XACML Response ====================");
-			System.out.println(response.encode());
+			//System.out.println(response.encode());
 			System.out
 					.println("===========================================================");
 			Set<AbstractResult> set = response.getResults();
 			return set;
 		} else {
-			System.out.println("Response received PDP is Null");
+			//System.out.println("Response received PDP is Null");
 		}
 		return null;
 	}
@@ -299,7 +299,7 @@ public class BalanaConnector {
 			if (attrRecord != null) {
 				for (String value : values) {
 					if (attrRecord.getValues().contains(value)) {
-						System.out.println(key + " :::::: " + value);
+						//System.out.println(key + " :::::: " + value);
 						if (isFirstAttr) {
 							attr.append("<Attributes Category=\""
 									+ attrRecord.getCategory().toString()
@@ -391,7 +391,7 @@ public class BalanaConnector {
 			if (attrRecord != null) {
 				for (String value : values) {
 					if (attrRecord.getValues().contains(value)) {
-						System.out.println(key + " :::::: " + value);
+						//System.out.println(key + " :::::: " + value);
 						if (isFirstResource) {
 							attr.append("<Attributes Category=\""
 									+ attrRecord.getCategory().toString()
@@ -435,13 +435,13 @@ public class BalanaConnector {
 		if (response != null) {
 			System.out
 					.println("\n======================== XACML Response ====================");
-			System.out.println(response.encode());
+			//System.out.println(response.encode());
 			System.out
 					.println("===========================================================");
 			Set<AbstractResult> set = response.getResults();
 			return set;
 		} else {
-			System.out.println("Response received PDP is Null");
+			//System.out.println("Response received PDP is Null");
 		}
 		return null;
 	}
@@ -507,13 +507,13 @@ public class BalanaConnector {
 		if (response != null) {
 			System.out
 					.println("\n======================== XACML Response ====================");
-			System.out.println(response.encode());
+			//System.out.println(response.encode());
 			System.out
 					.println("===========================================================");
 			Set<AbstractResult> set = response.getResults();
 			return set;
 		} else {
-			System.out.println("Response received PDP is Null");
+			//System.out.println("Response received PDP is Null");
 		}
 		return null;
 	}
@@ -584,7 +584,7 @@ public class BalanaConnector {
 			if (attrRecord != null) {
 				for (String value : values) {
 					if (attrRecord.getValues().contains(value)) {
-						System.out.println(key + " :::::: " + value);
+						//System.out.println(key + " :::::: " + value);
 						actionAttr.append("<Attributes Category=\""
 								+ attrRecord.getCategory().toString() + "\">");
 						actionAttr.append("<Attribute AttributeId=\""

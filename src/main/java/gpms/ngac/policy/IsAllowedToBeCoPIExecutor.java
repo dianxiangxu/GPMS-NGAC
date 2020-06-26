@@ -80,7 +80,7 @@ public class IsAllowedToBeCoPIExecutor implements FunctionExecutor{
 
 			Stack<Node> stack = new Stack<Node>();
 			stack.push(childFromObligation);
-			//System.out.println(piNode);
+			////System.out.println(piNode);
 
 			while (!stack.isEmpty()) {
 
@@ -98,12 +98,12 @@ public class IsAllowedToBeCoPIExecutor implements FunctionExecutor{
 					continue;
 				}
 				if(newRoot.getName().equals(ua)) {
-					System.out.println("ALLOWED!!!!!!!!!!!!!!!");
+					//System.out.println("ALLOWED!!!!!!!!!!!!!!!");
 					return true;
 				}
 
 				if (!newRoot.getName().equals(ua)) {
-					System.out.println(newRoot.getName());
+					//System.out.println(newRoot.getName());
 
 					arrayOfElegiblePIs.add(newRoot.getName());
 				}

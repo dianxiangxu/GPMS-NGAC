@@ -47,7 +47,7 @@ public class ConcatExecutor implements FunctionExecutor {
         	string2 = functionEvaluator.evalString(eventCtx, user, process, pdp, string2Arg.getFunction());
         }
 
-        System.out.println("Result: "+string1+string2);
+        //System.out.println("Result: "+string1+string2);
         return string1 + string2;
     }
 }

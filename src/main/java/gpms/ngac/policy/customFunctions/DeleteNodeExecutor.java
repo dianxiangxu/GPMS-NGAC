@@ -46,7 +46,7 @@ public class DeleteNodeExecutor implements FunctionExecutor {
 			pdp.getPAP().getGraphPAP().deleteNode(name);
 		}
 		else {
-			System.out.println("Node does not exists");
+			//System.out.println("Node does not exists");
 		}
 		return null;
 	}

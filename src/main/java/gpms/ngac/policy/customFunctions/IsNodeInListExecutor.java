@@ -36,7 +36,7 @@ public class IsNodeInListExecutor implements FunctionExecutor {
 					getFunctionName() + " expected " + numParams() + " parameters but got " + args.size());
 		}
 		for(String s : pdp.getPAP().getGraphPAP().getChildren("CoPI")) {
-			System.out.println("OBLIGATION CHILDREN:"+ s);
+			//System.out.println("OBLIGATION CHILDREN:"+ s);
 		}
 		Arg arg = args.get(1);
 		Function f = arg.getFunction();
@@ -58,7 +58,7 @@ public class IsNodeInListExecutor implements FunctionExecutor {
 		if (node == null) {
 			return false;
 		}
-		System.out.println("is_node_in_list: "+list.contains(node.getName()));
+		//System.out.println("is_node_in_list: "+list.contains(node.getName()));
 		return list.contains(node.getName());
 	}
 }

@@ -91,7 +91,7 @@ public class GraphTesterReachabilitySneakpath extends GraphTesterRS {
 				} else {
 					result = false;
 				}
-				System.out.println(newRoot + " " + result + " " + createPDS.getName() + " " + requiredAccessRights[0]);
+				//System.out.println(newRoot + " " + result + " " + createPDS.getName() + " " + requiredAccessRights[0]);
 			}
 			for (String[] requiredAccessRights : list) {
 				if (decider.check(newRoot.getID(), 102L, writePDS.getID(), requiredAccessRights)) {
@@ -99,7 +99,7 @@ public class GraphTesterReachabilitySneakpath extends GraphTesterRS {
 				} else {
 					result = false;
 				}
-				System.out.println(newRoot + " " + writePDS.getName() + " " + requiredAccessRights[0] + " " + result);
+				//System.out.println(newRoot + " " + writePDS.getName() + " " + requiredAccessRights[0] + " " + result);
 			}
 			graph.updateNode(newRoot.getID(), newRoot.getName(), visited);
 
@@ -134,7 +134,7 @@ public class GraphTesterReachabilitySneakpath extends GraphTesterRS {
 		for (Node pc : PCs) {
 			Stack<Node> stack = new Stack<Node>();
 			stack.push(pc);
-			System.out.println(pc);
+			//System.out.println(pc);
 			if (pc == null)
 				return null;
 			while (!stack.isEmpty()) {
@@ -161,7 +161,7 @@ public class GraphTesterReachabilitySneakpath extends GraphTesterRS {
 							} else {
 								result = false;
 							}
-							System.out.println(
+							//System.out.println(
 									pc.getName() + " " + newRoot + " " + oa.getName() + " " + AR + " " + result);
 							data.add(new String[] {Integer.toString(i),pc.getName(), newRoot.getName(), 
 									oa.getName(), AR,Boolean.toString(result)});

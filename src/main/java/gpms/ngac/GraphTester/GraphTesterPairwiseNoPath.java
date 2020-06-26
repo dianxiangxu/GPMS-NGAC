@@ -77,7 +77,7 @@ public class GraphTesterPairwiseNoPath extends GraphTesterPairwise {
 				Node ua = graph.getNode(UAs.get(temp[0]));
 				boolean result = decider.check(UAs.get(temp[0]), 104L, oa.getID(), listOfRights.get(temp[1]));
 				if (result == false) {
-					System.out.println(
+					//System.out.println(
 							ua.getName() + " " + oa.getName() + " " + listOfRights.get(temp[1])[0] + " " + result);
 				data.add(new String[] { Integer.toString(i), pc.getName(), ua.getName(), oa.getName(), listOfRights.get(temp[1])[0],
 						Boolean.toString(result) });

@@ -123,10 +123,10 @@ public class CreateXProposals {
 					totalCops = rand.nextInt(5);
 
 					for (int a = 0; a < totalCops; a++) {
-						// System.out.println("dupMasterList size: " +
+						// //System.out.println("dupMasterList size: " +
 						// dupMasterList.size());
 						int coPIChoice = rand.nextInt(dupMasterList.size());
-						// System.out.println("coPiChoice rand: " + coPIChoice);
+						// //System.out.println("coPiChoice rand: " + coPIChoice);
 						UserProfile coPIProfile = dupMasterList.get(coPIChoice);
 
 						dupMasterList.remove(coPIChoice);
@@ -292,7 +292,7 @@ public class CreateXProposals {
 					List<UserProfile> retrievedDeans;
 
 					for (String college : collegeList) {
-						System.out.println("college: " + college);
+						//System.out.println("college: " + college);
 						retrievedDeans = newUserProfileDAO
 								.getSupervisoryPersonnels(college, "", "Dean",
 										true);
@@ -304,7 +304,7 @@ public class CreateXProposals {
 					}
 
 					if (deanList.size() > 0) {
-						System.out.println("deanList not empty");
+						//System.out.println("deanList not empty");
 						for (UserProfile dean : deanList) {
 							newSignInfo = new SignatureInfo();
 							newSignInfo.setFullName(dean.getFullName());
@@ -316,7 +316,7 @@ public class CreateXProposals {
 						}
 
 					} else {
-						System.out.println("Dean list is empty");
+						//System.out.println("Dean list is empty");
 					}
 				}
 
@@ -354,7 +354,7 @@ public class CreateXProposals {
 					}
 
 					if (chairList.size() > 0) {
-						System.out.println("chairList not empty");
+						//System.out.println("chairList not empty");
 						for (UserProfile chair : chairList) {
 							newSignInfo = new SignatureInfo();
 							newSignInfo.setFullName(chair.getFullName());
@@ -366,7 +366,7 @@ public class CreateXProposals {
 						}
 
 					} else {
-						System.out.println("Chair list is empty");
+						//System.out.println("Chair list is empty");
 					}
 
 				}// End SignatureMode = 3
