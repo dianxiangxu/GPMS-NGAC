@@ -459,7 +459,7 @@ public class PDSOperations {
 			graph.deleteNode("super_pc_rep");
 		}
 		PDP pdp = getPDP(graph);
-		pdp.getEPP().processEvent(new SubmitEvent(graph.getNode(Constants.SUBMISSION_INFO_OA_LBL), irbApprovalRequired),
+		pdp.getEPP().processEvent(new SubmitEvent(graph.getNode("PDSWhole"), irbApprovalRequired),
 				PI, "process");
 		return pdp;
 	}

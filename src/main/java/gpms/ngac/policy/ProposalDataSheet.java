@@ -929,7 +929,7 @@ public class ProposalDataSheet {
 	public List<String> getPermittedActions(PDSOperations pdsOps, String username, String objectAtt) {
 
 		ArrayList<String> permittedActions = new ArrayList<String>();
-		List<String> ops = Arrays.asList("Save", "Submit", "Approve", "Disapprove", "Withdraw", "Archive", "Delete");
+		List<String> ops = Arrays.asList("Submit", "Approve", "Disapprove", "Withdraw", "Archive", "Delete");
 
 		// ArrayList<String> ops = new ArrayList<String>();
 		// ops.addAll(Arrays.asList(operations));
@@ -945,6 +945,15 @@ public class ProposalDataSheet {
 				log.info("Permitted Action: " + operation);
 			}
 
+		}
+		String[] writeOperation = { "write" };
+		boolean hasPermissionToWriteCoPIEditable = UserPermissionChecker.checkPermission(proposalPolicy, getProhibitions(), username,
+				new Attribute("CoPIEditable", NodeType.OA), writeOperation);
+		boolean hasPermissionToWritePIEditable = UserPermissionChecker.checkPermission(proposalPolicy, getProhibitions(), username,
+				new Attribute("PIEditable", NodeType.OA), writeOperation);
+		//write implies save
+		if(hasPermissionToWriteCoPIEditable || hasPermissionToWritePIEditable) {
+			permittedActions.add("Save");
 		}
 
 		return permittedActions;

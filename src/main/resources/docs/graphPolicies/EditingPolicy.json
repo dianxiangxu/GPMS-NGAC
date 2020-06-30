@@ -489,14 +489,7 @@
         ],
        "source": "CoPI", 
        "target": "CoPIEditable"  
-     },
-  {
-       "operations": [
-         "Save"
-        ],
-       "source": "CoPI", 
-       "target": "PDSWhole" 
-     },         
+     },        
   {
        "operations": [
          "add-sp",

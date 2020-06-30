@@ -57,8 +57,8 @@ public class Constants {
 	public static final String STATE_READY_FOR_SUBMISSION = "READYFORSUBMISSION";
 	public static final String STATE_SUBMITTED_BY_RA = "SUBMITTEDBYRESEARCHADMIN";
 	
-	public static final String APPROVAL_CONTENT = "Approval Content";
-	public static final String PDSs_OA_UA_LBL = "PDSs";
+	public static final String APPROVAL_CONTENT = "PDSWhole";
+	public static final String PDSs_OA_UA_LBL = "PDSSections";
 	public static final String CHAIR_UA = "Chair";
 	public static final String CURRENT_USERS_UA = "Current Users";
 	public static final String CHAIR_APPROVAL = "ChairApproval";

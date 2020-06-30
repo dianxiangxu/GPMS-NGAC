@@ -320,7 +320,7 @@ rules:
         - submit
       target:
         policyElements:
-          - name: Submission-Info
+          - name: PDSWhole
             type: OA
     response:
       actions:
@@ -337,7 +337,7 @@ rules:
             target:
               complement: false
               containers:
-                - name: PI-Editable-Data
+                - name: PIEditable
                   type: OA
         - deny:
             label: deny2
@@ -349,7 +349,7 @@ rules:
             target:
               complement: false
               containers:
-                - name: CoPI-Editable-Data
+                - name: CoPIEditable
                   type: OA 
         - deny:
             label: deny3
@@ -374,17 +374,6 @@ rules:
               type: UA              
             operations:
               - add-sp
-            target:
-              complement: false
-              containers:
-                - name: SP
-                  type: UA 
-        - deny:
-            label: deny5
-            subject:
-              name: CoPI
-              type: UA
-            operations:
               - delete-sp
             target:
               complement: false
@@ -397,13 +386,12 @@ rules:
               name: PI
               type: UA
             operations:
-              - Save
               - Delete
               - Submit
             target:
               complement: false
               containers:
-                - name: PDSs
+                - name: PDSWhole
                   type: OA 
         - grant:
             subject:
@@ -412,7 +400,7 @@ rules:
             operations:
               - write
             target:
-              name: Signature-Info
+              name: ChairApproval
               type: OA 
         - grant:
             subject:
@@ -422,7 +410,7 @@ rules:
               - Approve
               - Disapprove
             target:
-              name: Approval Content
+              name: PDSWhole
               type: OA 
         - grant:
             subject:
@@ -431,7 +419,7 @@ rules:
             operations:
               - read
             target:
-              name: PDSs
+              name: PDSSections
               type: OA         
         - condition:
             - function:
@@ -442,8 +430,8 @@ rules:
               - function:
                   name: get_node
                   args:
-                    - irbglobal
-                    - U
+                    - irbUser
+                    - UA
               - function:
                   name: to_props
                   args:
@@ -457,7 +445,7 @@ rules:
               - function:
                   name: get_node
                   args:
-                    - IRB
+                    - IRBOfficer
                     - UA
               - function:
                   name: to_props

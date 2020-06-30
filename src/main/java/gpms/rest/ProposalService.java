@@ -389,7 +389,7 @@ public class ProposalService {
 					setPolicyState(projectProposal, existingProposal, null, userInfo.getUserName(), false);
 
 					String decisionString = projectProposal.getPolicyDecisionAnyType(pdsOperations,
-							userInfo.getUserName(), "U", "Delete", objectAtt);
+							userInfo.getUserName(), "U", "Delete", "PDSWhole");
 					boolean isDeleted = false;
 					if (decisionString.equals("Permit")) {
 						isDeleted = proposalDAO.deleteProposal(existingProposal, proposalRoles, proposalUserTitle,
@@ -397,7 +397,7 @@ public class ProposalService {
 
 						if (isDeleted == false) {
 							decisionString = projectProposal.getPolicyDecisionAnyType(pdsOperations,
-									userInfo.getUserName(), "U", "Del", objectAtt);
+									userInfo.getUserName(), "U", "Delete", "PDSWhole");
 							return Response.status(403).type(MediaType.APPLICATION_JSON)
 									.entity("Your permission is: " + "Deny").build();
 						}
@@ -579,7 +579,7 @@ public class ProposalService {
 				if (projectProposal.isProposalSubmitted()) {
 					if (!stage.equals(Constants.ZOMBIE_STATE)) {
 						actions = projectProposal.getPermittedActions(pdsOperations, userInfo.getUserName(),
-								Constants.APPROVAL_CONTENT);
+								"PDSWhole");
 					}
 				} else if (!stage.equals(Constants.ZOMBIE_STATE)) {
 					actions = projectProposal.getPermittedActions(pdsOperations, userInfo.getUserName(), "PDSWhole");
@@ -1209,8 +1209,19 @@ public class ProposalService {
 								existingProposal.setProhibitions(
 										ProhibitionsSerializer.toJson(pdp.getPAP().getProhibitionsPAP()));
 							}
-							decisionString = projectProposal.getPolicyDecisionAnyType(pdsOperations,
-									userInfo.getUserName(), "U", acRight, objectAtt);
+							if (action.equals("Save")) {
+								String decisionStringWriteCopi = projectProposal.getPolicyDecisionAnyType(pdsOperations,
+										userInfo.getUserName(), "U", "write", "CoPIEditable");
+								String decisionStringWritePI = projectProposal.getPolicyDecisionAnyType(pdsOperations,
+										userInfo.getUserName(), "U", "write", "PIEditable");
+								if (decisionStringWriteCopi.equals("Permit")
+										|| decisionStringWritePI.equals("Permit")) {
+									decisionString = "Permit";
+								}
+							} else {
+								decisionString = projectProposal.getPolicyDecisionAnyType(pdsOperations,
+										userInfo.getUserName(), "U", acRight, objectAtt);
+							}
 							log.info("D:" + decisionString);
 							if (action.equals("Submit") && !userInfo.getUserPositionTitle()
 									.equalsIgnoreCase("University Research Administrator")) {
@@ -1220,6 +1231,8 @@ public class ProposalService {
 
 								}
 								projectProposal.updateCoPI(userInfo.getUserName(), true);
+								projectProposal.updateSP(userInfo.getUserName(), true);
+
 								existingProposal
 										.setPolicyGraph(GraphSerializer.toJson(projectProposal.getProposalPolicy()));
 								PDP pdp = pdsOperations.submitAProposal(userInfo.getUserName(),
@@ -1232,6 +1245,7 @@ public class ProposalService {
 							}
 							if (action.equals("Save")) {
 								projectProposal.updateCoPI(userInfo.getUserName(), true);
+								projectProposal.updateSP(userInfo.getUserName(), true);
 
 								existingProposal
 										.setPolicyGraph(GraphSerializer.toJson(projectProposal.getProposalPolicy()));
@@ -1532,9 +1546,27 @@ public class ProposalService {
 									"add-sp", "SP");
 							log.info("D:" + decision);
 						} else {
-							log.info("objectAtt:" + objectAtt);
+							log.info("objectAtt WRITE :" + objectAtt);
 							decision = projectProposal.getPolicyDecision(pdsOperations, userInfo.getUserName(), acRight,
 									objectAtt);
+							if (decision.equals("Deny")&& objectAtt.equals(Constants.SIGNATURE_INFO_OA_LBL)) {
+								if (projectProposal
+										.getPolicyDecision(pdsOperations, userInfo.getUserName(), acRight,
+												"ChairApproval")
+										.equals("Permit")
+										|| projectProposal.getPolicyDecision(pdsOperations, userInfo.getUserName(),
+												acRight, "BMApproval").equals("Permit")
+										|| projectProposal.getPolicyDecision(pdsOperations, userInfo.getUserName(),
+												acRight, "IRBApproval").equals("Permit")
+										|| projectProposal.getPolicyDecision(pdsOperations, userInfo.getUserName(),
+												acRight, "DeanApproval").equals("Permit")
+										|| projectProposal.getPolicyDecision(pdsOperations, userInfo.getUserName(),
+												acRight, "RAApproval").equals("Permit")
+										|| projectProposal.getPolicyDecision(pdsOperations, userInfo.getUserName(),
+												acRight, "RDApproval").equals("Permit")) {
+									decision = "Permit";
+								}
+							}
 							log.info("D:" + decision);
 						}
 					} else if (action.equalsIgnoreCase("Add Co-PI")) {
