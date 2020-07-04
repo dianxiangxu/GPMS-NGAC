@@ -69,7 +69,7 @@ public class Constants {
 	public static final String RD_APPROVAL = "RDApproval";
 	public static final String BM_UA = "Business Manager";
 	public static final String DEAN_UA = "Dean";
-	public static final String IRB_UA = "IRB";
+	public static final String IRB_UA = "IRBOfficer";
 	public static final String RD_UA = "Research Admin";
 	public static final String RA_UA = "Research Director";
 	public static final String COMPOSITE_PDS = "Composite-PDS";

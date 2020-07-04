@@ -1274,12 +1274,10 @@ public class ProposalService {
 								decisionString = "Deny";
 							log.info("D:" + decisionString);
 						}
-						if (decisionString.equals("Permit") || AbstractResult.DECISIONS[intDecision].equals("Permit")) {
+						if (decisionString.equals("Permit")) {
 
 							log.info("Pre :Action:" + action + "|Role:" + proposalRoles + "|Name:"
 									+ userInfo.getUserName() + "|Stage:" + projectProposal.getApprovalStage());
-							String ApprovalStagePre = projectProposal.getApprovalStage();
-							String ApprovalStagePost = "";
 							if (sendSaveUpdateNotification(userInfo.getUserName(), message, projectProposal, proposalId,
 									existingProposal, oldProposal, authorProfile, false, signatures,
 									irbApprovalRequired, requiredSignatures, emailDetails, action)) {
@@ -1288,25 +1286,12 @@ public class ProposalService {
 
 								if (action.equals("Submit") && !userInfo.getUserPositionTitle()
 										.equalsIgnoreCase("University Research Administrator")) {
-
-									log.info("Call for Prohibition load");
-
-									projectProposal.clearIngestigator();
 									projectProposal.updatePI(true);
 									projectProposal.updateCoPI(userInfo.getUserName(), true);
 									projectProposal.updateSP(userInfo.getUserName(), true);
 									existingProposal.setPolicyGraph(
 											GraphSerializer.toJson(projectProposal.getProposalPolicy()));
-
-									projectProposal.updatePostSubmissionchanges(proposalDAO);
 									PDSOperations.proposalPolicies.put(existingProposal.getNgacId(), proposalPolicy);
-									ApprovalStagePost = projectProposal.getApprovalStage();
-
-								} else if (action.equals("Approve")) {
-									ApprovalStagePost = projectProposal.getApprovalStage();
-									if (!ApprovalStagePre.equals(ApprovalStagePost)) {
-										projectProposal.updatePostSubmissionchanges(proposalDAO);
-									}
 								}
 
 								return Response.status(200).type(MediaType.APPLICATION_JSON)
@@ -1340,7 +1325,7 @@ public class ProposalService {
 		if (projectProposal.getApprovalStage().equals(Constants.STATE_CHAIR)) {
 			PDP pdp = pdsOperations.chairApprove(userInfo.getUserName(), existingProposal.getPolicyGraph());
 			existingProposal.setPolicyGraph(GraphSerializer.toJson(pdp.getPAP().getGraphPAP()));
-			Map<String, OperationSet> assoc = pdp.getPAP().getGraphPAP().getTargetAssociations("Approval Content");
+			Map<String, OperationSet> assoc = pdp.getPAP().getGraphPAP().getTargetAssociations("PDSWhole");
 			for (String s : assoc.keySet()) {
 				// System.out.println("ASSOCIATIONS: " + s);
 			}
@@ -1349,7 +1334,7 @@ public class ProposalService {
 		else if (projectProposal.getApprovalStage().equals(Constants.STATE_BM)) {
 			PDP pdp = pdsOperations.bmApprove(userInfo.getUserName(), existingProposal.getPolicyGraph());
 			existingProposal.setPolicyGraph(GraphSerializer.toJson(pdp.getPAP().getGraphPAP()));
-			Map<String, OperationSet> assoc = pdp.getPAP().getGraphPAP().getTargetAssociations("Approval Content");
+			Map<String, OperationSet> assoc = pdp.getPAP().getGraphPAP().getTargetAssociations("PDSWhole");
 			for (String s : assoc.keySet()) {
 				// System.out.println("ASSOCIATIONS: " + s);
 			}
@@ -1358,16 +1343,16 @@ public class ProposalService {
 		else if (projectProposal.getApprovalStage().equals(Constants.STATE_DEAN)) {
 			PDP pdp = pdsOperations.deanApprove(userInfo.getUserName(), existingProposal.getPolicyGraph());
 			existingProposal.setPolicyGraph(GraphSerializer.toJson(pdp.getPAP().getGraphPAP()));
-			Map<String, OperationSet> assoc = pdp.getPAP().getGraphPAP().getTargetAssociations("Approval Content");
+			Map<String, OperationSet> assoc = pdp.getPAP().getGraphPAP().getTargetAssociations("PDSWhole");
 			for (String s : assoc.keySet()) {
 				// System.out.println("ASSOCIATIONS: " + s);
 			}
 		}
 
-		else if (userInfo.getUserName().equals("irbglobal")) {
+		else if (userInfo.getUserName().equals("irbUser")) {
 			PDP pdp = pdsOperations.irbApprove(userInfo.getUserName(), existingProposal.getPolicyGraph());
 			existingProposal.setPolicyGraph(GraphSerializer.toJson(pdp.getPAP().getGraphPAP()));
-			Map<String, OperationSet> assoc = pdp.getPAP().getGraphPAP().getTargetAssociations("Approval Content");
+			Map<String, OperationSet> assoc = pdp.getPAP().getGraphPAP().getTargetAssociations("PDSWhole");
 			for (String s : assoc.keySet()) {
 				// System.out.println("ASSOCIATIONS: " + s);
 			}
@@ -1376,7 +1361,7 @@ public class ProposalService {
 		else if (projectProposal.getApprovalStage().equals(Constants.STATE_RA)) {
 			PDP pdp = pdsOperations.raApprove(userInfo.getUserName(), existingProposal.getPolicyGraph());
 			existingProposal.setPolicyGraph(GraphSerializer.toJson(pdp.getPAP().getGraphPAP()));
-			Map<String, OperationSet> assoc = pdp.getPAP().getGraphPAP().getTargetAssociations("Approval Content");
+			Map<String, OperationSet> assoc = pdp.getPAP().getGraphPAP().getTargetAssociations("PDSWhole");
 			for (String s : assoc.keySet()) {
 				// System.out.println("ASSOCIATIONS: " + s);
 			}
@@ -1384,7 +1369,7 @@ public class ProposalService {
 		if (projectProposal.getApprovalStage().equals(Constants.STATE_RD)) {
 			PDP pdp = pdsOperations.rdApprove(userInfo.getUserName(), existingProposal.getPolicyGraph());
 			existingProposal.setPolicyGraph(GraphSerializer.toJson(pdp.getPAP().getGraphPAP()));
-			Map<String, OperationSet> assoc = pdp.getPAP().getGraphPAP().getTargetAssociations("Approval Content");
+			Map<String, OperationSet> assoc = pdp.getPAP().getGraphPAP().getTargetAssociations("PDSWhole");
 			for (String s : assoc.keySet()) {
 				// System.out.println("ASSOCIATIONS: " + s);
 			}
@@ -1425,7 +1410,7 @@ public class ProposalService {
 			}
 		}
 
-		if (userInfo.getUserName().equals("irbglobal")) {
+		if (userInfo.getUserName().equals("irbUser")) {
 			PDP pdp = pdsOperations.irbDisapprove(userInfo.getUserName(), existingProposal.getPolicyGraph());
 			prohibitions = new MemProhibitions();
 			existingProposal.setPolicyGraph(GraphSerializer.toJson(pdp.getPAP().getGraphPAP()));

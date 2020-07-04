@@ -28,8 +28,7 @@
    "properties": {
           
         }
-  },
-  
+  }, 
   {
    "name" : "ApprovalInfo",
    "type" : "OA",
@@ -262,13 +261,6 @@
         }
   },
   {
-   "name" : "IRB",
-   "type" : "UA",
-   "properties": {
-          
-        }
-  },
-  {
    "name" : "Research Admin",
    "type" : "UA",
    "properties": {
@@ -315,7 +307,7 @@
        "target": "EditingPolicyClass"  
      },
      {                                  
-       "source": "IRB",  
+       "source": "IRBOfficer",  
        "target":"EditingPolicyClass" 
      }
      ,
@@ -437,7 +429,9 @@
      {
        "source": "PDSWhole", 
        "target": "EditingPolicyClass"  
-     }, {
+     }
+     ,
+  {
        "source": "PIInfo", 
        "target": "Investigator Info"  
      }, {
@@ -476,14 +470,6 @@
        "target": "CoPI"  
      },    
      {
-    "operations": [
-         "add-sp",
-         "delete-sp"
-        ],
-       "source": "PI", 
-       "target": "SP"  
-     },
-     {
        "operations": [
          "write"
         ],
@@ -496,14 +482,6 @@
          "delete-sp"
         ],
        "source": "CoPI",
-       "target": "SP"  
-     },
-  {
-       "operations": [
-         "add-sp",
-         "delete-sp"
-        ],
-       "source": "PI",
        "target": "SP"  
      },     
      {

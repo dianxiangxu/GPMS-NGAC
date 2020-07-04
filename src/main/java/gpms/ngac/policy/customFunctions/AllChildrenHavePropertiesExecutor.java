@@ -53,13 +53,13 @@ public class AllChildrenHavePropertiesExecutor implements FunctionExecutor {
 				if (mapProperties.containsKey(key)) {
 					continue;
 				}else {
-					//System.out.println("all_children_have_properties RESULT:"+ false);
+					System.out.println("all_children_have_properties RESULT:"+ false);
 					return false;
 				}
 
 			}
 		}
-		//System.out.println("all_children_have_properties RESULT:"+ true);
+		System.out.println("all_children_have_properties RESULT:"+ true);
 
 		return true;
 	}

@@ -383,7 +383,7 @@ public class PDSOperations {
 	public static List<String> getAdministrationAdminUsers() {
 
 		List<String> listOfAdmins = new ArrayList<String>();
-		listOfAdmins.add("irbglobal");
+		listOfAdmins.add("irbUser");
 		return listOfAdmins;
 	}
 
@@ -524,6 +524,7 @@ public class PDSOperations {
 		}
 		PDP pdp = getPDP(graph);
 		pdp.getEPP().processEvent(new ApproveEvent(graph.getNode(Constants.CHAIR_APPROVAL)), chair, "process");
+						
 		return pdp;
 	}
 
@@ -655,7 +656,7 @@ public class PDSOperations {
 			graph.deleteNode("super_pc_rep");
 		}
 		PDP pdp = getPDP(graph);
-		pdp.getEPP().processEvent(new SubmitRAEvent(graph.getNode(Constants.SUBMISSION_INFO_OA_LBL)), ra, "process");
+		pdp.getEPP().processEvent(new SubmitRAEvent(graph.getNode("PDSWhole")), ra, "process");
 		return pdp;
 	}
 

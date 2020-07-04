@@ -87,16 +87,7 @@ public static boolean checkPermission(Graph graph, Prohibitions prohibitions, St
 		    log.info("UserPermissionChecker: "+user.getName()+"|"+s+"|" +targetAttribute.getAttributeName());
 		    
 	        }
-//	        Prohibition p = prohibitions.get("deny6");
-//	        p.getSubject();
-        	System.out.println("NAZMUL PERMISSION TO SUBMIT" + decider.check("CoPI", "process" , "CoPIEditable", "write"));
-        	System.out.println("NAZMUL PERMISSION TO SUBMIT" + decider.check("CoPI", "process" , "SP", "add-sp"));
-        	System.out.println("NAZMUL PERMISSION TO SUBMIT" + decider.check("nazmul", "process" , "PIEditable", "write"));
-        	System.out.println("NAZMUL PERMISSION TO SUBMIT" + decider.check("nazmul", "process" , "CoPI", "add-copi"));
-        	System.out.println("NAZMUL PERMISSION TO SUBMIT" + decider.check("nazmul", "process" , "liliana", "delete-copi"));
 
-	        	System.out.println("NAZMUL PERMISSION TO SUBMIT" + decider.check("PI", "process" , "PDSWhole", "Submit"));
-	      
     		//System.out.println("UserPermissionChecker: "+user.getName()+"|"+targetAttribute.toString()+"|"+Arrays.toString(objects));
     	    hasPermission = decider.check(userName, "process" , targetAttribute.getAttributeName(), objects);
     		log.info(hasPermission);	        

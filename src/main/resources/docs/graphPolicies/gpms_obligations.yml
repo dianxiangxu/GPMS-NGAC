@@ -324,75 +324,46 @@ rules:
             type: OA
     response:
       actions:
-        - deny:
-            label: deny1
-            subject:
-              function: 
-                name: get_node_name
-                args: 
-                  - function:
-                      name: current_user
-            operations:
-               - write
-            target:
-              complement: false
-              containers:
-                - name: PIEditable
+        - delete:
+            associations:
+              - subject:
+                  name: PI
+                  type: UA
+                target:
+                  name: PDSWhole
                   type: OA
-        - deny:
-            label: deny2
-            subject:
-              name: CoPI
-              type: UA                 
-            operations:
-               - write
-            target:
-              complement: false
-              containers:
-                - name: CoPIEditable
-                  type: OA 
-        - deny:
-            label: deny3
-            subject:
-              function: 
-                name: get_node_name
-                args: 
-                  - function:
-                      name: current_user
-            operations:
-               - add-copi
-               - delete-copi
-            target:
-              complement: false
-              containers:
-                - name: CoPI
-                  type: UA 
-        - deny:
-            label: deny4
-            subject: 
-              name: CoPI
-              type: UA              
-            operations:
-              - add-sp
-              - delete-sp
-            target:
-              complement: false
-              containers:
-                - name: SP
-                  type: UA  
-        - deny:
-            label: deny6
-            subject:
-              name: PI
-              type: UA
-            operations:
-              - Delete
-              - Submit
-            target:
-              complement: false
-              containers:
-                - name: PDSWhole
-                  type: OA 
+        - delete:
+            associations:
+              - subject:
+                  name: PI
+                  type: UA
+                target:
+                  name: PIEditable
+                  type: OA
+        - delete:
+            associations:
+              - subject:
+                  name: CoPI
+                  type: UA
+                target:
+                  name: CoPIEditable
+                  type: OA
+        - delete:
+            associations:
+              - subject:
+                  name: PI
+                  type: UA
+                target:
+                  name: CoPI
+                  type: UA
+        - delete:
+            associations:
+              - subject:
+                  name: CoPI
+                  type: UA
+                target:
+                  name: SP
+                  type: UA                                                                                        
         - grant:
             subject:
               name: Chair
@@ -431,11 +402,21 @@ rules:
                   name: get_node
                   args:
                     - irbUser
-                    - UA
+                    - U
               - function:
                   name: to_props
                   args:
                     - required=true
+        - grant:
+            subject:
+              name: Chair
+              type: UA
+            operations:
+              - Approve
+              - Disapprove
+            target:
+              name: PDSWhole
+              type: OA               
         - condition!:
             - function:
                 name: irb_approval_required    
@@ -968,7 +949,7 @@ rules:
                             - AcademicUnitsPolicyClass
                             - PC         
                 where:
-                  name: Business-Manager
+                  name: Business Manager
                   type: UA     
   - label: delete_sp
     event:
@@ -1015,7 +996,7 @@ rules:
         - approve
       target:
         policyElements:
-          - name: Chair-Approval
+          - name: ChairApproval
             type: OA
     response:  
       actions:
@@ -1047,7 +1028,7 @@ rules:
                   name: Chair
                   type: UA
                 target:
-                  name: Approval Content
+                  name: ChairApproval
                   type: OA 
         - condition:
             - function:
@@ -1068,7 +1049,28 @@ rules:
                   name: Chair
                   type: UA
                 target:
-                  name: Signature-Info
+                  name: PDSWhole
+                  type: OA
+        - condition:
+            - function:
+                name: all_children_have_properties
+                args:
+                  - function:
+                      name: get_node
+                      args:
+                        - Chair
+                        - UA
+                  - function:
+                      name: to_props
+                      args:
+                        - approved=true     
+          delete:
+            associations:
+              - subject:
+                  name: Chair
+                  type: UA
+                target:
+                  name: PDSSections
                   type: OA
         - condition:
             - function:
@@ -1085,12 +1087,12 @@ rules:
                         - approved=true  
           grant:
             subject:
-              name: Business-Manager
+              name: Business Manager
               type: UA
             operations:
               - write
             target:
-              name: Signature-Info
+              name: BMApproval
               type: OA 
         - condition:
             - function:
@@ -1107,13 +1109,13 @@ rules:
                         - approved=true  
           grant:
             subject:
-              name: Business-Manager
+              name: Business Manager
               type: UA
             operations:
               - Approve
               - Disapprove
             target:
-              name: Approval Content
+              name: PDSWhole
               type: OA
         - condition:
             - function:
@@ -1130,12 +1132,46 @@ rules:
                         - approved=true  
           grant:
             subject:
-              name: IRB
+              name: Business Manager
+              type: UA
+            operations:
+              - read
+            target:
+              name: PDSSections
+              type: OA              
+        - condition:
+            - function:
+                name: all_children_have_properties
+                args:
+                  - function:
+                      name: get_node
+                      args:
+                        - Chair
+                        - UA
+                  - function:
+                      name: to_props
+                      args:
+                        - approved=true 
+            - function:
+                name: all_children_have_properties
+                args:
+                  - function:
+                      name: get_node
+                      args:
+                        - IRBOfficer
+                        - UA
+                  - function:
+                      name: to_props
+                      args:
+                        - required=true                           
+          grant:
+            subject:
+              name: IRBOfficer
               type: UA
             operations:
               - write
             target:
-              name: Signature-Info
+              name: IRBApproval
               type: OA 
         - condition:
             - function:
@@ -1149,51 +1185,64 @@ rules:
                   - function:
                       name: to_props
                       args:
-                        - approved=true  
+                        - approved=true 
+            - function:
+                name: all_children_have_properties
+                args:
+                  - function:
+                      name: get_node
+                      args:
+                        - IRBOfficer
+                        - UA
+                  - function:
+                      name: to_props
+                      args:
+                        - required=true                           
           grant:
             subject:
-              name: IRB
+              name: IRBOfficer
+              type: UA
+            operations:
+              - read
+            target:
+              name: PDSSections
+              type: OA 
+        - condition:
+            - function:
+                name: all_children_have_properties
+                args:
+                  - function:
+                      name: get_node
+                      args:
+                        - Chair
+                        - UA
+                  - function:
+                      name: to_props
+                      args:
+                        - approved=true 
+            - function:
+                name: all_children_have_properties
+                args:
+                  - function:
+                      name: get_node
+                      args:
+                        - IRBOfficer
+                        - UA
+                  - function:
+                      name: to_props
+                      args:
+                        - required=true  
+          grant:
+            subject:
+              name: IRBOfficer
               type: UA
             operations:
               - Approve
               - Disapprove
             target:
-              name: Approval Content
+              name: PDSWhole
               type: OA 
-        - condition:
-            - function:
-                name: all_children_have_properties
-                args:
-                  - function:
-                      name: get_node
-                      args:
-                        - Chair
-                        - UA
-                  - function:
-                      name: to_props
-                      args:
-                        - approved=true  
-          condition!:
-            - function:
-                name: is_node_contained_in
-                args:
-                  - function:
-                      name: get_node
-                      args:
-                        - irbglobal
-                        - U   
-                  - function:
-                      name: get_node
-                      args:
-                        - IRB
-                        - UA                                
-          assign:
-            - what:
-                name: irbglobal
-                type: U
-              where:
-                name: IRB
-                type: UA              
+
                               
   - label: chair_disapprove
     event:
@@ -1205,7 +1254,7 @@ rules:
         - disapprove
       target:
         policyElements:
-          - name: Chair-Approval
+          - name: ChairApproval
             type: OA
     response:
       actions:
@@ -1215,7 +1264,7 @@ rules:
                   name: Chair
                   type: UA
                 target:
-                  name: Approval Content
+                  name: ChairApproval
                   type: OA
         - delete:
             associations:
@@ -1223,16 +1272,64 @@ rules:
                   name: Chair
                   type: UA
                 target:
-                  name: Signature-Info
+                  name: PDSWhole
                   type: OA
         - delete:
-            prohibitions:
-              - deny1
-              - deny2
-              - deny3
-              - deny4
-              - deny5
-              - deny6
+            associations:
+              - subject:
+                  name: Chair
+                  type: UA
+                target:
+                  name: PDSSections
+                  type: OA                  
+        - grant:
+            subject:
+              name: PI
+              type: UA
+            operations:
+              - Submit
+              - Delete
+            target:
+              name: PDSWhole
+              type: OA
+        - grant:
+            subject:
+              name: PI
+              type: UA
+            operations:
+              - write
+            target:
+              name: PIEditable
+              type: OA
+        - grant:
+            subject:
+              name: PI
+              type: UA
+            operations:
+              - add-copi
+              - delete-copi
+            target:
+              name: CoPI
+              type: UA
+        - grant:
+            subject:
+              name: CoPI
+              type: UA
+            operations:
+              - write
+            target:
+              name: CoPIEditable
+              type: OA  
+        - grant:
+            subject:
+              name: CoPI
+              type: UA
+            operations:
+              - add-sp
+              - delete-sp
+            target:
+              name: SP
+              type: UA                                        
         - function:
             name: remove_properties_from_children
             args:
@@ -1255,7 +1352,7 @@ rules:
         - approve
       target:
         policyElements:
-          - name: BM-Approval
+          - name: BMApproval
             type: OA
     response:
       actions:
@@ -1275,7 +1372,7 @@ rules:
                   - function:
                       name: get_node
                       args:
-                        - Business-Manager
+                        - Business Manager
                         - UA
                   - function:
                       name: to_props
@@ -1284,10 +1381,10 @@ rules:
           delete:
             associations:
               - subject:
-                  name: Business-Manager
+                  name: Business Manager
                   type: UA
                 target:
-                  name: Approval Content
+                  name: BMApproval
                   type: OA
         - condition:
             - function:
@@ -1296,7 +1393,7 @@ rules:
                   - function:
                       name: get_node
                       args:
-                        - Business-Manager
+                        - Business Manager
                         - UA
                   - function:
                       name: to_props
@@ -1305,10 +1402,10 @@ rules:
           delete:
             associations:
               - subject:
-                  name: Business-Manager
+                  name: Business Manager
                   type: UA
                 target:
-                  name: Signature-Info
+                  name: PDSWhole
                   type: OA
         - condition:
             - function:
@@ -1317,7 +1414,28 @@ rules:
                   - function:
                       name: get_node
                       args:
-                        - Business-Manager
+                        - Business Manager
+                        - UA
+                  - function:
+                      name: to_props
+                      args:
+                        - approved=true     
+          delete:
+            associations:
+              - subject:
+                  name: Business Manager
+                  type: UA
+                target:
+                  name: PDSSections
+                  type: OA                  
+        - condition:
+            - function:
+                name: all_children_have_properties
+                args:
+                  - function:
+                      name: get_node
+                      args:
+                        - Business Manager
                         - UA
                   - function:
                       name: to_props
@@ -1330,7 +1448,7 @@ rules:
             operations:
               - write
             target:
-              name: Signature-Info
+              name: RAApproval
               type: OA 
         - condition:
             - function:
@@ -1339,7 +1457,7 @@ rules:
                   - function:
                       name: get_node
                       args:
-                        - Business-Manager
+                        - Business Manager
                         - UA
                   - function:
                       name: to_props
@@ -1353,9 +1471,30 @@ rules:
               - Approve
               - Disapprove
             target:
-              name: Approval Content
+              name: PDSWhole
               type: OA 
-                 
+        - condition:
+            - function:
+                name: all_children_have_properties
+                args:
+                  - function:
+                      name: get_node
+                      args:
+                        - Business Manager
+                        - UA
+                  - function:
+                      name: to_props
+                      args:
+                        - approved=true 
+          grant:
+            subject:
+              name: Dean
+              type: UA
+            operations:
+              - read
+            target:
+              name: PDSSections
+              type: OA                  
   - label: bm_disapprove
     event:
       subject:
@@ -1366,41 +1505,113 @@ rules:
         - disapprove
       target:
         policyElements:
-          - name: BM-Approval
+          - name: BMApproval
             type: OA
     response:
       actions:
         - delete:
             associations:
               - subject:
-                  name: Business-Manager
+                  name: IRBOfficer
                   type: UA
                 target:
-                  name: Approval Content
+                  name: IRBApproval
                   type: OA
         - delete:
             associations:
               - subject:
-                  name: Business-Manager
+                  name: IRBOfficer
                   type: UA
                 target:
-                  name: Signature-Info
+                  name: PDSWhole
                   type: OA
         - delete:
-            prohibitions:
-              - deny1
-              - deny2
-              - deny3
-              - deny4
-              - deny5
-              - deny6
+            associations:
+              - subject:
+                  name: IRBOfficer
+                  type: UA
+                target:
+                  name: PDSSections
+                  type: OA                  
+        - delete:
+            associations:
+              - subject:
+                  name: Business Manager
+                  type: UA
+                target:
+                  name: BMApproval
+                  type: OA
+        - delete:
+            associations:
+              - subject:
+                  name: Business Manager
+                  type: UA
+                target:
+                  name: PDSWhole
+                  type: OA
+        - delete:
+            associations:
+              - subject:
+                  name: Business Manager
+                  type: UA
+                target:
+                  name: PDSSections
+                  type: OA                                                  
+        - grant:
+            subject:
+              name: PI
+              type: UA
+            operations:
+              - Submit
+              - Delete
+            target:
+              name: PDSWhole
+              type: OA
+        - grant:
+            subject:
+              name: PI
+              type: UA
+            operations:
+              - write
+            target:
+              name: PIEditable
+              type: OA
+        - grant:
+            subject:
+              name: PI
+              type: UA
+            operations:
+              - add-copi
+              - delete-copi
+            target:
+              name: CoPI
+              type: UA
+        - grant:
+            subject:
+              name: CoPI
+              type: UA
+            operations:
+              - write
+            target:
+              name: CoPIEditable
+              type: OA  
+        - grant:
+            subject:
+              name: CoPI
+              type: UA
+            operations:
+              - add-sp
+              - delete-sp
+            target:
+              name: SP
+              type: UA              
         - function:
             name: remove_properties_from_children
             args:
               - function:
                   name: get_node
                   args:
-                    - Business-Manager
+                    - Business Manager
                     - UA
               - function:
                   name: to_props
@@ -1417,7 +1628,19 @@ rules:
               - function:
                   name: to_props
                   args:
-                    - approved=true    
+                    - approved=true 
+        - function:
+            name: remove_properties_from_children
+            args:
+              - function:
+                  name: get_node
+                  args:
+                    - IRBOfficer
+                    - UA
+              - function:
+                  name: to_props
+                  args:
+                    - approved=true                          
   - label: dean_approve
     event:
       subject:
@@ -1428,7 +1651,7 @@ rules:
         - approve
       target:
         policyElements:
-          - name: Dean-Approval
+          - name: DeanApproval
             type: OA
     response:
       actions:
@@ -1460,7 +1683,7 @@ rules:
                   name: Dean
                   type: UA
                 target:
-                  name: Approval Content
+                  name: DeanApproval
                   type: OA
         - condition:
             - function:
@@ -1481,7 +1704,7 @@ rules:
                   name: Dean
                   type: UA
                 target:
-                  name: Signature-Info
+                  name: PDSSections
                   type: OA
         - condition:
             - function:
@@ -1495,40 +1718,15 @@ rules:
                   - function:
                       name: to_props
                       args:
-                        - approved=true 
-            - function:
-                name: all_children_have_properties
-                args:
-                  - function:
-                      name: get_node
-                      args:
-                        - IRB
-                        - UA
-                  - function:
-                      name: to_props
-                      args:
-                        - approved=true 
-          condition!:
-            - function:
-                name: is_node_contained_in
-                args:
-                  - function:
-                      name: get_node
-                      args:
-                        - racomputerscience
-                        - U   
-                  - function:
-                      name: get_node
-                      args:
-                        - Research-Admin
-                        - UA     
-          assign:
-            - what:
-                name: racomputerscience
-                type: U
-              where:
-                name: Research-Admin
-                type: UA
+                        - approved=true     
+          delete:
+            associations:
+              - subject:
+                  name: Dean
+                  type: UA
+                target:
+                  name: PDSWhole
+                  type: OA                  
         - condition:
             - function:
                 name: all_children_have_properties
@@ -1548,7 +1746,7 @@ rules:
                   - function:
                       name: get_node
                       args:
-                        - IRB
+                        - IRBOfficer
                         - UA
                   - function:
                       name: to_props
@@ -1556,14 +1754,14 @@ rules:
                         - approved=true   
           grant:
             subject:
-              name: Research-Admin
+              name: Research Admin
               type: UA
             operations:
               - Approve
               - Disapprove
               - Withdraw
             target:
-              name: Approval Content
+              name: PDSWhole
               type: OA 
         - condition:
             - function:
@@ -1584,7 +1782,7 @@ rules:
                   - function:
                       name: get_node
                       args:
-                        - IRB
+                        - IRBOfficer
                         - UA
                   - function:
                       name: to_props
@@ -1592,12 +1790,46 @@ rules:
                         - approved=true   
           grant:
             subject:
-              name: Research-Admin
+              name: Research Admin
+              type: UA
+            operations:
+              - read
+            target:
+              name: PDSSections
+              type: OA               
+        - condition:
+            - function:
+                name: all_children_have_properties
+                args:
+                  - function:
+                      name: get_node
+                      args:
+                        - Dean
+                        - UA
+                  - function:
+                      name: to_props
+                      args:
+                        - approved=true 
+            - function:
+                name: all_children_have_properties
+                args:
+                  - function:
+                      name: get_node
+                      args:
+                        - IRBOfficer
+                        - UA
+                  - function:
+                      name: to_props
+                      args:
+                        - approved=true   
+          grant:
+            subject:
+              name: Research Admin
               type: UA
             operations:
               - write
             target:
-              name: OSP-Section-Info
+              name: OSPInfo
               type: OA 
         - condition:
             - function:
@@ -1618,7 +1850,7 @@ rules:
                   - function:
                       name: get_node
                       args:
-                        - IRB
+                        - IRBOfficer
                         - UA
                   - function:
                       name: to_props
@@ -1626,12 +1858,12 @@ rules:
                         - approved=true   
           grant:
             subject:
-              name: Research-Admin
+              name: Research Admin
               type: UA
             operations:
               - write
             target:
-              name: Signature-Info
+              name: RAApproval
               type: OA  
         - condition:
             - function:
@@ -1646,52 +1878,6 @@ rules:
                       name: to_props
                       args:
                         - approved=true 
-            - function:
-                name: all_children_have_properties
-                args:
-                  - function:
-                      name: get_node
-                      args:
-                        - IRB
-                        - UA
-                  - function:
-                      name: to_props
-                      args:
-                        - required=true 
-          condition!:
-            - function:
-                name: is_node_contained_in
-                args:
-                  - function:
-                      name: get_node
-                      args:
-                        - racomputerscience
-                        - U   
-                  - function:
-                      name: get_node
-                      args:
-                        - Research-Admin
-                        - UA    
-          assign:
-            - what:
-                name: racomputerscience
-                type: U
-              where:
-                name: Research-Admin
-                type: UA
-        - condition:
-            - function:
-                name: all_children_have_properties
-                args:
-                  - function:
-                      name: get_node
-                      args:
-                        - Dean
-                        - UA
-                  - function:
-                      name: to_props
-                      args:
-                        - approved=true 
           condition!:
             - function:
                 name: all_children_have_properties
@@ -1699,7 +1885,7 @@ rules:
                   - function:
                       name: get_node
                       args:
-                        - IRB
+                        - IRBOfficer
                         - UA
                   - function:
                       name: to_props
@@ -1707,14 +1893,14 @@ rules:
                         - required=true 
           grant:
             subject:
-              name: Research-Admin
+              name: Research Admin
               type: UA
             operations:
               - Approve
               - Disapprove
               - Withdraw
             target:
-              name: Approval Content
+              name: PDSWhole
               type: OA 
         - condition:
             - function:
@@ -1736,7 +1922,7 @@ rules:
                   - function:
                       name: get_node
                       args:
-                        - IRB
+                        - IRBOfficer
                         - UA
                   - function:
                       name: to_props
@@ -1744,13 +1930,13 @@ rules:
                         - required=true 
           grant:
             subject:
-              name: Research-Admin
+              name: Research Admin
               type: UA
             operations:
               - write
             target:
-              name: OSP-Section-Info
-              type: OA 
+              name: OSPInfo
+              type: OA  
         - condition:
             - function:
                 name: all_children_have_properties
@@ -1771,53 +1957,7 @@ rules:
                   - function:
                       name: get_node
                       args:
-                        - IRB
-                        - UA
-                  - function:
-                      name: to_props
-                      args:
-                        - required=true
-            - function:
-                name: is_node_contained_in
-                args:
-                  - function:
-                      name: get_node
-                      args:
-                        - racomputerscience
-                        - U   
-                  - function:
-                      name: get_node
-                      args:
-                        - Research-Admin
-                        - UA    
-          assign:
-            - what:
-                name: racomputerscience
-                type: U
-              where:
-                name: Research-Admin
-                type: UA 
-        - condition:
-            - function:
-                name: all_children_have_properties
-                args:
-                  - function:
-                      name: get_node
-                      args:
-                        - Dean
-                        - UA
-                  - function:
-                      name: to_props
-                      args:
-                        - approved=true 
-          condition!:
-            - function:
-                name: all_children_have_properties
-                args:
-                  - function:
-                      name: get_node
-                      args:
-                        - IRB
+                        - IRBOfficer
                         - UA
                   - function:
                       name: to_props
@@ -1825,13 +1965,48 @@ rules:
                         - required=true                 
           grant:
             subject:
-              name: Research-Admin
+              name: Research Admin
               type: UA
             operations:
               - write
             target:
-              name: Signature-Info
-              type: OA                  
+              name: RAApproval
+              type: OA      
+        - condition:
+            - function:
+                name: all_children_have_properties
+                args:
+                  - function:
+                      name: get_node
+                      args:
+                        - Dean
+                        - UA
+                  - function:
+                      name: to_props
+                      args:
+                        - approved=true 
+          condition!:
+            - function:
+                name: all_children_have_properties
+                args:
+                  - function:
+                      name: get_node
+                      args:
+                        - IRBOfficer
+                        - UA
+                  - function:
+                      name: to_props
+                      args:
+                        - required=true                 
+          grant:
+            subject:
+              name: Research Admin
+              type: UA
+            operations:
+              - read
+            target:
+              name: PDSSections
+              type: OA                             
   - label: dean_disapprove
     event:
       subject:
@@ -1840,17 +2015,65 @@ rules:
         - disapprove
       target:
         policyElements:
-          - name: Dean-Approval
+          - name: DeanApproval
             type: OA
     response:
       actions:
         - delete:
             associations:
               - subject:
+                  name: IRBOfficer
+                  type: UA
+                target:
+                  name: IRBApproval
+                  type: OA
+        - delete:
+            associations:
+              - subject:
+                  name: IRBOfficer
+                  type: UA
+                target:
+                  name: PDSWhole
+                  type: OA
+        - delete:
+            associations:
+              - subject:
+                  name: IRBOfficer
+                  type: UA
+                target:
+                  name: PDSSections
+                  type: OA                  
+        - delete:
+            associations:
+              - subject:
+                  name: Business Manager
+                  type: UA
+                target:
+                  name: BMApproval
+                  type: OA
+        - delete:
+            associations:
+              - subject:
+                  name: Business Manager
+                  type: UA
+                target:
+                  name: PDSWhole
+                  type: OA
+        - delete:
+            associations:
+              - subject:
+                  name: Business Manager
+                  type: UA
+                target:
+                  name: PDSSections
+                  type: OA           
+        - delete:
+            associations:
+              - subject:
                   name: Dean
                   type: UA
                 target:
-                  name: Approval Content
+                  name: DeanApproval
                   type: OA
         - delete:
             associations:
@@ -1858,16 +2081,76 @@ rules:
                   name: Dean
                   type: UA
                 target:
-                  name: Signature-Info
+                  name: PDSWhole
                   type: OA
         - delete:
-            prohibitions:
-              - deny1
-              - deny2
-              - deny3
-              - deny4
-              - deny5
-              - deny6
+            associations:
+              - subject:
+                  name: Dean
+                  type: UA
+                target:
+                  name: PDSSections
+                  type: OA                                         
+        - grant:
+            subject:
+              name: PI
+              type: UA
+            operations:
+              - Submit
+              - Delete
+            target:
+              name: PDSWhole
+              type: OA
+        - grant:
+            subject:
+              name: PI
+              type: UA
+            operations:
+              - write
+            target:
+              name: PIEditable
+              type: OA
+        - grant:
+            subject:
+              name: PI
+              type: UA
+            operations:
+              - add-copi
+              - delete-copi
+            target:
+              name: CoPI
+              type: UA
+        - grant:
+            subject:
+              name: CoPI
+              type: UA
+            operations:
+              - write
+            target:
+              name: CoPIEditable
+              type: OA  
+        - grant:
+            subject:
+              name: CoPI
+              type: UA
+            operations:
+              - add-sp
+              - delete-sp
+            target:
+              name: SP
+              type: UA                                        
+        - function:
+            name: remove_properties_from_children
+            args:
+              - function:
+                  name: get_node
+                  args:
+                    - Chair
+                    - UA
+              - function:
+                  name: to_props
+                  args:
+                    - approved=true  
         - function:
             name: remove_properties_from_children
             args:
@@ -1886,7 +2169,7 @@ rules:
               - function:
                   name: get_node
                   args:
-                    - Business-Manager
+                    - Business Manager
                     - UA
               - function:
                   name: to_props
@@ -1898,13 +2181,12 @@ rules:
               - function:
                   name: get_node
                   args:
-                    - Chair
+                    - IRBOfficer
                     - UA
               - function:
                   name: to_props
                   args:
                     - approved=true  
-
   - label: irb_approve
     event:
       subject:
@@ -1913,7 +2195,7 @@ rules:
         - approve
       target:
         policyElements:
-          - name: IRB-Approval
+          - name: IRBApproval
             type: OA
     response:
       actions:
@@ -1929,19 +2211,27 @@ rules:
         - delete:
             associations:
               - subject:
-                  name: IRB
+                  name: IRBOfficer
                   type: UA
                 target:
-                  name: Signature-Info
+                  name: IRBApproval
                   type: OA
         - delete:
             associations:
               - subject:
-                  name: IRB
+                  name: IRBOfficer
                   type: UA
                 target:
-                  name: Approval Content
+                  name: PDSSections
                   type: OA
+        - delete:
+            associations:
+              - subject:
+                  name: IRBOfficer
+                  type: UA
+                target:
+                  name: PDSWhole
+                  type: OA                  
         - condition:
             - function:
                 name: all_children_have_properties
@@ -1957,14 +2247,14 @@ rules:
                         - approved=true 
           grant:
             subject:
-              name: Research-Admin
+              name: Research Admin
               type: UA
             operations:
               - Approve
               - Disapprove
               - Withdraw
             target:
-              name: Approval Content
+              name: PDSWhole
               type: OA 
         - condition:
             - function:
@@ -1981,12 +2271,12 @@ rules:
                         - approved=true 
           grant:
             subject:
-              name: Research-Admin
+              name: Research Admin
               type: UA
             operations:
               - write
             target:
-              name: OSP-Section-Info
+              name: OSPInfo
               type: OA 
         - condition:
             - function:
@@ -2003,12 +2293,12 @@ rules:
                         - approved=true 
           grant:
             subject:
-              name: Research-Admin
+              name: Research Admin
               type: UA
             operations:
               - write
             target:
-              name: Signature-Info
+              name: RAApproval
               type: OA 
   - label: irb_disapprove
     event:
@@ -2018,58 +2308,130 @@ rules:
         - disapprove
       target:
         policyElements:
-          - name: IRB-Approval
+          - name: IRBApproval
             type: OA
     response:
       actions:
         - delete:
             associations:
               - subject:
-                  name: IRB
+                  name: IRBOfficer
                   type: UA
                 target:
-                  name: Signature-Info
+                  name: IRBApproval
                   type: OA
         - delete:
             associations:
               - subject:
-                  name: IRB
+                  name: IRBOfficer
                   type: UA
                 target:
-                  name: Approval Content
+                  name: PDSWhole
                   type: OA
         - delete:
-            prohibitions:
-              - deny1
-              - deny2
-              - deny3
-              - deny4
-              - deny5
-              - deny6
-        - function:
-            name: remove_properties_from_children
-            args:
-              - function:
-                  name: get_node
-                  args:
-                    - Dean
-                    - UA
-              - function:
-                  name: to_props
-                  args:
-                    - approved=true                                         
-        - function:
-            name: remove_properties_from_children
-            args:
-              - function:
-                  name: get_node
-                  args:
-                    - Business-Manager
-                    - UA
-              - function:
-                  name: to_props
-                  args:
-                    - approved=true  
+            associations:
+              - subject:
+                  name: IRBOfficer
+                  type: UA
+                target:
+                  name: PDSSections
+                  type: OA                  
+        - delete:
+            associations:
+              - subject:
+                  name: Business Manager
+                  type: UA
+                target:
+                  name: BMApproval
+                  type: OA
+        - delete:
+            associations:
+              - subject:
+                  name: Business Manager
+                  type: UA
+                target:
+                  name: PDSWhole
+                  type: OA
+        - delete:
+            associations:
+              - subject:
+                  name: Business Manager
+                  type: UA
+                target:
+                  name: PDSSections
+                  type: OA           
+        - delete:
+            associations:
+              - subject:
+                  name: Dean
+                  type: UA
+                target:
+                  name: DeanApproval
+                  type: OA
+        - delete:
+            associations:
+              - subject:
+                  name: Dean
+                  type: UA
+                target:
+                  name: PDSWhole
+                  type: OA
+        - delete:
+            associations:
+              - subject:
+                  name: Dean
+                  type: UA
+                target:
+                  name: PDSSections
+                  type: OA                                         
+        - grant:
+            subject:
+              name: PI
+              type: UA
+            operations:
+              - Submit
+              - Delete
+            target:
+              name: PDSWhole
+              type: OA
+        - grant:
+            subject:
+              name: PI
+              type: UA
+            operations:
+              - write
+            target:
+              name: PIEditable
+              type: OA
+        - grant:
+            subject:
+              name: PI
+              type: UA
+            operations:
+              - add-copi
+              - delete-copi
+            target:
+              name: CoPI
+              type: UA
+        - grant:
+            subject:
+              name: CoPI
+              type: UA
+            operations:
+              - write
+            target:
+              name: CoPIEditable
+              type: OA  
+        - grant:
+            subject:
+              name: CoPI
+              type: UA
+            operations:
+              - add-sp
+              - delete-sp
+            target:
+              name: SP
+              type: UA                                        
         - function:
             name: remove_properties_from_children
             args:
@@ -2088,44 +2450,36 @@ rules:
               - function:
                   name: get_node
                   args:
-                    - IRB
+                    - Dean
+                    - UA
+              - function:
+                  name: to_props
+                  args:
+                    - approved=true                                         
+        - function:
+            name: remove_properties_from_children
+            args:
+              - function:
+                  name: get_node
+                  args:
+                    - Business Manager
                     - UA
               - function:
                   name: to_props
                   args:
                     - approved=true  
-        - delete:
-            associations:
-              - subject:
-                  name: Dean
-                  type: UA
-                target:
-                  name: Approval Content
-                  type: OA
-        - delete:
-            associations:
-              - subject:
-                  name: Dean
-                  type: UA
-                target:
-                  name: Signature-Info
-                  type: OA  
-        - delete:
-            associations:
-              - subject:
-                  name: Business-Manager
-                  type: UA
-                target:
-                  name: Approval Content
-                  type: OA
-        - delete:
-            associations:
-              - subject:
-                  name: Business-Manager
-                  type: UA
-                target:
-                  name: Signature-Info
-                  type: OA                         
+        - function:
+            name: remove_properties_from_children
+            args:
+              - function:
+                  name: get_node
+                  args:
+                    - IRBOfficer
+                    - UA
+              - function:
+                  name: to_props
+                  args:
+                    - approved=true                        
 
   - label: ra_approve
     event:
@@ -2135,61 +2489,80 @@ rules:
         - approve
       target:
         policyElements:
-          - name: Research-Admin-Approval
+          - name: RAApproval
             type: OA
     response:
       actions:
         - delete:
             associations:
               - subject:
-                  name: Research-Admin
+                  name: Research Admin
                   type: UA
                 target:
-                  name: Signature-Info
+                  name: PDSWhole
                   type: OA
         - delete:
             associations:
               - subject:
-                  name: Research-Admin
+                  name: Research Admin
                   type: UA
                 target:
-                  name: Approval Content
+                  name: RAApproval
+                  type: OA                  
+        - delete:
+            associations:
+              - subject:
+                  name: Research Admin
+                  type: UA
+                target:
+                  name: PDSSections
                   type: OA
         - delete:
             associations:
               - subject:
-                  name: Research-Admin
+                  name: Research Admin
                   type: UA
                 target:
-                  name: OSP-Section-Info
+                  name: OSPInfo
                   type: OA
-        - assign:
-            - what:
-                name: directorcomputerscience
-                type: U
-              where:
-                name: Research-Director
-                type: UA
         - grant:
             subject:
-              name: Research-Director
+              name: Research Director
               type: UA
             operations:
               - Approve
               - Disapprove
               - Delete
             target:
-              name: Approval Content
+              name: PDSWhole
               type: OA 
         - grant:
             subject:
-              name: Research-Director
+              name: Research Director
               type: UA
             operations:
               - write
             target:
-              name: Signature-Info
+              name: RDApproval
               type: OA 
+        - grant:
+            subject:
+              name: Research Director
+              type: UA
+            operations:
+              - read
+            target:
+              name: PDSSections
+              type: OA 
+        - grant:
+            subject:
+              name: Research Director
+              type: UA
+            operations:
+              - write
+            target:
+              name: OSPInfo
+              type: OA                       
   - label: ra_disapprove
     event:
       subject:
@@ -2198,66 +2571,90 @@ rules:
         - disapprove
       target:
         policyElements:
-          - name: Research-Admin-Approval
+          - name: RAApproval
             type: OA
     response:
       actions:
         - delete:
             associations:
               - subject:
-                  name: Research-Admin
+                  name: Research Admin
                   type: UA
                 target:
-                  name: Signature-Info
+                  name: PDSWhole
                   type: OA
         - delete:
             associations:
               - subject:
-                  name: Research-Admin
+                  name: Research Admin
                   type: UA
                 target:
-                  name: Approval Content
+                  name: RAApproval
+                  type: OA                  
+        - delete:
+            associations:
+              - subject:
+                  name: Research Admin
+                  type: UA
+                target:
+                  name: PDSSections
                   type: OA
         - delete:
             associations:
               - subject:
-                  name: Research-Admin
+                  name: Research Admin
                   type: UA
                 target:
-                  name: OSP-Section-Info
+                  name: OSPInfo
                   type: OA
-        - delete:
-            prohibitions:
-              - deny1
-              - deny2
-              - deny3
-              - deny4
-              - deny5
-              - deny6
-        - function:
-            name: remove_properties_from_children
-            args:
-              - function:
-                  name: get_node
-                  args:
-                    - Dean
-                    - UA
-              - function:
-                  name: to_props
-                  args:
-                    - approved=true                                         
-        - function:
-            name: remove_properties_from_children
-            args:
-              - function:
-                  name: get_node
-                  args:
-                    - Business-Manager
-                    - UA
-              - function:
-                  name: to_props
-                  args:
-                    - approved=true  
+        - grant:
+            subject:
+              name: PI
+              type: UA
+            operations:
+              - Submit
+              - Delete
+            target:
+              name: PDSWhole
+              type: OA
+        - grant:
+            subject:
+              name: PI
+              type: UA
+            operations:
+              - write
+            target:
+              name: PIEditable
+              type: OA
+        - grant:
+            subject:
+              name: PI
+              type: UA
+            operations:
+              - add-copi
+              - delete-copi
+            target:
+              name: CoPI
+              type: UA
+        - grant:
+            subject:
+              name: CoPI
+              type: UA
+            operations:
+              - write
+            target:
+              name: CoPIEditable
+              type: OA  
+        - grant:
+            subject:
+              name: CoPI
+              type: UA
+            operations:
+              - add-sp
+              - delete-sp
+            target:
+              name: SP
+              type: UA                                        
         - function:
             name: remove_properties_from_children
             args:
@@ -2276,12 +2673,36 @@ rules:
               - function:
                   name: get_node
                   args:
-                    - IRB
+                    - Dean
                     - UA
               - function:
                   name: to_props
                   args:
-                    - approved=true     
+                    - approved=true                                         
+        - function:
+            name: remove_properties_from_children
+            args:
+              - function:
+                  name: get_node
+                  args:
+                    - Business Manager
+                    - UA
+              - function:
+                  name: to_props
+                  args:
+                    - approved=true  
+        - function:
+            name: remove_properties_from_children
+            args:
+              - function:
+                  name: get_node
+                  args:
+                    - IRBOfficer
+                    - UA
+              - function:
+                  name: to_props
+                  args:
+                    - approved=true          
   - label: rd_approve
     event:
       subject:
@@ -2290,43 +2711,68 @@ rules:
         - approve
       target:
         policyElements:
-          - name: Research-Director-Approval
+          - name: RDApproval
             type: OA
     response:
       actions:
         - delete:
             associations:
               - subject:
-                  name: Research-Director
+                  name: Research Director
                   type: UA
                 target:
-                  name: Signature-Info
+                  name: PDSSections
                   type: OA
         - delete:
             associations:
               - subject:
-                  name: Research-Director
+                  name: Research Director
                   type: UA
                 target:
-                  name: Approval Content
+                  name: RDApproval
+                  type: OA                  
+        - delete:
+            associations:
+              - subject:
+                  name: Research Director
+                  type: UA
+                target:
+                  name: PDSWhole
                   type: OA
+        - delete:
+            associations:
+              - subject:
+                  name: Research Director
+                  type: UA
+                target:
+                  name: OSPInfo
+                  type: OA                  
         - grant:
             subject:
-              name: Research-Admin
+              name: Research Admin
               type: UA
             operations:
               - Submit
             target:
-              name: Approval Content
+              name: PDSWhole
               type: OA 
         - grant:
             subject:
-              name: Research-Admin
+              name: Research Admin
               type: UA
             operations:
               - write
             target:
-              name: Signature-Info
+              name: RAApproval
+              type: OA 
+        - grant:
+            subject:
+              name: Research Admin
+              type: UA
+            operations:
+              - read
+            target:
+              name: PDSSections
               type: OA 
   - label: rd_disapprove
     event:
@@ -2336,58 +2782,82 @@ rules:
         - disapprove
       target:
         policyElements:
-          - name: Research-Director-Approval
+          - name: RDApproval
             type: OA
     response:
       actions:
         - delete:
             associations:
               - subject:
-                  name: Research-Director
+                  name: Research Director
                   type: UA
                 target:
-                  name: Signature-Info
+                  name: PDSSections
                   type: OA
         - delete:
             associations:
               - subject:
-                  name: Research-Director
+                  name: Research Director
                   type: UA
                 target:
-                  name: Approval Content
+                  name: PDSWhole
                   type: OA
         - delete:
-            prohibitions:
-              - deny1
-              - deny2
-              - deny3
-              - deny4
-              - deny5
-              - deny6
-        - function:
-            name: remove_properties_from_children
-            args:
-              - function:
-                  name: get_node
-                  args:
-                    - Dean
-                    - UA
-              - function:
-                  name: to_props
-                  args:
-                    - approved=true                                         
-        - function:
-            name: remove_properties_from_children
-            args:
-              - function:
-                  name: get_node
-                  args:
-                    - Business-Manager
-                    - UA
-              - function:
-                  name: to_props
-                  args:
-                    - approved=true  
+            associations:
+              - subject:
+                  name: Research Director
+                  type: UA
+                target:
+                  name: OSPInfo
+                  type: OA  
+        - grant:
+            subject:
+              name: PI
+              type: UA
+            operations:
+              - Submit
+              - Delete
+            target:
+              name: PDSWhole
+              type: OA
+        - grant:
+            subject:
+              name: PI
+              type: UA
+            operations:
+              - write
+            target:
+              name: PIEditable
+              type: OA
+        - grant:
+            subject:
+              name: PI
+              type: UA
+            operations:
+              - add-copi
+              - delete-copi
+            target:
+              name: CoPI
+              type: UA
+        - grant:
+            subject:
+              name: CoPI
+              type: UA
+            operations:
+              - write
+            target:
+              name: CoPIEditable
+              type: OA  
+        - grant:
+            subject:
+              name: CoPI
+              type: UA
+            operations:
+              - add-sp
+              - delete-sp
+            target:
+              name: SP
+              type: UA                                        
         - function:
             name: remove_properties_from_children
             args:
@@ -2406,12 +2876,36 @@ rules:
               - function:
                   name: get_node
                   args:
-                    - IRB
+                    - Dean
                     - UA
               - function:
                   name: to_props
                   args:
-                    - approved=true                        
+                    - approved=true                                         
+        - function:
+            name: remove_properties_from_children
+            args:
+              - function:
+                  name: get_node
+                  args:
+                    - Business Manager
+                    - UA
+              - function:
+                  name: to_props
+                  args:
+                    - approved=true  
+        - function:
+            name: remove_properties_from_children
+            args:
+              - function:
+                  name: get_node
+                  args:
+                    - IRBOfficer
+                    - UA
+              - function:
+                  name: to_props
+                  args:
+                    - approved=true                       
   - label: ra_submit
     event:
       subject:
@@ -2420,41 +2914,57 @@ rules:
         - RAsubmit
       target:
         policyElements:
-          - name: Submission-Info
+          - name: PDSWhole
             type: OA
     response:
       actions:
         - delete:
             associations:
               - subject:
-                  name: Research-Admin
+                  name: Research Admin
                   type: UA
                 target:
-                  name: Signature-Info
+                  name: PDSWhole
                   type: OA
         - delete:
             associations:
               - subject:
-                  name: Research-Admin
+                  name: Research Admin
                   type: UA
                 target:
-                  name: Approval Content
+                  name: RAApproval
+                  type: OA                  
+        - delete:
+            associations:
+              - subject:
+                  name: Research Admin
+                  type: UA
+                target:
+                  name: PDSSections
+                  type: OA
+        - delete:
+            associations:
+              - subject:
+                  name: Research Admin
+                  type: UA
+                target:
+                  name: OSPInfo
                   type: OA
         - grant:
             subject:
-              name: Research-Director
+              name: Research Director
               type: UA
             operations:
               - Archive
             target:
-              name: Approval Content
-              type: OA 
+              name: PDSWhole
+              type: OA       
         - grant:
             subject:
-              name: Research-Director
+              name: Research Director
               type: UA
             operations:
-              - write
+              - read
             target:
-              name: Signature-Info
-              type: OA                                   
+              name: PDSSections
+              type: OA                                  
