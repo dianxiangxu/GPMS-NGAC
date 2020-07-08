@@ -15,6 +15,7 @@ import org.junit.Test;
 
 import gov.nist.csd.pm.epp.EPPOptions;
 import gov.nist.csd.pm.exceptions.PMException;
+import gov.nist.csd.pm.operations.OperationSet;
 import gov.nist.csd.pm.pap.PAP;
 import gov.nist.csd.pm.pdp.PDP;
 import gov.nist.csd.pm.pdp.decider.PReviewDecider;
@@ -40,9 +41,9 @@ public class ObligationTest {
 		// File for super policy
 		File file_super = getFileFromResources(Constants.POLICY_CONFIG_FILE_SUPER);
 		// File for eligibility policy
-		File file_eligibility_policy = getFileFromResources(Constants.POLICY_CONFIG_FILE_PROPOSAL_CREATION);
+		File file_eligibility_policy = getFileFromResources(Constants.POLICY_CONFIG_ELIGIBILITY_POLICY);
 		// File for organization policy
-		File file_organization_policy = getFileFromResources(Constants.POLICY_CONFIG_FILE_UNIVERSITY_ORGANIZATION);
+		File file_organization_policy = getFileFromResources(Constants.POLICY_CONFIG_ACADEMIC_UNITS_POLICY_CLASS);
 		// File for editing policy
 		File file_editing_policy = getFileFromResources(Constants.PDS_EDITING_TEMPLATE);
 		// File for obligation policy
@@ -77,6 +78,7 @@ public class ObligationTest {
 //		try {
 //			// asserting that User nazmul is not currently assigned to PI User Attribute
 //			assertFalse(ngacGraph.getChildren("PI").contains("nazmul"));
+	
 //			// asserting that User ChairCSUser is not currently assigned to Chair User
 //			// Attribute
 //			assertFalse(ngacGraph.getChildren("Chair").contains("ChairCSUser"));
@@ -118,16 +120,30 @@ public class ObligationTest {
 			if (ngacGraph.exists("super_pc_rep")) {
 				ngacGraph.deleteNode("super_pc_rep");
 			}
-			getPDP(ngacGraph, obligation).getEPP().processEvent(new ApproveEvent(ngacGraph.getNode(Constants.CHAIR_APPROVAL)), "ChairCSUser", "process");
 			
 			PReviewDecider decider = new PReviewDecider(ngacGraph);
+			assertTrue(decider.check("nazmul", "", "SignatureInfo", "write"));
+			
+			
+			getPDP(ngacGraph, obligation).getEPP().processEvent(new ApproveEvent(ngacGraph.getNode(Constants.CHAIR_APPROVAL)), "ChairCSUser", "process");
+			assertTrue(ngacGraph.getChildren("IRBOfficer").contains("irbUser"));
+			String PIUser = "nazmul";
+			Map<String, OperationSet> map = ngacGraph.getSourceAssociations(PIUser);
+			for(Map.Entry<String,OperationSet> entry : map.entrySet()) {
+				String tagetNode = entry.getKey();
+				OperationSet os = entry.getValue();
+				assertTrue(os.contains("write"));
+				assertTrue(tagetNode.equals("SignatureInfo"));
+			}
+			
 			assertTrue(decider.check("IRBOfficer", "", "PDSSections", "read"));
 			//assertTrue(decider.check("IRBOfficer", "", "IRBApproval", "write"));
 			for(String s : ngacGraph.getChildren("IRBOfficer")){
 				System.out.println("IRB Children Users" + s);
 				for (Map.Entry<String,String> entry : ngacGraph.getNode(s).getProperties().entrySet())  {
-//					assertTrue(entry.getKey().equals("required"));
-//					assertTrue(entry.getValue().equals("true"));
+					System.out.println(entry.getKey()+" " + entry.getValue());
+					assertTrue(entry.getKey().equals("required"));
+					assertTrue(entry.getValue().equals("true"));
 			}}
 
 		} catch (PMException e) {

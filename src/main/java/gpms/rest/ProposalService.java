@@ -1322,6 +1322,8 @@ public class ProposalService {
 
 	private void approveAction(ProposalDataSheet projectProposal, Proposal existingProposal, GPMSCommonInfo userInfo)
 			throws PMException {
+		Graph graph = new MemGraph();
+		GraphSerializer.fromJson(graph, existingProposal.getPolicyGraph());
 		if (projectProposal.getApprovalStage().equals(Constants.STATE_CHAIR)) {
 			PDP pdp = pdsOperations.chairApprove(userInfo.getUserName(), existingProposal.getPolicyGraph());
 			existingProposal.setPolicyGraph(GraphSerializer.toJson(pdp.getPAP().getGraphPAP()));
@@ -1330,7 +1332,14 @@ public class ProposalService {
 				// System.out.println("ASSOCIATIONS: " + s);
 			}
 		}
-
+		else if (userInfo.getUserName().equals("irbUser")) {
+			PDP pdp = pdsOperations.irbApprove(userInfo.getUserName(), existingProposal.getPolicyGraph());
+			existingProposal.setPolicyGraph(GraphSerializer.toJson(pdp.getPAP().getGraphPAP()));
+			Map<String, OperationSet> assoc = pdp.getPAP().getGraphPAP().getTargetAssociations("PDSWhole");
+			for (String s : assoc.keySet()) {
+				// System.out.println("ASSOCIATIONS: " + s);
+			}
+		}
 		else if (projectProposal.getApprovalStage().equals(Constants.STATE_BM)) {
 			PDP pdp = pdsOperations.bmApprove(userInfo.getUserName(), existingProposal.getPolicyGraph());
 			existingProposal.setPolicyGraph(GraphSerializer.toJson(pdp.getPAP().getGraphPAP()));
@@ -1347,17 +1356,7 @@ public class ProposalService {
 			for (String s : assoc.keySet()) {
 				// System.out.println("ASSOCIATIONS: " + s);
 			}
-		}
-
-		else if (userInfo.getUserName().equals("irbUser")) {
-			PDP pdp = pdsOperations.irbApprove(userInfo.getUserName(), existingProposal.getPolicyGraph());
-			existingProposal.setPolicyGraph(GraphSerializer.toJson(pdp.getPAP().getGraphPAP()));
-			Map<String, OperationSet> assoc = pdp.getPAP().getGraphPAP().getTargetAssociations("PDSWhole");
-			for (String s : assoc.keySet()) {
-				// System.out.println("ASSOCIATIONS: " + s);
-			}
-		}
-
+		}		
 		else if (projectProposal.getApprovalStage().equals(Constants.STATE_RA)) {
 			PDP pdp = pdsOperations.raApprove(userInfo.getUserName(), existingProposal.getPolicyGraph());
 			existingProposal.setPolicyGraph(GraphSerializer.toJson(pdp.getPAP().getGraphPAP()));

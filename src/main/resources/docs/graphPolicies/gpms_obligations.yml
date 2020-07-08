@@ -399,10 +399,18 @@ rules:
             name: add_properties_to_node
             args:
               - function:
-                  name: get_node
-                  args:
-                    - irbUser
-                    - U
+                  name: get_child_user_in_policy_class
+                  args: 
+                    - function:
+                        name: get_node
+                        args:
+                          - IRBOfficer
+                          - UA
+                    - function:
+                        name: get_node
+                        args:
+                          - AdministrationUnitsPolicyClass
+                          - PC                                        
               - function:
                   name: to_props
                   args:
@@ -1063,27 +1071,6 @@ rules:
                   - function:
                       name: to_props
                       args:
-                        - approved=true     
-          delete:
-            associations:
-              - subject:
-                  name: Chair
-                  type: UA
-                target:
-                  name: PDSSections
-                  type: OA
-        - condition:
-            - function:
-                name: all_children_have_properties
-                args:
-                  - function:
-                      name: get_node
-                      args:
-                        - Chair
-                        - UA
-                  - function:
-                      name: to_props
-                      args:
                         - approved=true  
           grant:
             subject:
@@ -1406,28 +1393,7 @@ rules:
                   type: UA
                 target:
                   name: PDSWhole
-                  type: OA
-        - condition:
-            - function:
-                name: all_children_have_properties
-                args:
-                  - function:
-                      name: get_node
-                      args:
-                        - Business Manager
-                        - UA
-                  - function:
-                      name: to_props
-                      args:
-                        - approved=true     
-          delete:
-            associations:
-              - subject:
-                  name: Business Manager
-                  type: UA
-                target:
-                  name: PDSSections
-                  type: OA                  
+                  type: OA                 
         - condition:
             - function:
                 name: all_children_have_properties
@@ -1684,27 +1650,6 @@ rules:
                   type: UA
                 target:
                   name: DeanApproval
-                  type: OA
-        - condition:
-            - function:
-                name: all_children_have_properties
-                args:
-                  - function:
-                      name: get_node
-                      args:
-                        - Dean
-                        - UA
-                  - function:
-                      name: to_props
-                      args:
-                        - approved=true     
-          delete:
-            associations:
-              - subject:
-                  name: Dean
-                  type: UA
-                target:
-                  name: PDSSections
                   type: OA
         - condition:
             - function:
@@ -2222,16 +2167,8 @@ rules:
                   name: IRBOfficer
                   type: UA
                 target:
-                  name: PDSSections
-                  type: OA
-        - delete:
-            associations:
-              - subject:
-                  name: IRBOfficer
-                  type: UA
-                target:
                   name: PDSWhole
-                  type: OA                  
+                  type: OA                                   
         - condition:
             - function:
                 name: all_children_have_properties
@@ -2515,14 +2452,6 @@ rules:
                   name: Research Admin
                   type: UA
                 target:
-                  name: PDSSections
-                  type: OA
-        - delete:
-            associations:
-              - subject:
-                  name: Research Admin
-                  type: UA
-                target:
                   name: OSPInfo
                   type: OA
         - grant:
@@ -2721,14 +2650,6 @@ rules:
                   name: Research Director
                   type: UA
                 target:
-                  name: PDSSections
-                  type: OA
-        - delete:
-            associations:
-              - subject:
-                  name: Research Director
-                  type: UA
-                target:
                   name: RDApproval
                   type: OA                  
         - delete:
@@ -2764,15 +2685,6 @@ rules:
               - write
             target:
               name: RAApproval
-              type: OA 
-        - grant:
-            subject:
-              name: Research Admin
-              type: UA
-            operations:
-              - read
-            target:
-              name: PDSSections
               type: OA 
   - label: rd_disapprove
     event:
@@ -2940,14 +2852,6 @@ rules:
                   name: Research Admin
                   type: UA
                 target:
-                  name: PDSSections
-                  type: OA
-        - delete:
-            associations:
-              - subject:
-                  name: Research Admin
-                  type: UA
-                target:
                   name: OSPInfo
                   type: OA
         - grant:
@@ -2958,13 +2862,4 @@ rules:
               - Archive
             target:
               name: PDSWhole
-              type: OA       
-        - grant:
-            subject:
-              name: Research Director
-              type: UA
-            operations:
-              - read
-            target:
-              name: PDSSections
-              type: OA                                  
+              type: OA                                       

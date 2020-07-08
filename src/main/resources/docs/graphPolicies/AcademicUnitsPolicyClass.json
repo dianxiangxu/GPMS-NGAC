@@ -5,32 +5,7 @@
       "properties": {
         
       }
-    },  
-     {
-      "name": "AdministrationUnitsPolicyClass",
-      "type": "PC",
-      "properties": {
-        
-      }
-    }, 
-    
-
- {
-      "name": "Research Admin",
-      "type": "UA",
-      "properties": {}
-    },
- 
- {
-      "name": "Research Director",
-      "type": "UA",
-      "properties": {}
-    },
- {
-      "name": "IRBOfficer",
-      "type": "UA",
-      "properties": {}
-    },
+    },       
     {
       "name": "Dean COE",
       "type": "UA",
@@ -165,22 +140,7 @@
       "name": "bmChemUser",
       "type": "U",
       "properties": {}
-    },
- {
-      "name": "raUser",
-      "type": "U",
-      "properties": {}
-    },
- {
-      "name": "rdUser",
-      "type": "U",
-      "properties": {}
-    },
- {
-      "name": "irbUser",
-      "type": "U",
-      "properties": {}
-    }   
+    }  
  ],
  
  "assignments":[ 
@@ -255,16 +215,6 @@
       "source": "bmChemUser",  
       "target": "BMCHEM" 
     },
- {
-      "source": "raUser",  
-      "target": "Research Admin" 
-    },
- {
-      "source": "rdUser",  
-      "target": "Research Director" 
-    }
-,
-
 {
       "source": "DeptCS",  
       "target": "ChairCS" 
@@ -297,17 +247,7 @@
  {
       "source": "Dean COAS",  
       "target": "AcademicUnitsPolicyClass" 
-    }  
-     ,        
- {
-      "source": "Research Director",  
-      "target": "AdministrationUnitsPolicyClass" 
-    } 
-     ,        
- {
-      "source": "Research Admin",  
-      "target": "AdministrationUnitsPolicyClass" 
-    }    
+    }     
     ,        
  {
       "source": "Dean COE",  
@@ -340,52 +280,11 @@
  {
       "source": "DeptPHY",  
       "target": "ChairPHY" 
-    }  
-    ,
- {
-      "source": "IRBOfficer",  
-      "target": "AdministrationUnitsPolicyClass" 
-    } 
-    ,
- {
-      "source": "irbUser",  
-      "target": "IRBOfficer" 
     }     
-     ,
- {
-      "source": "Research Admin",  
-      "target": "AdministrationUnitsPolicyClass" 
-    }   
-    ,
- {
-      "source": "Research Director",  
-      "target": "AdministrationUnitsPolicyClass" 
-    } 
  ],
  
  "associations":
- [
-{
-      "operations": [
-        "*"
-      ],
-      "source": "super_ua1",  
-      "target": "Research Admin"  
-    },
-    {
-      "operations": [
-        "*"
-      ],
-      "source": "super_ua1",  
-      "target": "IRBOfficer"  
-    },
-    {
-      "operations": [
-        "*"
-      ],
-      "source": "super_ua1",  
-      "target": "Research Director"  
-    },       
+ [     
     {
       "operations": [
         "*"

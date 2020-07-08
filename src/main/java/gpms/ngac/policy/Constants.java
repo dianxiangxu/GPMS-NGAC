@@ -5,8 +5,10 @@ public class Constants {
 	public static final String POLICY_CONFIG_OUTPUT_FILE = "C:/data/";
 	public static final String POLICY_CONFIG_FILE = "docs/ngac_config.json";
 	public static final String POLICY_CONFIG_FILE_SUPER = "docs/graphPolicies/super_config.json";
-	public static final String POLICY_CONFIG_FILE_PROPOSAL_CREATION = "docs/graphPolicies/EligibilityPolicy.json";
-	public static final String POLICY_CONFIG_FILE_UNIVERSITY_ORGANIZATION = "docs/graphPolicies/NewOrgPolicy.json";
+	public static final String POLICY_CONFIG_ELIGIBILITY_POLICY = "docs/graphPolicies/EligibilityPolicyClass.json";
+	public static final String POLICY_CONFIG_ACADEMIC_UNITS_POLICY_CLASS = "docs/graphPolicies/AcademicUnitsPolicyClass.json";
+	public static final String POLICY_CONFIG_ADMINISTRATION_UNITS_POLICY_CLASS = "docs/graphPolicies/AdministrationUnitsPolicyClass.json";
+
 	public static final String POLICY_CONFIG_FILE_PDS = "docs/PDS_config.json";
 	public static final String POLICY_CONFIG_FILE_APPROVAL = "docs/approval_config.json";
 	public static final String POLICY_CONFIG_FILE_GET_FACULTY = "docs/getFaculty.json";
@@ -14,7 +16,7 @@ public class Constants {
 	public static final String POLICY_CONFIG_FILE_CREATE_APPROVAL = "docs/create_approval.json";
 	
 	//public static final String PDS_TEMPLATE = "docs/template_pds.json";
-	public static final String PDS_EDITING_TEMPLATE = "docs/graphPolicies/EditingPolicy.json";
+	public static final String PDS_EDITING_TEMPLATE = "docs/graphPolicies/EditingPolicyClass.json";
 	public static final String PDS_TEMPLATE_POST_SUBMISSION = "docs/post_submission_policy.json";
 	public static final String OBLIGATION_TEMPLATE_PROPOSAL_CREATION = "docs/graphPolicies/gpms_obligations.yml";
 	public static final String PROHIBITION_POST_SUBMISSION = "docs/post_submission_prohibitions.json";

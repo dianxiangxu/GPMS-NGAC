@@ -41,6 +41,7 @@ public class NGACPolicyConfigurationLoader {
 	private static Graph ngacPolicy;
 	private static final Logger log = Logger.getLogger(NGACPolicyConfigurationLoader.class.getName());
 	private static String jsonProposalPolicy = "";
+	private static String jsonAdministrationPolicy = "";
 	private static String jsonApprovalPolicy = "";	
 	private static File obligationFile = null;
 	String jsonProhibitionPolicy = "";
@@ -51,9 +52,10 @@ public class NGACPolicyConfigurationLoader {
 	public void init() {
 		if (ngacPolicy == null) {
 			File file_super = getFileFromResources(Constants.POLICY_CONFIG_FILE_SUPER);
-			File file_proposal_creation = getFileFromResources(Constants.POLICY_CONFIG_FILE_PROPOSAL_CREATION);
-			File file_university_org = getFileFromResources(Constants.POLICY_CONFIG_FILE_UNIVERSITY_ORGANIZATION);
+			File file_proposal_creation = getFileFromResources(Constants.POLICY_CONFIG_ELIGIBILITY_POLICY);
+			File file_university_org = getFileFromResources(Constants.POLICY_CONFIG_ACADEMIC_UNITS_POLICY_CLASS);
 			File file_proposal_editing = getFileFromResources(Constants.PDS_EDITING_TEMPLATE);
+			File file_administration_policy = getFileFromResources(Constants.POLICY_CONFIG_ADMINISTRATION_UNITS_POLICY_CLASS);
 			//File file_proposal_approval = getFileFromResources(Constants.POLICY_CONFIG_FILE_CREATE_APPROVAL);
 			//File prohibitionFile = getFileFromResources(Constants.PROHIBITION_POST_SUBMISSION); 
 			
@@ -66,6 +68,8 @@ public class NGACPolicyConfigurationLoader {
 						Files.readAllBytes(Paths.get(file_proposal_creation.getAbsolutePath())));
 				jsonUnivOrg = new String(Files.readAllBytes(Paths.get(file_university_org.getAbsolutePath())));
 				jsonProposalPolicy = new String(Files.readAllBytes(Paths.get(file_proposal_editing.getAbsolutePath())));
+				jsonAdministrationPolicy = new String(Files.readAllBytes(Paths.get(file_administration_policy.getAbsolutePath())));
+
 				//jsonApprovalPolicy = new String(Files.readAllBytes(Paths.get(file_proposal_approval.getAbsolutePath())));
 				//jsonProhibitionPolicy = new String(Files.readAllBytes(Paths.get(prohibitionFile.getAbsolutePath())));
 				
@@ -85,7 +89,8 @@ public class NGACPolicyConfigurationLoader {
 
 					GraphSerializer.fromJson(ngacPolicy, jsonUnivOrg);
 					log.info("3");
-					
+					GraphSerializer.fromJson(ngacPolicy, jsonAdministrationPolicy);
+
 
 				} catch (PMException e) {
 					log.debug("PM Exception: InitialConfigurationLoader : while loading NGAC base configuration. "
@@ -109,9 +114,10 @@ public class NGACPolicyConfigurationLoader {
 	public Graph reloadBasicConfig() {
 			Graph basicPlicy = null;
 			File file_super = getFileFromResources(Constants.POLICY_CONFIG_FILE_SUPER);
-			File file_proposal_creation = getFileFromResources(Constants.POLICY_CONFIG_FILE_PROPOSAL_CREATION);
-			File file_university_org = getFileFromResources(Constants.POLICY_CONFIG_FILE_UNIVERSITY_ORGANIZATION);
-			
+			File file_proposal_creation = getFileFromResources(Constants.POLICY_CONFIG_ELIGIBILITY_POLICY);
+			File file_university_org = getFileFromResources(Constants.POLICY_CONFIG_ACADEMIC_UNITS_POLICY_CLASS);
+			File file_administration_policy = getFileFromResources(Constants.POLICY_CONFIG_ADMINISTRATION_UNITS_POLICY_CLASS);
+
 			String jsonSuper;
 			String jsonProposalCreation;
 			String jsonUnivOrg;
@@ -120,12 +126,15 @@ public class NGACPolicyConfigurationLoader {
 			try {
 				jsonSuper = new String(Files.readAllBytes(Paths.get(file_super.getAbsolutePath())));
 				jsonProposalCreation = new String(Files.readAllBytes(Paths.get(file_proposal_creation.getAbsolutePath())));
+				jsonAdministrationPolicy = new String(Files.readAllBytes(Paths.get(file_administration_policy.getAbsolutePath())));
 				jsonUnivOrg = new String(Files.readAllBytes(Paths.get(file_university_org.getAbsolutePath())));
 				try {
 					basicPlicy = new MemGraph();
 					GraphSerializer.fromJson(basicPlicy, jsonSuper);
 				    GraphSerializer.fromJson(basicPlicy, jsonProposalCreation);
 					GraphSerializer.fromJson(basicPlicy, jsonUnivOrg);
+					GraphSerializer.fromJson(basicPlicy, jsonAdministrationPolicy);
+
 				} catch (PMException e) {
 					log.debug("PM Exception: Basic InitialConfigurationLoader : while loading NGAC base configuration. "
 							+ e.toString());

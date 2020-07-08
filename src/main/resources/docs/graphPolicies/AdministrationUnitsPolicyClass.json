@@ -1,0 +1,98 @@
+ {    "nodes" : [
+     {
+      "name": "AdministrationUnitsPolicyClass",
+      "type": "PC",
+      "properties": {
+        
+      }
+    },    
+ {
+      "name": "Research Admin",
+      "type": "UA",
+      "properties": {}
+    },
+ 
+ {
+      "name": "Research Director",
+      "type": "UA",
+      "properties": {}
+    },
+ {
+      "name": "IRBOfficer",
+      "type": "UA",
+      "properties": {}
+    },
+ {
+      "name": "raUser",
+      "type": "U",
+      "properties": {}
+    },
+ {
+      "name": "rdUser",
+      "type": "U",
+      "properties": {}
+    },
+ {
+      "name": "irbUser",
+      "type": "U",
+      "properties": {}
+    }   
+ ],
+ 
+ "assignments":[ 
+ {
+      "source": "raUser",  
+      "target": "Research Admin" 
+    },
+ {
+      "source": "rdUser",  
+      "target": "Research Director" 
+    }
+     , 
+ {
+      "source": "irbUser",  
+      "target": "IRBOfficer" 
+    }  ,       
+ {
+      "source": "Research Director",  
+      "target": "AdministrationUnitsPolicyClass" 
+    } 
+     ,        
+ {
+      "source": "Research Admin",  
+      "target": "AdministrationUnitsPolicyClass" 
+    }    
+    ,        
+ {
+      "source": "IRBOfficer",  
+      "target": "AdministrationUnitsPolicyClass" 
+    } 
+   
+     
+ ],
+ 
+ "associations":
+ [
+{
+      "operations": [
+        "*"
+      ],
+      "source": "super_ua1",  
+      "target": "Research Admin"  
+    },
+    {
+      "operations": [
+        "*"
+      ],
+      "source": "super_ua1",  
+      "target": "IRBOfficer"  
+    },
+    {
+      "operations": [
+        "*"
+      ],
+      "source": "super_ua1",  
+      "target": "Research Director"  
+    }
+ ] 
+} 

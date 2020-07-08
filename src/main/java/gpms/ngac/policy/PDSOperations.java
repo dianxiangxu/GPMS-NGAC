@@ -591,6 +591,7 @@ public class PDSOperations {
 		}
 		PDP pdp = getPDP(graph);
 		pdp.getEPP().processEvent(new ApproveEvent(graph.getNode(Constants.IRB_APPROVAL)), irb, "process");
+		System.out.println("hello");
 		return pdp;
 	}
 
