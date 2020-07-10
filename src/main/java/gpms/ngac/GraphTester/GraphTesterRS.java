@@ -5,6 +5,7 @@ import static gov.nist.csd.pm.pip.graph.model.nodes.NodeType.PC;
 import static gov.nist.csd.pm.pip.graph.model.nodes.NodeType.UA;
 import static gov.nist.csd.pm.pip.graph.model.nodes.NodeType.U;
 import gov.nist.csd.pm.exceptions.PMException;
+import gov.nist.csd.pm.operations.OperationSet;
 import gov.nist.csd.pm.pip.graph.Graph;
 import gov.nist.csd.pm.pip.graph.GraphSerializer;
 import gov.nist.csd.pm.pip.graph.MemGraph;
@@ -27,7 +28,7 @@ import com.opencsv.CSVWriter;
 
 public abstract class GraphTesterRS {
 	Graph graph;
-	List<Long> users;
+	List<String> users;
 	Node policy;
 	Node createPDS;
 	Node writePDS;
@@ -42,9 +43,7 @@ public abstract class GraphTesterRS {
 	}
 	public GraphTesterRS(Graph graph) throws PMException {
 		this.graph = graph;
-		Set<Node> set1 = graph.search("ProposalCreation", "PC", new HashMap<String, String>());
-		Node[] array1 = set1.toArray(new Node[graph.getNodes().size()]);
-		policy = array1[0];
+		Node policy = graph.getNode("ProposalCreation");
 
 	
 		Node[] nodes = graph.getNodes().toArray(
@@ -68,154 +67,140 @@ public abstract class GraphTesterRS {
 
 	private Graph buildGraphGPMS() throws PMException, InterruptedException {
 		graph = new MemGraph();
-		
-		policy = graph.createNode(getID(), "ProposalCreation", PC, null);
+		policy = graph.createPolicyClass("ProposalCreation", null);
 		PCs.add(policy);
-		Set<String> operations = new HashSet<String>();
-		operations.add("create-oa");
-		operations.add("create-oa-to-oa");
-		createPDS = graph.createNode(getID(), "org_PDSs", OA, null);
-		graph.assign(createPDS.getID(), policy.getID());
 
-		Node adjunctUA = graph.createNode(getID(), "adjunct", UA, null);
-		Node clinicalUA = graph.createNode(getID(), "clinical", UA, null);
-		Node teachingUA = graph.createNode(getID(), "teaching", UA, null);
-		Node researchUA = graph.createNode(getID(), "research", UA, null);
+		OperationSet operationsPI = new OperationSet();
+		operationsPI.add("create-oa");
+		operationsPI.add("create-oa-to-oa");
+		
+		OperationSet operationsNon = new OperationSet();
+		operationsNon.add("write");
+		operationsNon.add("read");
+		createPDS = graph.createNode("createPDS", OA, null,"ProposalCreation");
+		writePDS = graph.createNode("writePDS", OA, null, "ProposalCreation");
+		readPDS = graph.createNode("readPDS", OA, null, "ProposalCreation");
+		OAs.add(createPDS);
+		OAs.add(writePDS);
+		OAs.add(readPDS);
+		Node facultyUA = graph.createNode("faculty", UA, null,"ProposalCreation");
+
+		Node nonTenureTrackUA = graph.createNode("non-tenure-track",
+				UA, null,"faculty");
+		Node adjunctUA = graph.createNode("adjunct", UA, null,"faculty" );
+		Node clinicalUA = graph.createNode( "clinical", UA, null,"non-tenure-track");
+		Node teachingUA = graph.createNode("teaching", UA, null, "non-tenure-track");
+		Node researchUA = graph.createNode("research", UA, null, "non-tenure-track");
+		Node tenureTrackTenuredUA = graph.createNode(
+				"tenureTrackTenured", UA, null, "faculty");
 		Node tenureTrackUA = graph
-				.createNode(getID(), "tenure-track", UA, null);
-		Node tenuredUA = graph.createNode(getID(), "tenured", UA, null);
+				.createNode( "tenure-track", UA, null,"tenureTrackTenured");
+		Node tenuredUA = graph.createNode("tenured", UA, null, "tenureTrackTenured");
 
-		Node nonTenureTrackUA = graph.createNode(getID(), "non-tenure-track",
-				UA, null);
-		graph.assign(clinicalUA.getID(), nonTenureTrackUA.getID());
-		graph.assign(teachingUA.getID(), nonTenureTrackUA.getID());
-		graph.assign(researchUA.getID(), nonTenureTrackUA.getID());
 
-		Node tenureTrackTenuredUA = graph.createNode(getID(),
-				"tenureTrackTenured", UA, null);
-		graph.assign(tenureTrackUA.getID(), tenureTrackTenuredUA.getID());
-		graph.assign(tenuredUA.getID(), tenureTrackTenuredUA.getID());
 
-		Node facultyUA = graph.createNode(getID(), "faculty", UA, null);
-		graph.assign(adjunctUA.getID(), facultyUA.getID());
-		graph.assign(nonTenureTrackUA.getID(), facultyUA.getID());
-		graph.assign(tenureTrackTenuredUA.getID(), facultyUA.getID());
+		Node SPElegibleUA = graph.createNode( "SPElegible", UA, null, "ProposalCreation");
+		graph.assign(nonTenureTrackUA.getName(), SPElegibleUA.getName());
+		graph.assign(tenureTrackTenuredUA.getName(), SPElegibleUA.getName());
 
-		Node SPElegibleUA = graph.createNode(getID(), "SPElegible", UA, null);
-		graph.assign(nonTenureTrackUA.getID(), SPElegibleUA.getID());
-		graph.assign(tenureTrackTenuredUA.getID(), SPElegibleUA.getID());
+		Node CoPIElegibleUA = graph.createNode( "CoPIElegible", UA,
+				null, "ProposalCreation");
+		graph.assign(nonTenureTrackUA.getName(), CoPIElegibleUA.getName());
+		graph.assign(tenureTrackTenuredUA.getName(), CoPIElegibleUA.getName());
 
-		Node CoPIElegibleUA = graph.createNode(getID(), "CoPIElegible", UA,
-				null);
-		graph.assign(nonTenureTrackUA.getID(), CoPIElegibleUA.getID());
-		graph.assign(tenureTrackTenuredUA.getID(), CoPIElegibleUA.getID());
+		Node PIElegibleUA = graph.createNode("PIElegible", UA, null,"ProposalCreation");
+		graph.assign(researchUA.getName(), PIElegibleUA.getName());
+		graph.assign(tenureTrackTenuredUA.getName(), PIElegibleUA.getName());
 
-		Node PIElegibleUA = graph.createNode(getID(), "PIElegible", UA, null);
-		graph.assign(researchUA.getID(), PIElegibleUA.getID());
-		graph.assign(tenureTrackTenuredUA.getID(), PIElegibleUA.getID());
 
-		graph.assign(facultyUA.getID(), policy.getID());
-		graph.assign(SPElegibleUA.getID(), policy.getID());
-		graph.assign(CoPIElegibleUA.getID(), policy.getID());
-		graph.assign(PIElegibleUA.getID(), policy.getID());
+		graph.assign(PIElegibleUA.getName(), policy.getName());
 
-		graph.associate(PIElegibleUA.getID(), createPDS.getID(), operations);
-		graph.associate(clinicalUA.getID(), createPDS.getID(), operations);
+		graph.associate(PIElegibleUA.getName(), createPDS.getName(), operationsPI);
+		
+		graph.associate(facultyUA.getName(), writePDS.getName(), operationsNon);
+	
+		
+		graph.associate(tenuredUA.getName(), readPDS.getName(), operationsNon);
+	
 
-		users = new ArrayList<Long>();
-		users.add(tenuredUA.getID());
-		users.add(tenureTrackUA.getID());
-		users.add(researchUA.getID());
-		users.add(teachingUA.getID());
-		users.add(clinicalUA.getID());
-		users.add(adjunctUA.getID());
+		users = new ArrayList<String>();
+		users.add(tenuredUA.getName());
+		users.add(tenureTrackUA.getName());
+		users.add(researchUA.getName());
+		users.add(teachingUA.getName());
+		users.add(clinicalUA.getName());
+		users.add(adjunctUA.getName());
+		users.add(PIElegibleUA.getName());
+
 				
 		return graph;
 	}
 	private Graph buildGraphGPMS1() throws PMException, InterruptedException {
 		graph = new MemGraph();
-		policy = graph.createNode(getID(), "ProposalCreation", PC, null);
+		policy = graph.createPolicyClass("ProposalCreation", null);
 		PCs.add(policy);
 
-		Set<String> operationsPI = new HashSet<String>();
+		OperationSet operationsPI = new OperationSet();
 		operationsPI.add("create-oa");
 		operationsPI.add("create-oa-to-oa");
 		
-		Set<String> operationsNon = new HashSet<String>();
+		OperationSet operationsNon = new OperationSet();
 		operationsNon.add("write");
 		operationsNon.add("read");
-		createPDS = graph.createNode(getID(), "createPDS", OA, null);
-		writePDS = graph.createNode(getID(), "writePDS", OA, null);
-		readPDS = graph.createNode(getID(), "readPDS", OA, null);
+		createPDS = graph.createNode("createPDS", OA, null,"ProposalCreation");
+		writePDS = graph.createNode("writePDS", OA, null, "ProposalCreation");
+		readPDS = graph.createNode("readPDS", OA, null, "ProposalCreation");
 		OAs.add(createPDS);
 		OAs.add(writePDS);
 		OAs.add(readPDS);
-		
-		graph.assign(createPDS.getID(), policy.getID());
-		graph.assign(writePDS.getID(), policy.getID());
-		graph.assign(readPDS.getID(), policy.getID());
+		Node facultyUA = graph.createNode("faculty", UA, null,"ProposalCreation");
 
-
-		Node adjunctUA = graph.createNode(getID(), "adjunct", UA, null);
-		Node clinicalUA = graph.createNode(getID(), "clinical", UA, null);
-		Node teachingUA = graph.createNode(getID(), "teaching", UA, null);
-		Node researchUA = graph.createNode(getID(), "research", UA, null);
+		Node nonTenureTrackUA = graph.createNode("non-tenure-track",
+				UA, null,"faculty");
+		Node adjunctUA = graph.createNode("adjunct", UA, null,"faculty" );
+		Node clinicalUA = graph.createNode( "clinical", UA, null,"non-tenure-track");
+		Node teachingUA = graph.createNode("teaching", UA, null, "non-tenure-track");
+		Node researchUA = graph.createNode("research", UA, null, "non-tenure-track");
+		Node tenureTrackTenuredUA = graph.createNode(
+				"tenureTrackTenured", UA, null, "faculty");
 		Node tenureTrackUA = graph
-				.createNode(getID(), "tenure-track", UA, null);
-		Node tenuredUA = graph.createNode(getID(), "tenured", UA, null);
+				.createNode( "tenure-track", UA, null,"tenureTrackTenured");
+		Node tenuredUA = graph.createNode("tenured", UA, null, "tenureTrackTenured");
 
-		Node nonTenureTrackUA = graph.createNode(getID(), "non-tenure-track",
-				UA, null);
-		graph.assign(clinicalUA.getID(), nonTenureTrackUA.getID());
-		graph.assign(teachingUA.getID(), nonTenureTrackUA.getID());
-		graph.assign(researchUA.getID(), nonTenureTrackUA.getID());
 
-		Node tenureTrackTenuredUA = graph.createNode(getID(),
-				"tenureTrackTenured", UA, null);
-		graph.assign(tenureTrackUA.getID(), tenureTrackTenuredUA.getID());
-		graph.assign(tenuredUA.getID(), tenureTrackTenuredUA.getID());
 
-		Node facultyUA = graph.createNode(getID(), "faculty", UA, null);
-		graph.assign(adjunctUA.getID(), facultyUA.getID());
-		graph.assign(nonTenureTrackUA.getID(), facultyUA.getID());
-		graph.assign(tenureTrackTenuredUA.getID(), facultyUA.getID());
+		Node SPElegibleUA = graph.createNode( "SPElegible", UA, null, "ProposalCreation");
+		graph.assign(nonTenureTrackUA.getName(), SPElegibleUA.getName());
+		graph.assign(tenureTrackTenuredUA.getName(), SPElegibleUA.getName());
 
-		Node SPElegibleUA = graph.createNode(getID(), "SPElegible", UA, null);
-		graph.assign(nonTenureTrackUA.getID(), SPElegibleUA.getID());
-		graph.assign(tenureTrackTenuredUA.getID(), SPElegibleUA.getID());
+		Node CoPIElegibleUA = graph.createNode( "CoPIElegible", UA,
+				null, "ProposalCreation");
+		graph.assign(nonTenureTrackUA.getName(), CoPIElegibleUA.getName());
+		graph.assign(tenureTrackTenuredUA.getName(), CoPIElegibleUA.getName());
 
-		Node CoPIElegibleUA = graph.createNode(getID(), "CoPIElegible", UA,
-				null);
-		graph.assign(nonTenureTrackUA.getID(), CoPIElegibleUA.getID());
-		graph.assign(tenureTrackTenuredUA.getID(), CoPIElegibleUA.getID());
+		Node PIElegibleUA = graph.createNode("PIElegible", UA, null,"ProposalCreation");
+		graph.assign(researchUA.getName(), PIElegibleUA.getName());
+		graph.assign(tenureTrackTenuredUA.getName(), PIElegibleUA.getName());
 
-		Node PIElegibleUA = graph.createNode(getID(), "PIElegible", UA, null);
-		graph.assign(researchUA.getID(), PIElegibleUA.getID());
-		graph.assign(tenureTrackTenuredUA.getID(), PIElegibleUA.getID());
 
-		graph.assign(facultyUA.getID(), policy.getID());
-		graph.assign(SPElegibleUA.getID(), policy.getID());
-		graph.assign(CoPIElegibleUA.getID(), policy.getID());
-		graph.assign(PIElegibleUA.getID(), policy.getID());
+		graph.assign(PIElegibleUA.getName(), policy.getName());
 
-		graph.associate(PIElegibleUA.getID(), createPDS.getID(), operationsPI);
+		graph.associate(PIElegibleUA.getName(), createPDS.getName(), operationsPI);
 		
-		graph.associate(facultyUA.getID(), writePDS.getID(), operationsNon);
+		graph.associate(facultyUA.getName(), writePDS.getName(), operationsNon);
 	
 		
-		graph.associate(tenuredUA.getID(), readPDS.getID(), operationsNon);
+		graph.associate(tenuredUA.getName(), readPDS.getName(), operationsNon);
 	
 
-		users = new ArrayList<Long>();
-		users.add(tenuredUA.getID());
-		users.add(tenureTrackUA.getID());
-		users.add(researchUA.getID());
-		users.add(teachingUA.getID());
-		users.add(clinicalUA.getID());
-		users.add(adjunctUA.getID());
-		users.add(PIElegibleUA.getID());
-
-
+		users = new ArrayList<String>();
+		users.add(tenuredUA.getName());
+		users.add(tenureTrackUA.getName());
+		users.add(researchUA.getName());
+		users.add(teachingUA.getName());
+		users.add(clinicalUA.getName());
+		users.add(adjunctUA.getName());
+		users.add(PIElegibleUA.getName());
 
 
 		return graph;
@@ -223,7 +208,7 @@ public abstract class GraphTesterRS {
 	public Graph getGraph(){
 		return graph;
 	}
-	public List<Long> getUsers(){
+	public List<String> getUsers(){
 		return users;
 	}
 	public List<String[]> testGraphPC() throws PMException, IOException {

@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Map;
 
 import org.junit.Before;
@@ -132,6 +133,11 @@ public class ObligationTest {
 			for(Map.Entry<String,OperationSet> entry : map.entrySet()) {
 				String tagetNode = entry.getKey();
 				OperationSet os = entry.getValue();
+				String[] array = new String[2];
+				array[0] = "write";
+				array[1] = "read";
+				os.containsAll(Arrays.asList(array));
+				assertTrue(os.containsAll(Arrays.asList(array)));
 				assertTrue(os.contains("write"));
 				assertTrue(tagetNode.equals("SignatureInfo"));
 			}

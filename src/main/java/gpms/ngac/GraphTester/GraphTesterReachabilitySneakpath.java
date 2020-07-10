@@ -10,7 +10,6 @@ import gov.nist.csd.pm.pip.graph.Graph;
 import gov.nist.csd.pm.pip.graph.GraphSerializer;
 import gov.nist.csd.pm.pip.graph.MemGraph;
 import gov.nist.csd.pm.pip.graph.model.nodes.Node;
-import gpms.dev.PDS;
 import gpms.model.GPMSCommonInfo;
 import gpms.ngac.policy.Attribute;
 import gpms.ngac.policy.NGACPolicyConfigurationLoader;
@@ -52,9 +51,8 @@ public class GraphTesterReachabilitySneakpath extends GraphTesterRS {
 		Node[] nodes = graph.getNodes().toArray(new Node[graph.getNodes().size()]);
 		for (Node node : nodes) {
 			Long userID = getID();
-			if (node.getType() == UA && users.contains(node.getID())) {
-				graph.createNode(userID, node.getName() + "U", U, null);
-				graph.assign(userID, node.getID());
+			if (node.getType() == UA && users.contains(node.getName())) {
+				graph.createNode(node.getName() + "U", U, null, node.getName());
 			}
 
 		}
@@ -73,9 +71,9 @@ public class GraphTesterReachabilitySneakpath extends GraphTesterRS {
 		while (!stack.isEmpty()) {
 
 			Node newRoot = stack.pop();
-			Set<Long> set = graph.getChildren(newRoot.getID());
+			Set<String> set = graph.getChildren(newRoot.getName());
 
-			for (Long userAttNode : set) {
+			for (String userAttNode : set) {
 				Node child = graph.getNode(userAttNode);
 				if (!child.getProperties().equals(visited)) {
 					stack.push(child);
@@ -86,7 +84,7 @@ public class GraphTesterReachabilitySneakpath extends GraphTesterRS {
 				continue;
 			}
 			for (String[] requiredAccessRights : list) {
-				if (decider.check(newRoot.getID(), 102L, createPDS.getID(), requiredAccessRights)) {
+				if (decider.check(newRoot.getName(), "", createPDS.getName(), requiredAccessRights)) {
 					result = true;
 				} else {
 					result = false;
@@ -94,14 +92,14 @@ public class GraphTesterReachabilitySneakpath extends GraphTesterRS {
 				//System.out.println(newRoot + " " + result + " " + createPDS.getName() + " " + requiredAccessRights[0]);
 			}
 			for (String[] requiredAccessRights : list) {
-				if (decider.check(newRoot.getID(), 102L, writePDS.getID(), requiredAccessRights)) {
+				if (decider.check(newRoot.getName(), "", writePDS.getName(), requiredAccessRights)) {
 					result = true;
 				} else {
 					result = false;
 				}
 				//System.out.println(newRoot + " " + writePDS.getName() + " " + requiredAccessRights[0] + " " + result);
 			}
-			graph.updateNode(newRoot.getID(), newRoot.getName(), visited);
+			graph.updateNode(newRoot.getName(), visited);
 
 		}
 
@@ -139,9 +137,9 @@ public class GraphTesterReachabilitySneakpath extends GraphTesterRS {
 				return null;
 			while (!stack.isEmpty()) {
 				Node newRoot = stack.pop();
-				Set<Long> set = graph.getChildren(newRoot.getID());
+				Set<String> set = graph.getChildren(newRoot.getName());
 
-				for (Long userAttNode : set) {
+				for (String userAttNode : set) {
 					Node child = graph.getNode(userAttNode);
 					if (!child.getProperties().equals(visited)) {
 						stack.push(child);
@@ -156,20 +154,20 @@ public class GraphTesterReachabilitySneakpath extends GraphTesterRS {
 
 					for (String[] requiredAccessRights : list) {
 						for (String AR : requiredAccessRights) {
-							if (decider.check(newRoot.getID(), 102L, oa.getID(), AR)) {
+							if (decider.check(newRoot.getName(), "", oa.getName(), AR)) {
 								result = true;
 							} else {
 								result = false;
 							}
 							//System.out.println(
-									pc.getName() + " " + newRoot + " " + oa.getName() + " " + AR + " " + result);
+							//		pc.getName() + " " + newRoot + " " + oa.getName() + " " + AR + " " + result);
 							data.add(new String[] {Integer.toString(i),pc.getName(), newRoot.getName(), 
 									oa.getName(), AR,Boolean.toString(result)});
 							i++;
 						}
 					}
 				}
-				graph.updateNode(newRoot.getID(), newRoot.getName(), visited);
+				graph.updateNode(newRoot.getName(), visited);
 
 			}
 

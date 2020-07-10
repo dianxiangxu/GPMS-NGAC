@@ -9,7 +9,6 @@ import gov.nist.csd.pm.exceptions.PMException;
 import gov.nist.csd.pm.pip.graph.Graph;
 import gov.nist.csd.pm.pip.graph.MemGraph;
 import gov.nist.csd.pm.pip.graph.model.nodes.Node;
-import gpms.dev.PDS;
 import gpms.model.GPMSCommonInfo;
 import gpms.ngac.policy.Attribute;
 import gpms.ngac.policy.NGACPolicyConfigurationLoader;
@@ -35,12 +34,12 @@ public class GraphTesterPairwiseNoPath extends GraphTesterPairwise {
 		List<String[]> data = new ArrayList<String[]>();
 
 		Node[] nodes = graph.getNodes().toArray(new Node[graph.getNodes().size()]);
-		UAs = new ArrayList<Long>();
+		UAs = new ArrayList<String>();
 		for (Node node : nodes) {
 			Long userID = getID();
 			if (node.getType() == UA) {
 				Node UA = node;
-				UAs.add(UA.getID());
+				UAs.add(UA.getName());
 
 			}
 
@@ -75,10 +74,10 @@ public class GraphTesterPairwiseNoPath extends GraphTesterPairwise {
 			for (int[] temp : list) {
 
 				Node ua = graph.getNode(UAs.get(temp[0]));
-				boolean result = decider.check(UAs.get(temp[0]), 104L, oa.getID(), listOfRights.get(temp[1]));
+				boolean result = decider.check(UAs.get(temp[0]), "", oa.getName(), listOfRights.get(temp[1]));
 				if (result == false) {
 					//System.out.println(
-							ua.getName() + " " + oa.getName() + " " + listOfRights.get(temp[1])[0] + " " + result);
+						//	ua.getName() + " " + oa.getName() + " " + listOfRights.get(temp[1])[0] + " " + result);
 				data.add(new String[] { Integer.toString(i), pc.getName(), ua.getName(), oa.getName(), listOfRights.get(temp[1])[0],
 						Boolean.toString(result) });
 				i++;

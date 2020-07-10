@@ -21,6 +21,7 @@ import com.opencsv.CSVReader;
 import com.opencsv.CSVWriter;
 
 import gov.nist.csd.pm.exceptions.PMException;
+import gov.nist.csd.pm.operations.OperationSet;
 import gov.nist.csd.pm.pdp.decider.PReviewDecider;
 import gov.nist.csd.pm.pip.graph.Graph;
 import gov.nist.csd.pm.pip.graph.GraphSerializer;
@@ -45,23 +46,23 @@ public class MutatorREMAR extends MutantTester {
 		File testSuite = new File(testSuitePath);
 
 		for (Node oa : OAs) {
-			if (graph.getTargetAssociations(oa.getID()) != null) {
-				Long oaID = oa.getID();
+			if (graph.getTargetAssociations(oa.getName()) != null) {
+				String oaID = oa.getName();
 				removeAccessRight(oaID, testMethod, testSuite);
 			}
 		}
 
 	}
 
-	private void removeAccessRight(Long oaID, String testMethod, File testSuite) throws PMException, IOException {
+	private void removeAccessRight(String oaID, String testMethod, File testSuite) throws PMException, IOException {
 
-		Map<Long, Set<String>> associations = graph.getTargetAssociations(oaID);
-		List<Long> list = new ArrayList<Long>(associations.keySet());
-		for (Long associate : list) {
-			Set<String> accessRights = associations.get(associate);
+		Map<String, OperationSet> associations = graph.getTargetAssociations(oaID);
+		List<String> list = new ArrayList<String>(associations.keySet());
+		for (String associate : list) {
+			OperationSet accessRights = associations.get(associate);
 			for (String accessRight : accessRights) {
 				Graph mutant = createCopy();
-				Set<String> copy = new HashSet<String>();
+				OperationSet copy = new OperationSet();
 				copy.addAll(accessRights);
 				copy.remove(accessRight);
 				dissAndAssoc(mutant, associate, oaID, copy);
@@ -73,7 +74,7 @@ public class MutatorREMAR extends MutantTester {
 
 	}
 
-	private Graph dissAndAssoc(Graph mutant, Long associate, Long oaID, Set<String> accessRights) throws PMException {
+	private Graph dissAndAssoc(Graph mutant, String associate, String oaID, OperationSet accessRights) throws PMException {
 		mutant.dissociate(associate, oaID);
 		mutant.associate(associate, oaID, accessRights);
 		return mutant;

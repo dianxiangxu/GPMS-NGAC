@@ -46,7 +46,7 @@ public class MutatorREMNODE extends MutantTester{
 		for (Node elegibleNode : UAsPCsOAs) {
 			Graph mutant = createCopy();
 
-			mutant.deleteNode(elegibleNode.getID());
+			mutant.deleteNode(elegibleNode.getName());
 			testMutant(mutant,testSuite , testMethod, getNumberOfMutants(), mutationMethod);
 			setNumberOfMutants(getNumberOfMutants() + 1);
 		}

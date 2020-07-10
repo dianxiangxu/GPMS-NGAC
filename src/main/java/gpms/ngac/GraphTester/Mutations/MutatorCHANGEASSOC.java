@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 
 import gov.nist.csd.pm.exceptions.PMException;
+import gov.nist.csd.pm.operations.OperationSet;
 import gov.nist.csd.pm.pip.graph.Graph;
 import gov.nist.csd.pm.pip.graph.model.nodes.Node;
 
@@ -29,19 +30,20 @@ public class MutatorCHANGEASSOC extends MutantTester {
 	private void performMutation(Node oa, String testMethod, String testSuitePath) throws PMException, IOException {
 		File testSuite = new File(testSuitePath);
 
-		if (graph.getTargetAssociations(oa.getID()) == null) {
+		if (graph.getTargetAssociations(oa.getName()) == null) {
 			return;
 		}
-		Map<Long, Set<String>> sources = graph.getTargetAssociations(oa.getID());
-		List<Long> uas = new ArrayList<Long>(sources.keySet());
+		Map<String, OperationSet> sources = graph.getTargetAssociations(oa.getName());
+		List<String> uas = new ArrayList<String>(sources.keySet());
 
-		for (Long pastSourceID : uas) {
-			Set<String> accessRights = sources.get(pastSourceID);
-
+		for (String pastSourceID : uas) {
+			Set<String> accessRights1 = sources.get(pastSourceID);
+			OperationSet accessRights = new OperationSet(accessRights1);
+			
 			Graph mutant = createCopy();
 			for (Node ua : UAs) {
-				if (ua.getID() != pastSourceID) {
-					changeAssociation(mutant, pastSourceID, oa.getID(), ua.getID(), accessRights);
+				if (ua.getName().equals(pastSourceID)) {
+					changeAssociation(mutant, pastSourceID, oa.getName(), ua.getName(), accessRights);
 					testMutant(mutant, testSuite, testMethod, getNumberOfMutants(), mutationMethod);
 					setNumberOfMutants(getNumberOfMutants() + 1);
 				}
@@ -49,8 +51,8 @@ public class MutatorCHANGEASSOC extends MutantTester {
 		}
 	}
 
-	private void changeAssociation(Graph mutant, Long pastSourceID, Long oaID, Long sourceToBeID,
-			Set<String> accessRights) throws PMException, IOException {
+	private void changeAssociation(Graph mutant, String pastSourceID, String oaID, String sourceToBeID,
+			OperationSet accessRights) throws PMException, IOException {
 		mutant.dissociate(pastSourceID, oaID);
 		mutant.associate(sourceToBeID, oaID, accessRights);;
 	}

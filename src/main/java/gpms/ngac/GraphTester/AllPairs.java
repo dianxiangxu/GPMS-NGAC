@@ -703,10 +703,10 @@ public class AllPairs
       {
         bestSofar = result.length;
 	//System.out.println("New best of " + bestSofar + " rows at go " +
-	  go);
+	 // go);
 	showResult(result, tran, doWriteCsv);
 	//System.out.println("New best was " +
-	  bestSofar + " rows at go " + go);
+	 // bestSofar + " rows at go " + go);
       }
       if ((max > 0) && (go >= max))
       {
@@ -1224,7 +1224,7 @@ public class AllPairs
     }
     //System.out.println();
     //System.out.println("MaxGoes " + maxGoes + " seed " + seed +
-      " noShuffle " + noShuffle);
+     // " noShuffle " + noShuffle);
     AllPairs.indefiniteGenerate(choices, seed, maxGoes, !noShuffle, tran, writeCsv);      
   }
     

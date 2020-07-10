@@ -27,21 +27,21 @@ public class MutatorCHANGEAS extends MutantTester {
 	private void performMutation(Node node, String testMethod, String testSuitePath) throws PMException, IOException {
 		File testSuite = new File(testSuitePath);
 
-		Set<Long> children = graph.getChildren(node.getID());
+		Set<String> children = graph.getChildren(node.getName());
 		Node[] nodes = graph.getNodes().toArray(new Node[graph.getNodes().size()]);
-		for (long child : children) {
+		for (String child : children) {
 			Node childNode = graph.getNode(child);
 			for (Node parentToBe : nodes) {
-				Set<Long> childrentOfChild = graph.getChildren(child);
+				Set<String> childrentOfChild = graph.getChildren(child);
 
-				if (parentToBe.getType() != UA || parentToBe.getID() == node.getID()
-						|| childNode.getID() == parentToBe.getID() || childrentOfChild.contains(parentToBe.getID())) {
+				if (parentToBe.getType() != UA || parentToBe.getName().equals(node.getName())
+						|| childNode.getName().equals(parentToBe.getName()) || childrentOfChild.contains(parentToBe.getName())) {
 					continue;
 				}
 
 				Graph mutant = createCopy();
 
-				changeAssignment(mutant, childNode.getID(), node.getID(), testMethod, testSuitePath, parentToBe);
+				changeAssignment(mutant, childNode.getName(), node.getName(), testMethod, testSuitePath, parentToBe);
 				testMutant(mutant, testSuite, testMethod, getNumberOfMutants(), mutationMethod);
 				setNumberOfMutants(getNumberOfMutants() + 1);
 			}
@@ -49,11 +49,11 @@ public class MutatorCHANGEAS extends MutantTester {
 
 	}
 
-	private void changeAssignment(Graph mutant, Long nodeForChange, Long nodeToRemoveAssociation, String testMethod,
+	private void changeAssignment(Graph mutant, String nodeForChange, String nodeToRemoveAssociation, String testMethod,
 			String testSuitePath, Node parentToBe) throws PMException, IOException {
 		mutant.deassign(nodeForChange, nodeToRemoveAssociation);
 		//System.out.println("Child: " + graph.getNode(nodeForChange).getName() + " Parent: " + parentToBe.getName());
-		mutant.assign(nodeForChange, parentToBe.getID());
+		mutant.assign(nodeForChange, parentToBe.getName());
 	}
 
 }

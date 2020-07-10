@@ -68,8 +68,6 @@ abstract class MutantTester {
 
 			String UAname = sArray[2];
 			String OAname = sArray[3];
-			Long UA = getIDfromName(mutant, UAname, "UA");
-			Long OA = getIDfromName(mutant, OAname, "OA");
 			if (UA == null || OA == null) {
 				mutantTest[counter] = "Fail";
 				counter++;
@@ -77,7 +75,7 @@ abstract class MutantTester {
 			}
 			String[] AR = { sArray[4] };
 			Boolean result = Boolean.parseBoolean(sArray[5]);
-			if (decider.check(UA, 102L, OA, AR) != result) {
+			if (decider.check(UAname, "", OAname, AR) != result) {
 				mutantTest[counter] = "Fail";
 			} else {
 				mutantTest[counter] = "Pass";
@@ -98,13 +96,7 @@ abstract class MutantTester {
 
 	
 	
-	public Long getIDfromName(Graph graph, String name, String type) throws PMException {
-		Set<Node> set = graph.search(name, type, null);
-		if (set.size() != 0)
-			return set.iterator().next().getID();
-		else
-			return null;
-	}
+	
 
 	public double calculateMutationScore(double numberOfMutations, double numberOfKilledMutants) {
 		return (numberOfKilledMutants / numberOfMutations * 100);
@@ -176,8 +168,8 @@ abstract class MutantTester {
 		File file = getFileFromResources(filepath);
 
 		String json = new String(Files.readAllBytes(Paths.get(file.getAbsolutePath())));
-
-		graph = GraphSerializer.fromJson(new MemGraph(), json);
+		Graph graph = new MemGraph();
+		GraphSerializer.fromJson(graph, json);
 		getOAsInGraph();
 		if (OAs.size() == 0) {
 			//System.out.println("No OAs found");
@@ -262,16 +254,16 @@ abstract class MutantTester {
 		this.numberOfMutants = numberOfMutants;
 	}
 	private void loadAssociations() throws PMException {
-		Map<Long, Set<String>> associations = new HashMap<Long, Set<String>>();
+		Map<String, Set<String>> associations = new HashMap<String, Set<String>>();
 		for (Node oa : OAs) {
-			if (graph.getTargetAssociations(oa.getID()) != null)
+			if (graph.getTargetAssociations(oa.getName()) != null)
 			{
-				associations.putAll(graph.getTargetAssociations(oa.getID()));
+				associations.putAll(graph.getTargetAssociations(oa.getName()));
 			}
-			List<Long> list = new ArrayList<Long>(associations.keySet());
+			List<String> list = new ArrayList<String>(associations.keySet());
 			
 			for (int i = 0; i < list.size(); i++) {
-				long objectID = list.get(i);
+				String objectID = list.get(i);
 				Node obj = graph.getNode(objectID);
 				
 				if(!operations.contains(associations.get(objectID))){
@@ -284,7 +276,8 @@ abstract class MutantTester {
 	public Graph createCopy() throws PMException {
 		Graph mutant = new MemGraph();
 		String json = GraphSerializer.toJson(graph);
-		mutant = GraphSerializer.fromJson(new MemGraph(), json);
+		
+		GraphSerializer.fromJson(mutant, json);
 		return mutant;
 	}
 }

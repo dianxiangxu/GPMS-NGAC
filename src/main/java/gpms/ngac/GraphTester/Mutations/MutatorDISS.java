@@ -14,6 +14,7 @@ import com.opencsv.CSVReader;
 import com.opencsv.CSVWriter;
 
 import gov.nist.csd.pm.exceptions.PMException;
+import gov.nist.csd.pm.operations.OperationSet;
 import gov.nist.csd.pm.pdp.decider.PReviewDecider;
 import gov.nist.csd.pm.pip.graph.Graph;
 import gov.nist.csd.pm.pip.graph.GraphSerializer;
@@ -45,12 +46,11 @@ public class MutatorDISS extends MutantTester{
 		File testSuite = new File(testSuitePath);
 
 			Graph mutant = createCopy();			
-			Long oaID = oa.getID();
-			if (graph.getTargetAssociations(oa.getID()) != null) {
-				Map<Long, Set<String>> associations = graph.getTargetAssociations(oaID);
-				List<Long> list = new ArrayList<Long>(associations.keySet());
-				for(Long associate : list) {
-					mutant.dissociate(associate, oaID);					
+			if (graph.getTargetAssociations(oa.getName()) != null) {
+				Map<String, OperationSet> associations = graph.getTargetAssociations(oa.getName());
+				List<String> list = new ArrayList<String>(associations.keySet());
+				for(String associate : list) {
+					mutant.dissociate(associate, oa.getName());					
 					testMutant(mutant, testSuite,testMethod , getNumberOfMutants(), mutationMethod);
 					setNumberOfMutants(getNumberOfMutants() + 1);
 				}

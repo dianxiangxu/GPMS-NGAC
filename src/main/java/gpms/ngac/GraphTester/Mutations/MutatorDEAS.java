@@ -46,11 +46,11 @@ public class MutatorDEAS extends MutantTester {
 
 		File testSuite = new File(testSuitePath);
 
-		Set<Long> children = graph.getChildren(node.getID());
-		for (long child : children) {
+		Set<String> children = graph.getChildren(node.getName());
+		for (String child : children) {
 			Graph mutant = createCopy();
 			Node childNode = mutant.getNode(child);
-			mutant.deassign(childNode.getID(), node.getID());
+			mutant.deassign(childNode.getName(), node.getName());
 			testMutant(mutant, testSuite, testMethod, getNumberOfMutants(), mutationMethod);
 			setNumberOfMutants(getNumberOfMutants() + 1);
 
@@ -63,56 +63,47 @@ public class MutatorDEAS extends MutantTester {
 	private void testCase0() throws PMException {
 		PReviewDecider decider = new PReviewDecider(graph);
 		String[] requiredAccessRights1 = { "create-oa" };
-		Set<Node> set1 = graph.search("PIElegible", "UA", null);
-		Node UA = set1.iterator().next();
-		Set<Node> set2 = graph.search("createPDS", "OA", null);
-		Node OA = set2.iterator().next();
-		Set<Node> set3 = graph.search("ProposalCreation", "PC", null);
-		Node PC = set3.iterator().next();
+		Node UA  = graph.getNode("PIElegible");
+		Node OA = graph.getNode("createPDS");
+		Node PC = graph.getNode("ProposalCreation");
 		//System.out.println(
-				"Test on the original graph: " + decider.check(UA.getID(), 101L, OA.getID(), requiredAccessRights1));
+			//	"Test on the original graph: " + decider.check(UA.getID(), 101L, OA.getID(), requiredAccessRights1));
 
 	}
 
 	private void testCase1() throws PMException {
 		Graph mutant = new MemGraph();
 		String json = GraphSerializer.toJson(graph);
-		mutant = GraphSerializer.fromJson(new MemGraph(), json);
+		GraphSerializer.fromJson(mutant, json);
 		String[] requiredAccessRights1 = { "create-oa" };
-		Set<Node> set1 = mutant.search("PIElegible", "UA", null);
-		Node UA = set1.iterator().next();
-		Set<Node> set2 = mutant.search("createPDS", "OA", null);
-		Node OA = set2.iterator().next();
-		Set<Node> set3 = mutant.search("ProposalCreation", "PC", null);
-		Node PC = set3.iterator().next();
+		Node UA  = graph.getNode("PIElegible");
+		Node OA = graph.getNode("createPDS");
+		Node PC = graph.getNode("ProposalCreation");
 
 		PReviewDecider decider = new PReviewDecider(mutant);
 		//System.out.println("Test on the graph before removing the assignment of UA to PC: "
-				+ decider.check(UA.getID(), 101L, OA.getID(), requiredAccessRights1));
-		mutant.deassign(UA.getID(), PC.getID());
+				//+ decider.check(UA.getID(), 101L, OA.getID(), requiredAccessRights1));
+		mutant.deassign(UA.getName(), PC.getName());
 		//System.out.println("Test on the graph after removing the assignment of UA to PC: "
-				+ decider.check(UA.getID(), 101L, OA.getID(), requiredAccessRights1));
+				//+ decider.check(UA.getID(), 101L, OA.getID(), requiredAccessRights1));
 
 	}
 
 	private void testCase2() throws PMException {
 		Graph mutant = new MemGraph();
 		String json = GraphSerializer.toJson(graph);
-		mutant = GraphSerializer.fromJson(new MemGraph(), json);
+		GraphSerializer.fromJson(mutant, json);
 		String[] requiredAccessRights1 = { "create-oa" };
-		Set<Node> set1 = mutant.search("PIElegible", "UA", null);
-		Node UA = set1.iterator().next();
-		Set<Node> set2 = mutant.search("createPDS", "OA", null);
-		Node OA = set2.iterator().next();
-		Set<Node> set3 = mutant.search("ProposalCreation", "PC", null);
-		Node PC = set3.iterator().next();
+		Node UA  = graph.getNode("PIElegible");
+		Node OA = graph.getNode("createPDS");
+		Node PC = graph.getNode("ProposalCreation");
 
 		PReviewDecider decider = new PReviewDecider(mutant);
 		//System.out.println("Test on the graph before removing the assignment of OA to PC: "
-				+ decider.check(UA.getID(), 101L, OA.getID(), requiredAccessRights1));
-		mutant.deassign(OA.getID(), PC.getID());
+			//	+ decider.check(UA.getID(), 101L, OA.getID(), requiredAccessRights1));
+		mutant.deassign(OA.getName(), PC.getName());
 		//System.out.println("Test on the graph after removing the assignment of OA to PC: "
-				+ decider.check(UA.getID(), 101L, OA.getID(), requiredAccessRights1));
+			//	+ decider.check(UA.getID(), 101L, OA.getID(), requiredAccessRights1));
 
 	}
 }

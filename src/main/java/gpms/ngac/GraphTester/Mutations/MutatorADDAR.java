@@ -21,6 +21,7 @@ import com.opencsv.CSVReader;
 import com.opencsv.CSVWriter;
 
 import gov.nist.csd.pm.exceptions.PMException;
+import gov.nist.csd.pm.operations.OperationSet;
 import gov.nist.csd.pm.pdp.decider.PReviewDecider;
 import gov.nist.csd.pm.pip.graph.Graph;
 import gov.nist.csd.pm.pip.graph.GraphSerializer;
@@ -30,7 +31,6 @@ import gov.nist.csd.pm.pip.prohibitions.MemProhibitions;
 import gov.nist.csd.pm.pip.prohibitions.Prohibitions;
 import gov.nist.csd.pm.pip.prohibitions.ProhibitionsSerializer;
 import gov.nist.csd.pm.pip.prohibitions.model.Prohibition;
-import gov.nist.csd.pm.pip.prohibitions.model.Prohibition.Subject;
 import gpms.ngac.policy.NGACPolicyConfigurationLoader;
 
 public class MutatorADDAR extends MutantTester {
@@ -42,9 +42,8 @@ public class MutatorADDAR extends MutantTester {
 		getGraphLoaded(initialGraphConfig);
 		for (Node oa : OAs) {
 
-			Long oaID = oa.getID();
-			if (graph.getTargetAssociations(oa.getID()) != null) {
-				performMutation(oaID, testMethod, testSuitePath);
+			if (graph.getTargetAssociations(oa.getName()) != null) {
+				performMutation(oa.getName(), testMethod, testSuitePath);
 			}
 
 		}
@@ -53,13 +52,13 @@ public class MutatorADDAR extends MutantTester {
 
 	}
 
-	private void performMutation(Long oaID, String testMethod, String testSuitePath) throws PMException, IOException {
+	private void performMutation(String oaID, String testMethod, String testSuitePath) throws PMException, IOException {
 		File testSuite = new File(testSuitePath);
 
-		Map<Long, Set<String>> associations = graph.getTargetAssociations(oaID);
-		List<Long> targetAssociations = new ArrayList<Long>(associations.keySet());
-		for (Long associate : targetAssociations) {
-			Set<String> accessRights = associations.get(associate);
+		Map<String, OperationSet> associations = graph.getTargetAssociations(oaID);
+		List<String> targetAssociations = new ArrayList<String>(associations.keySet());
+		for (String associate : targetAssociations) {
+			OperationSet accessRights = associations.get(associate);
 			accessRights.add("NewAR");
 			Graph mutant = createCopy();
 			mutant = dissAndAssoc(mutant, associate, oaID, accessRights);
@@ -70,7 +69,7 @@ public class MutatorADDAR extends MutantTester {
 
 	
 
-	private Graph dissAndAssoc(Graph mutant, Long associate, Long oaID, Set<String> accessRights) throws PMException {
+	private Graph dissAndAssoc(Graph mutant, String associate, String oaID, OperationSet accessRights) throws PMException {
 		mutant.dissociate(associate, oaID);
 		mutant.associate(associate, oaID, accessRights);
 		return mutant;

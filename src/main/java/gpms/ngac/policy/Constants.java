@@ -18,7 +18,7 @@ public class Constants {
 	//public static final String PDS_TEMPLATE = "docs/template_pds.json";
 	public static final String PDS_EDITING_TEMPLATE = "docs/graphPolicies/EditingPolicyClass.json";
 	public static final String PDS_TEMPLATE_POST_SUBMISSION = "docs/post_submission_policy.json";
-	public static final String OBLIGATION_TEMPLATE_PROPOSAL_CREATION = "docs/graphPolicies/gpms_obligations.yml";
+	public static final String OBLIGATION_TEMPLATE_PROPOSAL_CREATION = "docs/graphPolicies/Obligations.yml";
 	public static final String PROHIBITION_POST_SUBMISSION = "docs/post_submission_prohibitions.json";
 	
 	public static final String PROPOSAL_CREATION_ABLE_UA = "PI-Eligible Faculty";

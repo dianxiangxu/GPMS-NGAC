@@ -5,6 +5,7 @@ import static gov.nist.csd.pm.pip.graph.model.nodes.NodeType.U;
 import static gov.nist.csd.pm.pip.graph.model.nodes.NodeType.UA;
 
 import gov.nist.csd.pm.exceptions.PMException;
+import gov.nist.csd.pm.operations.OperationSet;
 import gov.nist.csd.pm.pdp.decider.PReviewDecider;
 import gov.nist.csd.pm.pip.graph.Graph;
 import gov.nist.csd.pm.pip.graph.GraphSerializer;
@@ -50,8 +51,7 @@ public class MutatorADDASSOC extends MutantTester {
 		for (Node ua : UAs) {
 			Graph mutant = createCopy();
 			Node oa = OAs.get(0);
-			long uaID = ua.getID();
-			mutant = associate(mutant,oa,uaID);
+			mutant = associate(mutant,oa,ua.getName());
 			testMutant(mutant,testSuite , testMethod, getNumberOfMutants(), mutationMethod);
 			setNumberOfMutants(getNumberOfMutants() + 1);
 		}		
@@ -60,11 +60,11 @@ public class MutatorADDASSOC extends MutantTester {
 		
 	}
 	
-	private Graph associate(Graph mutant, Node oa, Long uaID) throws PMException {
-		Set<String> operationsPI = new HashSet<String>();
+	private Graph associate(Graph mutant, Node oa, String uaID) throws PMException {
+		OperationSet operationsPI = new OperationSet();
 		operationsPI.add("create-oa");
 		operationsPI.add("create-oa-to-oa");
-		mutant.associate(uaID, oa.getID(), operationsPI);
+		mutant.associate(uaID, oa.getName(), operationsPI);
 		return mutant;
 	}
 }
