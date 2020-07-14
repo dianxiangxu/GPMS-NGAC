@@ -47,6 +47,8 @@ public class ObligationTest {
 		File file_organization_policy = getFileFromResources(Constants.POLICY_CONFIG_ACADEMIC_UNITS_POLICY_CLASS);
 		// File for editing policy
 		File file_editing_policy = getFileFromResources(Constants.PDS_EDITING_TEMPLATE);
+		// File for administration policy
+		File file_administration_policy = getFileFromResources(Constants.POLICY_CONFIG_ADMINISTRATION_UNITS_POLICY_CLASS);
 		// File for obligation policy
 		File obligationFile = getFileFromResources(Constants.OBLIGATION_TEMPLATE_PROPOSAL_CREATION);
 		// JSON string super policy
@@ -59,14 +61,20 @@ public class ObligationTest {
 				Files.readAllBytes(Paths.get(file_organization_policy.getAbsolutePath())));
 		// JSON string editing policy
 		String editing_policy = new String(Files.readAllBytes(Paths.get(file_editing_policy.getAbsolutePath())));
+		
+		String jsonAdministrationPolicy = new String(Files.readAllBytes(Paths.get(file_administration_policy.getAbsolutePath())));
+
 		// Adding super policy to graph
 		GraphSerializer.fromJson(ngacGraph, super_policy);
 		// Adding eligibility policy to graph
 		GraphSerializer.fromJson(ngacGraph, eligibility_policy);
 		// Adding organization policy to graph policy to graph
 		GraphSerializer.fromJson(ngacGraph, organization_policy);
+		GraphSerializer.fromJson(ngacGraph, jsonAdministrationPolicy);
 		// Adding editing policy to graph
 		GraphSerializer.fromJson(ngacGraph, editing_policy);
+		
+
 		// Getting obligations as input stream
 		InputStream is = new FileInputStream(obligationFile);
 		// Parsing the obligation input stream to Obligation object
@@ -74,89 +82,89 @@ public class ObligationTest {
 
 	}
 
-//	@Test
-//	public void createProposalTest() {
-//		try {
-//			// asserting that User nazmul is not currently assigned to PI User Attribute
-//			assertFalse(ngacGraph.getChildren("PI").contains("nazmul"));
-	
-//			// asserting that User ChairCSUser is not currently assigned to Chair User
-//			// Attribute
-//			assertFalse(ngacGraph.getChildren("Chair").contains("ChairCSUser"));
-//			// asserting that User bmCSUser is not currently assigned to Business Manager
-//			// User Attribute
-//			assertFalse(ngacGraph.getChildren("Business Manager").contains("bmCSUser"));
-//			// asserting that User DeanCOEUser is not currently assigned to Dean User
-//			// Attribute
-//			assertFalse(ngacGraph.getChildren("Dean").contains("DeanCOEUser"));
-//
-//			// processing custom event "CreateEvent", passing "PDS" object attribute as a
-//			// target of the event, and nazmul as a user who performs the event. Process is
-//			// not specified in the obligation
-//			getPDP(ngacGraph, obligation).getEPP().processEvent(
-//					new CreateEvent(ngacGraph.getNode(Constants.PDS_ORIGINATING_OA)), "nazmul", "process");
-//
-//			// asserting that User nazmul was assigned to PI User Attribute
-//			assertTrue(ngacGraph.getChildren("PI").contains("nazmul"));
-//			// asserting that User ChairCSUser was assigned to Chair User Attribute
-//			assertTrue(ngacGraph.getChildren("Chair").contains("ChairCSUser"));
-//			// asserting that User bmCSUser was assigned to Business Manager User Attribute
-//			assertTrue(ngacGraph.getChildren("Business Manager").contains("bmCSUser"));
-//			// asserting that User DeanCOEUser was assigned to Dean User Attribute
-//			assertTrue(ngacGraph.getChildren("Dean").contains("DeanCOEUser"));
-//		} catch (PMException e) {
-//			e.printStackTrace();
-//		}
-//
-//	}
 	@Test
-	public void chairApproveProposalTest() {
+	public void createProposalTest() {
 		try {
-			if (ngacGraph.exists("super_pc_rep")) {
-				ngacGraph.deleteNode("super_pc_rep");
-			}
-			PDP pdp = getPDP(ngacGraph, obligation);
-			pdp.getEPP().processEvent(new SubmitEvent(ngacGraph.getNode("PDSWhole"), true),
-					"nazmul", "process");
-			if (ngacGraph.exists("super_pc_rep")) {
-				ngacGraph.deleteNode("super_pc_rep");
-			}
-			
-			PReviewDecider decider = new PReviewDecider(ngacGraph);
-			assertTrue(decider.check("nazmul", "", "SignatureInfo", "write"));
-			
-			
-			getPDP(ngacGraph, obligation).getEPP().processEvent(new ApproveEvent(ngacGraph.getNode(Constants.CHAIR_APPROVAL)), "ChairCSUser", "process");
-			assertTrue(ngacGraph.getChildren("IRBOfficer").contains("irbUser"));
-			String PIUser = "nazmul";
-			Map<String, OperationSet> map = ngacGraph.getSourceAssociations(PIUser);
-			for(Map.Entry<String,OperationSet> entry : map.entrySet()) {
-				String tagetNode = entry.getKey();
-				OperationSet os = entry.getValue();
-				String[] array = new String[2];
-				array[0] = "write";
-				array[1] = "read";
-				os.containsAll(Arrays.asList(array));
-				assertTrue(os.containsAll(Arrays.asList(array)));
-				assertTrue(os.contains("write"));
-				assertTrue(tagetNode.equals("SignatureInfo"));
-			}
-			
-			assertTrue(decider.check("IRBOfficer", "", "PDSSections", "read"));
-			//assertTrue(decider.check("IRBOfficer", "", "IRBApproval", "write"));
-			for(String s : ngacGraph.getChildren("IRBOfficer")){
-				System.out.println("IRB Children Users" + s);
-				for (Map.Entry<String,String> entry : ngacGraph.getNode(s).getProperties().entrySet())  {
-					System.out.println(entry.getKey()+" " + entry.getValue());
-					assertTrue(entry.getKey().equals("required"));
-					assertTrue(entry.getValue().equals("true"));
-			}}
+			// asserting that User nazmul is not currently assigned to PI User Attribute
+			assertFalse(ngacGraph.getChildren("PI").contains("nazmul"));
+	
+			// asserting that User ChairCSUser is not currently assigned to Chair User
+			// Attribute
+			assertFalse(ngacGraph.getChildren("Chair").contains("ChairCSUser"));
+			// asserting that User bmCSUser is not currently assigned to Business Manager
+			// User Attribute
+			assertFalse(ngacGraph.getChildren("Business Manager").contains("bmCSUser"));
+			// asserting that User DeanCOEUser is not currently assigned to Dean User
+			// Attribute
+			assertFalse(ngacGraph.getChildren("Dean").contains("DeanCOEUser"));
 
+			// processing custom event "CreateEvent", passing "PDS" object attribute as a
+			// target of the event, and nazmul as a user who performs the event. Process is
+			// not specified in the obligation
+			getPDP(ngacGraph, obligation).getEPP().processEvent(
+					new CreateEvent(ngacGraph.getNode(Constants.PDS_ORIGINATING_OA)), "nazmul", "process");
+
+			// asserting that User nazmul was assigned to PI User Attribute
+			assertTrue(ngacGraph.getChildren("PI").contains("nazmul"));
+			// asserting that User ChairCSUser was assigned to Chair User Attribute
+			assertTrue(ngacGraph.getChildren("Chair").contains("ChairCSUser"));
+			// asserting that User bmCSUser was assigned to Business Manager User Attribute
+			assertTrue(ngacGraph.getChildren("Business Manager").contains("bmCSUser"));
+			// asserting that User DeanCOEUser was assigned to Dean User Attribute
+			assertTrue(ngacGraph.getChildren("Dean").contains("DeanCOEUser"));
 		} catch (PMException e) {
 			e.printStackTrace();
 		}
 
 	}
+//	@Test
+//	public void chairApproveProposalTest() {
+//		try {
+//			if (ngacGraph.exists("super_pc_rep")) {
+//				ngacGraph.deleteNode("super_pc_rep");
+//			}
+//			PDP pdp = getPDP(ngacGraph, obligation);
+//			pdp.getEPP().processEvent(new SubmitEvent(ngacGraph.getNode("PDSWhole"), true),
+//					"nazmul", "process");
+//			if (ngacGraph.exists("super_pc_rep")) {
+//				ngacGraph.deleteNode("super_pc_rep");
+//			}
+//			
+//			PReviewDecider decider = new PReviewDecider(ngacGraph);
+//			assertTrue(decider.check("nazmul", "", "SignatureInfo", "write"));
+//			
+//			
+//			getPDP(ngacGraph, obligation).getEPP().processEvent(new ApproveEvent(ngacGraph.getNode(Constants.CHAIR_APPROVAL)), "ChairCSUser", "process");
+//			assertTrue(ngacGraph.getChildren("IRBOfficer").contains("irbUser"));
+//			String PIUser = "nazmul";
+//			Map<String, OperationSet> map = ngacGraph.getSourceAssociations(PIUser);
+//			for(Map.Entry<String,OperationSet> entry : map.entrySet()) {
+//				String tagetNode = entry.getKey();
+//				OperationSet os = entry.getValue();
+//				String[] array = new String[2];
+//				array[0] = "write";
+//				array[1] = "read";
+//				os.containsAll(Arrays.asList(array));
+//				assertTrue(os.containsAll(Arrays.asList(array)));
+//				assertTrue(os.contains("write"));
+//				assertTrue(tagetNode.equals("SignatureInfo"));
+//			}
+//			
+//			assertTrue(decider.check("IRBOfficer", "", "PDSSections", "read"));
+//			//assertTrue(decider.check("IRBOfficer", "", "IRBApproval", "write"));
+//			for(String s : ngacGraph.getChildren("IRBOfficer")){
+//				System.out.println("IRB Children Users" + s);
+//				for (Map.Entry<String,String> entry : ngacGraph.getNode(s).getProperties().entrySet())  {
+//					System.out.println(entry.getKey()+" " + entry.getValue());
+//					assertTrue(entry.getKey().equals("required"));
+//					assertTrue(entry.getValue().equals("true"));
+//			}}
+//
+//		} catch (PMException e) {
+//			e.printStackTrace();
+//		}
+//
+//	}
 	// method to get the file object from specified path
 	private File getFileFromResources(String fileName) {
 		ClassLoader classLoader = this.getClass().getClassLoader();
