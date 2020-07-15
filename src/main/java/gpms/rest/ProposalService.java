@@ -1,7 +1,7 @@
 package gpms.rest;
 
 import gpms.DAL.MongoDBConnector;
-import gpms.accesscontrol.BalanaConnector;
+//import gpms.accesscontrol.BalanaConnector;
 import gpms.dao.DelegationDAO;
 import gpms.dao.NotificationDAO;
 import gpms.dao.ProposalDAO;
@@ -65,8 +65,6 @@ import org.bson.types.ObjectId;
 import org.glassfish.jersey.media.sse.OutboundEvent;
 import org.glassfish.jersey.media.sse.OutboundEvent.Builder;
 import org.mongodb.morphia.Morphia;
-import org.wso2.balana.ObligationResult;
-import org.wso2.balana.ctx.AbstractResult;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -591,7 +589,7 @@ public class ProposalService {
 				if (attrMap.get("Resource") == null) {
 					attrMap.put("Resource", resourceMap);
 				}
-				actions = proposalDAO.generateMDPDecision(attrMap, actionMap, contentProfile);
+				//actions = proposalDAO.generateMDPDecision(attrMap, actionMap, contentProfile);
 
 			}
 
@@ -832,7 +830,6 @@ public class ProposalService {
 					String authorUserName = authorProfile.getUserAccount().getUserName();
 					StringBuffer contentProfile = proposalDAO.generateContentProfile(proposalId, existingProposal,
 							signatures, authorProfile);
-					BalanaConnector ac = new BalanaConnector();
 					HashMap<String, Multimap<String, String>> attrMap = proposalDAO.generateAttributes(policyInfo);
 
 					log.info("Action:" + buttonType);
@@ -919,11 +916,11 @@ public class ProposalService {
 //						if (AbstractResult.DECISIONS[intDecision]
 //								.equals("Permit")) 
 					if (decision.equals("Permit")) {
-						// List<ObligationResult> obligations = ar
-						// .getObligations();
-						List<ObligationResult> obligations = new ArrayList<ObligationResult>();
+//						 List<ObligationResult> obligations = ar
+//						 .getObligations();
+//						List<ObligationResult> obligations = new ArrayList<ObligationResult>();
 						String changeDone = proposalDAO.updateProposalStatusWithObligations(proposalId, buttonType,
-								proposalUserTitle, existingProposal, authorProfile, authorUserName, obligations);
+								proposalUserTitle, existingProposal, authorProfile, authorUserName);
 						String notificationMessage = changeDone + " by " + authorUserName + ".";
 						if (changeDone.equals("Withdrawn")) {
 							for (Iterator<SignatureUserInfo> iterator = signatures.iterator(); iterator.hasNext();) {
@@ -1115,7 +1112,6 @@ public class ProposalService {
 			ProposalDataSheet projectProposal = new ProposalDataSheet();
 			Proposal oldProposal = new Proposal();
 			StringBuffer contentProfile = new StringBuffer();
-			BalanaConnector ac = new BalanaConnector();
 			if (root != null && root.has("proposalInfo")) {
 				JsonNode proposalInfo = root.get("proposalInfo");
 				log.info(proposalInfo);
@@ -1192,7 +1188,7 @@ public class ProposalService {
 
 						String decisionString = "";
 						EmailCommonInfo emailDetails = new EmailCommonInfo();
-						int intDecision = AbstractResult.DECISION_NOT_APPLICABLE;
+//						int intDecision = AbstractResult.DECISION_NOT_APPLICABLE;
 
 						if (action.equals("Save") || action.equals("Submit")) {
 							String objectAtt = "PDSWhole";
@@ -1297,11 +1293,11 @@ public class ProposalService {
 								return Response.status(200).type(MediaType.APPLICATION_JSON)
 										.entity(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(true))
 										.build();
-							}
-						} else {
-							return Response.status(403).type(MediaType.APPLICATION_JSON)
-									.entity("Your permission is: " + AbstractResult.DECISIONS[intDecision]).build();
-						}
+							}}
+//						 else {
+//							return Response.status(403).type(MediaType.APPLICATION_JSON)
+//									.entity("Your permission is: " + AbstractResult.DECISIONS[intDecision]).build();
+//						}
 						// } end while
 					}
 				}
@@ -1603,10 +1599,7 @@ public class ProposalService {
 						decision = projectProposal.getPolicyDecision(pdsOperations, userInfo.getUserName(), "read",
 								"PDSSections");
 						log.info("Decisiong for viewing PDSs: " + decision);
-					} else {
-						BalanaConnector ac = new BalanaConnector();
-						decision = ac.getXACMLdecision(attrMap);
-					}
+					} 
 					log.info("Decision :" + decision);
 					if (decision.equals("Permit")) {
 						return Response.status(200).type(MediaType.APPLICATION_JSON)

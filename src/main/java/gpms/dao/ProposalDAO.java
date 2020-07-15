@@ -1,7 +1,6 @@
 package gpms.dao;
 
 import gpms.DAL.MongoDBConnector;
-import gpms.accesscontrol.BalanaConnector;
 import gpms.model.AdditionalInfo;
 import gpms.model.Appendix;
 import gpms.model.ApprovalType;
@@ -73,12 +72,12 @@ import org.mongodb.morphia.Datastore;
 import org.mongodb.morphia.Morphia;
 import org.mongodb.morphia.dao.BasicDAO;
 import org.mongodb.morphia.query.Query;
-import org.wso2.balana.ObligationResult;
-import org.wso2.balana.ctx.AbstractResult;
-import org.wso2.balana.ctx.Attribute;
-import org.wso2.balana.ctx.AttributeAssignment;
-import org.wso2.balana.ctx.xacml3.Result;
-import org.wso2.balana.xacml3.Attributes;
+//import org.wso2.balana.ObligationResult;
+//import org.wso2.balana.ctx.AbstractResult;
+//import org.wso2.balana.ctx.Attribute;
+//import org.wso2.balana.ctx.AttributeAssignment;
+//import org.wso2.balana.ctx.xacml3.Result;
+//import org.wso2.balana.xacml3.Attributes;
 
 import com.ebay.xcelite.Xcelite;
 import com.ebay.xcelite.sheet.XceliteSheet;
@@ -3144,12 +3143,12 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @return
 	 * @throws JsonProcessingException
 	 */
-	public EmailCommonInfo saveProposalWithObligations(List<ObligationResult> obligations)
-			throws JsonProcessingException {
-		EmailCommonInfo emailDetails = new EmailCommonInfo();
-		getObligationsDetails(obligations, emailDetails);
-		return emailDetails;
-	}
+//	public EmailCommonInfo saveProposalWithObligations(List<ObligationResult> obligations)
+//			throws JsonProcessingException {
+//		EmailCommonInfo emailDetails = new EmailCommonInfo();
+//		getObligationsDetails(obligations, emailDetails);
+//		return emailDetails;
+//	}
 
 	/***
 	 * Saves Proposal Without Obligations
@@ -3406,124 +3405,124 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param emailDetails
 	 * @return
 	 */
-	public Response getObligationsDetails(List<ObligationResult> obligations, EmailCommonInfo emailDetails) {
-		if (obligations.size() > 0) {
-			List<ObligationResult> preObligations = new ArrayList<ObligationResult>();
-			List<ObligationResult> postObligations = new ArrayList<ObligationResult>();
-			List<ObligationResult> ongoingObligations = new ArrayList<ObligationResult>();
-			for (ObligationResult obligation : obligations) {
-				categorizeObligationTypes(preObligations, postObligations, ongoingObligations, obligation);
-			}
-			// Performs Preobligations
-			Boolean preCondition = true;
-			String alertMessage = new String();
-			if (preObligations.size() != 0) {
-				preCondition = false;
-				//System.out.println("\n======================== Printing Obligations ====================");
-				for (ObligationResult obligation : preObligations) {
-					if (obligation instanceof org.wso2.balana.xacml3.Obligation) {
-						List<AttributeAssignment> assignments = ((org.wso2.balana.xacml3.Obligation) obligation)
-								.getAssignments();
-						String obligationType = "preobligation";
-						for (AttributeAssignment assignment : assignments) {
-							switch (assignment.getAttributeId().toString()) {
-							case "signedByCurrentUser":
-								preCondition = Boolean.parseBoolean(assignment.getContent());
-								break;
-							case "alertMessage":
-								alertMessage = assignment.getContent();
-								break;
-							default:
-								break;
-							}
-						}
-						//System.out.println(obligationType + " is RUNNING");
-						if (!preCondition) {
-							break;
-						}
-					}
-				}
-			}
+//	public Response getObligationsDetails(List<ObligationResult> obligations, EmailCommonInfo emailDetails) {
+//		if (obligations.size() > 0) {
+//			List<ObligationResult> preObligations = new ArrayList<ObligationResult>();
+//			List<ObligationResult> postObligations = new ArrayList<ObligationResult>();
+//			List<ObligationResult> ongoingObligations = new ArrayList<ObligationResult>();
+//			for (ObligationResult obligation : obligations) {
+//				categorizeObligationTypes(preObligations, postObligations, ongoingObligations, obligation);
+//			}
+//			// Performs Preobligations
+//			Boolean preCondition = true;
+//			String alertMessage = new String();
+//			if (preObligations.size() != 0) {
+//				preCondition = false;
+//				//System.out.println("\n======================== Printing Obligations ====================");
+//				for (ObligationResult obligation : preObligations) {
+//					if (obligation instanceof org.wso2.balana.xacml3.Obligation) {
+//						List<AttributeAssignment> assignments = ((org.wso2.balana.xacml3.Obligation) obligation)
+//								.getAssignments();
+//						String obligationType = "preobligation";
+//						for (AttributeAssignment assignment : assignments) {
+//							switch (assignment.getAttributeId().toString()) {
+//							case "signedByCurrentUser":
+//								preCondition = Boolean.parseBoolean(assignment.getContent());
+//								break;
+//							case "alertMessage":
+//								alertMessage = assignment.getContent();
+//								break;
+//							default:
+//								break;
+//							}
+//						}
+//						//System.out.println(obligationType + " is RUNNING");
+//						if (!preCondition) {
+//							break;
+//						}
+//					}
+//				}
+//			}
+//
+//			if (preCondition) {
+//				// Performs Postobligations
+//				for (ObligationResult obligation : postObligations) {
+//					if (obligation instanceof org.wso2.balana.xacml3.Obligation) {
+//						List<AttributeAssignment> assignments = ((org.wso2.balana.xacml3.Obligation) obligation)
+//								.getAssignments();
+//						String obligationType = "postobligation";
+//						for (AttributeAssignment assignment : assignments) {
+//							switch (assignment.getAttributeId().toString()) {
+//							case "authorName":
+//								emailDetails.setAuthorName(assignment.getContent());
+//								break;
+//							case "emailSubject":
+//								emailDetails.setEmailSubject(assignment.getContent());
+//								break;
+//							case "emailBody":
+//								emailDetails.setEmailBody(assignment.getContent());
+//								break;
+//							case "piEmail":
+//								emailDetails.setPiEmail(assignment.getContent());
+//								break;
+//							case "copisEmail":
+//							case "seniorsEmail":
+//							case "chairsEmail":
+//							case "managersEmail":
+//							case "deansEmail":
+//							case "irbsEmail":
+//							case "administratorsEmail":
+//							case "directorsEmail":
+//								if (!assignment.getContent().equals("")) {
+//									emailDetails.getEmaillist().add(assignment.getContent());
+//								}
+//								break;
+//							default:
+//								break;
+//							}
+//						}
+//						//System.out.println(obligationType + " is RUNNING");
+//					}
+//				}
+//			} else {
+//				return Response.status(403).type(MediaType.APPLICATION_JSON).entity(alertMessage).build();
+//			}
+//		}
+//		return Response.status(403)
+//				.entity("{\"error\": \"Error while geting Obligations Information!\", \"status\": \"FAIL\"}").build();
+//	}
 
-			if (preCondition) {
-				// Performs Postobligations
-				for (ObligationResult obligation : postObligations) {
-					if (obligation instanceof org.wso2.balana.xacml3.Obligation) {
-						List<AttributeAssignment> assignments = ((org.wso2.balana.xacml3.Obligation) obligation)
-								.getAssignments();
-						String obligationType = "postobligation";
-						for (AttributeAssignment assignment : assignments) {
-							switch (assignment.getAttributeId().toString()) {
-							case "authorName":
-								emailDetails.setAuthorName(assignment.getContent());
-								break;
-							case "emailSubject":
-								emailDetails.setEmailSubject(assignment.getContent());
-								break;
-							case "emailBody":
-								emailDetails.setEmailBody(assignment.getContent());
-								break;
-							case "piEmail":
-								emailDetails.setPiEmail(assignment.getContent());
-								break;
-							case "copisEmail":
-							case "seniorsEmail":
-							case "chairsEmail":
-							case "managersEmail":
-							case "deansEmail":
-							case "irbsEmail":
-							case "administratorsEmail":
-							case "directorsEmail":
-								if (!assignment.getContent().equals("")) {
-									emailDetails.getEmaillist().add(assignment.getContent());
-								}
-								break;
-							default:
-								break;
-							}
-						}
-						//System.out.println(obligationType + " is RUNNING");
-					}
-				}
-			} else {
-				return Response.status(403).type(MediaType.APPLICATION_JSON).entity(alertMessage).build();
-			}
-		}
-		return Response.status(403)
-				.entity("{\"error\": \"Error while geting Obligations Information!\", \"status\": \"FAIL\"}").build();
-	}
-
-	/***
-	 * Categorizes different Obligation Types
-	 * 
-	 * @param preObligations
-	 * @param postObligations
-	 * @param ongoingObligations
-	 * @param obligation
-	 */
-	public void categorizeObligationTypes(List<ObligationResult> preObligations, List<ObligationResult> postObligations,
-			List<ObligationResult> ongoingObligations, ObligationResult obligation) {
-		if (obligation instanceof org.wso2.balana.xacml3.Obligation) {
-			List<AttributeAssignment> assignments = ((org.wso2.balana.xacml3.Obligation) obligation).getAssignments();
-			String obligationType = "postobligation";
-			for (AttributeAssignment assignment : assignments) {
-				if (assignment.getAttributeId().toString().equalsIgnoreCase("obligationType")) {
-					obligationType = assignment.getContent();
-					break;
-				}
-			}
-			if (obligationType.equals("preobligation")) {
-				preObligations.add(obligation);
-				//System.out.println(obligationType + " is FOUND");
-			} else if (obligationType.equals("postobligation")) {
-				postObligations.add(obligation);
-				//System.out.println(obligationType + " is FOUND");
-			} else {
-				ongoingObligations.add(obligation);
-				//System.out.println(obligationType + " is FOUND");
-			}
-		}
-	}
+//	/***
+//	 * Categorizes different Obligation Types
+//	 * 
+//	 * @param preObligations
+//	 * @param postObligations
+//	 * @param ongoingObligations
+//	 * @param obligation
+//	 */
+//	public void categorizeObligationTypes(List<ObligationResult> preObligations, List<ObligationResult> postObligations,
+//			List<ObligationResult> ongoingObligations, ObligationResult obligation) {
+//		if (obligation instanceof org.wso2.balana.xacml3.Obligation) {
+//			List<AttributeAssignment> assignments = ((org.wso2.balana.xacml3.Obligation) obligation).getAssignments();
+//			String obligationType = "postobligation";
+//			for (AttributeAssignment assignment : assignments) {
+//				if (assignment.getAttributeId().toString().equalsIgnoreCase("obligationType")) {
+//					obligationType = assignment.getContent();
+//					break;
+//				}
+//			}
+//			if (obligationType.equals("preobligation")) {
+//				preObligations.add(obligation);
+//				//System.out.println(obligationType + " is FOUND");
+//			} else if (obligationType.equals("postobligation")) {
+//				postObligations.add(obligation);
+//				//System.out.println(obligationType + " is FOUND");
+//			} else {
+//				ongoingObligations.add(obligation);
+//				//System.out.println(obligationType + " is FOUND");
+//			}
+//		}
+//	}
 
 	/***
 	 * Updates Proposal Status With Obligations
@@ -3539,12 +3538,11 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @throws JsonProcessingException
 	 */
 	public String updateProposalStatusWithObligations(String proposalId, String buttonType, String proposalUserTitle,
-			Proposal existingProposal, UserProfile authorProfile, String authorUserName,
-			List<ObligationResult> obligations) throws JsonProcessingException {
+			Proposal existingProposal, UserProfile authorProfile, String authorUserName
+			) throws JsonProcessingException {
 		boolean isStatusUpdated = false;
 		String changeDone = new String();
 		EmailCommonInfo emailDetails = new EmailCommonInfo();
-		getObligationsDetails(obligations, emailDetails);
 		if (buttonType != null && buttonType != "") {
 			switch (buttonType) {
 			case "Withdraw":
@@ -3588,26 +3586,26 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @return
 	 * @throws JsonProcessingException
 	 */
-	public boolean deleteProposalWithObligations(String proposalRoles, String proposalUserTitle,
-			Proposal existingProposal, UserProfile authorProfile, String authorUserName,
-			List<ObligationResult> obligations) throws JsonProcessingException {
-		EmailCommonInfo emailDetails = new EmailCommonInfo();
-		getObligationsDetails(obligations, emailDetails);
-		boolean isDeleted = deleteProposal(existingProposal, proposalRoles, proposalUserTitle, authorProfile);
-		if (isDeleted) {
-			String emailSubject = emailDetails.getEmailSubject();
-			String emailBody = emailDetails.getEmailBody();
-			String authorName = emailDetails.getAuthorName();
-			String piEmail = emailDetails.getPiEmail();
-			List<String> emaillist = emailDetails.getEmaillist();
-			if (!emailSubject.equals("")) {
-				// EmailUtil emailUtil = new EmailUtil();
-				// emailUtil.sendMailMultipleUsersWithoutAuth(piEmail, emaillist,emailSubject +
-				// authorName, emailBody);
-			}
-		}
-		return isDeleted;
-	}
+//	public boolean deleteProposalWithObligations(String proposalRoles, String proposalUserTitle,
+//			Proposal existingProposal, UserProfile authorProfile, String authorUserName,
+//			List<ObligationResult> obligations) throws JsonProcessingException {
+//		EmailCommonInfo emailDetails = new EmailCommonInfo();
+//		getObligationsDetails(obligations, emailDetails);
+//		boolean isDeleted = deleteProposal(existingProposal, proposalRoles, proposalUserTitle, authorProfile);
+//		if (isDeleted) {
+//			String emailSubject = emailDetails.getEmailSubject();
+//			String emailBody = emailDetails.getEmailBody();
+//			String authorName = emailDetails.getAuthorName();
+//			String piEmail = emailDetails.getPiEmail();
+//			List<String> emaillist = emailDetails.getEmaillist();
+//			if (!emailSubject.equals("")) {
+//				// EmailUtil emailUtil = new EmailUtil();
+//				// emailUtil.sendMailMultipleUsersWithoutAuth(piEmail, emaillist,emailSubject +
+//				// authorName, emailBody);
+//			}
+//		}
+//		return isDeleted;
+//	}
 
 	/***
 	 * Generates Attributes based on policy info
@@ -3837,29 +3835,28 @@ public class ProposalDAO extends BasicDAO<Proposal, String> {
 	 * @param contentProfile
 	 * @return
 	 */
-	public List<String> generateMDPDecision(HashMap<String, Multimap<String, String>> attrMap,
-			Multimap<String, String> actionMap, StringBuffer contentProfile) {
-		BalanaConnector ac = new BalanaConnector();
-		List<String> attributeValue = Arrays.asList("Save", "Submit", "Approve", "Disapprove", "Withdraw", "Archive",
-				"Delete");
-		for (String action : attributeValue) {
-			actionMap.put("proposal.action", action);
-			attrMap.put("Action", actionMap);
-		}
-		Set<AbstractResult> results = ac.getXACMLdecisionForMDPWithProfile(attrMap, contentProfile);
-		List<String> actions = new ArrayList<String>();
-		for (AbstractResult result : results) {
-			if (AbstractResult.DECISION_PERMIT == result.getDecision()) {
-				Set<Attributes> attributesSet = ((Result) result).getAttributes();
-				for (Attributes attributes : attributesSet) {
-					for (Attribute attribute : attributes.getAttributes()) {
-						actions.add(attribute.getValue().encode());
-					}
-				}
-			}
-		}
-		return actions;
-	}
+//	public List<String> generateMDPDecision(HashMap<String, Multimap<String, String>> attrMap,
+//			Multimap<String, String> actionMap, StringBuffer contentProfile) {
+//		List<String> attributeValue = Arrays.asList("Save", "Submit", "Approve", "Disapprove", "Withdraw", "Archive",
+//				"Delete");
+//		for (String action : attributeValue) {
+//			actionMap.put("proposal.action", action);
+//			attrMap.put("Action", actionMap);
+//		}
+//		Set<AbstractResult> results = ac.getXACMLdecisionForMDPWithProfile(attrMap, contentProfile);
+//		List<String> actions = new ArrayList<String>();
+//		for (AbstractResult result : results) {
+//			if (AbstractResult.DECISION_PERMIT == result.getDecision()) {
+//				Set<Attributes> attributesSet = ((Result) result).getAttributes();
+//				for (Attributes attributes : attributesSet) {
+//					for (Attribute attribute : attributes.getAttributes()) {
+//						actions.add(attribute.getValue().encode());
+//					}
+//				}
+//			}
+//		}
+//		return actions;
+//	}
 
 	/***
 	 * Generates Author Content Profile

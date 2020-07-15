@@ -11,7 +11,7 @@ import gpms.model.GPMSCommonInfo;
 import gpms.model.UserAccount;
 import gpms.model.UserDetail;
 import gpms.model.UserProfile;
-import gpms.rest.DelegationService;
+//import gpms.rest.DelegationService;
 import gpms.utils.WriteXMLUtil;
 
 import java.io.File;
@@ -32,9 +32,9 @@ import org.mongodb.morphia.Datastore;
 import org.mongodb.morphia.Morphia;
 import org.mongodb.morphia.dao.BasicDAO;
 import org.mongodb.morphia.query.Query;
-import org.wso2.balana.ctx.AbstractResult;
-import org.wso2.balana.ctx.AttributeAssignment;
-import org.wso2.balana.xacml3.Advice;
+//import org.wso2.balana.ctx.AbstractResult;
+//import org.wso2.balana.ctx.AttributeAssignment;
+//import org.wso2.balana.xacml3.Advice;
 import org.xml.sax.SAXException;
 
 import com.ebay.xcelite.Xcelite;
@@ -272,16 +272,16 @@ public class DelegationDAO extends BasicDAO<Delegation, String> {
 	 * @throws IOException
 	 * @throws JsonProcessingException
 	 */
-	public void saveDelegation(GPMSCommonInfo userInfo,
-			UserProfile authorProfile, String delegatorName,
-			Delegation newDelegation) throws SAXException, IOException,
-			JsonProcessingException {
-		String policyId = new String();
-		policyId = createDynamicPolicy(userInfo.getUserProfileID(),
-				delegatorName, DelegationService.policyLocation, newDelegation);
-		newDelegation.setDelegationPolicyId(policyId);
-		saveDelegation(newDelegation, authorProfile);
-	}
+//	public void saveDelegation(GPMSCommonInfo userInfo,
+//			UserProfile authorProfile, String delegatorName,
+//			Delegation newDelegation) throws SAXException, IOException,
+//			JsonProcessingException {
+//		String policyId = new String();
+//		policyId = createDynamicPolicy(userInfo.getUserProfileID(),
+//				delegatorName, DelegationService.policyLocation, newDelegation);
+//		newDelegation.setDelegationPolicyId(policyId);
+//		saveDelegation(newDelegation, authorProfile);
+//	}
 
 	public void saveDelegation(Delegation newDelegation,
 			UserProfile authorProfile) {
@@ -302,16 +302,16 @@ public class DelegationDAO extends BasicDAO<Delegation, String> {
 	 * @throws SAXException
 	 * @throws IOException
 	 */
-	public void updateDelegation(GPMSCommonInfo userInfo,
-			UserProfile authorProfile, String delegatorName,
-			Delegation existingDelegation) throws SAXException, IOException {
-		String policyId = new String();
-		policyId = createDynamicPolicy(userInfo.getUserProfileID(),
-				delegatorName, DelegationService.policyLocation,
-				existingDelegation);
-		existingDelegation.setDelegationPolicyId(policyId);
-		updateDelegation(existingDelegation, authorProfile);
-	}
+//	public void updateDelegation(GPMSCommonInfo userInfo,
+//			UserProfile authorProfile, String delegatorName,
+//			Delegation existingDelegation) throws SAXException, IOException {
+//		String policyId = new String();
+//		policyId = createDynamicPolicy(userInfo.getUserProfileID(),
+//				delegatorName, DelegationService.policyLocation,
+//				existingDelegation);
+//		existingDelegation.setDelegationPolicyId(policyId);
+//		updateDelegation(existingDelegation, authorProfile);
+//	}
 
 	public void updateDelegation(Delegation existingDelegation,
 			UserProfile authorProfile) {
@@ -571,55 +571,55 @@ public class DelegationDAO extends BasicDAO<Delegation, String> {
 				policyLocation, existingDelegation);
 	}
 
-	/**
-	 * Gets Delegable User Details From Advice response
-	 * 
-	 * @param userDetails
-	 *            UserDetail
-	 * @param result
-	 */
-	public void getDelegableUserDetailsFromAdvice(List<UserDetail> userDetails,
-			AbstractResult result) {
-		List<Advice> advices = result.getAdvices();
-		for (Advice advice : advices) {
-			if (advice instanceof org.wso2.balana.xacml3.Advice) {
-				UserDetail userDeatil = new UserDetail();
-				List<AttributeAssignment> assignments = ((org.wso2.balana.xacml3.Advice) advice)
-						.getAssignments();
-				for (AttributeAssignment assignment : assignments) {
-					switch (assignment.getAttributeId().toString()) {
-					case "userId":
-						userDeatil.setUserProfileId(assignment.getContent());
-						break;
-					case "userfullName":
-						userDeatil.setFullName(assignment.getContent());
-						break;
-					case "userName":
-						userDeatil.setUserName(assignment.getContent());
-						break;
-					case "userEmail":
-						userDeatil.setEmail(assignment.getContent());
-						break;
-					case "userCollege":
-						userDeatil.setCollege(assignment.getContent());
-						break;
-					case "userDepartment":
-						userDeatil.setDepartment(assignment.getContent());
-						break;
-					case "userPositionType":
-						userDeatil.setPositionType(assignment.getContent());
-						break;
-					case "userPositionTitle":
-						userDeatil.setPositionTitle(assignment.getContent());
-						break;
-					default:
-						break;
-					}
-				}
-				userDetails.add(userDeatil);
-			}
-		}
-	}
+//	/**
+//	 * Gets Delegable User Details From Advice response
+//	 * 
+//	 * @param userDetails
+//	 *            UserDetail
+//	 * @param result
+//	 */
+//	public void getDelegableUserDetailsFromAdvice(List<UserDetail> userDetails,
+//			AbstractResult result) {
+//		List<Advice> advices = result.getAdvices();
+//		for (Advice advice : advices) {
+//			if (advice instanceof org.wso2.balana.xacml3.Advice) {
+//				UserDetail userDeatil = new UserDetail();
+//				List<AttributeAssignment> assignments = ((org.wso2.balana.xacml3.Advice) advice)
+//						.getAssignments();
+//				for (AttributeAssignment assignment : assignments) {
+//					switch (assignment.getAttributeId().toString()) {
+//					case "userId":
+//						userDeatil.setUserProfileId(assignment.getContent());
+//						break;
+//					case "userfullName":
+//						userDeatil.setFullName(assignment.getContent());
+//						break;
+//					case "userName":
+//						userDeatil.setUserName(assignment.getContent());
+//						break;
+//					case "userEmail":
+//						userDeatil.setEmail(assignment.getContent());
+//						break;
+//					case "userCollege":
+//						userDeatil.setCollege(assignment.getContent());
+//						break;
+//					case "userDepartment":
+//						userDeatil.setDepartment(assignment.getContent());
+//						break;
+//					case "userPositionType":
+//						userDeatil.setPositionType(assignment.getContent());
+//						break;
+//					case "userPositionTitle":
+//						userDeatil.setPositionTitle(assignment.getContent());
+//						break;
+//					default:
+//						break;
+//					}
+//				}
+//				userDetails.add(userDeatil);
+//			}
+//		}
+//	}
 
 	/**
 	 * Generates Content Profile for Admin Users
