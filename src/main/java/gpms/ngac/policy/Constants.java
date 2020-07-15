@@ -22,7 +22,7 @@ public class Constants {
 	public static final String PROHIBITION_POST_SUBMISSION = "docs/post_submission_prohibitions.json";
 	
 	public static final String PROPOSAL_CREATION_ABLE_UA = "PI-Eligible Faculty";
-	public static final String PDS_ORIGINATING_OA = "PDS";
+	public static final String PDS_ORIGINATING_OA = "PDSWhole";
 	public static final String COPI_ELIGIBLE_FACULTY_OA = "CoPI-Eligible Faculty";
 	public static final String SP_ELIGIBLE_FACULTY_OA = "SP-Eligible Faculty";
 	public static final String INVESTIGATOR_OA_UA_LBL = "Investigator Info";

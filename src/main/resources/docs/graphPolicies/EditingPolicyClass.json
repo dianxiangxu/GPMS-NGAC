@@ -21,14 +21,7 @@
        "properties": {
          
        }
-     },
-   {
-   "name" : "PDSWhole",
-   "type" : "OA",
-   "properties": {
-          
-        }
-  }, 
+     }, 
   {
    "name" : "ApprovalInfo",
    "type" : "OA",

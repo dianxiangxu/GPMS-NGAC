@@ -71,7 +71,7 @@
       "properties": {}
     },
     {
-      "name": "PDS",
+      "name": "PDSWhole",
       "type": "OA",
       "properties": {}
     },
@@ -218,7 +218,7 @@
     },
     
  {
-      "source": "PDS", 
+      "source": "PDSWhole", 
       "target": "EligibilityPolicyClass"  
     }
  
@@ -231,7 +231,7 @@
         "*"
       ],
       "source": "super_ua1",   
-      "target": "PDS" 
+      "target": "PDSWhole" 
     },
   {
       "operations": [
@@ -246,7 +246,7 @@
         "create"
       ],
       "source": "PIEligible", 
-      "target": "PDS"  
+      "target": "PDSWhole"  
     }
     
  

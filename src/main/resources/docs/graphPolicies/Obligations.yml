@@ -10,7 +10,7 @@ rules:
         - create
       target:
         policyElements:
-          - name: PDS
+          - name: PDSWhole
             type: OA
     response:
       actions:
