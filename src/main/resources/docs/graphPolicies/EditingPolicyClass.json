@@ -411,14 +411,7 @@
        "source": "Signature Info", 
        "target": "CoPIEditable"  
      },
-  {
-       "source": "PI", 
-       "target": "EditingPolicyClass"  
-     },
-     {
-       "source": "CoPI", 
-       "target": "EditingPolicyClass"  
-     },
+
      {
        "source": "PDSWhole", 
        "target": "EditingPolicyClass"  
