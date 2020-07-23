@@ -1,0 +1,309 @@
+label: GPMS Obligations
+rules:
+  - label: create_proposal
+    event:
+      subject:
+        anyUser:
+      operations:
+        - assign to
+      target:
+        policyElements:
+          - name: PDS
+            type: OA
+    response:
+      actions:
+        - assign:
+            - what:
+                function:
+                  name: current_user
+              where:
+                  name: PI
+                  type: UA
+        - function:
+            name: create_node1
+            args:
+              - PI-Info
+              - OA 
+              - function:
+                  name: concat_strings
+                  args:
+                    - function:
+                        name: get_node_name
+                        args:
+                          - function:
+                              name: current_user
+                    - PI
+              - O
+                            
+  - label: submit_proposal
+    event:
+      subject:
+      operations:
+        - assign to
+      target:
+        policyElements:
+          - name: Submission-Info
+            type: OA
+    response:
+      actions:
+        - deny:
+            label: deny1
+            subject:
+              function: 
+                name: get_node_name
+                args: 
+                  - function:
+                      name: current_user
+            operations:
+               - w
+            target:
+              complement: false
+              containers:
+                - name: PI-Editable-Data
+                  type: OA
+        - deny:
+            label: deny2
+            subject:
+              name: CoPI
+              type: UA                 
+            operations:
+               - w
+            target:
+              complement: false
+              containers:
+                - name: CoPI-Editable-Data
+                  type: OA 
+        - deny:
+            label: deny3
+            subject:
+              function: 
+                name: get_node_name
+                args: 
+                  - function:
+                      name: current_user
+            operations:
+               - assign-u-from
+            target:
+              complement: false
+              containers:
+                - name: CoPI
+                  type: UA 
+        - deny:
+            label: deny4
+            subject: 
+              name: CoPI
+              type: UA              
+            operations:
+              - assign-u-to
+            target:
+              complement: false
+              containers:
+                - name: SP
+                  type: UA 
+        - deny:
+            label: deny5
+            subject:
+              name: CoPI
+              type: UA
+            operations:
+              - deassign-u-to
+            target:
+              complement: false
+              containers:
+                - name: SP
+                  type: UA  
+        - deny:
+            label: deny6
+            subject:
+              name: PI
+              type: UA
+            operations:
+              - Save
+              - Delete
+              - Submit
+            target:
+              complement: false
+              containers:
+                - name: PDSs
+                  type: OA  
+  - label: add_copi
+    event:
+      subject:
+        anyUser:
+      operations:
+        - assign to
+      target:
+        policyElements:
+          - name: CoPI
+            type: UA
+    response:
+      actions:
+        - function:
+            name: create_node
+            args:
+              - CoPI-Info
+              - OA 
+              - function:
+                  name: concat_strings
+                  args:
+                    - function:
+                        name: get_node_name
+                        args:
+                          - function:
+                              name: child_of_assign
+                    - CoPI
+              - O                    A
+        - assign:
+            - what:
+                function:
+                  name: child_of_assign
+              where:
+                name: CoPI
+                type: UA  
+        - assign:
+            - what:
+                function:
+                  name: findChairForCoPI
+                  args: 
+                    - function:
+                        name: child_of_assign              
+              where:
+                name: Chair
+                type: UA
+        - assign:
+            - what:
+                function:
+                  name: findDeanForCoPI
+                  args: 
+                    - function:
+                        name: child_of_assign              
+              where:
+                name: Dean
+                type: UA
+        - assign:
+            - what:
+                function:
+                  name: findBMForCoPI
+                  args: 
+                    - function:
+                        name: child_of_assign              
+              where:
+                name: Business-Manager
+                type: UA                
+                      
+  - label: add_sp
+    event:
+      subject:
+        anyUser:
+      operations:
+        - assign to
+      target:
+        policyElements:
+          - name: SP
+            type: UA
+    response:
+      actions:
+        - function:
+            name: create_node1
+            args:
+              - SP-Info
+              - OA 
+              - function:
+                  name: get_node_name 
+                  args:
+                    - function:
+                        name: child_of_assign
+              - O
+        - assign:
+            - what:
+                function:
+                  name: child_of_assign
+              where:
+                name: SP
+                type: UA  
+  - label: delete_copi
+    event:
+      subject:
+        anyUser:
+      operations:
+        - deassign from
+      target:
+        policyElements:
+          - name: CoPI
+            type: UA
+    response:
+      actions:
+        - delete:
+            assign:
+              what: 
+                - function:
+                    name: child_of_assign
+              where:
+                - name: CoPI
+                  type: UA
+        - function:
+            name: delete_node
+            args:
+              - function:
+                  name: concat_strings
+                  args:
+                    - function:
+                        name: get_node_name
+                        args:
+                          - function:
+                              name: child_of_assign
+                    - CoPI
+                              
+  - label: delete_sp
+    event:
+      subject:
+        anyUser:
+      operations:
+        - deassign from
+      target:
+        policyElements:
+          - name: SP
+            type: UA
+    response:
+      actions:
+        - delete:
+            assign:
+              what: 
+                - function:
+                    name: child_of_assign
+              where:
+                - name: SP
+                  type: UA
+        - delete:
+            create:
+              what: 
+                - function:
+                    name: delete_node
+                    args: 
+                      - function:
+                          name: get_node_name 
+                          args:
+                            - function:
+                                name: child_of_assign
+                      - O
+        
+  - label: add_approval_entity
+    event:
+      subject:
+        anyUser:
+      operations:
+        - assign to
+      target:
+        policyElements:
+          - name: Current Users
+            type: UA
+    response:
+      actions:
+        - assign:
+            - what:
+                function:
+                  name: child_of_assign
+              where:
+                name: Current Users
+                type: UA            
+                    

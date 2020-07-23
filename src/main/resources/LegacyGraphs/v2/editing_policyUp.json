@@ -1,0 +1,617 @@
+{
+	"nodes" : [
+	    
+	    {
+	      "id": -4607625889972348117,
+	      "name": "Editing Policy",
+	      "type": "PC",
+	      "properties": {
+	        "default_ua": "-5902017007735841032",
+	        "default_oa": "-125095002669469944"
+	      }
+	    },
+		
+		{
+	      "id": -125095002669469944,
+	      "name": "PDSs",
+	      "type": "OA",
+	      "properties": {
+	        
+	      }
+	    },
+		 {
+			"id" : -5449382005586736685,
+			"name" : "Composite-PDS",
+			"type" : "OA",
+			"properties": {
+        		
+      		}
+		},
+		
+		{
+	      "id": -6615149973776705852,
+	      "name": "Data-Element",
+	      "type": "OA",
+	     "properties": {
+	        
+	      }
+	    },
+		{
+			"id" : 9167503850871231643,
+			"name" : "Approval-Element",
+			"type" : "OA",
+			"properties": {
+        		
+      		}
+		},
+		{
+			"id" : 2750318422398854466,
+			"name" : "Chair-Approval",
+			"type" : "OA",
+			"properties": {
+        		
+      		}
+		},
+		{
+			"id" : -5354253594823124359,
+			"name" : "BM-Approval",
+			"type" : "OA",
+			"properties": {
+        		
+      		}
+		},
+		{
+			"id" : -916238785149221322,
+			"name" : "Dean-Approval",
+			"type" : "OA",
+			"properties": {
+        		
+      		}
+		},
+		{
+			"id" : 3873349958397008611,
+			"name" : "IRB-Approval",
+			"type" : "OA",
+			"properties": {
+        		
+      		}
+		},
+		{
+			"id" : 1081764298527187021,
+			"name" : "Research-Admin-Approval",
+			"type" : "OA",
+			"properties": {
+        		
+      		}
+		},
+		{
+			"id" : 1559676298615558766,
+			"name" : "Research-Director-Approval",
+			"type" : "OA",
+			"properties": {
+        		
+      		}
+		},
+		{
+			"id" : -2066887753519890737,
+			"name" : "Approval",
+			"type" : "OA",
+			"properties": {
+        		
+      		}
+		},
+		{
+			"id" : -7779581742012516000,
+			"name" : "Disapproval",
+			"type" : "OA",
+			"properties": {
+        		
+      		}
+		},
+		{
+			"id" : -1929643799755390863,
+			"name" : "Comment-Sign",
+			"type" : "OA",
+			"properties": {
+        		
+      		}
+		},
+		
+		{
+			"id" : 5575516001022439988,
+			"name" : "Submission-Info",
+			"type" : "OA",
+			"properties": {
+        		
+      		}
+		},
+		
+		{
+	      "id": 1432074838181907682,
+	      "name": "PI-Editable-Data",
+	      "type": "OA",
+	      "properties": {
+	        
+	      }
+	    },
+		
+		{
+	      "id": 375260122425903544,
+	      "name": "CoPI-Editable-Data",
+	      "type": "OA",
+	      "properties": {
+	        
+	      }
+	    },
+		
+		{
+			"id" : 7001563235694976423,
+			"name" : "Investigator-Info",
+			"type" : "OA",
+			"properties": {
+        		
+      		}
+			
+		},
+		{
+			"id" : -5341305212299730455,
+			"name" : "Budget-Info",
+			"type" : "OA",
+			"properties": {
+        		
+      		}
+		},
+		{
+			"id" : -190539787517064699,
+			"name" : "Project-Info",
+			"type" : "OA",
+			"properties": {
+        		
+      		}
+		},
+		{
+			"id" : 3894258469648060145,
+			"name" : "Cost-Share-Info",
+			"type" : "OA",
+			"properties": {
+        		
+      		}
+		},
+		{
+			"id" : -8043143079246781366,
+			"name" : "University-Commitments-Info",
+			"type" : "OA",
+			"properties": {
+        		
+      		}
+		},
+		{
+			"id" : -2397200779418123885,
+			"name" : "Conflict-Of-Interest-Info",
+			"type" : "OA",
+			"properties": {
+        		
+      		}
+		},
+		{
+			"id" : 6467546770626657861,
+			"name" : "Compliance-Info",
+			"type" : "OA",
+			"properties": {
+        		
+      		}
+		},
+		{
+			"id" : -1768676899060472986,
+			"name" : "Additional-Info",
+			"type" : "OA",
+			"properties": {
+        		
+      		}
+		},
+		{
+			"id" : -6310901605321273772,
+			"name" : "Collaboration-Info",
+			"type" : "OA",
+			"properties": {
+        		
+      		}
+		},
+		{
+			"id" : -4012432083875732141,
+			"name" : "Confidential-Info",
+			"type" : "OA",
+			"properties": {
+        		
+      		}
+		},
+		{
+			"id" : 7551150462584150574,
+			"name" : "OSP-Section-Info",
+			"type" : "OA",
+			"properties": {
+        		
+      		}
+		},
+		{
+			"id" : 6901962756104494162,
+			"name" : "Signature-Info",
+			"type" : "OA",
+			"properties": {
+        		
+      		}
+		},
+		
+		{
+			"id" : 7802207678959344357,
+			"name" : "PI-Info",
+			"type" : "OA",
+			"properties": {
+        		
+      		}
+		},
+		{
+			"id" : -9185667913592477577,
+			"name" : "CoPI-Info",
+			"type" : "OA",
+			"properties": {
+        		
+      		}
+		},
+		{
+			"id" : 7199330667779893433,
+			"name" : "SP-Info",
+			"type" : "OA",
+			"properties": {
+        		
+      		}
+		},
+		
+		
+		{
+			"id" : 780103731515376518,
+			"name" : "PI",
+			"type" : "UA",
+			"properties": {
+        		
+      		}
+		},
+		{
+			"id" : -4306211063214550717,
+			"name" : "CoPI",
+			"type" : "UA",
+			"properties": {
+        		
+      		}
+		},
+		{
+			"id" : -1962468227633535458,
+			"name" : "CoPIAdd",
+			"type" : "UA",
+			"properties": {
+        		
+      		}
+		},
+		{
+			"id" : -5902017007735841032,
+			"name" : "SP",
+			"type" : "UA",
+			"properties": {
+        		
+      		}
+		},
+		{
+			"id" : 2918018706953930328,
+			"name" : "SPAdd",
+			"type" : "UA",
+			"properties": {
+        		
+      		}
+		},
+		
+		{
+			"id" : 9119011481844295193,
+			"name" : "Chair",
+			"type" : "UA",
+			"properties": {
+        		
+      		}
+		},
+		{
+			"id" : -8064244964736173254,
+			"name" : "Business-Manager",
+			"type" : "UA",
+			"properties": {
+        		
+      		}
+		},
+		{
+			"id" : -6146157395029427080,
+			"name" : "Dean",
+			"type" : "UA",
+			"properties": {
+        		
+      		}
+		},
+		{
+			"id" : 5391382021104887608,
+			"name" : "IRB",
+			"type" : "UA",
+			"properties": {
+        		
+      		}
+		},
+		{
+			"id" : 7305893459676862759,
+			"name" : "Research-Admin",
+			"type" : "UA",
+			"properties": {
+        		
+      		}
+		},
+		{
+			"id" : -1686286092320439089,
+			"name" : "Research-Director",
+			"type" : "UA",
+			"properties": {
+        		
+      		}
+		}
+		
+		
+		
+		
+		
+	],
+	
+	
+
+	
+	"assignments":[
+		
+	
+		{
+	      "sourceID": -5902017007735841032, 
+	      "targetID": -4607625889972348117  
+	    },  
+		{                                  
+	      "sourceID": -125095002669469944,  
+	      "targetID": -4607625889972348117  
+	    },
+		{                                  
+	      "sourceID": 9119011481844295193,  
+	      "targetID": -4607625889972348117  
+	    },
+		{                                  
+	      "sourceID": -8064244964736173254,  
+	      "targetID": -4607625889972348117  
+	    },
+		{                                  
+	      "sourceID": -6146157395029427080,  
+	      "targetID": -4607625889972348117  
+	    },
+	    {                                  
+	      "sourceID": 5391382021104887608,  
+	      "targetID": -4607625889972348117  
+	    },
+		{                                  
+	      "sourceID": 7305893459676862759,  
+	      "targetID": -4607625889972348117  
+	    },
+		{                                  
+	      "sourceID": -1686286092320439089,  
+	      "targetID": -4607625889972348117  
+	    },
+		{                                  
+	      "sourceID": 5575516001022439988,  
+	      "targetID": -5449382005586736685  
+	    },                                    
+		{                                  
+	      "sourceID": 2918018706953930328,
+	      "targetID": -5902017007735841032   
+	    },                                  
+		{                                   
+	      "sourceID": -4306211063214550717,
+	      "targetID": 2918018706953930328   
+	    },
+		{                                  
+	      "sourceID": -1962468227633535458, 
+	      "targetID": -4306211063214550717  
+	    },   	
+		{
+	      "sourceID": 780103731515376518, 
+	      "targetID": -1962468227633535458 
+	    },
+		{
+	      "sourceID": -5449382005586736685, 
+	      "targetID": -125095002669469944   
+	    },
+		{
+	      "sourceID": -6615149973776705852,  
+	      "targetID": -5449382005586736685   
+	    },
+		{
+	      "sourceID": 9167503850871231643,  
+	      "targetID": -5449382005586736685  
+	    },
+		
+		{
+	      "sourceID": 2750318422398854466,  
+	      "targetID": 9167503850871231643  
+	    },
+		{
+	      "sourceID": -5354253594823124359,  
+	      "targetID": 9167503850871231643  
+	    },
+		{
+	      "sourceID": -916238785149221322,  
+	      "targetID": 9167503850871231643  
+	    },
+		{
+	      "sourceID": 1081764298527187021,  
+	      "targetID": 9167503850871231643  
+	    },
+		{
+	      "sourceID": 1559676298615558766,  
+	      "targetID": 9167503850871231643  
+	    },
+	    
+	    {
+	      "sourceID": 7001563235694976423, 
+	      "targetID": -6615149973776705852   
+	    },
+	    {
+	      "sourceID": 1432074838181907682, 
+	      "targetID": -6615149973776705852  
+	    },
+		{
+	      "sourceID": 375260122425903544,  
+	      "targetID": 1432074838181907682  
+	    },
+		{
+	      "sourceID": -5341305212299730455, 
+	      "targetID": 1432074838181907682  
+	    },
+	    
+	    {
+	      "sourceID": -190539787517064699,  
+	      "targetID": 375260122425903544  
+	    },
+	    {
+	      "sourceID": 3894258469648060145,  
+	      "targetID": 375260122425903544   
+	    },
+	    {
+	      "sourceID": -8043143079246781366,  
+	      "targetID": 375260122425903544   
+	    },
+	    {
+	      "sourceID": -2397200779418123885,  
+	      "targetID": 375260122425903544   
+	    },
+	    {
+	      "sourceID": 6467546770626657861,  
+	      "targetID": 375260122425903544   
+	    },
+	    {
+	      "sourceID": -1768676899060472986,  
+	      "targetID": 375260122425903544   
+	    },
+	    {
+	      "sourceID": -6310901605321273772,  
+	      "targetID": 375260122425903544   
+	    },
+	    {
+	      "sourceID": -4012432083875732141,  
+	      "targetID": 375260122425903544   
+	    },
+	    {
+	      "sourceID": 7551150462584150574,  
+	      "targetID": 375260122425903544   
+	    },
+	    {
+	      "sourceID": 6901962756104494162, 
+	      "targetID": 375260122425903544  
+	    },
+		{
+	      "sourceID": 780103731515376518, 
+	      "targetID": 6725271236759789516  
+	    },
+	    {
+	      "sourceID": -4306211063214550717, 
+	      "targetID": 6725271236759789516  
+	    }
+    
+	],
+	
+	"associations":[
+	
+		{
+		  "operations": [
+        	"w"
+      		],
+	      "sourceID": 780103731515376518, 
+	      "targetID": 1432074838181907682  
+	    },
+	    {
+		  "operations": [
+        	"Save",
+        	"Delete",
+        	"Submit"
+      		],
+	      "sourceID": 780103731515376518, 
+	      "targetID": -125095002669469944 
+	    },
+		{
+		  "operations": [
+        	"create-o"
+      		],
+	      "sourceID": 780103731515376518, 
+	      "targetID": 5575516001022439988  
+	    },
+		{
+		  "operations": [
+        	"assign-u-to",
+        	"deassign-u-to"
+      		],
+	      "sourceID": 780103731515376518, 
+	      "targetID": -4306211063214550717  
+	    },
+		
+		{
+		  "operations": [
+        	"assign-u-from"
+      		],
+	      "sourceID": -4306211063214550717, 
+	      "targetID": 6809429203704967195  
+	    },
+		
+		{
+		  "operations": [
+        	"assign-u-from"
+      		],
+	      "sourceID": 780103731515376518, 
+	      "targetID": 3281040394433647477  
+	    },
+	    
+	    {
+	      "operations": [
+        	"w"
+      		],
+	      "sourceID": -4306211063214550717, 
+	      "targetID": 375260122425903544  
+	    },
+		{
+	      "operations": [
+        	"Save"
+      		],
+	      "sourceID": -4306211063214550717, 
+	      "targetID": -125095002669469944 
+	    },
+		{
+	      "operations": [
+        	"assign-u-to",
+			"deassign-u-to"
+      		],
+	      "sourceID": -4306211063214550717,
+	      "targetID": -5902017007735841032  
+	    },
+		{
+	      "operations": [
+        	"assign-u-to",
+			"deassign-u-to"
+      		],
+	      "sourceID": 780103731515376518,
+	      "targetID": -5902017007735841032  
+	    },
+	    {
+	      "operations": [
+        	"r"
+      		],
+	      "sourceID": -5902017007735841032, 
+	      "targetID": -5449382005586736685 
+	    }	    
+	    
+	]
+	
+}	

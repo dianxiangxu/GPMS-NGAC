@@ -1,0 +1,525 @@
+{
+	"nodes" : [
+	    
+	    {
+	      "id": -4607625889972348117,
+	      "name": "EditingPolicyAfterSubmission",
+	      "type": "PC",
+	      "properties": {
+	        "default_ua": "-5902017007735841032",
+	        "default_oa": "-125095002669469944"
+	      }
+	    },
+		
+		{
+	      "id": -125095002669469944,
+	      "name": "PDSs",
+	      "type": "OA",
+	      "properties": {
+	        "namespace": "PDS_TEMPLATE"
+	      }
+	    },
+		 {
+			"id" : -5449382005586736685,
+			"name" : "CompositPDS",
+			"type" : "OA",
+			"properties": {
+        		"namespace": "PDS_TEMPLATE"
+      		}
+		},
+		
+		{
+	      "id": -6615149973776705852,
+	      "name": "DataElement",
+	      "type": "OA",
+	     "properties": {
+	        "namespace": "PDS_TEMPLATE"
+	      }
+	    },
+		{
+			"id" : 9167503850871231643,
+			"name" : "ApprovalElement",
+			"type" : "OA",
+			"properties": {
+        		"namespace": "PDS_TEMPLATE"
+      		}
+		},
+		
+		{
+	      "id": 1432074838181907682,
+	      "name": "PIEditable",
+	      "type": "OA",
+	      "properties": {
+	        "namespace": "PDS_TEMPLATE"
+	      }
+	    },
+		
+		{
+	      "id": 375260122425903544,
+	      "name": "CoPIEditable",
+	      "type": "OA",
+	      "properties": {
+	        "namespace": "PDS_TEMPLATE"
+	      }
+	    },
+		
+		{
+			"id" : 7001563235694976423,
+			"name" : "InvestigatorInfo",
+			"type" : "OA",
+			"properties": {
+        		"namespace": "PDS_TEMPLATE"
+      		}
+			
+		},
+		{
+			"id" : -5341305212299730455,
+			"name" : "BudgetInfo",
+			"type" : "OA",
+			"properties": {
+        		"namespace": "PDS_TEMPLATE"
+      		}
+		},
+		{
+			"id" : -190539787517064699,
+			"name" : "ProjectInfo",
+			"type" : "OA",
+			"properties": {
+        		"namespace": "PDS_TEMPLATE"
+      		}
+		},
+		{
+			"id" : 3894258469648060145,
+			"name" : "CostShareInfo",
+			"type" : "OA",
+			"properties": {
+        		"namespace": "PDS_TEMPLATE"
+      		}
+		},
+		{
+			"id" : -8043143079246781366,
+			"name" : "UniversityCommitmentsInfo",
+			"type" : "OA",
+			"properties": {
+        		"namespace": "PDS_TEMPLATE"
+      		}
+		},
+		{
+			"id" : -2397200779418123885,
+			"name" : "ConflictOfInterestInfo",
+			"type" : "OA",
+			"properties": {
+        		"namespace": "PDS_TEMPLATE"
+      		}
+		},
+		{
+			"id" : 6467546770626657861,
+			"name" : "ComplianceInfo",
+			"type" : "OA",
+			"properties": {
+        		"namespace": "PDS_TEMPLATE"
+      		}
+		},
+		{
+			"id" : -1768676899060472986,
+			"name" : "AdditionalInfo",
+			"type" : "OA",
+			"properties": {
+        		"namespace": "PDS_TEMPLATE"
+      		}
+		},
+		{
+			"id" : -6310901605321273772,
+			"name" : "CollaborationInfo",
+			"type" : "OA",
+			"properties": {
+        		"namespace": "PDS_TEMPLATE"
+      		}
+		},
+		{
+			"id" : -4012432083875732141,
+			"name" : "ConfidentialInfo",
+			"type" : "OA",
+			"properties": {
+        		"namespace": "PDS_TEMPLATE"
+      		}
+		},
+		{
+			"id" : 7551150462584150574,
+			"name" : "OSPSectionInfo",
+			"type" : "OA",
+			"properties": {
+        		"namespace": "PDS_TEMPLATE"
+      		}
+		},
+		{
+			"id" : 6901962756104494162,
+			"name" : "SignatureInfo",
+			"type" : "OA",
+			"properties": {
+        		"namespace": "PDS_TEMPLATE"
+      		}
+		},
+		
+		{
+			"id" : 7802207678959344357,
+			"name" : "PI",
+			"type" : "OA",
+			"properties": {
+        		"namespace": "PDS_TEMPLATE"
+      		}
+		},
+		{
+			"id" : -9185667913592477577,
+			"name" : "CoPI",
+			"type" : "OA",
+			"properties": {
+        		"namespace": "PDS_TEMPLATE"
+      		}
+		},
+		{
+			"id" : 7199330667779893433,
+			"name" : "SP",
+			"type" : "OA",
+			"properties": {
+        		"namespace": "PDS_TEMPLATE"
+      		}
+		},
+		{
+			"id" : 780103731515376518,
+			"name" : "PI",
+			"type" : "UA",
+			"properties": {
+        		"namespace": "PDS_TEMPLATE"
+      		}
+		},
+		{
+			"id" : -4306211063214550717,
+			"name" : "CoPI",
+			"type" : "UA",
+			"properties": {
+        		"namespace": "PDS_TEMPLATE"
+      		}
+		},
+		{
+			"id" : -1962468227633535458,
+			"name" : "CoPIAdd",
+			"type" : "UA",
+			"properties": {
+        		"namespace": "PDS_TEMPLATE"
+      		}
+		},
+		
+		{
+			"id" : 2918018706953930328,
+			"name" : "SPAdd",
+			"type" : "UA",
+			"properties": {
+        		"namespace": "PDS_TEMPLATE"
+      		}
+		},
+		{
+			"id" : -5902017007735841032,
+			"name" : "SP",
+			"type" : "UA",
+			"properties": {
+        		"namespace": "PDS_TEMPLATE"
+      		}
+		},
+		
+		{
+			"id" : -8087512419355742949,
+			"name" : "Chairs",
+			"type" : "UA",
+			"properties": {
+        		"namespace": "PDS_TEMPLATE"
+      		}
+		},
+		{
+			"id" : -8213502542059200063,
+			"name" : "BusinessManagers",
+			"type" : "UA",
+			"properties": {
+        		"namespace": "PDS_TEMPLATE"
+      		}
+		},
+		{
+			"id" : 8119012269646740694,
+			"name" : "Deans",
+			"type" : "UA",
+			"properties": {
+        		"namespace": "PDS_TEMPLATE"
+      		}
+		},
+		{
+			"id" : 7526102568163640020,
+			"name" : "ResearchAdmins",
+			"type" : "UA",
+			"properties": {
+        		"namespace": "PDS_TEMPLATE"
+      		}
+		},
+		{
+			"id" : 6683744691988964244,
+			"name" : "ResearchDirector",
+			"type" : "UA",
+			"properties": {
+        		"namespace": "PDS_TEMPLATE"
+      		}
+		},
+		{
+			"id" : -4213328588259937921,
+			"name" : "ChairsApproval",
+			"type" : "OA",
+			"properties": {
+        		"namespace": "PDS_TEMPLATE"
+      		}
+		},
+		{
+			"id" : -8380533135508416220,
+			"name" : "MBsApproval",
+			"type" : "OA",
+			"properties": {
+        		"namespace": "PDS_TEMPLATE"
+      		}
+		},
+		{
+			"id" : 1744436250277518368,
+			"name" : "DeansApproval",
+			"type" : "OA",
+			"properties": {
+        		"namespace": "PDS_TEMPLATE"
+      		}
+		},
+		{
+			"id" : -6727767071968202210,
+			"name" : "ResearchAdminsApproval",
+			"type" : "OA",
+			"properties": {
+        		"namespace": "PDS_TEMPLATE"
+      		}
+		},
+		{
+			"id" : -1179402023187096175,
+			"name" : "ResearchDirsApproval",
+			"type" : "OA",
+			"properties": {
+        		"namespace": "PDS_TEMPLATE"
+      		}
+		},
+		{
+			"id" : 8771916494888830884,
+			"name" : "ApproveOrSign",
+			"type" : "OA",
+			"properties": {
+        		"namespace": "PDS_TEMPLATE"
+      		}
+		},
+		{
+			"id" : 8854849565094507154,
+			"name" : "Reject",
+			"type" : "OA",
+			"properties": {
+        		"namespace": "PDS_TEMPLATE"
+      		}
+		},
+		{
+			"id" : 6859259900837840485,
+			"name" : "Comment",
+			"type" : "OA",
+			"properties": {
+        		"namespace": "PDS_TEMPLATE"
+      		}
+		}
+		
+	],
+	
+	
+	"assignments":[
+		
+		
+		{
+	      "sourceID": -5902017007735841032,
+	      "targetID": -4607625889972348117 
+	    },  
+		{                                  
+	      "sourceID": -125095002669469944, 
+	      "targetID": -4607625889972348117 
+	    },
+		{
+	      "sourceID": -8087512419355742949,
+	      "targetID": -4607625889972348117 
+	    },  
+		{
+	      "sourceID": -8213502542059200063,
+	      "targetID": -4607625889972348117 
+	    }, 
+ 		{
+	      "sourceID": 8119012269646740694, 
+	      "targetID": -4607625889972348117 
+	    }, 
+		{
+	      "sourceID": 7526102568163640020, 
+	      "targetID": -4607625889972348117 
+	    }, 
+		{
+	      "sourceID": 6683744691988964244, 
+	      "targetID": -4607625889972348117 
+	    }, 
+		                                   
+		{                                  
+	      "sourceID": 2918018706953930328, 
+	      "targetID": -5902017007735841032 
+	    },                                 
+		{                                  
+	      "sourceID": -4306211063214550717,
+	      "targetID": 2918018706953930328  
+	    },
+		{                                  
+	      "sourceID": -1962468227633535458,
+	      "targetID": -4306211063214550717 
+	    },   	
+		{
+	      "sourceID": 780103731515376518,  
+	      "targetID": -1962468227633535458 
+	    },
+		{
+	      "sourceID": -5449382005586736685,
+	      "targetID": -125095002669469944  
+	    },
+		{
+	      "sourceID": -6615149973776705852,
+	      "targetID": -5449382005586736685 
+	    },
+		{
+	      "sourceID": 9167503850871231643, 
+	      "targetID": -5449382005586736685 
+	    },
+	    
+	    {
+	      "sourceID": 7001563235694976423, 
+	      "targetID": -6615149973776705852 
+	    },
+	    {
+	      "sourceID": 1432074838181907682, 
+	      "targetID": -6615149973776705852 
+	    },
+		{
+	      "sourceID": 375260122425903544,  
+	      "targetID": 1432074838181907682  
+	    },
+		{
+	      "sourceID": -5341305212299730455,
+	      "targetID": 1432074838181907682  
+	    },
+	    
+	    {
+	      "sourceID": -190539787517064699, 
+	      "targetID": 375260122425903544   
+	    },
+	    {
+	      "sourceID": 3894258469648060145, 
+	      "targetID": 375260122425903544   
+	    },
+	    {
+	      "sourceID": -8043143079246781366,
+	      "targetID": 375260122425903544   
+	    },
+	    {
+	      "sourceID": -2397200779418123885,
+	      "targetID": 375260122425903544   
+	    },
+	    {
+	      "sourceID": 6467546770626657861, 
+	      "targetID": 375260122425903544   
+	    },
+	    {
+	      "sourceID": -1768676899060472986,
+	      "targetID": 375260122425903544   
+	    },
+	    {
+	      "sourceID": -6310901605321273772,
+	      "targetID": 375260122425903544   
+	    },
+	    {
+	      "sourceID": -4012432083875732141,
+	      "targetID": 375260122425903544   
+	    },
+	    {
+	      "sourceID": 7551150462584150574,  
+	      "targetID": 375260122425903544   
+	    },
+	    {
+	      "sourceID": 6901962756104494162, 
+	      "targetID": 375260122425903544   
+	    },
+		{
+	      "sourceID": -4213328588259937921,
+	      "targetID": 9167503850871231643  
+	    },
+		{
+	      "sourceID": -8380533135508416220,
+	      "targetID": 9167503850871231643  
+	    },
+		{
+	      "sourceID": 1744436250277518368, 
+	      "targetID": 9167503850871231643  
+	    },
+		{
+	      "sourceID": -6727767071968202210,
+	      "targetID": 9167503850871231643  
+	    },
+		{
+	      "sourceID": -1179402023187096175,
+	      "targetID": 9167503850871231643  
+	    },
+		{
+	      "sourceID": 6859259900837840485, 
+	      "targetID": -4213328588259937921 
+	    },
+		{
+	      "sourceID": 8771916494888830884, 
+	      "targetID": 6859259900837840485  
+	    },
+		 {
+	      "sourceID": 8854849565094507154, 
+	      "targetID": 6859259900837840485  
+	    }
+	],
+	
+	"associations":[
+	
+		{
+	      "operations": [
+        	"r"
+      		],
+	      "sourceID": -5902017007735841032,
+	      "targetID": -5449382005586736685 
+	    },	  
+		{
+		  "operations": [
+        	"r"
+      		],
+	      "sourceID": -8087512419355742949,
+	      "targetID": -5449382005586736685 
+	    },
+		{
+		  "operations": [
+        	"assign-o"
+      		],
+	      "sourceID": -8087512419355742949,
+	      "targetID": -4213328588259937921 
+	    },
+	    {
+		  "operations": [
+        	"Approve",
+        	"Disapprove"
+      		],
+	      "sourceID": -8087512419355742949,
+	      "targetID": -125095002669469944  
+	    }
+	    
+	]
+	
+}	
+

@@ -1,0 +1,69 @@
+{	"nodes":[
+	
+	{
+      "id": 4052416637635911800,
+      "name": "approval",
+      "type": "PC",
+      "properties": {
+        "default_ua": "-1803058124293847229",
+        "default_oa": "-6790062770177027761"
+      }
+    },
+	
+	{
+      "id": -1803058124293847229,
+      "name": "approval",
+      "type": "UA",
+      "properties": {
+        "namespace": "approval"
+      }
+    },
+	{
+      "id": -6790062770177027761,
+      "name": "approval",
+      "type": "OA",
+      "properties": {
+        "namespace": "approval"
+      }
+    }
+    
+	
+	],
+	
+	"assignments" :[
+	
+	 {
+      "sourceID": -1803058124293847229, 
+      "targetID": 4052416637635911800   
+    },
+	 {
+      "sourceID": 6674456450717933892,  
+      "targetID": 4052416637635911800   
+    },
+	 
+    {
+      "sourceID": -6790062770177027761, 
+      "targetID": 4052416637635911800   
+    }
+	
+	],
+	
+	"associations":
+	[
+	  {
+      "operations": [
+        "*"
+      ],
+      "sourceID": 6674456450717933892,  
+      "targetID": -6790062770177027761  
+    },
+	
+	 {
+      "operations": [
+        "*"
+      ],
+      "sourceID": 6674456450717933892,  
+      "targetID": -1803058124293847229  
+    }
+	]
+}

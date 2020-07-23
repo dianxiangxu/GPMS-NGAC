@@ -1,0 +1,32 @@
+{
+	"tasks":[
+		{
+			"name" : "Create Proposal",
+			"code" : "1001",
+			"permissions" : [
+				{
+					"attribute_name" : "RBAC_PDSs",
+					"type" : "OA",
+					"access_right_set" : ["assign", "assign to"]
+				}
+			]
+		},
+		{
+			"name" : "Add CoPI",
+			"code" : "1002",
+			"permissions" : [
+				{
+					"attribute_name" : "faculty",
+					"type" : "UA",
+					"access_right_set" : ["assign from"]
+				},
+				{
+					"attribute_name" : "PI",
+					"type" : "OA",
+					"access_right_set" : ["assign", "assign to"]
+				}
+			]
+		}
+		
+		]
+}

@@ -1,0 +1,103 @@
+{	"nodes" :[
+	{
+      "id": -2290196160925753798,
+      "name": "PDS",
+      "type": "PC",
+      "properties": {
+        "default_ua": "7864348816142508224",
+        "default_oa": "-4485836466973897276"
+      }
+    },
+	
+	{
+      "id": -8343754015336576481,
+      "name": "PDSs",
+      "type": "UA",
+      "properties": {
+        "namespace": "PDS"
+      }
+    },
+	
+	{
+      "id": -1246189650788113361,
+      "name": "PDSs",
+      "type": "OA",
+      "properties": {
+        "namespace": "PDS"
+      }
+    },
+	 {
+      "id": -4485836466973897276,
+      "name": "PDS",
+      "type": "OA",
+      "properties": {
+        "namespace": "PDS"
+      }
+    },
+	
+	{
+      "id": 7864348816142508224,
+      "name": "PDS",
+      "type": "UA",
+      "properties": {
+        "namespace": "PDS"
+      }
+    },
+    
+    {
+      "id": -1556042382821103730,
+      "name": "submitted_pdss",
+      "type": "OA",
+      "properties": {}
+    }
+	
+	],	
+	
+	"assignments" :[
+	
+	 {
+      "sourceID": -4485836466973897276, 
+      "targetID": -2290196160925753798  
+    },                                  
+	                                    
+	 {                                  
+      "sourceID": -1556042382821103730, 
+      "targetID": -4485836466973897276  
+    },                                  
+	 {                                  
+      "sourceID": -1246189650788113361, 
+      "targetID": -4485836466973897276  
+    },                                  
+	 {                                  
+      "sourceID": 7864348816142508224,  
+      "targetID": -2290196160925753798  
+    },                                  
+	                                    
+	{                                   
+      "sourceID": -8343754015336576481, 
+      "targetID": 7864348816142508224   
+    },
+	{
+      "sourceID": 6674456450717933892,  
+      "targetID": -2290196160925753798  
+    }
+	],
+	
+	"associations": [
+	{
+      "operations": [
+        "*"
+      ],
+      "sourceID": 6674456450717933892,  
+      "targetID": 7864348816142508224   
+    },
+	
+	 {
+      "operations": [
+        "*"
+      ],
+      "sourceID": 6674456450717933892,  
+      "targetID": -4485836466973897276  
+    }
+	]
+}

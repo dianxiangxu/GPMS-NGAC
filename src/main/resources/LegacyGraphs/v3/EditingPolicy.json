@@ -1,0 +1,611 @@
+{
+ "nodes" : [  
+     {
+       "name": "EditingPolicyClass",
+       "type": "PC",
+       "properties": {
+         "default_ua": "SP",
+         "default_oa": "PDSs"
+       }
+     },
+      {
+      "name": "Approval Content",
+      "type": "OA",
+      "properties": {
+        
+      }
+    },
+  {
+       "name": "Audit Log",
+       "type": "OA",
+       "properties": {
+         
+       }
+     },
+  {
+       "name": "PDSs",
+       "type": "OA",
+       "properties": {
+         
+       }
+     },
+   {
+   "name" : "Composite-PDS",
+   "type" : "OA",
+   "properties": {
+          
+        }
+  },
+  
+  {
+       "name": "Data-Element",
+       "type": "OA",
+      "properties": {
+         
+       }
+     },
+  {
+   "name" : "Approval-Element",
+   "type" : "OA",
+   "properties": {
+          
+        }
+  },
+  {
+   "name" : "Chair-Approval",
+   "type" : "OA",
+   "properties": {
+          
+        }
+  },
+  {
+   "name" : "BM-Approval",
+   "type" : "OA",
+   "properties": {
+          
+        }
+  },
+  {
+   "name" : "Dean-Approval",
+   "type" : "OA",
+   "properties": {
+          
+        }
+  },
+  {
+   "name" : "IRB-Approval",
+   "type" : "OA",
+   "properties": {
+          
+        }
+  },
+  {
+   "name" : "Research-Admin-Approval",
+   "type" : "OA",
+   "properties": {
+          
+        }
+  },
+  {
+   "name" : "Research-Director-Approval",
+   "type" : "OA",
+   "properties": {
+          
+        }
+  },
+  {
+   "name" : "Approval",
+   "type" : "OA",
+   "properties": {
+          
+        }
+  },
+  {
+   "name" : "Disapproval",
+   "type" : "OA",
+   "properties": {
+          
+        }
+  },
+  {
+   "name" : "Comment-Sign",
+   "type" : "OA",
+   "properties": {
+          
+        }
+  },
+  
+  {
+   "name" : "Submission-Info",
+   "type" : "OA",
+   "properties": {
+          
+        }
+  },
+  
+  {
+       "name": "PI-Editable-Data",
+       "type": "OA",
+       "properties": {
+         
+       }
+     },
+  
+  {
+       "name": "CoPI-Editable-Data",
+       "type": "OA",
+       "properties": {
+         
+       }
+     },
+  
+  {
+   "name" : "Investigator-Info",
+   "type" : "OA",
+   "properties": {
+          
+        }
+   
+  },
+  {
+   "name" : "Budget-Info",
+   "type" : "OA",
+   "properties": {
+          
+        }
+  },
+  {
+   "name" : "Project-Info",
+   "type" : "OA",
+   "properties": {
+          
+        }
+  },
+  {
+   "name" : "Cost-Share-Info",
+   "type" : "OA",
+   "properties": {
+          
+        }
+  },
+  {
+   "name" : "University-Commitments-Info",
+   "type" : "OA",
+   "properties": {
+          
+        }
+  },
+  {
+   "name" : "Conflict-Of-Interest-Info",
+   "type" : "OA",
+   "properties": {
+          
+        }
+  },
+  {
+   "name" : "Compliance-Info",
+   "type" : "OA",
+   "properties": {
+          
+        }
+  },
+  {
+   "name" : "Additional-Info",
+   "type" : "OA",
+   "properties": {
+          
+        }
+  },
+  {
+   "name" : "Collaboration-Info",
+   "type" : "OA",
+   "properties": {
+          
+        }
+  },
+  {
+   "name" : "Confidential-Info",
+   "type" : "OA",
+   "properties": {
+          
+        }
+  },
+  {
+   "name" : "OSP-Section-Info",
+   "type" : "OA",
+   "properties": {
+          
+        }
+  },
+  {
+   "name" : "Signature-Info",
+   "type" : "OA",
+   "properties": {
+          
+        }
+  },
+  
+  {
+   "name" : "PI-Info",
+   "type" : "OA",
+   "properties": {
+          
+        }
+  },
+  {
+   "name" : "CoPI-Info",
+   "type" : "OA",
+   "properties": {
+          
+        }
+  },
+  {
+   "name" : "SP-Info",
+   "type" : "OA",
+   "properties": {
+          
+        }
+  },
+  
+  
+  {
+   "name" : "PI",
+   "type" : "UA",
+   "properties": {
+          
+        }
+  },
+  {
+   "name" : "CoPI",
+   "type" : "UA",
+   "properties": {
+          
+        }
+  },
+  {
+   "name" : "CoPIAdd",
+   "type" : "UA",
+   "properties": {
+          
+        }
+  },
+  {
+   "name" : "SP",
+   "type" : "UA",
+   "properties": {
+          
+        }
+  },
+  {
+   "name" : "SPAdd",
+   "type" : "UA",
+   "properties": {
+          
+        }
+  },
+  
+  {
+   "name" : "Chair",
+   "type" : "UA",
+   "properties": {
+          
+        }
+  },
+  {
+   "name" : "Business-Manager",
+   "type" : "UA",
+   "properties": {
+          
+        }
+  },
+  {
+   "name" : "Dean",
+   "type" : "UA",
+   "properties": {
+          
+        }
+  },
+  {
+   "name" : "IRB",
+   "type" : "UA",
+   "properties": {
+          
+        }
+  },
+  {
+   "name" : "Research-Admin",
+   "type" : "UA",
+   "properties": {
+          
+        }
+  },
+  {
+   "name" : "Research-Director",
+   "type" : "UA",
+   "properties": {
+          
+        }
+  }
+  
+  
+  
+  
+  
+ ],
+ 
+ 
+
+ 
+ "assignments":[
+  
+  {                                  
+       "source": "Audit Log",  
+       "target": "EditingPolicyClass"  
+     },
+  {
+       "source": "SP", 
+       "target":"EditingPolicyClass" 
+     },  
+  {                                  
+       "source": "PDSs",  
+       "target":"EditingPolicyClass" 
+     },
+  {                                  
+       "source": "Chair",  
+       "target": "EditingPolicyClass"  
+     },
+  {                                  
+       "source": "Business-Manager",  
+       "target": "EditingPolicyClass"  
+     },
+  {                                  
+       "source": "Dean",  
+       "target": "EditingPolicyClass"  
+     },
+     {                                  
+       "source": "IRB",  
+       "target":"EditingPolicyClass" 
+     }
+     ,
+     {                                  
+       "source": "Approval Content",  
+       "target":"EditingPolicyClass" 
+     },
+  {                                  
+       "source": "Research-Admin",  
+       "target":"EditingPolicyClass"  
+     },
+  {                                  
+       "source": "Research-Director",  
+       "target": "EditingPolicyClass"  
+     },
+  {                                  
+       "source": "Submission-Info",  
+       "target": "Composite-PDS"  
+     },                                    
+  {                                  
+       "source": "SPAdd",
+       "target": "SP"   
+     },                                  
+  {                                   
+       "source": "CoPI",
+       "target": "SPAdd"   
+     },
+  {                                  
+       "source": "CoPIAdd", 
+       "target": "CoPI"  
+     },    
+  {
+       "source": "PI", 
+       "target": "CoPIAdd" 
+     },
+  {
+       "source": "Composite-PDS", 
+       "target": "PDSs"   
+     },
+  {
+       "source": "Data-Element",  
+       "target": "Composite-PDS"   
+     },
+  {
+       "source": "Approval-Element",  
+       "target": "Composite-PDS"  
+     },
+  
+  {
+       "source": "Chair-Approval",  
+       "target": "Approval-Element"  
+     },
+  {
+       "source": "BM-Approval",  
+       "target": "Approval-Element"  
+     },
+       {
+       "source": "IRB-Approval",  
+       "target": "Approval-Element"  
+     },
+  {
+       "source": "Dean-Approval",  
+       "target": "Approval-Element"  
+     },
+  {
+       "source": "Research-Admin-Approval",  
+       "target": "Approval-Element"  
+     },
+  {
+       "source": "Research-Director-Approval",  
+       "target": "Approval-Element"  
+     },
+     
+     {
+       "source": "Investigator-Info", 
+       "target": "Data-Element"   
+     },
+     {
+       "source": "PI-Editable-Data", 
+       "target": "Data-Element"  
+     },
+  {
+       "source": "CoPI-Editable-Data",  
+       "target": "PI-Editable-Data"  
+     },
+  {
+       "source": "Budget-Info", 
+       "target": "PI-Editable-Data"  
+     },
+     
+     {
+       "source": "Project-Info",  
+       "target": "CoPI-Editable-Data"  
+     },
+     {
+       "source": "Cost-Share-Info",  
+       "target": "CoPI-Editable-Data"   
+     },
+     {
+       "source": "University-Commitments-Info",  
+       "target": "CoPI-Editable-Data"   
+     },
+     {
+       "source": "Conflict-Of-Interest-Info",  
+       "target": "CoPI-Editable-Data"   
+     },
+     {
+       "source": "Compliance-Info",  
+       "target": "CoPI-Editable-Data"   
+     },
+     {
+       "source": "Additional-Info",  
+       "target": "CoPI-Editable-Data"   
+     },
+     {
+       "source": "Collaboration-Info",  
+       "target": "CoPI-Editable-Data"   
+     },
+     {
+       "source": "Confidential-Info",  
+       "target": "CoPI-Editable-Data"   
+     },
+     {
+       "source": "OSP-Section-Info",  
+       "target": "CoPI-Editable-Data"   
+     },
+     {
+       "source": "Signature-Info", 
+       "target": "CoPI-Editable-Data"  
+     },
+  {
+       "source": "PI", 
+       "target": "EligibilityPolicyClass"  
+     },
+     {
+       "source": "CoPI", 
+       "target": "EligibilityPolicyClass"  
+     }, {
+       "source": "PI-Info", 
+       "target": "Investigator-Info"  
+     }, {
+       "source": "CoPI-Info", 
+       "target": "Investigator-Info"  
+     }, {
+       "source": "SP-Info", 
+       "target": "Investigator-Info"  
+     }
+    
+ ],
+ 
+ "associations":[
+ 
+  {
+    "operations": [
+         "write"
+        ],
+       "source": "PI", 
+       "target": "PI-Editable-Data"  
+     },
+     {
+    "operations": [
+         "Save",
+         "Delete",
+         "Submit"
+        ],
+       "source": "PI", 
+       "target": "PDSs" 
+     },
+  {
+    "operations": [
+         "create-o"
+        ],
+       "source": "PI", 
+       "target": "Submission-Info"  
+     },
+  {
+    "operations": [
+         "add-copi",
+         "delete-copi"
+        ],
+       "source": "PI", 
+       "target": "CoPI"  
+     },    
+     {
+    "operations": [
+         "add-sp",
+         "delete-sp"
+        ],
+       "source": "PI", 
+       "target": "SP"  
+     },
+     {
+       "operations": [
+         "write"
+        ],
+       "source": "CoPI", 
+       "target": "CoPI-Editable-Data"  
+     },
+  {
+       "operations": [
+         "Save"
+        ],
+       "source": "CoPI", 
+       "target": "PDSs" 
+     },
+  {
+       "operations": [
+         "add-sp",
+         "delete-sp"
+        ],
+       "source": "CoPI",
+       "target": "SP"  
+     },
+  {
+       "operations": [
+         "add-sp",
+         "delete-sp"
+        ],
+       "source": "PI",
+       "target": "SP"  
+     },
+     {
+       "operations": [
+         "r"
+        ],
+       "source": "SP", 
+       "target": "Composite-PDS" 
+     },     
+     {
+       "operations": [
+         "ViewLog"
+        ],
+       "source": "PI", 
+       "target": "Audit Log" 
+     },
+      {
+       "operations": [
+         "read"
+        ],
+       "source": "SP", 
+       "target": "PDSs" 
+     }
+ ]
+ 
+} 

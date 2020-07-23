@@ -1,0 +1,519 @@
+{    "nodes" : [
+ {
+      "name": "University Organization",
+      "type": "PC",
+      "properties": {
+        
+      }
+    },
+ {
+      "name": "HR",
+      "type": "UA",
+      "properties": {
+      }
+    },
+ 
+ {
+      "name": "OSP",
+      "type": "UA",
+      "properties": {
+      }
+    },
+  
+ {
+      "name": "colleges",
+      "type": "UA",
+      "properties": {}
+    },
+  
+  {
+      "name": "COEN",
+      "type": "UA",
+      "properties": {}
+    },
+   {
+      "name": "COAS",
+      "type": "UA",
+      "properties": {}
+    },
+ 
+ {
+      "name": "Research Admin",
+      "type": "UA",
+      "properties": {}
+    },
+ 
+ {
+      "name": "Research Director",
+      "type": "UA",
+      "properties": {}
+    },
+ {
+      "name": "IRB",
+      "type": "UA",
+      "properties": {}
+    },
+ 
+ {
+      "name": "COAS Dean",
+      "type": "UA",
+      "properties": {
+        "dean": "COAS"
+      }
+    },
+ {
+      "name": "COEN Dean",
+      "type": "UA",
+      "properties": {
+        "dean": "COEN"
+      }
+    },
+    
+  {
+      "name": "CS Chair",
+      "type": "UA",
+      "properties": {
+        "chair": "CS"
+      }
+    },
+ {
+      "name": "CE Chair",
+      "type": "UA",
+      "properties": {
+        "chair": "CE"
+      }
+    },
+ {
+      "name": "CE Business Manager",
+      "type": "UA",
+      "properties": {
+        "chair": "CE"
+      }
+    },
+ {
+      "name": "ECE Chair",
+      "type": "UA",
+      "properties": {
+        "chair": "ECE"
+      }
+    },
+  {
+      "name": "PHYSICS Chair",
+      "type": "UA",
+      "properties": {
+        "chair": "PHYSICS"
+      }
+    },
+    
+    {
+      "name": "CHEMISTRY Chair",
+      "type": "UA",
+      "properties": {
+        "chair": "CHEMISTRY"
+      }
+    },
+ 
+ {
+      "name": "CS Business Manager",
+      "type": "UA",
+      "properties": {}
+    },
+ {
+      "name": "CHEMISTRY Business Manager",
+      "type": "UA",
+      "properties": {}
+    },
+ {
+      "name": "ECE Business Manager",
+      "type": "UA",
+      "properties": {}
+    },
+ {
+      "name": "PHYSICS Business Manager",
+      "type": "UA",
+      "properties": {}
+    },
+ 
+ {
+      "name": "ECE",
+      "type": "UA",
+      "properties": {}
+    },
+ {
+      "name": "CS",
+      "type": "UA",
+      "properties": {}
+    },
+ {
+      "name": "CE",
+      "type": "UA",
+      "properties": {}
+    },
+    
+ {
+      "name": "CHEMISTRY",
+      "type": "UA",
+      "properties": {}
+    },
+  {
+      "name": "PHYSICS",
+      "type": "UA",
+      "properties": {}
+    },
+ {
+      "name": "deancomputerscience",
+      "type": "U",
+      "properties": {}
+    },
+ {
+      "name": "deancomputerengineering",
+      "type": "U",
+      "properties": {}
+    },
+ {
+      "name": "deanelectricalengineering",
+      "type": "U",
+      "properties": {}
+    },
+ 
+    {
+      "name": "deanphysics1",
+      "type": "U",
+      "properties": {}
+    },
+ {
+      "name": "deanchemistry1",
+      "type": "U",
+      "properties": {}
+    },
+ {
+      "name": "chaircomputerscience",
+      "type": "U",
+      "properties": {}
+    },
+ {
+      "name": "bmcomputerscience",
+      "type": "U",
+      "properties": {}
+    },
+ {
+      "name": "chaircomputerengineering",
+      "type": "U",
+      "properties": {}
+    },
+ {
+      "name": "bmcomputerengineering1",
+      "type": "U",
+      "properties": {}
+    },
+ {
+      "name": "chairelectricalengineering",
+      "type": "U",
+      "properties": {}
+    },
+ {
+      "name": "bmelectricalengineering",
+      "type": "U",
+      "properties": {}
+    },
+ {
+      "name": "chairphysics1",
+      "type": "U",
+      "properties": {}
+    },
+ {
+      "name": "bmphysics1",
+      "type": "U",
+      "properties": {}
+    },
+ {
+      "name": "chairchemistry",
+      "type": "U",
+      "properties": {}
+    },
+ {
+      "name": "bmchemistry1",
+      "type": "U",
+      "properties": {}
+    },
+ {
+      "name": "racomputerscience",
+      "type": "U",
+      "properties": {}
+    },
+ {
+      "name": "directorcomputerscience",
+      "type": "U",
+      "properties": {}
+    },
+ {
+      "name": "irbglobal",
+      "type": "U",
+      "properties": {}
+    }
+ 
+   
+ ],
+ 
+ "assignments":[
+ 
+ {
+      "source": "CS", 
+      "target": "COEN"  
+    },
+  {
+      "source": "ECE", 
+      "target": "COEN"  
+    },
+ {
+      "source": "CE", 
+      "target": "COEN"  
+    },
+ {
+      "source": "CE Chair", 
+      "target": "CE"  
+    },
+ {
+      "source": "CE Business Manager", 
+      "target": "CE"  
+    },
+ {
+      "source": "CHEMISTRY",  
+      "target": "COAS"   
+    },
+ {
+      "source": "PHYSICS", 
+      "target": "COAS"   
+    },
+   
+  {
+      "source": "COAS Dean",  
+      "target": "COAS"  
+    },
+ 
+ {
+      "source": "COEN Dean",
+      "target": "COEN" 
+    },
+ 
+     {
+      "source": "CHEMISTRY Chair",  
+      "target": "CHEMISTRY"  
+    },
+ 
+  {
+      "source": "CHEMISTRY Business Manager", 
+      "target": "CHEMISTRY"  
+    },
+   
+  {
+      "source": "CS Chair",  
+      "target": "CS"   
+    },
+ {
+   "source": "nazmul",  
+      "target": "CS"  
+ },
+ {
+      "source": "CS Business Manager",   
+      "target": "CS"   
+    },
+  
+ {
+      "source": "PHYSICS Chair",  
+      "target": "PHYSICS"  
+    },
+ 
+ {
+      "source": "PHYSICS Business Manager",  
+      "target": "PHYSICS"  
+    },
+
+ {
+      "source": "ECE Chair",  
+      "target": "ECE"  
+    },
+ 
+ {
+      "source": "ECE Business Manager",  
+      "target": "ECE"  
+    },
+ 
+ {
+      "source": "COEN", 
+      "target": "colleges"  
+    },
+      
+    {
+      "source": "COAS",  
+      "target": "colleges"  
+    },    {
+      "source": "irbglobal",  
+      "target": "colleges"  
+    },
+ 
+ {
+      "source": "Research Admin",  
+      "target": "OSP"    
+    },
+ {
+      "source": "Research Director", 
+      "target": "OSP"    
+    },
+ {
+      "source": "IRB", 
+      "target": "OSP"    
+    },
+     {
+      "source": "colleges", 
+      "target": "University Organization"   
+    },
+ 
+    {
+      "source": "HR", 
+      "target": "University Organization"   
+    },
+ 
+ {
+      "source": "OSP",  
+      "target": "University Organization"   
+    },
+    
+    
+ {
+      "source": "super_ua1",  
+      "target": "University Organization"   
+    },
+ 
+ 
+ {
+      "source": "tomtom",  
+      "target": "CHEMISTRY"   
+    },
+ 
+ {
+      "source": "liliana",  
+      "target": "CS"   
+    }, 
+    {
+      "source": "samer",  
+      "target": "ECE"   
+    },
+ {
+      "source": "NickC",  
+      "target": "PHYSICS"   
+    },
+ {
+      "source": "selena",  
+      "target": "CHEMISTRY"  
+    },
+ {
+      "source": "tamanna",  
+      "target": "CS"  
+    },
+ {
+      "source": "edmund",  
+      "target": "CS"  
+    },
+ {
+      "source": "milson",  
+      "target": "CS"  
+    },
+ {
+      "source": "deancomputerscience",  
+      "target": "COEN Dean"   
+    },
+ {
+      "source": "deancomputerengineering",  
+      "target": "COEN Dean"   
+    },
+ {
+      "source": "deanelectricalengineering",  
+      "target": "COEN Dean"   
+    },
+ {
+      "source": "deanphysics1",  
+      "target": "COAS Dean"   
+    },
+ {
+      "source": "deanchemistry1",  
+      "target": "COAS Dean"   
+    },
+ {
+      "source": "chaircomputerscience",  
+      "target": "CS Chair"  
+    },
+ {
+      "source": "bmcomputerscience",  
+      "target": "CS Business Manager"   
+    },
+ {
+      "source": "chaircomputerengineering",  
+      "target": "CE Chair"   
+    },
+ {
+      "source": "bmcomputerengineering1",  
+      "target": "CE Business Manager"  
+    },
+ {
+      "source": "chairelectricalengineering",  
+      "target": "ECE Chair"   
+    },
+ {
+      "source": "bmelectricalengineering",  
+      "target": "ECE Business Manager"   
+    },
+ {
+      "source": "chairphysics1",  
+      "target": "PHYSICS Chair"   
+    },
+ {
+      "source": "bmphysics1",  
+      "target": "PHYSICS Business Manager"   
+    },
+ {
+      "source": "chairchemistry",  
+      "target": "CHEMISTRY Chair" 
+    },
+ {
+      "source": "bmchemistry1",  
+      "target": "CHEMISTRY Business Manager" 
+    },
+ {
+      "source": "racomputerscience",  
+      "target": "Research Admin" 
+    },
+ {
+      "source": "directorcomputerscience",  
+      "target": "Research Director" 
+    } 
+ ],
+ 
+ "associations":
+ [
+ {
+      "operations": [
+        "*"
+      ],
+      "source": "super_ua1",  
+      "target": "colleges"  
+    },
+  {
+      "operations": [
+        "*"
+      ],
+      "source": "super_ua1",  
+      "target": "HR"  
+    },
+ {
+      "operations": [
+        "*"
+      ],
+      "source": "super_ua1",  
+      "target": "OSP"    
+    }
+    
+ 
+ ]
+ 
+} 

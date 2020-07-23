@@ -1,0 +1,90 @@
+{
+ "nodes" : [
+	{
+      "name": "Create Approval",
+      "type": "PC",
+      "properties": {
+      }
+    },
+	    {
+      "name": "Approval Content",
+      "type": "OA",
+      "properties": {
+        
+      }
+    },
+	
+    {
+      "name": "Current Users",
+      "type": "UA",
+      "properties": {
+        
+      }
+    },
+    
+    {
+      "name": "Current Comment-Sign",
+      "type": "OA",
+      "properties": {
+        
+      }
+    },
+	{
+      "name": "Current Approval",
+      "type": "OA",
+      "properties": {
+        
+      }
+    },
+	{
+      "name": "Current Disapproval",
+      "type": "OA",
+      "properties": {
+        
+      }
+    }
+ ],
+ 
+	"assignments" :[
+	
+	{
+      "source": "Current Users", 
+      "target": "Create Approval" 
+    },
+	
+	 {
+      "source": "Approval Content", 
+      "target": "Create Approval"  
+    },
+	 {
+      "source": "Current Comment-Sign", 
+      "target": "Approval Content"  
+    },
+	 {
+      "source": "Current Approval",  
+      "target": "Approval Content"   
+    },
+	{
+      "source": "Current Disapproval", 
+      "target": "Approval Content"  
+    }
+	
+	],
+	
+	"associations":
+	[
+	
+	{
+      "operations": [
+        "create-o",
+		"assign-o",
+		"Approve",
+		"Disapprove"
+      ],
+      "source": "Current Users",  
+      "target": "Approval Content"   
+    }
+   
+	]
+
+}
