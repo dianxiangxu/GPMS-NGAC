@@ -1,1 +1,0 @@
-{"options":{},"indexes":[{"v":2,"key":{"_id":1},"name":"_id_","ns":"db_gpms.proposal"},{"v":2,"unique":true,"key":{"project info.project title":1},"name":"proposalTitleIndex","ns":"db_gpms.proposal"},{"v":2,"key":{"audit log.activity on":1},"name":"activityOnIndex","ns":"db_gpms.proposal"}],"uuid":"1c299128d1c546669253fdb62d380426"}

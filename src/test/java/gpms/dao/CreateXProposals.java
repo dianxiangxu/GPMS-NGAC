@@ -1,19 +1,19 @@
 package gpms.dao;
 
 import gpms.DAL.MongoDBConnector;
-import gpms.model.InvestigatorInfo;
-import gpms.model.InvestigatorRefAndPosition;
-import gpms.model.PositionDetails;
-import gpms.model.ProjectInfo;
-import gpms.model.ProjectLocation;
-import gpms.model.ProjectPeriod;
-import gpms.model.ProjectType;
-import gpms.model.Proposal;
-import gpms.model.SignatureInfo;
-import gpms.model.SponsorAndBudgetInfo;
-import gpms.model.TypeOfRequest;
-import gpms.model.UserAccount;
-import gpms.model.UserProfile;
+import gpms.dataModel.InvestigatorInfo;
+import gpms.dataModel.InvestigatorRefAndPosition;
+import gpms.dataModel.PositionDetails;
+import gpms.dataModel.ProjectInfo;
+import gpms.dataModel.ProjectLocation;
+import gpms.dataModel.ProjectPeriod;
+import gpms.dataModel.ProjectType;
+import gpms.dataModel.Proposal;
+import gpms.dataModel.SignatureInfo;
+import gpms.dataModel.SponsorAndBudgetInfo;
+import gpms.dataModel.TypeOfRequest;
+import gpms.dataModel.UserAccount;
+import gpms.dataModel.UserProfile;
 
 import java.util.ArrayList;
 import java.util.Calendar;

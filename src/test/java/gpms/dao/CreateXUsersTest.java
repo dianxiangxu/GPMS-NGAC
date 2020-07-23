@@ -2,10 +2,10 @@ package gpms.dao;
 
 import gpms.DAL.DepartmentsPositionsCollection;
 import gpms.DAL.MongoDBConnector;
-import gpms.model.Address;
-import gpms.model.PositionDetails;
-import gpms.model.UserAccount;
-import gpms.model.UserProfile;
+import gpms.dataModel.Address;
+import gpms.dataModel.PositionDetails;
+import gpms.dataModel.UserAccount;
+import gpms.dataModel.UserProfile;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;

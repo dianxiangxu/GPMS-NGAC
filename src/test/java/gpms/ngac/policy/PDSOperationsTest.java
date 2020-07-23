@@ -10,7 +10,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import gov.nist.csd.pm.pip.prohibitions.MemProhibitions;
-import gpms.model.GPMSCommonInfo;
+import gpms.dataModel.GPMSCommonInfo;
+import gpms.policy.NGACPolicyConfigurationLoader;
+import gpms.policy.PDSOperations;
 
 
 public class PDSOperationsTest {

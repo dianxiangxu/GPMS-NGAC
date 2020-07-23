@@ -27,8 +27,9 @@ import gov.nist.csd.pm.pip.obligations.MemObligations;
 import gov.nist.csd.pm.pip.obligations.evr.EVRParser;
 import gov.nist.csd.pm.pip.obligations.model.Obligation;
 import gov.nist.csd.pm.pip.prohibitions.MemProhibitions;
-import gpms.ngac.policy.customEvents.*;
-import gpms.ngac.policy.customFunctions.*;
+import gpms.policy.Constants;
+import gpms.policy.customEvents.*;
+import gpms.policy.customFunctions.*;
 
 
 public class ObligationTest {
@@ -213,4 +214,5 @@ public class ObligationTest {
 
 		return pdp;
 	}
+	
 }

@@ -1,18 +1,17 @@
 package gpms.dao;
 
 import gpms.DAL.MongoDBConnector;
-import gpms.model.AuditLog;
-import gpms.model.AuditLogCommonInfo;
-import gpms.model.AuditLogInfo;
-import gpms.model.Delegation;
-import gpms.model.DelegationCommonInfo;
-import gpms.model.DelegationInfo;
-import gpms.model.GPMSCommonInfo;
-import gpms.model.UserAccount;
-import gpms.model.UserDetail;
-import gpms.model.UserProfile;
+import gpms.dataModel.AuditLog;
+import gpms.dataModel.AuditLogCommonInfo;
+import gpms.dataModel.AuditLogInfo;
+import gpms.dataModel.Delegation;
+import gpms.dataModel.DelegationCommonInfo;
+import gpms.dataModel.DelegationInfo;
+import gpms.dataModel.GPMSCommonInfo;
+import gpms.dataModel.UserAccount;
+import gpms.dataModel.UserDetail;
+import gpms.dataModel.UserProfile;
 //import gpms.rest.DelegationService;
-import gpms.utils.WriteXMLUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -567,8 +566,7 @@ public class DelegationDAO extends BasicDAO<Delegation, String> {
 	public String createDynamicPolicy(String delegatorId, String delegatorName,
 			String policyLocation, Delegation existingDelegation)
 			throws SAXException, IOException {
-		return WriteXMLUtil.saveDelegationPolicy(delegatorId, delegatorName,
-				policyLocation, existingDelegation);
+		return null;
 	}
 
 //	/**

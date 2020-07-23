@@ -1,20 +1,20 @@
 package gpms.dao;
 
 import gpms.DAL.MongoDBConnector;
-import gpms.model.ApprovalType;
-import gpms.model.Delegation;
-import gpms.model.DeleteType;
-import gpms.model.GPMSCommonInfo;
-import gpms.model.InvestigatorRefAndPosition;
-import gpms.model.NotificationLog;
-import gpms.model.PositionDetails;
-import gpms.model.Proposal;
-import gpms.model.RequiredSignaturesInfo;
-import gpms.model.SignatureUserInfo;
-import gpms.model.Status;
-import gpms.model.SubmitType;
-import gpms.model.UserAccount;
-import gpms.model.UserProfile;
+import gpms.dataModel.ApprovalType;
+import gpms.dataModel.Delegation;
+import gpms.dataModel.DeleteType;
+import gpms.dataModel.GPMSCommonInfo;
+import gpms.dataModel.InvestigatorRefAndPosition;
+import gpms.dataModel.NotificationLog;
+import gpms.dataModel.PositionDetails;
+import gpms.dataModel.Proposal;
+import gpms.dataModel.RequiredSignaturesInfo;
+import gpms.dataModel.SignatureUserInfo;
+import gpms.dataModel.Status;
+import gpms.dataModel.SubmitType;
+import gpms.dataModel.UserAccount;
+import gpms.dataModel.UserProfile;
 import gpms.rest.NotificationService;
 import gpms.utils.EmailUtil;
 

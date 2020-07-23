@@ -1,22 +1,22 @@
 package gpms.dao;
 
 import gpms.DAL.MongoDBConnector;
-import gpms.model.Address;
-import gpms.model.AuditLog;
-import gpms.model.AuditLogCommonInfo;
-import gpms.model.AuditLogInfo;
-import gpms.model.Delegation;
-import gpms.model.GPMSCommonInfo;
-import gpms.model.InvestigatorUsersAndPositions;
-import gpms.model.PositionDetails;
-import gpms.model.Proposal;
-import gpms.model.UserAccount;
-import gpms.model.UserDetail;
-import gpms.model.UserInfo;
-import gpms.model.UserProfile;
-import gpms.model.UserProposalCount;
-import gpms.ngac.policy.NGACPolicyConfigurationLoader;
-import gpms.ngac.policy.PDSOperations;
+import gpms.dataModel.Address;
+import gpms.dataModel.AuditLog;
+import gpms.dataModel.AuditLogCommonInfo;
+import gpms.dataModel.AuditLogInfo;
+import gpms.dataModel.Delegation;
+import gpms.dataModel.GPMSCommonInfo;
+import gpms.dataModel.InvestigatorUsersAndPositions;
+import gpms.dataModel.PositionDetails;
+import gpms.dataModel.Proposal;
+import gpms.dataModel.UserAccount;
+import gpms.dataModel.UserDetail;
+import gpms.dataModel.UserInfo;
+import gpms.dataModel.UserProfile;
+import gpms.dataModel.UserProposalCount;
+import gpms.policy.NGACPolicyConfigurationLoader;
+import gpms.policy.PDSOperations;
 import gpms.utils.EmailUtil;
 
 import static gov.nist.csd.pm.pip.graph.model.nodes.NodeType.U;

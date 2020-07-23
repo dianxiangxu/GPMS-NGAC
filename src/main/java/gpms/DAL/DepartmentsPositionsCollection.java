@@ -13,9 +13,9 @@ import com.mongodb.MongoClient;
 import gpms.dao.ProposalDAO;
 import gpms.dao.UserAccountDAO;
 import gpms.dao.UserProfileDAO;
-import gpms.model.GPMSCommonInfo;
-import gpms.model.UserAccount;
-import gpms.model.UserProfile;
+import gpms.dataModel.GPMSCommonInfo;
+import gpms.dataModel.UserAccount;
+import gpms.dataModel.UserProfile;
 
 /***
  * Available Department Positions Types and Titles for a User

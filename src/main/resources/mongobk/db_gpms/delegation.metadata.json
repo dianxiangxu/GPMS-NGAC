@@ -1,1 +1,0 @@
-{"options":{},"indexes":[{"v":2,"key":{"_id":1},"name":"_id_","ns":"db_gpms.delegation"},{"v":2,"key":{"audit log.activity on":1},"name":"activityOnIndex","ns":"db_gpms.delegation"}],"uuid":"2b755bd16d214ae7be0873cb70e95999"}
