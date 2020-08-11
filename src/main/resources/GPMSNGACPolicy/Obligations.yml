@@ -2434,7 +2434,15 @@ rules:
               - function:
                   name: to_props
                   args:
-                    - approved=true                        
+                    - approved=true     
+        - delete:
+            associations:
+              - subject:
+                  name: Chair
+                  type: UA
+                target:
+                  name: PDSSections
+                  type: OA                      
 
   - label: ra_approve
     event:
