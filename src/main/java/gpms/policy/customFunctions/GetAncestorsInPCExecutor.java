@@ -75,10 +75,11 @@ public class GetAncestorsInPCExecutor implements FunctionExecutor {
 
 				listOfArgumentsFinal.add(new Arg(getNode1));
 				listOfArgumentsFinal.add(new Arg(getNode2));
+				Function isNodeContainedIn = new Function("is_node_contained_in", listOfArgumentsFinal);
 
-				function.setArgs(listOfArgumentsFinal);
+				//function.setArgs(listOfArgumentsFinal);
 
-				Boolean isContainedIn = (Boolean) isNodeContainedInExecutor.exec(eventCtx, user, process, pdp, function,
+				Boolean isContainedIn = (Boolean) isNodeContainedInExecutor.exec(eventCtx, user, process, pdp, isNodeContainedIn,
 						functionEvaluator);
 
 				if (count == levelOfAncestory && isContainedIn) {
@@ -106,9 +107,10 @@ public class GetAncestorsInPCExecutor implements FunctionExecutor {
 
 				listOfArgumentsFinal.add(new Arg(getNode1));
 				listOfArgumentsFinal.add(new Arg(getNode2));
+				Function isNodeContainedIn = new Function("is_node_contained_in", listOfArgumentsFinal);
 
-				function.setArgs(listOfArgumentsFinal);
-				Boolean isContainedIn = (Boolean) isNodeContainedInExecutor.exec(eventCtx, user, process, pdp, function,
+				//function.setArgs(listOfArgumentsFinal);
+				Boolean isContainedIn = (Boolean) isNodeContainedInExecutor.exec(eventCtx, user, process, pdp, isNodeContainedIn,
 						functionEvaluator);
 
 				if (count == levelOfAncestory && isContainedIn) {
