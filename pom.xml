@@ -86,8 +86,8 @@
 				<version>3.5.1</version>
 				<inherited>true</inherited>
 				<configuration>
-					<source>1.7</source>
-					<target>1.7</target>
+					<source>1.8</source>
+					<target>1.8</target>
 					<encoding>UTF-8</encoding>
 					<showWarnings>true</showWarnings>
 					<showDeprecation>true</showDeprecation>
@@ -403,10 +403,16 @@
 		</dependency> 
 	</dependencies>
 
+
+
+
 	<properties>
 		<balana.version>1.0.4</balana.version>
 		<jersey.version>2.22.2</jersey.version>
 		<version.log4j>1.2.17</version.log4j>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		 <javaVersion>8</javaVersion>
+        <maven.compiler.source>${java.version}</maven.compiler.source>
+        <maven.compiler.target>${java.version}</maven.compiler.target>
 	</properties>
 </project>
