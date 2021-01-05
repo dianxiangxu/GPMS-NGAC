@@ -3,7 +3,10 @@ Proposal Workflow Management System - A web-based application for automating the
 
 # Installation of Project
 ## Prerequisites: 
-MongoDB : https://docs.mongodb.com/manual/installation/
+
+Java 1.8
+
+MongoDB Community Edition: https://docs.mongodb.com/manual/administration/install-community/
 
 Tomcat 8 : https://tomcat.apache.org/download-80.cgi
 
@@ -14,6 +17,13 @@ The following instructions are for Windows 10. For other OS, the installation is
 
 There are multiple ways of starting the project. We recommend installing and starting the Eclipse IDE first.
 
-### Eclipse project import
+### Eclipse Project Import from Git
 
 Use the following url in Eclipse "Import -> Git -> Projects from Git (with smart import)" : https://github.com/dianxiangxu/GPMS-NGAC.git
+
+### Tomcat Installation
+
+### MongoDB import database
+
+Follow the instructions to install MongoDB if have not already in the link above for your OS (INCLUDING CREATION OF C:\data FOR WINDOWS!). 
+You will also need to download this toolbox for MongoDB: https://www.mongodb.com/try/download/database-tools
