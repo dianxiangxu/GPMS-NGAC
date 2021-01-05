@@ -6,7 +6,7 @@ Proposal Workflow Management System - A web-based application for automating the
 
 Java 1.8
 
-MongoDB : https://docs.mongodb.com/manual/installation/
+MongoDB Community Edition: https://docs.mongodb.com/manual/administration/install-community/
 
 Tomcat 8 : https://tomcat.apache.org/download-80.cgi
 
