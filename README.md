@@ -14,3 +14,6 @@ The following instructions are for Windows 10. For other OS, the installation is
 
 There are multiple ways of starting the project. We recommend installing and starting the Eclipse IDE first.
 
+### Eclipse project import
+
+Use the following url in Eclipse "Import -> Git -> Projects from Git (with smart import)" : https://github.com/dianxiangxu/GPMS-NGAC.git
