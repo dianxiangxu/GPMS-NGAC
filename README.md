@@ -10,5 +10,7 @@ Tomcat 8 : https://tomcat.apache.org/download-80.cgi
 Eclipse IDE for Enterprise Java Developers : https://www.eclipse.org/downloads/packages/
 
 ## Installation
+The following instructions are for Windows 10. For other OS, the installation is the same. 
+
 There are multiple ways of starting the project. We recommend installing and starting the Eclipse IDE first.
 
