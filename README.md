@@ -119,3 +119,88 @@ Go ahead and visit the "localhost:8080/GPMS-NGAC/Login.jsp". Do no expect to log
 
 Follow the instructions to install MongoDB if have not already in the link above for your OS (INCLUDING CREATION OF C:\data FOR WINDOWS!). 
 You will also need to download this toolbox for MongoDB: https://www.mongodb.com/try/download/database-tools
+
+After the toolbox downloaded, navigate to your MongoDB folder, and copy all of the files from the toolbox into your MongoDB folder (the path for it should be the same as on screenshot unless you changed it during installation): 
+
+![](https://github.com/dianxiangxu/GPMS-NGAC/blob/master/Documentation/InstallationScreenshots/MongoDB/5.JPG)
+
+
+Now, let's start the mongodb. From the bin folder of MongoDB from the previous step, type mongo and press enter in the command prompt: 
+
+![](https://github.com/dianxiangxu/GPMS-NGAC/blob/master/Documentation/InstallationScreenshots/MongoDB/1.jpg)
+
+The marked address should be the same, mongodb://127.0.0.1:27017, take a note of it in order to take a look at the db from the Mongo Compass interface later. 
+
+Press CTRL-C, you should see "bye" output:
+
+![](https://github.com/dianxiangxu/GPMS-NGAC/blob/master/Documentation/InstallationScreenshots/MongoDB/2.jpg)
+
+Go back to Eclipse and locate "InitialDB" in the project: 
+
+![](https://github.com/dianxiangxu/GPMS-NGAC/blob/master/Documentation/InstallationScreenshots/MongoDB/3.jpg)
+
+Right click on it and do "Show in -> System Explorer":
+
+![](https://github.com/dianxiangxu/GPMS-NGAC/blob/master/Documentation/InstallationScreenshots/MongoDB/4.jpg)
+
+The Explorer window will pop-up. Save the path. Go back to your mongodb folder where you copied all the files and run: mongorestore -d db_gpms C:\Users\dubro\git\GPMS-NGAC\InitialDB\db_gpms  , of course, change the path appropriately: 
+
+![](https://github.com/dianxiangxu/GPMS-NGAC/blob/master/Documentation/InstallationScreenshots/MongoDB/6.jpg)
+
+You should see the following out, and the most important part marked with red box: 
+
+![](https://github.com/dianxiangxu/GPMS-NGAC/blob/master/Documentation/InstallationScreenshots/MongoDB/7.jpg)
+
+Go back to Eclipse, and restart the server similarly (maybe not needed, but better to restart just in case): 
+
+![](https://github.com/dianxiangxu/GPMS-NGAC/blob/master/Documentation/InstallationScreenshots/MongoDB/8.jpg)
+
+Now you can login with the Username: "nazmul" and Password: "gpmspassword".
+
+![](https://github.com/dianxiangxu/GPMS-NGAC/blob/master/Documentation/InstallationScreenshots/MongoDB/9.jpg)
+
+If no error messages pop-up, you set it up correctly. Just to make sure, click on My Proposals button: 
+
+![](https://github.com/dianxiangxu/GPMS-NGAC/blob/master/Documentation/InstallationScreenshots/MongoDB/10.jpg)
+
+You should see the following screen. If you see the proposals' list, then access control is working and everything is great: 
+
+![](https://github.com/dianxiangxu/GPMS-NGAC/blob/master/Documentation/InstallationScreenshots/MongoDB/11.JPG)
+
+Let's log out and log in as admin, Username: "admin", Password: "gpmspassword". You should see the following screen. Click on "Manage Users":
+
+![](https://github.com/dianxiangxu/GPMS-NGAC/blob/master/Documentation/InstallationScreenshots/MongoDB/14.jpg)
+
+Here, you will find all the usernames. The password is the same for each user: "gpmspassword". 
+Pay attention to whether a user is deleted and is active, it displays this information in the table: 
+
+![](https://github.com/dianxiangxu/GPMS-NGAC/blob/master/Documentation/InstallationScreenshots/MongoDB/15.jpg)
+
+You may also access the database through mongodb compass, use the exact same address and press connect: 
+
+![](https://github.com/dianxiangxu/GPMS-NGAC/blob/master/Documentation/InstallationScreenshots/MongoDB/12.jpg)
+
+After you press connect, you should the complete database. The passwords are encrypted, but it is the same one for each user: "gpmspassword". 
+
+# USEFUL HINTS FOR FIXING THE PROJECT
+
+1. You should now have any problem if you follow every step. However, software changes, updates, etc. Almost any problem can be solved by search online the error message. 
+
+2. If you get 404 page, build the project (there is a screenshot above), and restart the server.
+
+3. If there are compilation errors, update the project from Maven (screenshot above), then build the project (update cleans the project if "clean" is checks, the .class files should be regenerated), restart the server. 
+
+4. Clean the server: 
+
+![](https://github.com/dianxiangxu/GPMS-NGAC/blob/master/Documentation/InstallationScreenshots/MongoDB/16.jpg)
+
+Restart the server after cleaning. 
+
+5. Make sure you install Java prior to starting Eclipse. 
+
+6. Contact Vlad at vadpb7@umsystem.edu or dubrovenski.v@gmail.com
+
+NOTE: the guide is good for installing any tomcat 8/mongodb project, and, actually, a tomcat project with any database as long as you know how to start that db. 
+
+
+
