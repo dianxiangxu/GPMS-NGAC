@@ -25,4 +25,4 @@ Use the following url in Eclipse "Import -> Git -> Projects from Git (with smart
 
 ### MongoDB import database
 
-Follow the instructions to install MongoDB if have not already in the link above for your OS. 
+Follow the instructions to install MongoDB if have not already in the link above for your OS (INCLUDING CREATION OF C:\data FOR WINDOWS!). 
