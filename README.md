@@ -10,3 +10,5 @@ Tomcat 8 : https://tomcat.apache.org/download-80.cgi
 Eclipse IDE for Enterprise Java Developers : https://www.eclipse.org/downloads/packages/
 
 ## Installation
+There are multiple ways of starting the project. We recommend to install and start the Eclipse IDE first.
+
