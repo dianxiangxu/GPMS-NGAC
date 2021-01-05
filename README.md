@@ -20,3 +20,9 @@ There are multiple ways of starting the project. We recommend installing and sta
 ### Eclipse Project Import from Git
 
 Use the following url in Eclipse "Import -> Git -> Projects from Git (with smart import)" : https://github.com/dianxiangxu/GPMS-NGAC.git
+
+### Tomcat Installation
+
+### MongoDB import database
+
+Follow the instructions to install MongoDB if have not already in the link above for your OS. 
