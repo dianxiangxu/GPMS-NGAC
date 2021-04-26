@@ -58,14 +58,43 @@ public class DepartmentsPositionsCollection {
 			adminUsers.put("IRB","irbglobal");
 			
 		}
-		
 		if(departmentNames == null) {
 			departmentNames = new HashMap<String, String>();			
 			departmentNames.put("Computer Science","CS");
 			departmentNames.put("Computer Engineering","CE");
 			departmentNames.put("Electrical Engineering","ECE");
+			departmentNames.put("Mechanical Engineering","MEC");//added
+			departmentNames.put("Informational Technology","INFO");//added
+			
 			departmentNames.put("Physics","PHY");
 			departmentNames.put("Chemistry","CHE");
+			departmentNames.put("Economics","ECON");//added
+			departmentNames.put("Mathematics","MATH");//added
+			departmentNames.put("Biology","BIO");//added
+			
+			departmentNames.put("Dentistry","DENT");//added
+			departmentNames.put("Medicine","MED");//added
+			departmentNames.put("Nursing","NURS");//added
+			departmentNames.put("Pharmacy","PHA");//added
+			departmentNames.put("Health Studies","HSE");//added
+			
+			departmentNames.put("Early Childhood","EARLY");//added
+			departmentNames.put("Elementary School","ELEM");//added
+			departmentNames.put("High School","HSL");//added
+			departmentNames.put("Middle School","MSL");//added
+			departmentNames.put("Foreign Languages","FORL");//added
+			
+			departmentNames.put("Business Administration","BA");//added
+			departmentNames.put("Accounting","ACC");//added
+			departmentNames.put("Finance","FIN");//added
+			departmentNames.put("Entrepreneurial Real Estate","ENTREP");//added
+			departmentNames.put("Urban Policy Administration","URB");//added
+			
+			departmentNames.put("Law leading to the Master of Law","LLM");//added
+			departmentNames.put("Juris Doctor","JD");//added
+			departmentNames.put("Law leading Tax","LLMT");//added
+			departmentNames.put("Family Law","FAM");//added
+			departmentNames.put("Intellectual Property","INTL");//added
 		}
 		
 		if(userIdNameMap == null) {
@@ -145,6 +174,16 @@ public class DepartmentsPositionsCollection {
 		// universityAdministrator.add("University Research Administrator");
 		// universityAdministrator.add("University Research Director");
 
+		HashMap<String, ArrayList<String>> positionTypeUNIVERSAL = new HashMap<String, ArrayList<String>>(); //UNIVERSAL ADD
+		positionTypeUNIVERSAL.put("Tenured/tenure-track faculty", tenuredTitles);
+		positionTypeUNIVERSAL.put("Non-tenure-track research faculty",
+				nonTenuredTitles);
+		positionTypeUNIVERSAL.put("Teaching faculty", teachingFaculty);
+		positionTypeUNIVERSAL.put("Research staff", researchStaff);
+		positionTypeUNIVERSAL.put("Professional staff", professionalStaff);
+		positionTypeUNIVERSAL.put("Administrator", administratorStaff);
+		
+		
 		HashMap<String, ArrayList<String>> positionTypeCS = new HashMap<String, ArrayList<String>>();
 		positionTypeCS.put("Tenured/tenure-track faculty", tenuredTitles);
 		positionTypeCS.put("Non-tenure-track research faculty",
@@ -197,13 +236,52 @@ public class DepartmentsPositionsCollection {
 		departmentEngineering.put("Computer Science", positionTypeCS);
 		departmentEngineering.put("Electrical Engineering", positionTypeEE);
 		departmentEngineering.put("Computer Engineering", positionTypeCE);
+		departmentEngineering.put("Mechanical Engineering", positionTypeCE);//added
+		departmentEngineering.put("Informational Technology", positionTypeCE);//added
 
 		HashMap<String, HashMap<String, ArrayList<String>>> departmentScience = new HashMap<String, HashMap<String, ArrayList<String>>>();
 		departmentScience.put("Physics", positionTypePhysics);
 		departmentScience.put("Chemistry", positionTypeChemistry);
+		departmentScience.put("Economics", positionTypeChemistry);//added
+		departmentScience.put("Mathematics", positionTypeChemistry);//added
+		departmentScience.put("Biology", positionTypeChemistry);//added
 
+		HashMap<String, HashMap<String, ArrayList<String>>> departmentHealth = new HashMap<String, HashMap<String, ArrayList<String>>>();
+		departmentHealth.put("Dentistry", positionTypeUNIVERSAL);//added
+		departmentHealth.put("Medicine", positionTypeUNIVERSAL);//added
+		departmentHealth.put("Nursing", positionTypeUNIVERSAL);//added
+		departmentHealth.put("Pharmacy", positionTypeUNIVERSAL);//added
+		departmentHealth.put("Health Studies", positionTypeUNIVERSAL);//added
+		
+		HashMap<String, HashMap<String, ArrayList<String>>> departmentEDU = new HashMap<String, HashMap<String, ArrayList<String>>>();
+		departmentEDU.put("Early Childhood", positionTypeUNIVERSAL);//added
+		departmentEDU.put("Elementary School", positionTypeUNIVERSAL);//added
+		departmentEDU.put("High School", positionTypeUNIVERSAL);//added
+		departmentEDU.put("Middle School", positionTypeUNIVERSAL);//added
+		departmentEDU.put("Foreign Languages", positionTypeUNIVERSAL);//added
+		
+		HashMap<String, HashMap<String, ArrayList<String>>> departmentMNGT = new HashMap<String, HashMap<String, ArrayList<String>>>();
+		departmentMNGT.put("Business Administration", positionTypeUNIVERSAL);//added
+		departmentMNGT.put("Accounting", positionTypeUNIVERSAL);//added
+		departmentMNGT.put("Finance", positionTypeUNIVERSAL);//added
+		departmentMNGT.put("Entrepreneurial Real Estate", positionTypeUNIVERSAL);//added
+		departmentMNGT.put("Urban Policy Administration", positionTypeUNIVERSAL);//added
+		
+		HashMap<String, HashMap<String, ArrayList<String>>> departmentLAW = new HashMap<String, HashMap<String, ArrayList<String>>>();
+		departmentLAW.put("Law leading to the Master of Law", positionTypeUNIVERSAL);//added
+		departmentLAW.put("Juris Doctor", positionTypeUNIVERSAL);//added
+		departmentLAW.put("Law leading Tax", positionTypeUNIVERSAL);//added
+		departmentLAW.put("Family Law", positionTypeUNIVERSAL);//added
+		departmentLAW.put("Intellectual Property", positionTypeUNIVERSAL);//added
+		
 		ht.put("Engineering", departmentEngineering);
 		ht.put("Science", departmentScience);
+		ht.put("Health Sciences", departmentHealth);
+		ht.put("Education", departmentEDU);
+		ht.put("Management", departmentMNGT);
+		ht.put("Law", departmentLAW);
+
+
 	}
 
 	public Map<String, HashMap<String, HashMap<String, ArrayList<String>>>> getAvailableDepartmentsAndPositions() {

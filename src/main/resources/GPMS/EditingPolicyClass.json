@@ -1,0 +1,484 @@
+{
+ "nodes" : [  
+     {
+       "name": "EditingPolicyClass",
+       "type": "PC",
+       "properties": {
+         "default_ua": "SP",
+         "default_oa": "PDSSections"
+       }
+     },      
+  {
+       "name": "Audit Log",
+       "type": "OA",
+       "properties": {
+         
+       }
+     },
+  {
+       "name": "PDSSections",
+       "type": "OA",
+       "properties": {
+         
+       }
+     }, 
+  {
+   "name" : "ApprovalInfo",
+   "type" : "OA",
+   "properties": {
+          
+        }
+  },
+  {
+   "name" : "ChairApproval",
+   "type" : "OA",
+   "properties": {
+          
+        }
+  },
+  {
+   "name" : "BMApproval",
+   "type" : "OA",
+   "properties": {
+          
+        }
+  },
+  {
+   "name" : "DeanApproval",
+   "type" : "OA",
+   "properties": {
+          
+        }
+  },
+  {
+   "name" : "IRBApproval",
+   "type" : "OA",
+   "properties": {
+          
+        }
+  },
+  {
+   "name" : "RAApproval",
+   "type" : "OA",
+   "properties": {
+          
+        }
+  },
+  {
+   "name" : "RDApproval",
+   "type" : "OA",
+   "properties": {
+          
+        }
+  },  
+  {
+       "name": "PIEditable",
+       "type": "OA",
+       "properties": {
+         
+       }
+     },
+  
+  {
+       "name": "CoPIEditable",
+       "type": "OA",
+       "properties": {
+         
+       }
+     },
+  
+  {
+   "name" : "Investigator Info",
+   "type" : "OA",
+   "properties": {
+          
+        }
+   
+  },
+  {
+   "name" : "Budget Info",
+   "type" : "OA",
+   "properties": {
+          
+        }
+  },
+  {
+   "name" : "Project Info",
+   "type" : "OA",
+   "properties": {
+          
+        }
+  },
+  {
+   "name" : "CostShare Info",
+   "type" : "OA",
+   "properties": {
+          
+        }
+  },
+  {
+   "name" : "UnivCommitmentsInfo",
+   "type" : "OA",
+   "properties": {
+          
+        }
+  },
+  {
+   "name" : "COI",
+   "type" : "OA",
+   "properties": {
+          
+        }
+  },
+  {
+   "name" : "Compliance Info",
+   "type" : "OA",
+   "properties": {
+          
+        }
+  },
+  {
+   "name" : "Additional Info",
+   "type" : "OA",
+   "properties": {
+          
+        }
+  },
+  {
+   "name" : "Collaboration Info",
+   "type" : "OA",
+   "properties": {
+          
+        }
+  },
+  {
+   "name" : "Proprietary Info",
+   "type" : "OA",
+   "properties": {
+          
+        }
+  },
+  {
+   "name" : "OSPInfo",
+   "type" : "OA",
+   "properties": {
+          
+        }
+  },
+  {
+   "name" : "Signature Info",
+   "type" : "OA",
+   "properties": {
+          
+        }
+  },
+  
+  {
+   "name" : "PIInfo",
+   "type" : "OA",
+   "properties": {
+          
+        }
+  },
+  {
+   "name" : "CoPIInfo",
+   "type" : "OA",
+   "properties": {
+          
+        }
+  },
+  {
+   "name" : "SPInfo",
+   "type" : "OA",
+   "properties": {
+          
+        }
+  },
+  
+  
+  {
+   "name" : "PI",
+   "type" : "UA",
+   "properties": {
+          
+        }
+  },
+  {
+   "name" : "CoPI",
+   "type" : "UA",
+   "properties": {
+          
+        }
+  },
+  {
+   "name" : "SP",
+   "type" : "UA",
+   "properties": {
+          
+        }
+  },
+
+  
+  {
+   "name" : "Chair",
+   "type" : "UA",
+   "properties": {
+          
+        }
+  },
+  {
+   "name" : "Business Manager",
+   "type" : "UA",
+   "properties": {
+          
+        }
+  },
+  {
+   "name" : "Dean",
+   "type" : "UA",
+   "properties": {
+          
+        }
+  },
+  {
+   "name" : "Research Admin",
+   "type" : "UA",
+   "properties": {
+          
+        }
+  },
+  {
+   "name" : "Research Director",
+   "type" : "UA",
+   "properties": {
+          
+        }
+  }     
+  ,
+  {
+   "name" : "IRBOfficer",
+   "type" : "UA",
+   "properties": {
+          
+        }
+  } 
+  ,
+  {
+   "name" : "PDSWhole",
+   "type" : "OA",
+   "properties": {
+          
+        }
+  }             
+ ],
+   
+ "assignments":[
+  
+  {                                  
+       "source": "Audit Log",  
+       "target": "EditingPolicyClass"  
+     },
+  {
+       "source": "SP", 
+       "target":"EditingPolicyClass" 
+     },  
+  {                                  
+       "source": "PDSSections",  
+       "target":"EditingPolicyClass" 
+     },
+     {                                  
+       "source": "Investigator Info",  
+       "target": "PDSSections" 
+     },
+  {                                  
+       "source": "Chair",  
+       "target": "EditingPolicyClass"  
+     },
+  {                                  
+       "source": "Business Manager",  
+       "target": "EditingPolicyClass"  
+     },
+  {                                  
+       "source": "Dean",  
+       "target": "EditingPolicyClass"  
+     },
+     {                                  
+       "source": "IRBOfficer",  
+       "target":"EditingPolicyClass" 
+     }
+     ,
+  {                                  
+       "source": "Research Admin",  
+       "target":"EditingPolicyClass"  
+     },
+  {                                  
+       "source": "Research Director",  
+       "target": "EditingPolicyClass"  
+     },                                                                  
+  {                                   
+       "source": "CoPI",
+       "target": "SP"   
+     },  
+  {
+       "source": "PI", 
+       "target": "CoPI" 
+     },
+ 
+  {
+       "source": "ApprovalInfo",  
+       "target": "PDSSections"  
+     },
+     {
+       "source": "CoPIEditable",  
+       "target": "PDSSections"  
+     },
+  {
+       "source": "PIEditable",  
+       "target": "PDSSections"  
+     },
+  {
+       "source": "ChairApproval",  
+       "target": "ApprovalInfo"  
+     },
+  {
+       "source": "BMApproval",  
+       "target": "ApprovalInfo"  
+     },
+       {
+       "source": "IRBApproval",  
+       "target": "ApprovalInfo"  
+     },
+  {
+       "source": "DeanApproval",  
+       "target": "ApprovalInfo"  
+     },
+  {
+       "source": "RAApproval",  
+       "target": "ApprovalInfo"  
+     },
+  {
+       "source": "RDApproval",  
+       "target": "ApprovalInfo"  
+     },
+     
+     
+  {
+       "source": "Budget Info", 
+       "target": "PIEditable"  
+     },     
+     {
+       "source": "Project Info",  
+       "target": "PIEditable"  
+     },
+     {
+       "source": "CostShare Info",  
+       "target": "CoPIEditable"   
+     },
+     {
+       "source": "UnivCommitmentsInfo",  
+       "target": "CoPIEditable"   
+     },
+     {
+       "source": "COI",  
+       "target": "CoPIEditable"   
+     },
+     {
+       "source": "Compliance Info",  
+       "target": "CoPIEditable"   
+     },
+     {
+       "source": "Additional Info",  
+       "target": "CoPIEditable"   
+     },
+     {
+       "source": "Collaboration Info",  
+       "target": "CoPIEditable"   
+     },
+     {
+       "source": "Proprietary Info",  
+       "target": "CoPIEditable"   
+     },
+     {
+       "source": "OSPInfo",  
+       "target": "PDSSections"   
+     },
+     {
+       "source": "Signature Info", 
+       "target": "CoPIEditable"  
+     },
+
+     {
+       "source": "PDSWhole", 
+       "target": "EditingPolicyClass"  
+     }
+     ,
+  {
+       "source": "PIInfo", 
+       "target": "Investigator Info"  
+     }, {
+       "source": "CoPIInfo", 
+       "target": "Investigator Info"  
+     }, {
+       "source": "SPInfo", 
+       "target": "Investigator Info"  
+     }
+    
+ ],
+ 
+ "associations":[
+ 
+  {
+    "operations": [
+         "write"
+        ],
+       "source": "PI", 
+       "target": "PIEditable"  
+     },
+     {
+    "operations": [         
+         "Delete",
+         "Submit"
+        ],
+       "source": "PI", 
+       "target": "PDSWhole" 
+     },
+  {
+    "operations": [
+         "add-copi",
+         "delete-copi"
+        ],
+       "source": "PI", 
+       "target": "CoPI"  
+     },    
+     {
+       "operations": [
+         "write"
+        ],
+       "source": "CoPI", 
+       "target": "CoPIEditable"  
+     },        
+  {
+       "operations": [
+         "add-sp",
+         "delete-sp"
+        ],
+       "source": "CoPI",
+       "target": "SP"  
+     },     
+     {
+       "operations": [
+         "ViewLog"
+        ],
+       "source": "PI", 
+       "target": "Audit Log" 
+     },
+      {
+       "operations": [
+         "read"
+        ],
+       "source": "SP", 
+       "target": "PDSSections" 
+     }
+ ]
+ 
+} 

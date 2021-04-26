@@ -539,9 +539,9 @@ public class UserProfileDAO extends BasicDAO<UserProfile, String> {
 		ds.save(newProfile);
 		String messageBody = "Hello " + newProfile.getFullName()
 				+ ",<br/><br/> You have successfully created an account. As soon as administrator will activate and assign you on positions you will get an email and then only you can login. If you want to activate as soon as possible please contact administrator: <a href='http://seal.boisestate.edu/GPMS/ContactUs.jsp' title='GPMS Contact Us' target='_blank'>Contact Us</a><br/><br/>Thank you, <br/> GPMS Team";
-		EmailUtil emailUtil = new EmailUtil();
-		emailUtil.sendMailWithoutAuth(newProfile.getWorkEmails().get(0),
-				"Successfully created an account " + newProfile.getFullName(), messageBody);
+//		EmailUtil emailUtil = new EmailUtil();
+//		emailUtil.sendMailWithoutAuth(newProfile.getWorkEmails().get(0),
+//				"Successfully created an account " + newProfile.getFullName(), messageBody);
 	}
 
 	/**

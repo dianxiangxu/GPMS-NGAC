@@ -2,12 +2,12 @@ package gpms.policy;
 
 public class Constants {
 	
-	public static final String POLICY_CONFIG_FILE_SUPER = "GPMSNGACPolicy/super_config.json";
-	public static final String POLICY_CONFIG_ELIGIBILITY_POLICY = "GPMSNGACPolicy/EligibilityPolicyClass.json";
-	public static final String POLICY_CONFIG_ACADEMIC_UNITS_POLICY_CLASS = "GPMSNGACPolicy/AcademicUnitsPolicyClass.json";
-	public static final String POLICY_CONFIG_ADMINISTRATION_UNITS_POLICY_CLASS = "GPMSNGACPolicy/AdministrationUnitsPolicyClass.json";
-	public static final String PDS_EDITING_TEMPLATE = "GPMSNGACPolicy/EditingPolicyClass.json";
-	public static final String OBLIGATION_TEMPLATE_PROPOSAL_CREATION = "GPMSNGACPolicy/Obligations.yml";
+	public static final String POLICY_CONFIG_FILE_SUPER = "GPMS/super_config.json";
+	public static final String POLICY_CONFIG_ELIGIBILITY_POLICY = "GPMS/EligibilityPolicyClass.json";
+	public static final String POLICY_CONFIG_ACADEMIC_UNITS_POLICY_CLASS = "GPMS/AcademicUnitsPolicyClass.json";
+	public static final String POLICY_CONFIG_ADMINISTRATION_UNITS_POLICY_CLASS = "GPMS/AdministrationUnitsPolicyClass.json";
+	public static final String PDS_EDITING_TEMPLATE = "GPMS/EditingPolicyClass.json";
+	public static final String OBLIGATION_TEMPLATE_PROPOSAL_CREATION = "GPMS/Obligations.yml";
 
 	
 	

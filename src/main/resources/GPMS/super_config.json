@@ -1,0 +1,99 @@
+{
+ "nodes" : [
+ {
+      
+      "name": "super_pc_rep",
+      "type": "OA",
+      "properties": {
+        "namespace": "super"
+      }
+    },
+	{
+      
+      "name": "super",
+      "type": "U",
+      "properties": {
+        "namespace": "super"
+      }
+    },
+	
+    {
+      "name": "super_ua1",
+      "type": "UA",
+      "properties": {
+        "namespace": "super"
+      }
+    },
+    
+    {
+      "name": "super_ua2",
+      "type": "UA",
+      "properties": {
+        "namespace": "super"
+      }
+    },
+	{
+      "name": "super_O",
+      "type": "O",
+      "properties": {
+        "namespace": "super"
+      }
+    },
+	{
+      "name": "super_oa",
+      "type": "OA",
+      "properties": {
+        "namespace": "super"
+      }
+    },
+	    {
+      "name": "super_pc",
+      "type": "PC",
+      "properties": {
+        "namespace": "super"
+      }
+    }
+ ],
+ 
+	"assignments" :[
+	
+	{
+      "source": "super_ua1", 
+      "target": "super_pc" 
+    },
+	
+	 {
+      "source":   "super", 
+      "target": "super_ua1"  
+    },
+	 {
+      "source": "super_O", 
+      "target":"super_oa"  
+    },
+	 {
+      "source": "super",  
+      "target": "super_ua2"   
+    },
+	{
+      "source": "super_oa", 
+      "target": "super_pc"  
+    },
+    {
+      "source": "super_ua2",  
+      "target": "super_pc"  
+    }
+	],
+	
+	"associations":
+	[
+	{
+      "operations": [
+        "*"
+      ],
+      "source": "super_ua1",  
+      "target": "super_oa"  
+    }
+   
+	]
+
+}

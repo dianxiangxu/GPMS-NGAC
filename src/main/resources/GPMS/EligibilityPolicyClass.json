@@ -1,0 +1,237 @@
+{    "nodes" : [
+ {
+      "name": "EligibilityPolicyClass",
+      "type": "PC",
+      "properties": {
+        "default_ua": "HR",
+        "default_oa": "OSP"
+      }
+    },
+    {
+      "name": "PIEligible",
+      "type": "UA",
+      "properties": {}
+    },
+ 
+ {
+      "name": "CoPIEligible",
+      "type": "UA",
+      "properties": {}
+    },
+ 
+ {
+      "name": "SPEligible",
+      "type": "UA",
+      "properties": {}
+    },
+ 
+ {
+      "name": "NonTenureTrack Faculty",
+      "type": "UA",
+      "properties": {}
+    },
+ 
+ {
+      "name": "TenuredTenureTrack Faculty",
+      "type": "UA",
+      "properties": {}
+    },
+ 
+ {
+      "name": "Tenured Faculty",
+      "type": "UA",
+      "properties": {}
+    }, 
+ {
+      "name": "TenureTrack Faculty",
+      "type": "UA",
+      "properties": {}
+    }, 
+ 
+ {
+      "name": "Research Faculty",
+      "type": "UA",
+      "properties": {}
+    },
+ {
+      "name": "Teaching Faculty",
+      "type": "UA",
+      "properties": {}
+    },
+    
+    {
+      "name": "Clinic Faculty",
+      "type": "UA",
+      "properties": {}
+    },
+ 
+ {
+      "name": "Adjunct Faculty",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "PDSWhole",
+      "type": "OA",
+      "properties": {}
+    },
+    {
+      "name": "nazmul",
+      "type": "U",
+      "properties": {}
+    },
+ {
+      "name": "tomtom",
+      "type": "U",
+      "properties": {}
+    },  
+ 
+  {
+      "name": "liliana",
+      "type": "U",
+      "properties": {}
+    },
+     {
+      "name": "amy",
+      "type": "U",
+      "properties": {}
+    },    
+    {
+      "name": "samer",
+      "type": "U",
+      "properties": {}
+    },    
+    {
+      "name": "milson",
+      "type": "U",
+      "properties": {}
+    },    
+    {
+      "name": "edmund",
+      "type": "U",
+      "properties": {}
+    },  
+    {
+      "name": "vlad",
+      "type": "U",
+      "properties": {}
+    },   
+    {
+      "name": "tamanna",
+      "type": "U",
+      "properties": {}
+    },    
+    {
+      "name": "selena",
+      "type": "U",
+      "properties": {}
+    },    
+    {
+      "name": "NickC",
+      "type": "U",
+      "properties": {}
+    }
+ 
+ ],
+ 
+ "assignments":[
+ 
+    {
+      "source": "SPEligible",
+      "target": "EligibilityPolicyClass"  
+    },
+ {
+      "source": "CoPIEligible",
+      "target": "SPEligible"  
+    },
+ {
+      "source": "PIEligible", 
+      "target": "CoPIEligible"  
+    },
+    {
+      "source": "TenuredTenureTrack Faculty", 
+      "target": "PIEligible"  
+    },
+    {
+      "source": "TenureTrack Faculty", 
+      "target": "TenuredTenureTrack Faculty"  
+    },
+    {
+      "source": "Tenured Faculty", 
+      "target": "TenuredTenureTrack Faculty"  
+    },
+  {
+      "source": "Adjunct Faculty",
+      "target": "SPEligible"  
+    }, 
+    {
+      "source": "NonTenureTrack Faculty", 
+      "target": "CoPIEligible"  
+    }, 
+    {
+      "source": "Clinic Faculty", 
+      "target": "NonTenureTrack Faculty"  
+    },
+     {
+      "source": "Teaching Faculty", 
+      "target": "NonTenureTrack Faculty"  
+    },
+    {
+      "source": "Research Faculty", 
+      "target": "NonTenureTrack Faculty"  
+    },
+    {
+      "source": "Research Faculty", 
+      "target": "PIEligible" 
+    },  
+ {
+      "source": "NickC", 
+      "target": "TenureTrack Faculty"  
+    },
+
+    {
+      "source": "samer", 
+      "target": "Tenured Faculty"  
+    },
+    {
+      "source": "vlad", 
+      "target": "Adjunct Faculty"  
+    },    
+
+ {
+      "source": "nazmul", 
+      "target": "Research Faculty" 
+    },
+ 
+ {
+      "source": "tomtom", 
+      "target": "Clinic Faculty"
+    },
+ {
+      "source": "liliana", 
+      "target": "Teaching Faculty"
+    },
+    
+ {
+      "source": "PDSWhole", 
+      "target": "EligibilityPolicyClass"  
+    }
+ 
+ ],
+ 
+ "associations":
+ [
+ 
+ 
+    {
+      "operations": [
+        "create"
+      ],
+      "source": "PIEligible", 
+      "target": "PDSWhole"  
+    }
+    
+ 
+ ]
+ 
+} 

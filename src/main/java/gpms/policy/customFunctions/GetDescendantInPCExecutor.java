@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-public class GetAncestorInPCExecutor implements FunctionExecutor {
+public class GetDescendantInPCExecutor implements FunctionExecutor {
 	@Override
 	public String getFunctionName() {
 		return "get_ancestor_in_policy_class";

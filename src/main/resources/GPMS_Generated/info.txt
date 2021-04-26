@@ -1,0 +1,25 @@
+Eligibility Policy Class:
+     UA : 11
+     U: 56
+     OA: 1
+     O: 0
+     PC: 1
+Academic Policy Class:
+     UA : 93
+     U: 116
+     OA: 0
+     O: 0
+     PC: 1
+Editing Policy Class:
+     UA : 9
+     U: 0
+     OA: 27
+     O: 0
+     PC: 1
+Administration Policy Class:
+     UA : 3
+     U: 3
+     OA: 0
+     O: 0
+     PC: 1
+TOTAL NODES: 323

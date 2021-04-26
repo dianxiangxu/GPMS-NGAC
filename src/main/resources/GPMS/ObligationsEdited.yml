@@ -1,0 +1,2965 @@
+label: GPMS Obligations
+rules:
+  - label: create_proposal
+    event:
+      subject:
+        anyUser:
+      policyClass: 
+        policyClass: EligibilityPolicyClass
+      operations:
+        - create
+      target:
+        policyElements:
+          - name: PDSWhole
+            type: OA
+    response:
+      actions:
+        - assign:
+            - what:
+                function:
+                  name: current_user
+              where:
+                  name: PI
+                  type: UA
+        - function:
+            name: create_node1
+            args:
+              - PIInfo
+              - OA 
+              - function:
+                  name: concat_strings
+                  args:
+                    - function:
+                        name: get_node_name
+                        args:
+                          - function:
+                              name: current_user
+                    - PI
+              - O
+        - assign:
+            - what:
+                function:
+                  name: get_child_user_in_policy_class
+                  args: 
+                    - function:
+                        name: get_ancestor_in_policy_class
+                        args: 
+                          - function:
+                              name: current_user
+                          - function:
+                              name: get_node
+                              args:
+                                - AcademicUnitsPolicyClass
+                                - PC
+                          - "2"        
+                    - function:
+                        name: get_node
+                        args:
+                          - AcademicUnitsPolicyClass
+                          - PC                      
+              where:
+                name: Chair
+                type: UA
+        - assign:
+            - what:
+                function:
+                  name: get_child_user_in_policy_class
+                  args: 
+                    - function:
+                        name: get_ancestor_in_policy_class
+                        args: 
+                          - function:
+                              name: current_user
+                          - function:
+                              name: get_node
+                              args:
+                                - AcademicUnitsPolicyClass
+                                - PC
+                          - "4"        
+                    - function:
+                        name: get_node
+                        args:
+                          - AcademicUnitsPolicyClass
+                          - PC                  
+              where:
+                name: Dean
+                type: UA
+        - assign:
+            - what:
+                function:
+                  name: get_child_user_in_policy_class
+                  args: 
+                    - function:
+                        name: get_ancestor_in_policy_class
+                        args: 
+                          - function:
+                              name: current_user
+                          - function:
+                              name: get_node
+                              args:
+                                - AcademicUnitsPolicyClass
+                                - PC
+                          - "3"        
+                    - function:
+                        name: get_node
+                        args:
+                          - AcademicUnitsPolicyClass
+                          - PC                
+              where:
+                name: Business Manager
+                type: UA 
+  - label: add_copi
+    event:
+      subject:
+        anyUser:
+      policyClass: 
+        policyClass: EditingPolicyClass
+      operations:
+        - add-copi
+      target:
+        policyElements:
+          - name: CoPI
+            type: UA
+    response:
+      condition:
+        - function:
+            name: is_node_contained_in
+            args:
+              - function:
+                  name: copi_to_add
+              - function:
+                  name: get_node
+                  args:
+                    - CoPIEligible
+                    - UA    
+      actions:
+        - function:
+            name: create_node1
+            args:
+              - CoPIInfo
+              - OA 
+              - function:
+                  name: concat_strings
+                  args:
+                    - function:
+                        name: get_node_name
+                        args:
+                          - function:
+                              name: copi_to_add
+                    - CoPI
+              - O                    
+        - assign:
+            - what:
+                function:
+                  name: copi_to_add
+              where:
+                name: CoPI
+                type: UA
+        - condition!:
+            - function:
+                name: is_node_contained_in
+                args:
+                  - function:
+                      name: get_child_user_in_policy_class
+                      args: 
+                        - function:
+                            name: get_ancestor_in_policy_class
+                            args: 
+                              - function:
+                                  name: copi_to_add
+                              - function:
+                                  name: get_node
+                                  args:
+                                    - AcademicUnitsPolicyClass
+                                    - PC
+                              - "2"
+                        - function:
+                            name: get_node
+                            args:
+                              - AcademicUnitsPolicyClass
+                              - PC   
+                  - function:
+                      name: get_node
+                      args:
+                        - Chair
+                        - UA                  
+          assign:
+            - what:
+                function:
+                  name: get_child_user_in_policy_class
+                  args: 
+                    - function:
+                        name: get_ancestor_in_policy_class
+                        args: 
+                          - function:
+                              name: copi_to_add
+                          - function:
+                              name: get_node
+                              args:
+                                - AcademicUnitsPolicyClass
+                                - PC
+                          - "2"        
+                    - function:
+                        name: get_node
+                        args:
+                          - AcademicUnitsPolicyClass
+                          - PC                   
+              where:
+                name: Chair
+                type: UA
+        - condition!:
+            - function:
+                name: is_node_contained_in
+                args:
+                  - function:
+                      name: get_child_user_in_policy_class
+                      args: 
+                        - function:
+                            name: get_ancestor_in_policy_class
+                            args: 
+                              - function:
+                                  name: copi_to_add
+                              - function:
+                                  name: get_node
+                                  args:
+                                    - AcademicUnitsPolicyClass
+                                    - PC
+                              - "4" 
+                        - function:
+                            name: get_node
+                            args:
+                              - AcademicUnitsPolicyClass
+                              - PC  
+                  - function:
+                      name: get_node
+                      args:
+                        - Dean
+                        - UA 
+          assign:
+            - what:
+                function:
+                  name: get_child_user_in_policy_class
+                  args: 
+                    - function:
+                        name: get_ancestor_in_policy_class
+                        args: 
+                          - function:
+                              name: copi_to_add
+                          - function:
+                              name: get_node
+                              args:
+                                - AcademicUnitsPolicyClass
+                                - PC
+                          - "4"
+                    - function:
+                        name: get_node
+                        args:
+                          - AcademicUnitsPolicyClass
+                          - PC                  
+              where:
+                name: Dean
+                type: UA
+        - condition!:
+            - function:
+                name: is_node_contained_in
+                args:
+                  - function:
+                      name: get_child_user_in_policy_class
+                      args: 
+                        - function:
+                            name: get_ancestor_in_policy_class
+                            args: 
+                              - function:
+                                  name: copi_to_add
+                              - function:
+                                  name: get_node
+                                  args:
+                                    - AcademicUnitsPolicyClass
+                                    - PC
+                              - "3"
+                        - function:
+                            name: get_node
+                            args:
+                              - AcademicUnitsPolicyClass
+                              - PC   
+                  - function:
+                      name: get_node
+                      args:
+                        - Business Manager
+                        - UA
+          assign:
+            - what:
+                function:
+                  name: get_child_user_in_policy_class
+                  args: 
+                    - function:
+                        name: get_ancestor_in_policy_class
+                        args: 
+                          - function:
+                              name: copi_to_add
+                          - function:
+                              name: get_node
+                              args:
+                                - AcademicUnitsPolicyClass
+                                - PC
+                          - "3" 
+                    - function:
+                        name: get_node
+                        args:
+                          - AcademicUnitsPolicyClass
+                          - PC                                                    
+              where:
+                name: Business Manager
+                type: UA                
+  - label: submit_proposal
+    event:
+      subject:
+        user: cris
+      policyClass: 
+        policyClass: EditingPolicyClass
+      operations:
+        - submit
+      target:
+        policyElements:
+          - name: PDSWhole
+            type: OA
+    response:
+      actions:
+        - delete:
+            associations:
+              - subject:
+                  name: PI
+                  type: UA
+                target:
+                  name: PDSWhole
+                  type: OA
+        - delete:
+            associations:
+              - subject:
+                  name: PI
+                  type: UA
+                target:
+                  name: PIEditable
+                  type: OA
+        - delete:
+            associations:
+              - subject:
+                  name: CoPI
+                  type: UA
+                target:
+                  name: CoPIEditable
+                  type: OA
+        - delete:
+            associations:
+              - subject:
+                  name: PI
+                  type: UA
+                target:
+                  name: CoPI
+                  type: UA
+        - delete:
+            associations:
+              - subject:
+                  name: CoPI
+                  type: UA
+                target:
+                  name: SP
+                  type: UA                                                                                        
+        - grant:
+            subject:
+              name: Chair
+              type: UA
+            operations:
+              - write
+            target:
+              name: ChairApproval
+              type: OA 
+        - grant:
+            subject:
+              name: Chair
+              type: UA
+            operations:
+              - Approve
+              - Disapprove
+            target:
+              name: PDSWhole
+              type: OA 
+        - grant:
+            subject:
+              name: Chair
+              type: UA
+            operations:
+              - read
+            target:
+              name: PDSSections
+              type: OA         
+        - condition:
+            - function:
+                name: irb_approval_required    
+          function:
+            name: add_properties_to_node
+            args:
+              - function:
+                  name: get_child_user_in_policy_class
+                  args: 
+                    - function:
+                        name: get_node
+                        args:
+                          - IRBOfficer
+                          - UA
+                    - function:
+                        name: get_node
+                        args:
+                          - AdministrationUnitsPolicyClass
+                          - PC                                        
+              - function:
+                  name: to_props
+                  args:
+                    - required=true
+        - grant:
+            subject:
+              name: Chair
+              type: UA
+            operations:
+              - Approve
+              - Disapprove
+            target:
+              name: PDSWhole
+              type: OA               
+        - condition!:
+            - function:
+                name: irb_approval_required    
+          function:
+            name: remove_properties_from_children
+            args:
+              - function:
+                  name: get_node
+                  args:
+                    - IRBOfficer
+                    - UA
+              - function:
+                  name: to_props
+                  args:
+                    - approved=true
+                    - required=true                                                             
+  - label: add_sp
+    event:
+      subject:
+        anyUser:
+      policyClass: 
+        policyClass: EditingPolicyClass
+      operations:
+        - add-sp
+      target:
+        policyElements:
+          - name: SP
+            type: UA
+    response:
+      condition:
+        - function:
+            name: is_node_contained_in
+            args:
+              - function:
+                  name: sp_to_add
+              - function:
+                  name: get_node
+                  args:
+                    - SPEligible
+                    - UA  
+      actions:
+        - function:
+            name: create_node1
+            args:
+              - SPInfo
+              - OA 
+              - function:
+                  name: concat_strings
+                  args:
+                    - function:
+                        name: get_node_name
+                        args:
+                          - function:
+                              name: sp_to_add
+                    - SP
+              - O
+        - assign:
+            - what:
+                function:
+                  name: sp_to_add
+              where:
+                name: SP
+                type: UA  
+  - label: delete_copi
+    event:
+      subject:
+      policyClass: 
+        policyClass: EditingPolicyClass
+      operations:
+        - delete-copi
+      target:
+        policyElements:
+          - name: CoPI
+            type: UA
+    response:
+      actions:
+        - delete:
+            assignments:
+              - what:
+                  function:
+                    name: copi_to_delete
+                where:
+                  name: CoPI
+                  type: UA
+        - function:
+            name: delete_node
+            args:
+              - function:
+                  name: concat_strings
+                  args:
+                    - function:
+                        name: get_node_name
+                        args:
+                          - function:
+                              name: copi_to_delete
+                    - CoPI                                   
+        - condition!:
+            - function:
+                name: is_node_in_list
+                args:
+                  - function:
+                      name: get_child_user_in_policy_class
+                      args: 
+                        - function:
+                            name: get_ancestor_in_policy_class
+                            args: 
+                              - function:
+                                  name: copi_to_delete
+                              - function:
+                                  name: get_node
+                                  args:
+                                    - AcademicUnitsPolicyClass
+                                    - PC
+                              - "2"
+                        - function:
+                            name: get_node
+                            args:
+                              - AcademicUnitsPolicyClass
+                              - PC  
+                  - function:
+                      name: get_children_users_in_policy_class
+                      args: 
+                        - function:
+                            name: get_ancestors_in_policy_class
+                            args: 
+                              - function:
+                                  name: get_node
+                                  args:
+                                    - CoPI
+                                    - UA
+                              - function:
+                                  name: get_node
+                                  args:
+                                    - AcademicUnitsPolicyClass
+                                    - PC
+                              - "2"
+                        - function:
+                            name: get_node
+                            args:
+                              - AcademicUnitsPolicyClass
+                              - PC  
+            - function:
+                name: compare_node_names
+                args:
+                  - function:
+                      name: get_node_name
+                      args:
+                        - function:
+                            name: get_child_user_in_policy_class
+                            args: 
+                              - function:
+                                  name: get_ancestor_in_policy_class
+                                  args: 
+                                    - function:
+                                        name: copi_to_delete
+                                    - function:
+                                        name: get_node
+                                        args:
+                                          - AcademicUnitsPolicyClass
+                                          - PC
+                                    - "2"
+                              - function:
+                                  name: get_node
+                                  args:
+                                    - AcademicUnitsPolicyClass
+                                    - PC 
+                  - function:
+                      name: get_node_name
+                      args:
+                        - function:
+                            name: get_child_user_in_policy_class
+                            args: 
+                              - function:
+                                  name: get_ancestor_in_policy_class
+                                  args: 
+                                    - function:
+                                        name: current_user
+                                    - function:
+                                        name: get_node
+                                        args:
+                                          - AcademicUnitsPolicyClass
+                                          - PC
+                                    - "2"
+                              - function:
+                                  name: get_node
+                                  args:
+                                    - AcademicUnitsPolicyClass
+                                    - PC  
+            - function:
+                name: compare_node_names
+                args:
+                  - function:
+                      name: get_node_name
+                      args:
+                        - function:
+                            name: get_child_user_in_policy_class
+                            args: 
+                              - function:
+                                  name: get_ancestor_in_policy_class
+                                  args: 
+                                    - function:
+                                        name: copi_to_delete
+                                    - function:
+                                        name: get_node
+                                        args:
+                                          - AcademicUnitsPolicyClass
+                                          - PC
+                                    - "2"
+                              - function:
+                                  name: get_node
+                                  args:
+                                    - AcademicUnitsPolicyClass
+                                    - PC 
+                  - function:
+                      name: get_child
+                      args:
+                        - "PI"
+          delete:
+            assignments:
+              - what:
+                  function:
+                    name: get_child_user_in_policy_class
+                    args: 
+                      - function:
+                          name: get_ancestor_in_policy_class
+                          args: 
+                            - function:
+                                name: copi_to_delete
+                            - function:
+                                name: get_node
+                                args:
+                                  - AcademicUnitsPolicyClass
+                                  - PC
+                            - "2"
+                      - function:
+                          name: get_node
+                          args:
+                            - AcademicUnitsPolicyClass
+                            - PC          
+                where:
+                  name: Chair
+                  type: UA 
+        - condition!:
+            - function:
+                name: is_node_in_list
+                args:
+                  - function:
+                      name: get_child_user_in_policy_class
+                      args: 
+                        - function:
+                            name: get_ancestor_in_policy_class
+                            args: 
+                              - function:
+                                  name: copi_to_delete
+                              - function:
+                                  name: get_node
+                                  args:
+                                    - AcademicUnitsPolicyClass
+                                    - PC
+                              - "4"
+                        - function:
+                            name: get_node
+                            args:
+                              - AcademicUnitsPolicyClass
+                              - PC  
+                  - function:
+                      name: get_children_users_in_policy_class
+                      args: 
+                        - function:
+                            name: get_ancestors_in_policy_class
+                            args: 
+                              - function:
+                                  name: get_node
+                                  args:
+                                    - CoPI
+                                    - UA
+                              - function:
+                                  name: get_node
+                                  args:
+                                    - AcademicUnitsPolicyClass
+                                    - PC
+                              - "4"
+                        - function:
+                            name: get_node
+                            args:
+                              - AcademicUnitsPolicyClass
+                              - PC  
+            - function:
+                name: compare_node_names
+                args:
+                  - function:
+                      name: get_node_name
+                      args:
+                        - function:
+                            name: get_child_user_in_policy_class
+                            args: 
+                              - function:
+                                  name: get_ancestor_in_policy_class
+                                  args: 
+                                    - function:
+                                        name: copi_to_delete
+                                    - function:
+                                        name: get_node
+                                        args:
+                                          - AcademicUnitsPolicyClass
+                                          - PC
+                                    - "4"
+                              - function:
+                                  name: get_node
+                                  args:
+                                    - AcademicUnitsPolicyClass
+                                    - PC 
+                  - function:
+                      name: get_node_name
+                      args:
+                        - function:
+                            name: get_child_user_in_policy_class
+                            args: 
+                              - function:
+                                  name: get_ancestor_in_policy_class
+                                  args: 
+                                    - function:
+                                        name: current_user
+                                    - function:
+                                        name: get_node
+                                        args:
+                                          - AcademicUnitsPolicyClass
+                                          - PC
+                                    - "4"
+                              - function:
+                                  name: get_node
+                                  args:
+                                    - AcademicUnitsPolicyClass
+                                    - PC  
+            - function:
+                name: compare_node_names
+                args:
+                  - function:
+                      name: get_node_name
+                      args:
+                        - function:
+                            name: get_child_user_in_policy_class
+                            args: 
+                              - function:
+                                  name: get_ancestor_in_policy_class
+                                  args: 
+                                    - function:
+                                        name: copi_to_delete
+                                    - function:
+                                        name: get_node
+                                        args:
+                                          - AcademicUnitsPolicyClass
+                                          - PC
+                                    - "4"
+                              - function:
+                                  name: get_node
+                                  args:
+                                    - AcademicUnitsPolicyClass
+                                    - PC 
+                  - function:
+                      name: get_child
+                      args:
+                        - "PI"
+          delete:
+            assignments:
+              - what:
+                  function:
+                    name: get_child_user_in_policy_class
+                    args: 
+                      - function:
+                          name: get_ancestor_in_policy_class
+                          args: 
+                            - function:
+                                name: copi_to_delete
+                            - function:
+                                name: get_node
+                                args:
+                                  - AcademicUnitsPolicyClass
+                                  - PC
+                            - "4"
+                      - function:
+                          name: get_node
+                          args:
+                            - AcademicUnitsPolicyClass
+                            - PC         
+                where:
+                  name: Dean
+                  type: UA 
+        - condition!:
+            - function:
+                name: is_node_in_list
+                args:
+                  - function:
+                      name: get_child_user_in_policy_class
+                      args: 
+                        - function:
+                            name: get_ancestor_in_policy_class
+                            args: 
+                              - function:
+                                  name: copi_to_delete
+                              - function:
+                                  name: get_node
+                                  args:
+                                    - AcademicUnitsPolicyClass
+                                    - PC
+                              - "3"
+                        - function:
+                            name: get_node
+                            args:
+                              - AcademicUnitsPolicyClass
+                              - PC  
+                  - function:
+                      name: get_children_users_in_policy_class
+                      args: 
+                        - function:
+                            name: get_ancestors_in_policy_class
+                            args: 
+                              - function:
+                                  name: get_node
+                                  args:
+                                    - CoPI
+                                    - UA
+                              - function:
+                                  name: get_node
+                                  args:
+                                    - AcademicUnitsPolicyClass
+                                    - PC
+                              - "3"
+                        - function:
+                            name: get_node
+                            args:
+                              - AcademicUnitsPolicyClass
+                              - PC  
+            - function:
+                name: compare_node_names
+                args:
+                  - function:
+                      name: get_node_name
+                      args:
+                        - function:
+                            name: get_child_user_in_policy_class
+                            args: 
+                              - function:
+                                  name: get_ancestor_in_policy_class
+                                  args: 
+                                    - function:
+                                        name: copi_to_delete
+                                    - function:
+                                        name: get_node
+                                        args:
+                                          - AcademicUnitsPolicyClass
+                                          - PC
+                                    - "3"
+                              - function:
+                                  name: get_node
+                                  args:
+                                    - AcademicUnitsPolicyClass
+                                    - PC 
+                  - function:
+                      name: get_node_name
+                      args:
+                        - function:
+                            name: get_child_user_in_policy_class
+                            args: 
+                              - function:
+                                  name: get_ancestor_in_policy_class
+                                  args: 
+                                    - function:
+                                        name: current_user
+                                    - function:
+                                        name: get_node
+                                        args:
+                                          - AcademicUnitsPolicyClass
+                                          - PC
+                                    - "3"
+                              - function:
+                                  name: get_node
+                                  args:
+                                    - AcademicUnitsPolicyClass
+                                    - PC  
+            - function:
+                name: compare_node_names
+                args:
+                  - function:
+                      name: get_node_name
+                      args:
+                        - function:
+                            name: get_child_user_in_policy_class
+                            args: 
+                              - function:
+                                  name: get_ancestor_in_policy_class
+                                  args: 
+                                    - function:
+                                        name: copi_to_delete
+                                    - function:
+                                        name: get_node
+                                        args:
+                                          - AcademicUnitsPolicyClass
+                                          - PC
+                                    - "3"
+                              - function:
+                                  name: get_node
+                                  args:
+                                    - AcademicUnitsPolicyClass
+                                    - PC 
+                  - function:
+                      name: get_child
+                      args:
+                        - "PI"
+          delete:
+            assignments:
+              - what:
+                  function:
+                    name: get_child_user_in_policy_class
+                    args: 
+                      - function:
+                          name: get_ancestor_in_policy_class
+                          args: 
+                            - function:
+                                name: copi_to_delete
+                            - function:
+                                name: get_node
+                                args:
+                                  - AcademicUnitsPolicyClass
+                                  - PC
+                            - "3"
+                      - function:
+                          name: get_node
+                          args:
+                            - AcademicUnitsPolicyClass
+                            - PC         
+                where:
+                  name: Business Manager
+                  type: UA     
+  - label: delete_sp
+    event:
+      subject:
+        anyUser:
+      policyClass: 
+        policyClass: EditingPolicyClass
+      operations:
+        - delete-sp
+      target:
+        policyElements:
+          - name: SP
+            type: UA
+    response:
+      actions:
+        - delete:
+            assignments:
+              - what:
+                  function:
+                    name: sp_to_delete
+                where:
+                  name: SP
+                  type: UA
+        - function:
+            name: delete_node
+            args:
+              - function:
+                  name: concat_strings
+                  args:
+                    - function:
+                        name: get_node_name
+                        args:
+                          - function:
+                              name: sp_to_delete
+                    - SP                    
+
+  - label: chair_approve
+    event:
+      subject:
+        anyUser:
+      policyClass: 
+        policyClass: EditingPolicyClass
+      operations:
+        - approve
+      target:
+        policyElements:
+          - name: ChairApproval
+            type: OA
+    response:  
+      actions:
+        - function:
+            name: add_properties_to_node
+            args:
+              - function:
+                  name: current_user
+              - function:
+                  name: to_props
+                  args:
+                    - approved=true 
+        - condition:
+            - function:
+                name: all_children_have_properties
+                args:
+                  - function:
+                      name: get_node
+                      args:
+                        - Chair
+                        - UA
+                  - function:
+                      name: to_props
+                      args:
+                        - approved=true        
+          delete:
+            associations:
+              - subject:
+                  name: Chair
+                  type: UA
+                target:
+                  name: ChairApproval
+                  type: OA 
+        - condition:
+            - function:
+                name: all_children_have_properties
+                args:
+                  - function:
+                      name: get_node
+                      args:
+                        - Chair
+                        - UA
+                  - function:
+                      name: to_props
+                      args:
+                        - approved=true     
+          delete:
+            associations:
+              - subject:
+                  name: Chair
+                  type: UA
+                target:
+                  name: PDSWhole
+                  type: OA
+        - condition:
+            - function:
+                name: all_children_have_properties
+                args:
+                  - function:
+                      name: get_node
+                      args:
+                        - Chair
+                        - UA
+                  - function:
+                      name: to_props
+                      args:
+                        - approved=true  
+          grant:
+            subject:
+              name: Business Manager
+              type: UA
+            operations:
+              - write
+            target:
+              name: BMApproval
+              type: OA 
+        - condition:
+            - function:
+                name: all_children_have_properties
+                args:
+                  - function:
+                      name: get_node
+                      args:
+                        - Chair
+                        - UA
+                  - function:
+                      name: to_props
+                      args:
+                        - approved=true  
+          grant:
+            subject:
+              name: Business Manager
+              type: UA
+            operations:
+              - Approve
+              - Disapprove
+            target:
+              name: PDSWhole
+              type: OA
+        - condition:
+            - function:
+                name: all_children_have_properties
+                args:
+                  - function:
+                      name: get_node
+                      args:
+                        - Chair
+                        - UA
+                  - function:
+                      name: to_props
+                      args:
+                        - approved=true  
+          grant:
+            subject:
+              name: Business Manager
+              type: UA
+            operations:
+              - read
+            target:
+              name: PDSSections
+              type: OA              
+        - condition:
+            - function:
+                name: all_children_have_properties
+                args:
+                  - function:
+                      name: get_node
+                      args:
+                        - Chair
+                        - UA
+                  - function:
+                      name: to_props
+                      args:
+                        - approved=true 
+            - function:
+                name: all_children_have_properties
+                args:
+                  - function:
+                      name: get_node
+                      args:
+                        - IRBOfficer
+                        - UA
+                  - function:
+                      name: to_props
+                      args:
+                        - required=true                           
+          grant:
+            subject:
+              name: IRBOfficer
+              type: UA
+            operations:
+              - write
+            target:
+              name: IRBApproval
+              type: OA 
+        - condition:
+            - function:
+                name: all_children_have_properties
+                args:
+                  - function:
+                      name: get_node
+                      args:
+                        - Chair
+                        - UA
+                  - function:
+                      name: to_props
+                      args:
+                        - approved=true 
+            - function:
+                name: all_children_have_properties
+                args:
+                  - function:
+                      name: get_node
+                      args:
+                        - IRBOfficer
+                        - UA
+                  - function:
+                      name: to_props
+                      args:
+                        - required=true                           
+          grant:
+            subject:
+              name: IRBOfficer
+              type: UA
+            operations:
+              - read
+            target:
+              name: PDSSections
+              type: OA 
+        - condition:
+            - function:
+                name: all_children_have_properties
+                args:
+                  - function:
+                      name: get_node
+                      args:
+                        - Chair
+                        - UA
+                  - function:
+                      name: to_props
+                      args:
+                        - approved=true 
+            - function:
+                name: all_children_have_properties
+                args:
+                  - function:
+                      name: get_node
+                      args:
+                        - IRBOfficer
+                        - UA
+                  - function:
+                      name: to_props
+                      args:
+                        - required=true  
+          grant:
+            subject:
+              name: IRBOfficer
+              type: UA
+            operations:
+              - Approve
+              - Disapprove
+            target:
+              name: PDSWhole
+              type: OA 
+
+                              
+  - label: chair_disapprove
+    event:
+      subject:
+        anyUser:
+      policyClass: 
+        policyClass: EditingPolicyClass
+      operations:
+        - disapprove
+      target:
+        policyElements:
+          - name: ChairApproval
+            type: OA
+    response:
+      actions:
+        - delete:
+            associations:
+              - subject:
+                  name: Chair
+                  type: UA
+                target:
+                  name: ChairApproval
+                  type: OA
+        - delete:
+            associations:
+              - subject:
+                  name: Chair
+                  type: UA
+                target:
+                  name: PDSWhole
+                  type: OA
+        - delete:
+            associations:
+              - subject:
+                  name: Chair
+                  type: UA
+                target:
+                  name: PDSSections
+                  type: OA                  
+        - grant:
+            subject:
+              name: PI
+              type: UA
+            operations:
+              - Submit
+              - Delete
+            target:
+              name: PDSWhole
+              type: OA
+        - grant:
+            subject:
+              name: PI
+              type: UA
+            operations:
+              - write
+            target:
+              name: PIEditable
+              type: OA
+        - grant:
+            subject:
+              name: PI
+              type: UA
+            operations:
+              - add-copi
+              - delete-copi
+            target:
+              name: CoPI
+              type: UA
+        - grant:
+            subject:
+              name: CoPI
+              type: UA
+            operations:
+              - write
+            target:
+              name: CoPIEditable
+              type: OA  
+        - grant:
+            subject:
+              name: CoPI
+              type: UA
+            operations:
+              - add-sp
+              - delete-sp
+            target:
+              name: SP
+              type: UA                                        
+        - function:
+            name: remove_properties_from_children
+            args:
+              - function:
+                  name: get_node
+                  args:
+                    - Chair
+                    - UA
+              - function:
+                  name: to_props
+                  args:
+                    - approved=true   
+  - label: bm_approve
+    event:
+      subject:
+        anyUser:
+      policyClass: 
+        policyClass: EditingPolicyClass
+      operations:
+        - approve
+      target:
+        policyElements:
+          - name: BMApproval
+            type: OA
+    response:
+      actions:
+        - function:
+            name: add_properties_to_node
+            args:
+              - function:
+                  name: current_user
+              - function:
+                  name: to_props
+                  args:
+                    - approved=true 
+        - condition:
+            - function:
+                name: all_children_have_properties
+                args:
+                  - function:
+                      name: get_node
+                      args:
+                        - Business Manager
+                        - UA
+                  - function:
+                      name: to_props
+                      args:
+                        - approved=true          
+          delete:
+            associations:
+              - subject:
+                  name: Business Manager
+                  type: UA
+                target:
+                  name: BMApproval
+                  type: OA
+        - condition:
+            - function:
+                name: all_children_have_properties
+                args:
+                  - function:
+                      name: get_node
+                      args:
+                        - Business Manager
+                        - UA
+                  - function:
+                      name: to_props
+                      args:
+                        - approved=true     
+          delete:
+            associations:
+              - subject:
+                  name: Business Manager
+                  type: UA
+                target:
+                  name: PDSWhole
+                  type: OA                 
+        - condition:
+            - function:
+                name: all_children_have_properties
+                args:
+                  - function:
+                      name: get_node
+                      args:
+                        - Business Manager
+                        - UA
+                  - function:
+                      name: to_props
+                      args:
+                        - approved=true 
+          grant:
+            subject:
+              name: Dean
+              type: UA
+            operations:
+              - write
+            target:
+              name: DeanApproval
+              type: OA 
+        - condition:
+            - function:
+                name: all_children_have_properties
+                args:
+                  - function:
+                      name: get_node
+                      args:
+                        - Business Manager
+                        - UA
+                  - function:
+                      name: to_props
+                      args:
+                        - approved=true 
+          grant:
+            subject:
+              name: Dean
+              type: UA
+            operations:
+              - Approve
+              - Disapprove
+            target:
+              name: PDSWhole
+              type: OA 
+        - condition:
+            - function:
+                name: all_children_have_properties
+                args:
+                  - function:
+                      name: get_node
+                      args:
+                        - Business Manager
+                        - UA
+                  - function:
+                      name: to_props
+                      args:
+                        - approved=true 
+          grant:
+            subject:
+              name: Dean
+              type: UA
+            operations:
+              - read
+            target:
+              name: PDSSections
+              type: OA                  
+  - label: bm_disapprove
+    event:
+      subject:
+        anyUser:
+      policyClass: 
+        policyClass: EditingPolicyClass
+      operations:
+        - disapprove
+      target:
+        policyElements:
+          - name: BMApproval
+            type: OA
+    response:
+      actions:
+        - delete:
+            associations:
+              - subject:
+                  name: IRBOfficer
+                  type: UA
+                target:
+                  name: IRBApproval
+                  type: OA
+        - delete:
+            associations:
+              - subject:
+                  name: IRBOfficer
+                  type: UA
+                target:
+                  name: PDSWhole
+                  type: OA
+        - delete:
+            associations:
+              - subject:
+                  name: IRBOfficer
+                  type: UA
+                target:
+                  name: PDSSections
+                  type: OA                  
+        - delete:
+            associations:
+              - subject:
+                  name: Business Manager
+                  type: UA
+                target:
+                  name: BMApproval
+                  type: OA
+        - delete:
+            associations:
+              - subject:
+                  name: Business Manager
+                  type: UA
+                target:
+                  name: PDSWhole
+                  type: OA
+        - delete:
+            associations:
+              - subject:
+                  name: Business Manager
+                  type: UA
+                target:
+                  name: PDSSections
+                  type: OA                                                  
+        - grant:
+            subject:
+              name: PI
+              type: UA
+            operations:
+              - Submit
+              - Delete
+            target:
+              name: PDSWhole
+              type: OA
+        - grant:
+            subject:
+              name: PI
+              type: UA
+            operations:
+              - write
+            target:
+              name: PIEditable
+              type: OA
+        - grant:
+            subject:
+              name: PI
+              type: UA
+            operations:
+              - add-copi
+              - delete-copi
+            target:
+              name: CoPI
+              type: UA
+        - grant:
+            subject:
+              name: CoPI
+              type: UA
+            operations:
+              - write
+            target:
+              name: CoPIEditable
+              type: OA  
+        - grant:
+            subject:
+              name: CoPI
+              type: UA
+            operations:
+              - add-sp
+              - delete-sp
+            target:
+              name: SP
+              type: UA              
+        - function:
+            name: remove_properties_from_children
+            args:
+              - function:
+                  name: get_node
+                  args:
+                    - Business Manager
+                    - UA
+              - function:
+                  name: to_props
+                  args:
+                    - approved=true                                         
+        - function:
+            name: remove_properties_from_children
+            args:
+              - function:
+                  name: get_node
+                  args:
+                    - Chair
+                    - UA
+              - function:
+                  name: to_props
+                  args:
+                    - approved=true 
+        - function:
+            name: remove_properties_from_children
+            args:
+              - function:
+                  name: get_node
+                  args:
+                    - IRBOfficer
+                    - UA
+              - function:
+                  name: to_props
+                  args:
+                    - approved=true   
+        - delete:
+            associations:
+              - subject:
+                  name: Chair
+                  type: UA
+                target:
+                  name: PDSSections
+                  type: OA                                                        
+                                           
+  - label: dean_approve
+    event:
+      subject:
+        anyUser:
+      policyClass: 
+        policyClass: EditingPolicyClass
+      operations:
+        - approve
+      target:
+        policyElements:
+          - name: DeanApproval
+            type: OA
+    response:
+      actions:
+        - function:
+            name: add_properties_to_node
+            args:
+              - function:
+                  name: current_user
+              - function:
+                  name: to_props
+                  args:
+                    - approved=true 
+        - condition:
+            - function:
+                name: all_children_have_properties
+                args:
+                  - function:
+                      name: get_node
+                      args:
+                        - Dean
+                        - UA
+                  - function:
+                      name: to_props
+                      args:
+                        - approved=true          
+          delete:
+            associations:
+              - subject:
+                  name: Dean
+                  type: UA
+                target:
+                  name: DeanApproval
+                  type: OA
+        - condition:
+            - function:
+                name: all_children_have_properties
+                args:
+                  - function:
+                      name: get_node
+                      args:
+                        - Dean
+                        - UA
+                  - function:
+                      name: to_props
+                      args:
+                        - approved=true     
+          delete:
+            associations:
+              - subject:
+                  name: Dean
+                  type: UA
+                target:
+                  name: PDSWhole
+                  type: OA                  
+        - condition:
+            - function:
+                name: all_children_have_properties
+                args:
+                  - function:
+                      name: get_node
+                      args:
+                        - Dean
+                        - UA
+                  - function:
+                      name: to_props
+                      args:
+                        - approved=true 
+            - function:
+                name: all_children_have_properties
+                args:
+                  - function:
+                      name: get_node
+                      args:
+                        - IRBOfficer
+                        - UA
+                  - function:
+                      name: to_props
+                      args:
+                        - approved=true   
+          grant:
+            subject:
+              name: Research Admin
+              type: UA
+            operations:
+              - Approve
+              - Disapprove
+              - Withdraw
+            target:
+              name: PDSWhole
+              type: OA 
+        - condition:
+            - function:
+                name: all_children_have_properties
+                args:
+                  - function:
+                      name: get_node
+                      args:
+                        - Dean
+                        - UA
+                  - function:
+                      name: to_props
+                      args:
+                        - approved=true 
+            - function:
+                name: all_children_have_properties
+                args:
+                  - function:
+                      name: get_node
+                      args:
+                        - IRBOfficer
+                        - UA
+                  - function:
+                      name: to_props
+                      args:
+                        - approved=true   
+          grant:
+            subject:
+              name: Research Admin
+              type: UA
+            operations:
+              - read
+            target:
+              name: PDSSections
+              type: OA               
+        - condition:
+            - function:
+                name: all_children_have_properties
+                args:
+                  - function:
+                      name: get_node
+                      args:
+                        - Dean
+                        - UA
+                  - function:
+                      name: to_props
+                      args:
+                        - approved=true 
+            - function:
+                name: all_children_have_properties
+                args:
+                  - function:
+                      name: get_node
+                      args:
+                        - IRBOfficer
+                        - UA
+                  - function:
+                      name: to_props
+                      args:
+                        - approved=true   
+          grant:
+            subject:
+              name: Research Admin
+              type: UA
+            operations:
+              - write
+            target:
+              name: OSPInfo
+              type: OA 
+        - condition:
+            - function:
+                name: all_children_have_properties
+                args:
+                  - function:
+                      name: get_node
+                      args:
+                        - Dean
+                        - UA
+                  - function:
+                      name: to_props
+                      args:
+                        - approved=true 
+            - function:
+                name: all_children_have_properties
+                args:
+                  - function:
+                      name: get_node
+                      args:
+                        - IRBOfficer
+                        - UA
+                  - function:
+                      name: to_props
+                      args:
+                        - approved=true   
+          grant:
+            subject:
+              name: Research Admin
+              type: UA
+            operations:
+              - write
+            target:
+              name: RAApproval
+              type: OA  
+        - condition:
+            - function:
+                name: all_children_have_properties
+                args:
+                  - function:
+                      name: get_node
+                      args:
+                        - Dean
+                        - UA
+                  - function:
+                      name: to_props
+                      args:
+                        - approved=true 
+          condition!:
+            - function:
+                name: all_children_have_properties
+                args:
+                  - function:
+                      name: get_node
+                      args:
+                        - IRBOfficer
+                        - UA
+                  - function:
+                      name: to_props
+                      args:
+                        - required=true 
+          grant:
+            subject:
+              name: Research Admin
+              type: UA
+            operations:
+              - Approve
+              - Disapprove
+              - Withdraw
+            target:
+              name: PDSWhole
+              type: OA 
+        - condition:
+            - function:
+                name: all_children_have_properties
+                args:
+                  - function:
+                      name: get_node
+                      args:
+                        - Dean
+                        - UA
+                  - function:
+                      name: to_props
+                      args:
+                        - approved=true 
+          condition!:
+            - function:
+                name: all_children_have_properties
+                args:
+                  - function:
+                      name: get_node
+                      args:
+                        - IRBOfficer
+                        - UA
+                  - function:
+                      name: to_props
+                      args:
+                        - required=true 
+          grant:
+            subject:
+              name: Research Admin
+              type: UA
+            operations:
+              - write
+            target:
+              name: OSPInfo
+              type: OA  
+        - condition:
+            - function:
+                name: all_children_have_properties
+                args:
+                  - function:
+                      name: get_node
+                      args:
+                        - Dean
+                        - UA
+                  - function:
+                      name: to_props
+                      args:
+                        - approved=true 
+          condition!:
+            - function:
+                name: all_children_have_properties
+                args:
+                  - function:
+                      name: get_node
+                      args:
+                        - IRBOfficer
+                        - UA
+                  - function:
+                      name: to_props
+                      args:
+                        - required=true                 
+          grant:
+            subject:
+              name: Research Admin
+              type: UA
+            operations:
+              - write
+            target:
+              name: RAApproval
+              type: OA      
+        - condition:
+            - function:
+                name: all_children_have_properties
+                args:
+                  - function:
+                      name: get_node
+                      args:
+                        - Dean
+                        - UA
+                  - function:
+                      name: to_props
+                      args:
+                        - approved=true 
+          condition!:
+            - function:
+                name: all_children_have_properties
+                args:
+                  - function:
+                      name: get_node
+                      args:
+                        - IRBOfficer
+                        - UA
+                  - function:
+                      name: to_props
+                      args:
+                        - required=true                 
+          grant:
+            subject:
+              name: Research Admin
+              type: UA
+            operations:
+              - read
+            target:
+              name: PDSSections
+              type: OA                             
+  - label: dean_disapprove
+    event:
+      subject:
+        anyUser:
+      operations:
+        - disapprove
+      target:
+        policyElements:
+          - name: DeanApproval
+            type: OA
+    response:
+      actions:
+        - delete:
+            associations:
+              - subject:
+                  name: IRBOfficer
+                  type: UA
+                target:
+                  name: IRBApproval
+                  type: OA
+        - delete:
+            associations:
+              - subject:
+                  name: IRBOfficer
+                  type: UA
+                target:
+                  name: PDSWhole
+                  type: OA
+        - delete:
+            associations:
+              - subject:
+                  name: IRBOfficer
+                  type: UA
+                target:
+                  name: PDSSections
+                  type: OA                  
+        - delete:
+            associations:
+              - subject:
+                  name: Business Manager
+                  type: UA
+                target:
+                  name: BMApproval
+                  type: OA
+        - delete:
+            associations:
+              - subject:
+                  name: Business Manager
+                  type: UA
+                target:
+                  name: PDSWhole
+                  type: OA
+        - delete:
+            associations:
+              - subject:
+                  name: Business Manager
+                  type: UA
+                target:
+                  name: PDSSections
+                  type: OA           
+        - delete:
+            associations:
+              - subject:
+                  name: Dean
+                  type: UA
+                target:
+                  name: DeanApproval
+                  type: OA
+        - delete:
+            associations:
+              - subject:
+                  name: Dean
+                  type: UA
+                target:
+                  name: PDSWhole
+                  type: OA
+        - delete:
+            associations:
+              - subject:
+                  name: Dean
+                  type: UA
+                target:
+                  name: PDSSections
+                  type: OA                                         
+        - grant:
+            subject:
+              name: PI
+              type: UA
+            operations:
+              - Submit
+              - Delete
+            target:
+              name: PDSWhole
+              type: OA
+        - grant:
+            subject:
+              name: PI
+              type: UA
+            operations:
+              - write
+            target:
+              name: PIEditable
+              type: OA
+        - grant:
+            subject:
+              name: PI
+              type: UA
+            operations:
+              - add-copi
+              - delete-copi
+            target:
+              name: CoPI
+              type: UA
+        - grant:
+            subject:
+              name: CoPI
+              type: UA
+            operations:
+              - write
+            target:
+              name: CoPIEditable
+              type: OA  
+        - grant:
+            subject:
+              name: CoPI
+              type: UA
+            operations:
+              - add-sp
+              - delete-sp
+            target:
+              name: SP
+              type: UA                                        
+        - function:
+            name: remove_properties_from_children
+            args:
+              - function:
+                  name: get_node
+                  args:
+                    - Chair
+                    - UA
+              - function:
+                  name: to_props
+                  args:
+                    - approved=true  
+        - function:
+            name: remove_properties_from_children
+            args:
+              - function:
+                  name: get_node
+                  args:
+                    - Dean
+                    - UA
+              - function:
+                  name: to_props
+                  args:
+                    - approved=true                                         
+        - function:
+            name: remove_properties_from_children
+            args:
+              - function:
+                  name: get_node
+                  args:
+                    - Business Manager
+                    - UA
+              - function:
+                  name: to_props
+                  args:
+                    - approved=true  
+        - function:
+            name: remove_properties_from_children
+            args:
+              - function:
+                  name: get_node
+                  args:
+                    - IRBOfficer
+                    - UA
+              - function:
+                  name: to_props
+                  args:
+                    - approved=true  
+        - delete:
+            associations:
+              - subject:
+                  name: Chair
+                  type: UA
+                target:
+                  name: PDSSections
+                  type: OA           
+                    
+  - label: irb_approve
+    event:
+      subject:
+        anyUser:
+      operations:
+        - approve
+      target:
+        policyElements:
+          - name: IRBApproval
+            type: OA
+    response:
+      actions:
+        - function:
+            name: add_properties_to_node
+            args:
+              - function:
+                  name: current_user
+              - function:
+                  name: to_props
+                  args:
+                    - approved=true 
+        - delete:
+            associations:
+              - subject:
+                  name: IRBOfficer
+                  type: UA
+                target:
+                  name: IRBApproval
+                  type: OA
+        - delete:
+            associations:
+              - subject:
+                  name: IRBOfficer
+                  type: UA
+                target:
+                  name: PDSWhole
+                  type: OA                                   
+        - condition:
+            - function:
+                name: all_children_have_properties
+                args:
+                  - function:
+                      name: get_node
+                      args:
+                        - Dean
+                        - UA
+                  - function:
+                      name: to_props
+                      args:
+                        - approved=true 
+          grant:
+            subject:
+              name: Research Admin
+              type: UA
+            operations:
+              - Approve
+              - Disapprove
+              - Withdraw
+            target:
+              name: PDSWhole
+              type: OA 
+        - condition:
+            - function:
+                name: all_children_have_properties
+                args:
+                  - function:
+                      name: get_node
+                      args:
+                        - Dean
+                        - UA
+                  - function:
+                      name: to_props
+                      args:
+                        - approved=true 
+          grant:
+            subject:
+              name: Research Admin
+              type: UA
+            operations:
+              - write
+            target:
+              name: OSPInfo
+              type: OA 
+        - condition:
+            - function:
+                name: all_children_have_properties
+                args:
+                  - function:
+                      name: get_node
+                      args:
+                        - Dean
+                        - UA
+                  - function:
+                      name: to_props
+                      args:
+                        - approved=true 
+          grant:
+            subject:
+              name: Research Admin
+              type: UA
+            operations:
+              - write
+            target:
+              name: RAApproval
+              type: OA 
+  - label: irb_disapprove
+    event:
+      subject:
+        anyUser:
+      operations:
+        - disapprove
+      target:
+        policyElements:
+          - name: IRBApproval
+            type: OA
+    response:
+      actions:
+        - delete:
+            associations:
+              - subject:
+                  name: IRBOfficer
+                  type: UA
+                target:
+                  name: IRBApproval
+                  type: OA
+        - delete:
+            associations:
+              - subject:
+                  name: IRBOfficer
+                  type: UA
+                target:
+                  name: PDSWhole
+                  type: OA
+        - delete:
+            associations:
+              - subject:
+                  name: IRBOfficer
+                  type: UA
+                target:
+                  name: PDSSections
+                  type: OA                  
+        - delete:
+            associations:
+              - subject:
+                  name: Business Manager
+                  type: UA
+                target:
+                  name: BMApproval
+                  type: OA
+        - delete:
+            associations:
+              - subject:
+                  name: Business Manager
+                  type: UA
+                target:
+                  name: PDSWhole
+                  type: OA
+        - delete:
+            associations:
+              - subject:
+                  name: Business Manager
+                  type: UA
+                target:
+                  name: PDSSections
+                  type: OA           
+        - delete:
+            associations:
+              - subject:
+                  name: Dean
+                  type: UA
+                target:
+                  name: DeanApproval
+                  type: OA
+        - delete:
+            associations:
+              - subject:
+                  name: Dean
+                  type: UA
+                target:
+                  name: PDSWhole
+                  type: OA
+        - delete:
+            associations:
+              - subject:
+                  name: Dean
+                  type: UA
+                target:
+                  name: PDSSections
+                  type: OA                                         
+        - grant:
+            subject:
+              name: PI
+              type: UA
+            operations:
+              - Submit
+              - Delete
+            target:
+              name: PDSWhole
+              type: OA
+        - grant:
+            subject:
+              name: PI
+              type: UA
+            operations:
+              - write
+            target:
+              name: PIEditable
+              type: OA
+        - grant:
+            subject:
+              name: PI
+              type: UA
+            operations:
+              - add-copi
+              - delete-copi
+            target:
+              name: CoPI
+              type: UA
+        - grant:
+            subject:
+              name: CoPI
+              type: UA
+            operations:
+              - write
+            target:
+              name: CoPIEditable
+              type: OA  
+        - grant:
+            subject:
+              name: CoPI
+              type: UA
+            operations:
+              - add-sp
+              - delete-sp
+            target:
+              name: SP
+              type: UA                                        
+        - function:
+            name: remove_properties_from_children
+            args:
+              - function:
+                  name: get_node
+                  args:
+                    - Chair
+                    - UA
+              - function:
+                  name: to_props
+                  args:
+                    - approved=true  
+        - function:
+            name: remove_properties_from_children
+            args:
+              - function:
+                  name: get_node
+                  args:
+                    - Dean
+                    - UA
+              - function:
+                  name: to_props
+                  args:
+                    - approved=true                                         
+        - function:
+            name: remove_properties_from_children
+            args:
+              - function:
+                  name: get_node
+                  args:
+                    - Business Manager
+                    - UA
+              - function:
+                  name: to_props
+                  args:
+                    - approved=true  
+        - function:
+            name: remove_properties_from_children
+            args:
+              - function:
+                  name: get_node
+                  args:
+                    - IRBOfficer
+                    - UA
+              - function:
+                  name: to_props
+                  args:
+                    - approved=true     
+        - delete:
+            associations:
+              - subject:
+                  name: Chair
+                  type: UA
+                target:
+                  name: PDSSections
+                  type: OA                      
+
+  - label: ra_approve
+    event:
+      subject:
+        anyUser:
+      operations:
+        - approve
+      target:
+        policyElements:
+          - name: RAApproval
+            type: OA
+    response:
+      actions:
+        - delete:
+            associations:
+              - subject:
+                  name: Research Admin
+                  type: UA
+                target:
+                  name: PDSWhole
+                  type: OA
+        - delete:
+            associations:
+              - subject:
+                  name: Research Admin
+                  type: UA
+                target:
+                  name: RAApproval
+                  type: OA                  
+        - delete:
+            associations:
+              - subject:
+                  name: Research Admin
+                  type: UA
+                target:
+                  name: OSPInfo
+                  type: OA
+        - grant:
+            subject:
+              name: Research Director
+              type: UA
+            operations:
+              - Approve
+              - Disapprove
+              - Delete
+            target:
+              name: PDSWhole
+              type: OA 
+        - grant:
+            subject:
+              name: Research Director
+              type: UA
+            operations:
+              - write
+            target:
+              name: RDApproval
+              type: OA 
+        - grant:
+            subject:
+              name: Research Director
+              type: UA
+            operations:
+              - read
+            target:
+              name: PDSSections
+              type: OA 
+        - grant:
+            subject:
+              name: Research Director
+              type: UA
+            operations:
+              - write
+            target:
+              name: OSPInfo
+              type: OA                       
+  - label: ra_disapprove
+    event:
+      subject:
+        anyUser:
+      operations:
+        - disapprove
+      target:
+        policyElements:
+          - name: RAApproval
+            type: OA
+    response:
+      actions:
+        - delete:
+            associations:
+              - subject:
+                  name: Research Admin
+                  type: UA
+                target:
+                  name: PDSWhole
+                  type: OA
+        - delete:
+            associations:
+              - subject:
+                  name: Research Admin
+                  type: UA
+                target:
+                  name: RAApproval
+                  type: OA                  
+        - delete:
+            associations:
+              - subject:
+                  name: Research Admin
+                  type: UA
+                target:
+                  name: PDSSections
+                  type: OA
+        - delete:
+            associations:
+              - subject:
+                  name: Research Admin
+                  type: UA
+                target:
+                  name: OSPInfo
+                  type: OA
+        - delete:
+            associations:
+              - subject:
+                  name: Chair
+                  type: UA
+                target:
+                  name: PDSSections
+                  type: OA 
+        - delete:
+            associations:
+              - subject:
+                  name: Business Manager
+                  type: UA
+                target:
+                  name: PDSSections
+                  type: OA 
+        - delete:
+            associations:
+              - subject:
+                  name: Dean
+                  type: UA
+                target:
+                  name: PDSSections
+                  type: OA                                                       
+        - grant:
+            subject:
+              name: PI
+              type: UA
+            operations:
+              - Submit
+              - Delete
+            target:
+              name: PDSWhole
+              type: OA
+        - grant:
+            subject:
+              name: PI
+              type: UA
+            operations:
+              - write
+            target:
+              name: PIEditable
+              type: OA
+        - grant:
+            subject:
+              name: PI
+              type: UA
+            operations:
+              - add-copi
+              - delete-copi
+            target:
+              name: CoPI
+              type: UA
+        - grant:
+            subject:
+              name: CoPI
+              type: UA
+            operations:
+              - write
+            target:
+              name: CoPIEditable
+              type: OA  
+        - grant:
+            subject:
+              name: CoPI
+              type: UA
+            operations:
+              - add-sp
+              - delete-sp
+            target:
+              name: SP
+              type: UA                                        
+        - function:
+            name: remove_properties_from_children
+            args:
+              - function:
+                  name: get_node
+                  args:
+                    - Chair
+                    - UA
+              - function:
+                  name: to_props
+                  args:
+                    - approved=true  
+        - function:
+            name: remove_properties_from_children
+            args:
+              - function:
+                  name: get_node
+                  args:
+                    - Dean
+                    - UA
+              - function:
+                  name: to_props
+                  args:
+                    - approved=true                                         
+        - function:
+            name: remove_properties_from_children
+            args:
+              - function:
+                  name: get_node
+                  args:
+                    - Business Manager
+                    - UA
+              - function:
+                  name: to_props
+                  args:
+                    - approved=true  
+        - function:
+            name: remove_properties_from_children
+            args:
+              - function:
+                  name: get_node
+                  args:
+                    - IRBOfficer
+                    - UA
+              - function:
+                  name: to_props
+                  args:
+                    - approved=true          
+  - label: rd_approve
+    event:
+      subject:
+        anyUser:
+      operations:
+        - approve
+      target:
+        policyElements:
+          - name: RDApproval
+            type: OA
+    response:
+      actions:
+        - delete:
+            associations:
+              - subject:
+                  name: Research Director
+                  type: UA
+                target:
+                  name: RDApproval
+                  type: OA                  
+        - delete:
+            associations:
+              - subject:
+                  name: Research Director
+                  type: UA
+                target:
+                  name: PDSWhole
+                  type: OA
+        - delete:
+            associations:
+              - subject:
+                  name: Research Director
+                  type: UA
+                target:
+                  name: OSPInfo
+                  type: OA                  
+        - grant:
+            subject:
+              name: Research Admin
+              type: UA
+            operations:
+              - Submit
+            target:
+              name: PDSWhole
+              type: OA 
+        - grant:
+            subject:
+              name: Research Admin
+              type: UA
+            operations:
+              - write
+            target:
+              name: RAApproval
+              type: OA 
+  - label: rd_disapprove
+    event:
+      subject:
+        anyUser:
+      operations:
+        - disapprove
+      target:
+        policyElements:
+          - name: RDApproval
+            type: OA
+    response:
+      actions:
+        - delete:
+            associations:
+              - subject:
+                  name: Research Director
+                  type: UA
+                target:
+                  name: PDSSections
+                  type: OA
+        - delete:
+            associations:
+              - subject:
+                  name: Research Director
+                  type: UA
+                target:
+                  name: PDSWhole
+                  type: OA
+        - delete:
+            associations:
+              - subject:
+                  name: Research Director
+                  type: UA
+                target:
+                  name: OSPInfo
+                  type: OA 
+        - delete:
+            associations:
+              - subject:
+                  name: Research Director
+                  type: UA
+                target:
+                  name: RDApproval
+                  type: OA                   
+        - delete:
+            associations:
+              - subject:
+                  name: Research Admin
+                  type: UA
+                target:
+                  name: PDSSections
+                  type: OA
+        - delete:
+            associations:
+              - subject:
+                  name: Chair
+                  type: UA
+                target:
+                  name: PDSSections
+                  type: OA 
+        - delete:
+            associations:
+              - subject:
+                  name: Business Manager
+                  type: UA
+                target:
+                  name: PDSSections
+                  type: OA 
+        - delete:
+            associations:
+              - subject:
+                  name: Dean
+                  type: UA
+                target:
+                  name: PDSSections
+                  type: OA      
+        - grant:
+            subject:
+              name: PI
+              type: UA
+            operations:
+              - Submit
+              - Delete
+            target:
+              name: PDSWhole
+              type: OA
+        - grant:
+            subject:
+              name: PI
+              type: UA
+            operations:
+              - write
+            target:
+              name: PIEditable
+              type: OA
+        - grant:
+            subject:
+              name: PI
+              type: UA
+            operations:
+              - add-copi
+              - delete-copi
+            target:
+              name: CoPI
+              type: UA
+        - grant:
+            subject:
+              name: CoPI
+              type: UA
+            operations:
+              - write
+            target:
+              name: CoPIEditable
+              type: OA  
+        - grant:
+            subject:
+              name: CoPI
+              type: UA
+            operations:
+              - add-sp
+              - delete-sp
+            target:
+              name: SP
+              type: UA                                        
+        - function:
+            name: remove_properties_from_children
+            args:
+              - function:
+                  name: get_node
+                  args:
+                    - Chair
+                    - UA
+              - function:
+                  name: to_props
+                  args:
+                    - approved=true  
+        - function:
+            name: remove_properties_from_children
+            args:
+              - function:
+                  name: get_node
+                  args:
+                    - Dean
+                    - UA
+              - function:
+                  name: to_props
+                  args:
+                    - approved=true                                         
+        - function:
+            name: remove_properties_from_children
+            args:
+              - function:
+                  name: get_node
+                  args:
+                    - Business Manager
+                    - UA
+              - function:
+                  name: to_props
+                  args:
+                    - approved=true  
+        - function:
+            name: remove_properties_from_children
+            args:
+              - function:
+                  name: get_node
+                  args:
+                    - IRBOfficer
+                    - UA
+              - function:
+                  name: to_props
+                  args:
+                    - approved=true                       
+  - label: ra_submit
+    event:
+      subject:
+        anyUser:
+      operations:
+        - RAsubmit
+      target:
+        policyElements:
+          - name: PDSWhole
+            type: OA
+    response:
+      actions:
+        - delete:
+            associations:
+              - subject:
+                  name: Research Admin
+                  type: UA
+                target:
+                  name: PDSWhole
+                  type: OA
+        - delete:
+            associations:
+              - subject:
+                  name: Research Admin
+                  type: UA
+                target:
+                  name: RAApproval
+                  type: OA                  
+        - delete:
+            associations:
+              - subject:
+                  name: Research Admin
+                  type: UA
+                target:
+                  name: OSPInfo
+                  type: OA
+        - grant:
+            subject:
+              name: Research Director
+              type: UA
+            operations:
+              - Archive
+            target:
+              name: PDSWhole
+              type: OA      
+        - grant:
+            subject:
+              name: Research Director
+              type: UA
+            operations:
+              - write
+            target:
+              name: RDApproval
+              type: OA                                                       

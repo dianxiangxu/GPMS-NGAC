@@ -365,7 +365,11 @@
 			<artifactId>swagger-jersey2-jaxrs</artifactId>
 			<version>1.5.0</version>
 		</dependency>
-
+		<dependency>
+			<groupId>com.github.javafaker</groupId>
+			<artifactId>javafaker</artifactId>
+			<version>0.12</version>
+		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/org.jdom/jdom2 -->
 		<dependency>

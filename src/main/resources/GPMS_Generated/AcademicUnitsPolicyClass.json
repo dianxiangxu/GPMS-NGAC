@@ -1,0 +1,1901 @@
+{
+  "nodes": [
+    {
+      "name": "BMFIN",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "DeptINTL",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "bmLLMUser",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "BMNURS",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "Camron",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "ChairMED",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "ChairMEC",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "Alexandrea",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "ChairDENT",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "ChairLLMTUser",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "bmBAUser",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "ChairMEDUser",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "bmELEMUser",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "Julius",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "bmEARLYUser",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "BMDENT",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "Stanford",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "Russell",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "Dereck",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "ChairINFOUser",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "DeptACC",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "Edgar",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "Quincy",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "BMMEC",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "BMMED",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "ChairFORLUser",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "Orin",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "bmECEUser",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "samer",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "DeanCOASUser",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "ChairBAUser",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "bmJDUser",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "DeptCS",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "ChairMSL",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "Alison",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "bmFORLUser",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "Graciela",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "ChairNURS",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "ChairECE",
+      "type": "UA",
+      "properties": {
+        "chair": "DeptECE"
+      }
+    },
+    {
+      "name": "BMCHEM",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "ChairPHY",
+      "type": "UA",
+      "properties": {
+        "chair": "DeptPHY"
+      }
+    },
+    {
+      "name": "bmFAMUser",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "DeptNURS",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "bmINFOUser",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "nazmul",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "ChairURB",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "ChairELEMUser",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "Dean MNGT",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "bmLLMTUser",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "ChairPHA",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "tomtom",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "Charlotte",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "bmMECUser",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "DeptFIN",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "Abagail",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "ChairHSLUser",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "Colleen",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "Dean COE",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "ChairCS",
+      "type": "UA",
+      "properties": {
+        "chair": "CS"
+      }
+    },
+    {
+      "name": "bmACCUser",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "ChairEARLYUser",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "ChairFINUser",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "Vada",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "BMENTREP",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "DeptECON",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "DeptMATH",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "ChairJDUser",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "BMELEM",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "bmFINUser",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "DeptBA",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "bmHSLUser",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "ChairACCUser",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "ChairNURSUser",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "Santos",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "ChairINTL",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "ChairMECUser",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "Dean LAW",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "bmDENTUser",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "bmENTREPUser",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "Brown",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "ChairMATHUser",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "DeptMED",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "DeptMEC",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "Nelda",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "ChairURBUser",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "bmPHYUser",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "BMMATH",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "ChairFAM",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "Asha",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "BMPHA",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "ChairBIO",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "BMJD",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "DeptINFO",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "ChairFORL",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "BMURB",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "ChairBA",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "ChairECONUser",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "ChairINFO",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "DeptFORL",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "BMPHY",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "ChairLLM",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "ChairLLMUser",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "BMLLMT",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "Skyla",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "ChairPHYUser",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "BMECE",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "Alvera",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "BMMSL",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "DeptMSL",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "Zackery",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "BMFAM",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "DeptECE",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "Yasmine",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "ChairENTREP",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "AcademicUnitsPolicyClass",
+      "type": "PC",
+      "properties": {}
+    },
+    {
+      "name": "Araceli",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "ChairECON",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "ChairMATH",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "DeanCOEUser",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "bmMEDUser",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "DeptURB",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "ChairHSL",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "DeptPHA",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "Karina",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "Dean COAS",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "Arturo",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "ChairHSE",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "bmCSUser",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "DeptELEM",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "BMECON",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "Lora",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "Estell",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "bmURBUser",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "Gaetano",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "DeptPHY",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "Bartholome",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "Toy",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "DeptLLMT",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "Brittany",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "Dean EDU",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "ChairFAMUser",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "ChairChemUser",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "ChairENTREPUser",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "Hermina",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "bmINTLUser",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "NickC",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "ChairDENTUser",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "ChairECEUser",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "BMLLM",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "Domenic",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "DeptEARLY",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "ChairACC",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "Magali",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "Naomie",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "vlad",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "ChairPHAUser",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "BMEARLY",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "BMFORL",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "Nayeli",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "Rosamond",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "ChairLLMT",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "Lupe",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "BMBIO",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "Buddy",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "DeptBIO",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "BMINFO",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "ChairEARLY",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "ChairELEM",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "Tristian",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "Solon",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "bmNURSUser",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "DeptFAM",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "Aidan",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "ChairBIOUser",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "DeptJD",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "Ernestine",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "Stefanie",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "Dorian",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "bmPHAUser",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "bmChemUser",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "bmBIOUser",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "DeptLLM",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "BMHSE",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "ChairHSEUser",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "liliana",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "DeptDENT",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "ChairINTLUser",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "BMHSL",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "Frederic",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "bmHSEUser",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "Dean CHS",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "Grayce",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "ChairCHEM",
+      "type": "UA",
+      "properties": {
+        "chair": "DeptCHEM"
+      }
+    },
+    {
+      "name": "bmECONUser",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "Lyla",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "ChairMSLUser",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "Michele",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "ChairCSUser",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "BMBA",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "BMINTL",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "bmMATHUser",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "ChairJD",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "ChairFIN",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "BMCS",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "bmMSLUser",
+      "type": "U",
+      "properties": {}
+    },
+    {
+      "name": "BMACC",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "DeptCHEM",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "DeptHSE",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "DeptHSL",
+      "type": "UA",
+      "properties": {}
+    },
+    {
+      "name": "DeptENTREP",
+      "type": "UA",
+      "properties": {}
+    }
+  ],
+  "assignments": [
+    {
+      "source": "bmLLMTUser",
+      "target": "BMLLMT"
+    },
+    {
+      "source": "Aidan",
+      "target": "DeptINFO"
+    },
+    {
+      "source": "ChairFAM",
+      "target": "BMFAM"
+    },
+    {
+      "source": "bmPHAUser",
+      "target": "BMPHA"
+    },
+    {
+      "source": "bmELEMUser",
+      "target": "BMELEM"
+    },
+    {
+      "source": "Solon",
+      "target": "DeptDENT"
+    },
+    {
+      "source": "ChairMATHUser",
+      "target": "ChairMATH"
+    },
+    {
+      "source": "Dean COE",
+      "target": "AcademicUnitsPolicyClass"
+    },
+    {
+      "source": "ChairLLMUser",
+      "target": "ChairLLM"
+    },
+    {
+      "source": "bmPHYUser",
+      "target": "BMPHY"
+    },
+    {
+      "source": "Tristian",
+      "target": "DeptFAM"
+    },
+    {
+      "source": "ChairHSL",
+      "target": "BMHSL"
+    },
+    {
+      "source": "ChairPHY",
+      "target": "BMPHY"
+    },
+    {
+      "source": "ChairPHYUser",
+      "target": "ChairPHY"
+    },
+    {
+      "source": "ChairPHAUser",
+      "target": "ChairPHA"
+    },
+    {
+      "source": "ChairFORL",
+      "target": "BMFORL"
+    },
+    {
+      "source": "ChairACC",
+      "target": "BMACC"
+    },
+    {
+      "source": "Alexandrea",
+      "target": "DeptURB"
+    },
+    {
+      "source": "Lyla",
+      "target": "DeptLLM"
+    },
+    {
+      "source": "Gaetano",
+      "target": "DeptLLMT"
+    },
+    {
+      "source": "ChairChemUser",
+      "target": "ChairCHEM"
+    },
+    {
+      "source": "bmMECUser",
+      "target": "BMMEC"
+    },
+    {
+      "source": "Vada",
+      "target": "DeptPHA"
+    },
+    {
+      "source": "ChairENTREP",
+      "target": "BMENTREP"
+    },
+    {
+      "source": "bmINTLUser",
+      "target": "BMINTL"
+    },
+    {
+      "source": "DeptACC",
+      "target": "ChairACC"
+    },
+    {
+      "source": "ChairEARLY",
+      "target": "BMEARLY"
+    },
+    {
+      "source": "bmINFOUser",
+      "target": "BMINFO"
+    },
+    {
+      "source": "BMMEC",
+      "target": "Dean COE"
+    },
+    {
+      "source": "bmEARLYUser",
+      "target": "BMEARLY"
+    },
+    {
+      "source": "DeptHSL",
+      "target": "ChairHSL"
+    },
+    {
+      "source": "DeptPHY",
+      "target": "ChairPHY"
+    },
+    {
+      "source": "Graciela",
+      "target": "DeptDENT"
+    },
+    {
+      "source": "ChairMECUser",
+      "target": "ChairMEC"
+    },
+    {
+      "source": "ChairLLMT",
+      "target": "BMLLMT"
+    },
+    {
+      "source": "BMHSL",
+      "target": "Dean EDU"
+    },
+    {
+      "source": "DeptEARLY",
+      "target": "ChairEARLY"
+    },
+    {
+      "source": "Araceli",
+      "target": "DeptACC"
+    },
+    {
+      "source": "DeptELEM",
+      "target": "ChairELEM"
+    },
+    {
+      "source": "ChairURB",
+      "target": "BMURB"
+    },
+    {
+      "source": "bmACCUser",
+      "target": "BMACC"
+    },
+    {
+      "source": "Orin",
+      "target": "DeptNURS"
+    },
+    {
+      "source": "Alvera",
+      "target": "DeptMATH"
+    },
+    {
+      "source": "DeanCOEUser",
+      "target": "Dean COE"
+    },
+    {
+      "source": "DeptFAM",
+      "target": "ChairFAM"
+    },
+    {
+      "source": "Karina",
+      "target": "DeptHSE"
+    },
+    {
+      "source": "ChairENTREPUser",
+      "target": "ChairENTREP"
+    },
+    {
+      "source": "BMHSE",
+      "target": "Dean CHS"
+    },
+    {
+      "source": "Naomie",
+      "target": "DeptHSL"
+    },
+    {
+      "source": "Yasmine",
+      "target": "DeptMATH"
+    },
+    {
+      "source": "BMNURS",
+      "target": "Dean CHS"
+    },
+    {
+      "source": "Dorian",
+      "target": "DeptURB"
+    },
+    {
+      "source": "bmDENTUser",
+      "target": "BMDENT"
+    },
+    {
+      "source": "ChairURBUser",
+      "target": "ChairURB"
+    },
+    {
+      "source": "DeptECE",
+      "target": "ChairECE"
+    },
+    {
+      "source": "Michele",
+      "target": "DeptACC"
+    },
+    {
+      "source": "BMJD",
+      "target": "Dean LAW"
+    },
+    {
+      "source": "Abagail",
+      "target": "DeptFIN"
+    },
+    {
+      "source": "Hermina",
+      "target": "DeptNURS"
+    },
+    {
+      "source": "Dereck",
+      "target": "DeptELEM"
+    },
+    {
+      "source": "tomtom",
+      "target": "DeptCHEM"
+    },
+    {
+      "source": "DeptECON",
+      "target": "ChairECON"
+    },
+    {
+      "source": "Dean CHS",
+      "target": "AcademicUnitsPolicyClass"
+    },
+    {
+      "source": "nazmul",
+      "target": "DeptCS"
+    },
+    {
+      "source": "Ernestine",
+      "target": "DeptHSE"
+    },
+    {
+      "source": "Zackery",
+      "target": "DeptECON"
+    },
+    {
+      "source": "bmFORLUser",
+      "target": "BMFORL"
+    },
+    {
+      "source": "ChairLLM",
+      "target": "BMLLM"
+    },
+    {
+      "source": "Domenic",
+      "target": "DeptMED"
+    },
+    {
+      "source": "DeptLLMT",
+      "target": "ChairLLMT"
+    },
+    {
+      "source": "Edgar",
+      "target": "DeptPHA"
+    },
+    {
+      "source": "bmFAMUser",
+      "target": "BMFAM"
+    },
+    {
+      "source": "DeptJD",
+      "target": "ChairJD"
+    },
+    {
+      "source": "ChairECONUser",
+      "target": "ChairECON"
+    },
+    {
+      "source": "ChairMED",
+      "target": "BMMED"
+    },
+    {
+      "source": "DeptURB",
+      "target": "ChairURB"
+    },
+    {
+      "source": "ChairDENT",
+      "target": "BMDENT"
+    },
+    {
+      "source": "ChairCSUser",
+      "target": "ChairCS"
+    },
+    {
+      "source": "DeptBIO",
+      "target": "ChairBIO"
+    },
+    {
+      "source": "ChairJD",
+      "target": "BMJD"
+    },
+    {
+      "source": "ChairACCUser",
+      "target": "ChairACC"
+    },
+    {
+      "source": "BMPHY",
+      "target": "Dean COAS"
+    },
+    {
+      "source": "ChairFIN",
+      "target": "BMFIN"
+    },
+    {
+      "source": "DeptMATH",
+      "target": "ChairMATH"
+    },
+    {
+      "source": "BMEARLY",
+      "target": "Dean EDU"
+    },
+    {
+      "source": "DeptMSL",
+      "target": "ChairMSL"
+    },
+    {
+      "source": "ChairMEC",
+      "target": "BMMEC"
+    },
+    {
+      "source": "ChairFORLUser",
+      "target": "ChairFORL"
+    },
+    {
+      "source": "bmMSLUser",
+      "target": "BMMSL"
+    },
+    {
+      "source": "bmLLMUser",
+      "target": "BMLLM"
+    },
+    {
+      "source": "DeptCHEM",
+      "target": "ChairCHEM"
+    },
+    {
+      "source": "bmMATHUser",
+      "target": "BMMATH"
+    },
+    {
+      "source": "bmJDUser",
+      "target": "BMJD"
+    },
+    {
+      "source": "DeptNURS",
+      "target": "ChairNURS"
+    },
+    {
+      "source": "Asha",
+      "target": "DeptINFO"
+    },
+    {
+      "source": "bmChemUser",
+      "target": "BMCHEM"
+    },
+    {
+      "source": "Camron",
+      "target": "DeptMSL"
+    },
+    {
+      "source": "samer",
+      "target": "DeptECE"
+    },
+    {
+      "source": "DeptFIN",
+      "target": "ChairFIN"
+    },
+    {
+      "source": "ChairHSE",
+      "target": "BMHSE"
+    },
+    {
+      "source": "ChairBIOUser",
+      "target": "ChairBIO"
+    },
+    {
+      "source": "Stanford",
+      "target": "DeptMEC"
+    },
+    {
+      "source": "ChairINFOUser",
+      "target": "ChairINFO"
+    },
+    {
+      "source": "DeptMEC",
+      "target": "ChairMEC"
+    },
+    {
+      "source": "BMLLM",
+      "target": "Dean LAW"
+    },
+    {
+      "source": "bmFINUser",
+      "target": "BMFIN"
+    },
+    {
+      "source": "Rosamond",
+      "target": "DeptEARLY"
+    },
+    {
+      "source": "BMENTREP",
+      "target": "Dean MNGT"
+    },
+    {
+      "source": "bmENTREPUser",
+      "target": "BMENTREP"
+    },
+    {
+      "source": "Lupe",
+      "target": "DeptMEC"
+    },
+    {
+      "source": "bmECONUser",
+      "target": "BMECON"
+    },
+    {
+      "source": "ChairFINUser",
+      "target": "ChairFIN"
+    },
+    {
+      "source": "Colleen",
+      "target": "DeptFORL"
+    },
+    {
+      "source": "BMPHA",
+      "target": "Dean CHS"
+    },
+    {
+      "source": "BMMED",
+      "target": "Dean CHS"
+    },
+    {
+      "source": "BMINFO",
+      "target": "Dean COE"
+    },
+    {
+      "source": "ChairHSEUser",
+      "target": "ChairHSE"
+    },
+    {
+      "source": "Dean LAW",
+      "target": "AcademicUnitsPolicyClass"
+    },
+    {
+      "source": "Buddy",
+      "target": "DeptBIO"
+    },
+    {
+      "source": "ChairPHA",
+      "target": "BMPHA"
+    },
+    {
+      "source": "DeptMED",
+      "target": "ChairMED"
+    },
+    {
+      "source": "Quincy",
+      "target": "DeptECON"
+    },
+    {
+      "source": "DeanCOASUser",
+      "target": "Dean COAS"
+    },
+    {
+      "source": "Nelda",
+      "target": "DeptLLM"
+    },
+    {
+      "source": "bmBAUser",
+      "target": "BMBA"
+    },
+    {
+      "source": "bmECEUser",
+      "target": "BMECE"
+    },
+    {
+      "source": "Magali",
+      "target": "DeptINTL"
+    },
+    {
+      "source": "Stefanie",
+      "target": "DeptFORL"
+    },
+    {
+      "source": "ChairECEUser",
+      "target": "ChairECE"
+    },
+    {
+      "source": "BMACC",
+      "target": "Dean MNGT"
+    },
+    {
+      "source": "bmHSEUser",
+      "target": "BMHSE"
+    },
+    {
+      "source": "Julius",
+      "target": "DeptBA"
+    },
+    {
+      "source": "bmBIOUser",
+      "target": "BMBIO"
+    },
+    {
+      "source": "ChairDENTUser",
+      "target": "ChairDENT"
+    },
+    {
+      "source": "BMBIO",
+      "target": "Dean COAS"
+    },
+    {
+      "source": "Brown",
+      "target": "DeptENTREP"
+    },
+    {
+      "source": "ChairBIO",
+      "target": "BMBIO"
+    },
+    {
+      "source": "DeptDENT",
+      "target": "ChairDENT"
+    },
+    {
+      "source": "DeptPHA",
+      "target": "ChairPHA"
+    },
+    {
+      "source": "ChairLLMTUser",
+      "target": "ChairLLMT"
+    },
+    {
+      "source": "ChairBAUser",
+      "target": "ChairBA"
+    },
+    {
+      "source": "Frederic",
+      "target": "DeptMSL"
+    },
+    {
+      "source": "DeptINTL",
+      "target": "ChairINTL"
+    },
+    {
+      "source": "BMELEM",
+      "target": "Dean EDU"
+    },
+    {
+      "source": "Estell",
+      "target": "DeptEARLY"
+    },
+    {
+      "source": "ChairELEMUser",
+      "target": "ChairELEM"
+    },
+    {
+      "source": "Russell",
+      "target": "DeptBIO"
+    },
+    {
+      "source": "Skyla",
+      "target": "DeptLLMT"
+    },
+    {
+      "source": "ChairECE",
+      "target": "BMECE"
+    },
+    {
+      "source": "bmHSLUser",
+      "target": "BMHSL"
+    },
+    {
+      "source": "Toy",
+      "target": "DeptMED"
+    },
+    {
+      "source": "vlad",
+      "target": "DeptCS"
+    },
+    {
+      "source": "DeptHSE",
+      "target": "ChairHSE"
+    },
+    {
+      "source": "Alison",
+      "target": "DeptELEM"
+    },
+    {
+      "source": "ChairNURSUser",
+      "target": "ChairNURS"
+    },
+    {
+      "source": "BMURB",
+      "target": "Dean MNGT"
+    },
+    {
+      "source": "Dean COAS",
+      "target": "AcademicUnitsPolicyClass"
+    },
+    {
+      "source": "bmMEDUser",
+      "target": "BMMED"
+    },
+    {
+      "source": "BMECON",
+      "target": "Dean COAS"
+    },
+    {
+      "source": "DeptINFO",
+      "target": "ChairINFO"
+    },
+    {
+      "source": "BMCHEM",
+      "target": "Dean COAS"
+    },
+    {
+      "source": "ChairEARLYUser",
+      "target": "ChairEARLY"
+    },
+    {
+      "source": "Dean EDU",
+      "target": "AcademicUnitsPolicyClass"
+    },
+    {
+      "source": "ChairMSLUser",
+      "target": "ChairMSL"
+    },
+    {
+      "source": "BMBA",
+      "target": "Dean MNGT"
+    },
+    {
+      "source": "BMFIN",
+      "target": "Dean MNGT"
+    },
+    {
+      "source": "bmURBUser",
+      "target": "BMURB"
+    },
+    {
+      "source": "ChairBA",
+      "target": "BMBA"
+    },
+    {
+      "source": "DeptCS",
+      "target": "ChairCS"
+    },
+    {
+      "source": "ChairMSL",
+      "target": "BMMSL"
+    },
+    {
+      "source": "BMECE",
+      "target": "Dean COE"
+    },
+    {
+      "source": "ChairHSLUser",
+      "target": "ChairHSL"
+    },
+    {
+      "source": "Grayce",
+      "target": "DeptHSL"
+    },
+    {
+      "source": "BMFAM",
+      "target": "Dean LAW"
+    },
+    {
+      "source": "NickC",
+      "target": "DeptPHY"
+    },
+    {
+      "source": "ChairECON",
+      "target": "BMECON"
+    },
+    {
+      "source": "Lora",
+      "target": "DeptINTL"
+    },
+    {
+      "source": "ChairCS",
+      "target": "BMCS"
+    },
+    {
+      "source": "BMMSL",
+      "target": "Dean EDU"
+    },
+    {
+      "source": "DeptBA",
+      "target": "ChairBA"
+    },
+    {
+      "source": "BMLLMT",
+      "target": "Dean LAW"
+    },
+    {
+      "source": "bmNURSUser",
+      "target": "BMNURS"
+    },
+    {
+      "source": "ChairFAMUser",
+      "target": "ChairFAM"
+    },
+    {
+      "source": "Dean MNGT",
+      "target": "AcademicUnitsPolicyClass"
+    },
+    {
+      "source": "ChairMATH",
+      "target": "BMMATH"
+    },
+    {
+      "source": "DeptENTREP",
+      "target": "ChairENTREP"
+    },
+    {
+      "source": "ChairINFO",
+      "target": "BMINFO"
+    },
+    {
+      "source": "Santos",
+      "target": "DeptJD"
+    },
+    {
+      "source": "BMINTL",
+      "target": "Dean LAW"
+    },
+    {
+      "source": "ChairCHEM",
+      "target": "BMCHEM"
+    },
+    {
+      "source": "Charlotte",
+      "target": "DeptFAM"
+    },
+    {
+      "source": "Bartholome",
+      "target": "DeptFIN"
+    },
+    {
+      "source": "DeptLLM",
+      "target": "ChairLLM"
+    },
+    {
+      "source": "BMDENT",
+      "target": "Dean CHS"
+    },
+    {
+      "source": "ChairNURS",
+      "target": "BMNURS"
+    },
+    {
+      "source": "Brittany",
+      "target": "DeptJD"
+    },
+    {
+      "source": "liliana",
+      "target": "DeptCS"
+    },
+    {
+      "source": "BMMATH",
+      "target": "Dean COAS"
+    },
+    {
+      "source": "ChairINTL",
+      "target": "BMINTL"
+    },
+    {
+      "source": "Arturo",
+      "target": "DeptBA"
+    },
+    {
+      "source": "Nayeli",
+      "target": "DeptENTREP"
+    },
+    {
+      "source": "ChairJDUser",
+      "target": "ChairJD"
+    },
+    {
+      "source": "ChairELEM",
+      "target": "BMELEM"
+    },
+    {
+      "source": "DeptFORL",
+      "target": "ChairFORL"
+    },
+    {
+      "source": "BMCS",
+      "target": "Dean COE"
+    },
+    {
+      "source": "bmCSUser",
+      "target": "BMCS"
+    },
+    {
+      "source": "ChairMEDUser",
+      "target": "ChairMED"
+    },
+    {
+      "source": "ChairINTLUser",
+      "target": "ChairINTL"
+    },
+    {
+      "source": "BMFORL",
+      "target": "Dean EDU"
+    }
+  ],
+  "associations": []
+}

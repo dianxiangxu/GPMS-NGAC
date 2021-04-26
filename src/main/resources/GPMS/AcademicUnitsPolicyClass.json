@@ -1,0 +1,343 @@
+{    "nodes" : [
+ {
+      "name": "AcademicUnitsPolicyClass",
+      "type": "PC",
+      "properties": {
+        
+      }
+    },       
+    {
+      "name": "Dean COE",
+      "type": "UA",
+      "properties": {
+      }
+    },
+    {
+      "name": "Dean COAS",
+      "type": "UA",
+      "properties": {
+      }
+    },
+  {
+      "name": "ChairCS",
+      "type": "UA",
+      "properties": {
+        "chair": "CS"
+      }
+    }
+    ,
+ {
+      "name": "ChairECE",
+      "type": "UA",
+      "properties": {
+        "chair": "DeptECE"
+      }
+    },
+  {
+      "name": "ChairPHY",
+      "type": "UA",
+      "properties": {
+        "chair": "DeptPHY"
+      }
+    },
+    
+    {
+      "name": "ChairCHEM",
+      "type": "UA",
+      "properties": {
+        "chair": "DeptCHEM"
+      }
+    },
+ 
+ {
+      "name": "BMCS",
+      "type": "UA",
+      "properties": {}
+    },
+ {
+      "name": "BMCHEM",
+      "type": "UA",
+      "properties": {}
+    },
+ {
+      "name": "BMECE",
+      "type": "UA",
+      "properties": {}
+    },
+ {
+      "name": "BMPHY",
+      "type": "UA",
+      "properties": {}
+    },
+ 
+ {
+      "name": "DeptECE",
+      "type": "UA",
+      "properties": {}
+    },
+ {
+      "name": "DeptCS",
+      "type": "UA",
+      "properties": {}
+    },
+    
+ {
+      "name": "DeptCHEM",
+      "type": "UA",
+      "properties": {}
+    },
+  {
+      "name": "DeptPHY",
+      "type": "UA",
+      "properties": {}
+    },
+ {
+      "name": "DeanCOEUser",
+      "type": "U",
+      "properties": {}
+    },
+ {
+      "name": "DeanCOASUser",
+      "type": "U",
+      "properties": {}
+    },
+ {
+      "name": "ChairCSUser",
+      "type": "U",
+      "properties": {}
+    },
+ {
+      "name": "bmCSUser",
+      "type": "U",
+      "properties": {}
+    },
+ {
+      "name": "ChairECEUser",
+      "type": "U",
+      "properties": {}
+    },
+ {
+      "name": "bmECEUser",
+      "type": "U",
+      "properties": {}
+    },
+ {
+      "name": "ChairPHYUser",
+      "type": "U",
+      "properties": {}
+    },
+ {
+      "name": "bmPHYUser",
+      "type": "U",
+      "properties": {}
+    },
+ {
+      "name": "ChairChemUser",
+      "type": "U",
+      "properties": {}
+    },
+ {
+      "name": "bmChemUser",
+      "type": "U",
+      "properties": {}
+    } 
+    ,
+    {
+      "name": "nazmul",
+      "type": "U",
+      "properties": {}
+    },
+ {
+      "name": "tomtom",
+      "type": "U",
+      "properties": {}
+    },  
+ 
+  {
+      "name": "liliana",
+      "type": "U",
+      "properties": {}
+    },
+     {
+      "name": "amy",
+      "type": "U",
+      "properties": {}
+    },    
+    {
+      "name": "samer",
+      "type": "U",
+      "properties": {}
+    },    
+    {
+      "name": "milson",
+      "type": "U",
+      "properties": {}
+    },    
+    {
+      "name": "edmund",
+      "type": "U",
+      "properties": {}
+    },  
+    {
+      "name": "vlad",
+      "type": "U",
+      "properties": {}
+    },   
+    {
+      "name": "tamanna",
+      "type": "U",
+      "properties": {}
+    },    
+    {
+      "name": "selena",
+      "type": "U",
+      "properties": {}
+    },    
+    {
+      "name": "NickC",
+      "type": "U",
+      "properties": {}
+    } 
+ ],
+ 
+ "assignments":[ 
+ {
+   "source": "nazmul",  
+      "target": "DeptCS"  
+ },   
+  {
+   "source": "vlad",  
+      "target": "DeptCS"  
+ }, 
+
+ 
+ 
+ {
+      "source": "tomtom",  
+      "target": "DeptCHEM"   
+    },
+ 
+ {
+      "source": "liliana",  
+      "target": "DeptCS"   
+    }, 
+    {
+      "source": "samer",  
+      "target": "DeptECE"   
+    },
+ {
+      "source": "NickC",  
+      "target": "DeptPHY"   
+    },
+ {
+      "source": "DeanCOEUser",  
+      "target": "Dean COE"   
+    },
+ {
+      "source": "DeanCOASUser",  
+      "target": "Dean COAS"   
+    },
+ {
+      "source": "ChairCSUser",  
+      "target": "ChairCS"  
+    },
+ {
+      "source": "bmCSUser",  
+      "target": "BMCS"   
+    },
+ {
+      "source": "ChairECEUser",  
+      "target": "ChairECE"   
+    },
+ {
+      "source": "bmECEUser",  
+      "target": "BMECE"  
+    },
+ {
+      "source": "ChairPHYUser",  
+      "target": "ChairPHY"   
+    },
+ {
+      "source": "bmPHYUser",  
+      "target": "BMPHY"   
+    },
+ {
+      "source": "ChairChemUser",  
+      "target": "ChairCHEM" 
+    },
+ {
+      "source": "bmChemUser",  
+      "target": "BMCHEM" 
+    },
+{
+      "source": "DeptCS",  
+      "target": "ChairCS" 
+    }
+    ,
+ {
+      "source": "DeptECE",  
+      "target": "ChairECE" 
+    }        
+    ,
+ {
+      "source": "ChairCS",  
+      "target": "BMCS" 
+    }
+    ,
+ {
+      "source": "ChairECE",  
+      "target": "BMECE"
+    }        
+    ,
+ {
+      "source": "BMCS",  
+      "target": "Dean COE" 
+    }
+    ,
+ {
+      "source": "BMECE",  
+      "target": "Dean COE" 
+    }  ,        
+ {
+      "source": "Dean COAS",  
+      "target": "AcademicUnitsPolicyClass" 
+    }     
+    ,        
+ {
+      "source": "Dean COE",  
+      "target": "AcademicUnitsPolicyClass" 
+    }  
+    ,
+ {
+      "source": "BMCHEM",  
+      "target": "Dean COAS" 
+    }
+    ,
+ {
+      "source": "BMPHY",  
+      "target": "Dean COAS" 
+    }  ,  
+     {
+      "source": "ChairCHEM",  
+      "target": "BMCHEM" 
+    }
+    ,
+ {
+      "source": "ChairPHY",  
+      "target": "BMPHY" 
+    },
+    {
+      "source": "DeptCHEM",  
+      "target": "ChairCHEM" 
+    }
+    ,
+ {
+      "source": "DeptPHY",  
+      "target": "ChairPHY" 
+    }     
+ ],
+ 
+ "associations":
+ [     
+ ] 
+} 
