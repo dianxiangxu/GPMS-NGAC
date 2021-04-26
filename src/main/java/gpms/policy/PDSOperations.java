@@ -59,8 +59,8 @@ import gpms.policy.customFunctions.CreateNodeExecutor1;
 import gpms.policy.customFunctions.DeanForExecutor;
 import gpms.policy.customFunctions.DeleteNodeExecutor;
 import gpms.policy.customFunctions.EmailExecutor;
-import gpms.policy.customFunctions.GetAncestorInPCExecutor;
-import gpms.policy.customFunctions.GetAncestorsInPCExecutor;
+import gpms.policy.customFunctions.GetDescendantInPCExecutor;
+import gpms.policy.customFunctions.GetDescendantsInPCExecutor;
 import gpms.policy.customFunctions.GetChildExecutor;
 import gpms.policy.customFunctions.GetChildInPCExecutor;
 import gpms.policy.customFunctions.GetChildrenUsersInPolicyClassExecutor;
@@ -133,7 +133,6 @@ public class PDSOperations {
 	public static PDP getPDP(Graph graph) throws PMException {
 		DeleteNodeExecutor deleteNodeExecutor = new DeleteNodeExecutor();
 		EmailExecutor emailExecutor = new EmailExecutor();
-		IsAllowedToBeCoPIExecutor isAllowedToBeCoPIExecutor = new IsAllowedToBeCoPIExecutor();
 		ChairForExecutor chairForExecutor = new ChairForExecutor();
 		DeanForExecutor deanForExecutor = new DeanForExecutor();
 		// BMForExecutor bmForExecutor = new BMForExecutor();
@@ -151,15 +150,15 @@ public class PDSOperations {
 		AllChildrenHavePropertiesExecutor allChildrenHavePropertiesExecutor = new AllChildrenHavePropertiesExecutor();
 		HasChildrenExecutor hasChildrenExecutor = new HasChildrenExecutor();
 		IRBApprovalRequired iRBApprovalRequired = new IRBApprovalRequired();
-		GetAncestorInPCExecutor getAncestorInPCExecutor = new GetAncestorInPCExecutor();
+		GetDescendantInPCExecutor getAncestorInPCExecutor = new GetDescendantInPCExecutor();
 		GetChildInPCExecutor getChildInPCExecutor = new GetChildInPCExecutor();
 		GetChildrenUsersInPolicyClassExecutor getChildrenInPCExecutor = new GetChildrenUsersInPolicyClassExecutor();
 		GetChildExecutor getChildExecutor = new GetChildExecutor();
-		GetAncestorsInPCExecutor getAncestorsInPCExecutor = new GetAncestorsInPCExecutor();
+		GetDescendantsInPCExecutor getAncestorsInPCExecutor = new GetDescendantsInPCExecutor();
 
 		obligation = policyLoader.getObligation();
 		EPPOptions eppOptions = new EPPOptions(deleteNodeExecutor, emailExecutor, chairForExecutor, deanForExecutor,
-				isAllowedToBeCoPIExecutor, createNodeExecutor1, concatExecutor, chairsForExecutor,
+				 createNodeExecutor1, concatExecutor, chairsForExecutor,
 				areSomeNodesContainedInExecutor, compareNodesExecutor, coPIToAddExecutor, spToAddExecutor,
 				coPIToDeleteExecutor, spToDeleteExecutor, addPropertiesToNodeExecutor,
 				removePropertiesFromChildrenExecutor, allChildrenHavePropertiesExecutor, hasChildrenExecutor,
@@ -591,7 +590,6 @@ public class PDSOperations {
 		}
 		PDP pdp = getPDP(graph);
 		pdp.getEPP().processEvent(new ApproveEvent(graph.getNode(Constants.IRB_APPROVAL)), irb, "process");
-		System.out.println("hello");
 		return pdp;
 	}
 

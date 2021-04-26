@@ -777,11 +777,11 @@ public class ObligationTest {
 		RemovePropertyFromChildrenExecutor removePropertiesFromChildrenExecutor = new RemovePropertyFromChildrenExecutor();
 		AllChildrenHavePropertiesExecutor allChildrenHavePropertiesExecutor = new AllChildrenHavePropertiesExecutor();
 		IRBApprovalRequired iRBApprovalRequired = new IRBApprovalRequired();
-		GetAncestorInPCExecutor getAncestorInPCExecutor = new GetAncestorInPCExecutor();
+		GetDescendantInPCExecutor getAncestorInPCExecutor = new GetDescendantInPCExecutor();
 		GetChildInPCExecutor getChildInPCExecutor = new GetChildInPCExecutor();
 		GetChildrenUsersInPolicyClassExecutor getChildrenInPCExecutor = new GetChildrenUsersInPolicyClassExecutor();
 		GetChildExecutor getChildExecutor = new GetChildExecutor();
-		GetAncestorsInPCExecutor getAncestorsInPCExecutor = new GetAncestorsInPCExecutor();
+		GetDescendantsInPCExecutor getAncestorsInPCExecutor = new GetDescendantsInPCExecutor();
 		//adding custom functions to eppOptions
 		EPPOptions eppOptions = new EPPOptions(deleteNodeExecutor, createNodeExecutor1, concatExecutor,
 				areSomeNodesContainedInExecutor, compareNodesExecutor, coPIToAddExecutor, spToAddExecutor,
