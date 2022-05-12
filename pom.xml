@@ -391,15 +391,12 @@
 			<artifactId>opencsv</artifactId>
 			<version>4.1</version>
 		</dependency>
-<dependency>
-    <groupId>javax.xml.bind</groupId>
-    <artifactId>jaxb-api</artifactId>
-    <version>2.3.0</version>
-</dependency>
+		<dependency>
+		    <groupId>javax.xml.bind</groupId>
+		    <artifactId>jaxb-api</artifactId>
+		    <version>2.3.0</version>
+		</dependency>
 	</dependencies>
-
-
-
 
 	<properties>
 		<balana.version>1.0.4</balana.version>
